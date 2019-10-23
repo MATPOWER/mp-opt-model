@@ -65,29 +65,6 @@ end
 
 %% add general info about this named set
 zero_vector = zeros(dim_list{:});
-empty_cell  = cell(dim_list{:});
 om.(ff).idx.i1.(name)    = zero_vector; %% starting index
 om.(ff).idx.iN.(name)    = zero_vector; %% ending index
 om.(ff).idx.N.(name)     = zero_vector; %% number of vars/constraints/costs
-
-%% add type-specific info about this named set
-switch ff
-    case 'var'          %% variable set
-        om.var.data.v0.(name)   = empty_cell;   %% initial value
-        om.var.data.vl.(name)   = empty_cell;   %% lower bound
-        om.var.data.vu.(name)   = empty_cell;   %% upper bound
-        om.var.data.vt.(name)   = empty_cell;   %% variable type
-    case 'lin'          %% linear constraint set
-        om.lin.data.A.(name)   = empty_cell;
-        om.lin.data.l.(name)   = empty_cell;
-        om.lin.data.u.(name)   = empty_cell;
-        om.lin.data.vs.(name)  = empty_cell;
-    case {'nle', 'nli'} %% nonlinear constraint set
-        om.(ff).data.fcn.(name) = empty_cell;
-        om.(ff).data.hess.(name)= empty_cell;
-        om.(ff).data.vs.(name)  = empty_cell;
-    case 'cost'         %% cost set
-        om.cost.data.N.(name)   = empty_cell;
-        om.cost.data.Cw.(name)  = empty_cell;
-        om.cost.data.vs.(name)  = empty_cell;
-end

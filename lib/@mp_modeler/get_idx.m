@@ -71,27 +71,7 @@ function varargout = get_idx(om, varargin)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 
-if nargin == 1
-    varargout{1} = om.var.idx;
-    if nargout > 1
-        varargout{2} = om.lin.idx;
-        if nargout > 2
-            varargout{3} = om.nle.idx;
-            if nargout > 3
-                varargout{4} = om.nli.idx;
-                if nargout > 4
-                    varargout{5} = om.cost.idx;
-                    if nargout > 5
-                        varargout{6} = om.qdc.idx;
-                        if nargout > 6
-                            varargout{7} = om.nlc.idx;
-                        end
-                    end
-                end
-            end
-        end
-    end
-else
+if nargin ~= 1
     for k = nargout:-1:1
         varargout{k} = om.(varargin{k}).idx;
     end

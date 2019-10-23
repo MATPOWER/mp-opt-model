@@ -87,7 +87,6 @@ if nargin == 1
         end
     end
 else
-    for k = nargout:-1:1
-        varargout{k} = om.(varargin{k}).idx;
-    end
+    %% call parent method (also checks for valid type for named set)
+    [varargout{1:nargout}] = get_idx@mp_modeler(om, varargin{:});
 end
