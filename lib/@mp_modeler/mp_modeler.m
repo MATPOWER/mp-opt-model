@@ -205,7 +205,7 @@ classdef mp_modeler < handle
 %           .(user defined fields)
 
 %   MATPOWER
-%   Copyright (c) 2008-2017, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2019, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MATPOWER.
@@ -215,7 +215,8 @@ classdef mp_modeler < handle
 %    es = struct();
 
     properties
-        userdata = struct();
+        userdata = [];
+        set_types = [];
     end     %% properties
     
     methods
@@ -247,6 +248,36 @@ classdef mp_modeler < handle
                 else
                     error('@opt_model/opt_model: input must be a ''opt_model'' object or a struct');
                 end
+            end
+            
+            om.def_set_types();
+%             if isempty(om.????) %% skip if constructed from existing object
+%                 om.init_set_types();%% Octave 5.2 requires this be called from
+%                                     %% be called from the sub-class
+%                                     %% constructor, since it alters fields of
+%                                     %% an object not yet fully constructed.
+%                                     %% Since been fixed:
+%                                     %%   https://savannah.gnu.org/bugs/?52614
+%             end
+        end
+
+        function om = init_set_types(om)
+            %% base data struct for each type
+            ds = struct( ...
+                'idx', struct( ...
+                    'i1', struct(), ...
+                    'iN', struct(), ...
+                    'N', struct() ), ...
+                'N', 0, ...
+                'NS', 0, ...
+                'order', struct( ...
+                    'name', [], ...
+                    'idx', [] ), ...
+                'data', struct() );
+
+            %% initialize each (set_type) field with base data structure
+            for f = fieldnames(om.set_types)'
+                om.(f{1}) = ds;
             end
         end
 

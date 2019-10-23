@@ -141,7 +141,7 @@ else
 end
 
 fprintf('  userdata = ');
-if ~isempty(fieldnames(om.userdata))
+if ~isempty(om.userdata)
     fprintf('\n');
 end
 if have_fcn('octave')
