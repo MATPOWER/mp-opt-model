@@ -296,5 +296,36 @@ classdef mp_modeler < handle
                 new_om.(props{k}) = om.(props{k});
             end
         end
+
+        function display_set(om, stype, sname)
+            if nargin < 3
+                sname = stype;
+            end
+            st = om.(stype);    %% data for set type of interest
+            if st.NS
+                fmt = '%-26s %6s %8s %8s %8s\n';
+                fprintf(fmt, sname, 'name', 'i1', 'iN', 'N');
+                fprintf(fmt, repmat('=', 1, length(sname)), '------', '-----', '-----', '------');
+                idx = st.idx;
+                fmt = '%10d:%22s %8d %8d %8d\n';
+                for k = 1:st.NS
+                    name = st.order(k).name;
+                    if isempty(st.order(k).idx)
+                        fprintf(fmt, k, name, idx.i1.(name), idx.iN.(name), idx.N.(name));
+                    else
+                        vsidx = st.order(k).idx;
+                        str = '%d'; for m = 2:length(vsidx), str = [str ',%d']; end
+                        s = substruct('.', name, '()', vsidx);
+                        nname = sprintf(['%s(' str, ')'], name, vsidx{:});
+                        fprintf(fmt, k, nname, ...
+                                subsref(idx.i1, s), subsref(idx.iN, s), subsref(idx.N, s));
+                    end
+                end
+                fmt = sprintf('%%10d = %%s.NS%%%dd = %%s.N\\n\\n', 35-length(stype));
+                fprintf(fmt, st.NS, stype, st.N, stype);
+            else
+                fprintf('%-26s  :  <none>\n', sname);
+            end
+        end
     end     %% methods
 end         %% classdef
