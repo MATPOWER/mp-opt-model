@@ -51,7 +51,7 @@ if length(dim_list) == 1
 end
 
 %% call parent method (also checks for valid type for named set)
-om = init_indexed_name@mp_modeler(om, set_type, name, dim_list);
+om = init_indexed_name@mp_idx_manager(om, set_type, name, dim_list);
 
 %% add type-specific info about this named set
 empty_cell  = cell(dim_list{:});

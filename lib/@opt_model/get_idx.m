@@ -88,5 +88,5 @@ if nargin == 1
     end
 else
     %% call parent method (also checks for valid type for named set)
-    [varargout{1:nargout}] = get_idx@mp_modeler(om, varargin{:});
+    [varargout{1:nargout}] = get_idx@mp_idx_manager(om, varargin{:});
 end

@@ -37,7 +37,7 @@ function om = add_named_set(om, set_type, name, idx, N, varargin)
 %   See https://matpower.org for more info.
 
 %% call parent method (also checks for valid type for named set)
-om = add_named_set@mp_modeler(om, set_type, name, idx, N, varargin);
+om = add_named_set@mp_idx_manager(om, set_type, name, idx, N, varargin);
 
 if ~isempty(idx)
     %% calls to substruct() are relatively expensive, so we pre-build the
