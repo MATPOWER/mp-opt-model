@@ -9,60 +9,92 @@ classdef mp_idx_manager < handle
 %   The types of named sets to be managed by the class are defined by the
 %   DEF_SET_TYPES method, which assigns a struct to the 'set_types' field.
 %
-%   E.g.
-%       function obj = def_set_types(obj)
-%           obj.set_types = struct(...
-%                   'var', 'variable', ...
-%                   'lin', 'linear constraint' ...
-%               );
-%       end
+%   Properties:
+%       set_types   - a struct defined by DEF_SET_TYPES method
+%       userdata    - a struct containing arbitrary data added by the user
 %
-%   The INIT_SET_TYPES method initializes the structures needed to track
-%   the ordering and  indexing of each set type and can be overridden to
-%   initialize any additional data to be stored with each block of each
-%   set type.
-
-
-%       init_indexed_name
+%   Private Methods
+%       add_named_set - Adds named subset of a particular type to the
+%           object.
 %
-%   Return the number of elements of any given set type, optionally for a
-%   single named block:
-%       getN
+%       def_set_types - (must be implemented in the subclass) Returns a
+%           struct defining the various set types, where the key is the
+%           set type name, which must also be declared as a property in
+%           the object's class, and the value is a string name used for
+%           display purposes.
 %
-%   Return index structure for each set type:
-%       get_idx
+%           E.g.
+%               function obj = def_set_types(obj)
+%                   obj.set_types = struct(...
+%                           'var', 'variable', ...
+%                           'lin', 'linear constraint' ...
+%                       );
+%               end
 %
-%   Retreive user data in the model object:
-%       get_userdata
+%       init_set_types - Used by object constructor to initializes the
+%           structures needed to track the ordering and indexing of each
+%           set type and can be overridden to initialize any additional
+%           data to be stored with each block of each set type.
 %
-%   Display the object (called automatically when you omit the semicolon
-%   at the command-line):
-%       display
+%       valid_named_set_type - Returns a label for the given named set
+%           type if valid, empty otherwise.
 %
-%   Return the value of an individual field:
-%       get
+%   Public Methods
+%       add_<SET-TYPE> - (must be implemented in the subclass) Used to
+%           add a block of the given set type to the object, using the
+%           private ADD_NAMED_SET method internally followed by the
+%           handling of any data specific to that set type.
 %
-%   Indentify variable, constraint or cost row indices:
-%       describe_idx
+%       copy - Makes a shallow copy of the object.
 %
-%   The following is the structure of the data in the OPF model object.
-%   Each field of .idx or .data is a struct whose field names are the names
-%   of the corresponding blocks of vars, constraints or costs (found in
-%   order in the corresponding .order field). The description next to these
-%   fields gives the meaning of the value for each named sub-field.
+%       describe_idx - Identifies indices of a given set type.
+%           E.g. variable 361 corresponds to Pg(68)
+%
+%       display - (must be implemented in the subclass) Displays the
+%           object (called automatically when you omit the semicolon at
+%           the command-line).
+%
+%       display_set - Prints to screen the indexing details for the
+%           specified set type. Intended to be called by DISPLAY method.
+%
+%       get_idx - Returns index structure(s) for specified set type(s),
+%           with starting/ending indices and number of elements for
+%           each named (and optionally indexed) block.
+%
+%       get_userdata - Retreives values of user data stored in the object.
+%
+%       get - Return the value of any individual field.
+%
+%       getN - Returns the number of elements of any given set type,
+%           optionally for a single named block.
+%
+%       init_indexed_name - Initializes the dimensions for an indexed
+%           named set.
+%
+%       params_<SET-TYPE> - (must be implemented in the subclass)
+%           Returns set-type-specific data for a given type.
+%
+%       
+%
+%   The following is the structure of the data in the object, using a set
+%   type named 'var' for illustration. Each field of .idx or .data is a
+%   struct whose field names are the names of the corresponding blocks of
+%   elements of that type (e.g. variables, constraints, etc.). They are
+%   found in order in the corresponding .order field. The description next
+%   to these fields gives the meaning of the value for each named sub-field.
 %   E.g. obj.var.data.v0.Pg contains a vector of initial values for the 'Pg'
 %   block of variables.
 %
 %   obj
-%       .var        - data for optimization variable sets that make up
-%                     the full optimization variable x
+%       .var        - data for 'var' set type, e.g. optimization variable
+%                     sets that make up the full optimization variable x
 %           .idx
 %               .i1 - starting index within x
 %               .iN - ending index within x
 %               .N  - number of elements in this variable set
 %           .N      - total number of elements in x
 %           .NS     - number of variable sets or named blocks
-%           .data   - bounds and initial value data
+%           .data   - additional set-type-specific data for each block
 %           .order  - struct array of names/indices for variable
 %                     blocks in the order they appear in x
 %               .name   - name of the block, e.g. Pg
@@ -112,7 +144,7 @@ classdef mp_idx_manager < handle
                         end
                     end
                 else
-                    error('@opt_model/opt_model: input must be a ''opt_model'' object or a struct');
+                    error('@mp_idx_manager/mp_idx_manager: input must be an ''mp_idx_manager'' object or a struct');
                 end
             end
             

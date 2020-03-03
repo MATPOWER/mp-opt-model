@@ -22,9 +22,6 @@ function om = add_named_set(om, set_type, name, idx, N, varargin)
 %   Quadratic Cost Set
 %       OM.ADD_NAMED_SET('qdc', NAME, IDX_LIST, N, CP, VARSETS);
 %
-%   General Nonlinear Cost Set
-%       OM.ADD_NAMED_SET('nlc', NAME, IDX_LIST, N, FCN, VARSETS);
-%
 %   See also OPT_MODEL, ADD_VAR, ADD_LIN_CONSTRAINT, ADD_NLN_CONSTRAINT
 %            ADD_QUAD_COST and ADD_NLN_COST.
 
@@ -37,7 +34,7 @@ function om = add_named_set(om, set_type, name, idx, N, varargin)
 %   See https://matpower.org for more info.
 
 %% call parent method (also checks for valid type for named set)
-om = add_named_set@mp_idx_manager(om, set_type, name, idx, N, varargin);
+om = add_named_set@mp_idx_manager(om, set_type, name, idx, N, varargin{:});
 
 if ~isempty(idx)
     %% calls to substruct() are relatively expensive, so we pre-build the

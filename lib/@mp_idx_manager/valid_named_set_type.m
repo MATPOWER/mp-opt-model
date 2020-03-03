@@ -9,12 +9,23 @@ function str = valid_named_set_type(obj, set_type)
 %   valid values of SET_TYPE, otherwise an empty string. Can be used to
 %   check whether SET_TYPE is a valid type.
 %
-%   Valid types and their corresponding return values are:
+%   Valid set types, and the corresponding values are defined as a struct
+%   returned by the DEF_SET_TYPES method.
+%
+%   E.g. The following method ...
+%       function obj = def_set_types(obj)
+%           obj.set_types = struct(...
+%                   'var', 'variable', ...
+%                   'lin', 'linear constraint' ...
+%               );
+%       end
+%
+%   ... indicates the following valid SET_TYPES and corresponding
+%   return values:
+%
 %       SET_TYPE    STR
-%       'var'     'variable'
-%       'lin'     'linear constraint'
-%       'nle'     'nonlinear equality constraint'
-%       'nli'     'nonlinear inequality constraint'
+%       'var'       'variable'
+%       'lin'       'linear constraint'
 
 %   MATPOWER
 %   Copyright (c) 2017-2020, Power Systems Engineering Research Center (PSERC)

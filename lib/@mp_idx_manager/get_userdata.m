@@ -2,15 +2,18 @@ function rv = get_userdata(obj, name)
 %GET_USERDATA  Used to retrieve values of user data.
 %
 %   VAL = OBJ.GET_USERDATA(NAME) returns the value specified by the given name
+%   or an empty matrix if userdata with NAME does not exist.
 %
 %   This function allows the user to retrieve any arbitrary data that was
-%   saved in the object for later use. This can be useful when using a user
-%   function to add variables, constraints, costs, etc. For example, suppose
-%   some special indexing is constructed when adding some variables or
-%   constraints. This indexing data can be stored and used later to "unpack"
-%   the results of the solved case.
+%   saved in the object for later use. Data for a given NAME is saved by
+%   assigning it to OBJ.userdata.(NAME).
 %
-%   See also OPT_MODEL, SET_USERDATA.
+%   This can be useful, for example, when using a user function to add
+%   variables or constraints, etc. Suppose some special indexing is
+%   constructed when adding some variables or constraints. This indexing data
+%   can be stored and used later to "unpack" the results of the solved case.
+%
+%   See also OPT_MODEL.
 
 %   MATPOWER
 %   Copyright (c) 2008-2020, Power Systems Engineering Research Center (PSERC)

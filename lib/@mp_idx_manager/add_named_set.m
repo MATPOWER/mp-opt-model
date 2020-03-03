@@ -1,11 +1,14 @@
 function obj = add_named_set(obj, set_type, name, idx, N, varargin)
-%ADD_NAMED_SET  Adds a named set of variables/constraints/costs to the model.
+%ADD_NAMED_SET  Adds a named set of a particular type to the object.
 %
 %   -----  PRIVATE METHOD  -----
 %
 %   This method is intended to be a private method, used internally by
-%   the public methods ADD_VAR, ADD_LIN_CONSTRAINT, ADD_NLN_CONSTRAINT
-%   ADD_QUAD_COST, ADD_NLN_COST and ADD_LEGACY_COST.
+%   the public methods for each set type, e.g.  ADD_VAR, ADD_LIN_CONSTRAINT.
+%   This method handles the indexing part. The set-type-specific methods
+%   that call it need to handle any data that goes with each set added.
+%
+%   E.g.
 %
 %   Variable Set
 %       OBJ.ADD_NAMED_SET('var', NAME, IDX_LIST, N, V0, VL, VU, VT);
@@ -25,11 +28,8 @@ function obj = add_named_set(obj, set_type, name, idx, N, varargin)
 %   General Nonlinear Cost Set
 %       OBJ.ADD_NAMED_SET('nlc', NAME, IDX_LIST, N, FCN, VARSETS);
 %
-%   Legacy Cost Set
-%       OBJ.ADD_NAMED_SET('cost', NAME, IDX_LIST, N, CP, VARSETS);
-%
-%   See also OPT_MODEL, ADD_VAR, ADD_LIN_CONSTRAINT, ADD_NLN_CONSTRAINT
-%            ADD_QUAD_COST and ADD_NLN_COST.
+%   See also OPT_MODEL and its methods ADD_VAR, ADD_LIN_CONSTRAINT,
+%           ADD_NLN_CONSTRAINT, ADD_QUAD_COST and ADD_NLN_COST.
 
 %   MATPOWER
 %   Copyright (c) 2008-2020, Power Systems Engineering Research Center (PSERC)
@@ -46,14 +46,16 @@ if st_label
     obj_ff = obj.(ff);
     obj.(ff) = [];
 else
-    error('@opt_model/add_named_set: ''%s'' is not a valid SET_TYPE, must be one of ''var'', ''lin'', ''nle'', ''nli'', ''qdc'', ''nlc'', ''cost''', set_type);
+    ff = fieldnames(obj.set_types);
+    stypes = sprintf('\n  ''%s''', ff{:});
+    error('@mp_idx_manager/add_named_set: ''%s'' is not a valid SET_TYPE, must be one of the following:%s', set_type, stypes);
 end
 
 %% add general indexing info about this named set
 if isempty(idx)     %% simple named set
     %% prevent duplicate name in set of specified type
     if isfield(obj_ff.idx.N, name)
-        error('@opt_model/add_named_set: %s set named ''%s'' already exists', st_label, name);
+        error('@mp_idx_manager/add_named_set: %s set named ''%s'' already exists', st_label, name);
     end
 
     %% add indexing info about this set
@@ -74,7 +76,7 @@ else                %% indexed named set
     if subsref(obj_ff.idx.i1, sn) ~= 0
         str = '%d'; for m = 2:length(idx), str = [str ',%d']; end
         nname = sprintf(['%s(' str, ')'], name, idx{:});
-        error('@opt_model/add_named_set: %s set named ''%s'' already exists', st_label, nname);
+        error('@mp_idx_manager/add_named_set: %s set named ''%s'' already exists', st_label, nname);
     end
 
     %% add indexing info about this set

@@ -3,26 +3,22 @@ function obj = init_indexed_name(obj, set_type, name, dim_list)
 %
 %   OBJ.INIT_INDEXED_NAME(SET_TYPE, NAME, DIM_LIST)
 %
-%   Initializes the dimensions for an indexed named variable, constraint
-%   or cost set.
+%   Initializes the dimensions for an indexed named set.
 %
-%   Variables, constraints and costs are referenced in OPT_MODEL in terms
-%   of named sets. The specific type of named set being referenced is
+%   For example, variables and linear constraints could be referenced in
+%   terms of named sets, where the type of named set being referenced is
 %   given by SET_TYPE, with the following valid options:
 %       SET_TYPE = 'var'   => variable set
 %       SET_TYPE = 'lin'   => linear constraint set
-%       SET_TYPE = 'nle'   => nonlinear equality constraint set
-%       SET_TYPE = 'nli'   => nonlinear inequality constraint set
-%       SET_TYPE = 'cost'  => cost set
 %
 %   Indexed Named Sets
 %
-%   A variable, constraint or cost set can be identified by a single NAME,
-%   such as 'Pmismatch', or by a name that is indexed by one or more indices,
-%   such as 'Pmismatch(3,4)'. For an indexed named set, before adding the
-%   indexed variable, constraint or cost sets themselves, the dimensions of
-%   the indexed set must be set by calling INIT_INDEXED_NAME, where
-%   DIM_LIST is a cell array of the dimensions.
+%   In this case a variable or constraint set can be identified by a single
+%   NAME, such as 'Pmismatch', or by a name that is indexed by one or more
+%   indices, such as 'Pmismatch(3,4)'. For an indexed named set, before adding
+%   the indexed variable or constraint sets themselves, the dimensions of
+%   the indexed set must be set by calling INIT_INDEXED_NAME, where DIM_LIST
+%   is a cell array of the dimensions.
 %
 %   Examples:
 %       %% linear constraints with indexed named set 'R(i,j)'
@@ -33,8 +29,9 @@ function obj = init_indexed_name(obj, set_type, name, dim_list)
 %         end
 %       end
 %
-%   See also OPT_MODEL, ADD_VAR, ADD_LIN_CONSTRAINT, ADD_NLN_CONSTRAINT,
-%            ADD_QUAD_COST, ADD_NLN_COST and ADD_LEGACY_COST.
+%   See also OPT_MODEL, and its methods INIT_INDEXED_NAME, ADD_VAR,
+%           ADD_LIN_CONSTRAINT, ADD_NLN_CONSTRAINT, ADD_QUAD_COST and
+%           ADD_NLN_COST.
 
 %   MATPOWER
 %   Copyright (c) 2008-2020, Power Systems Engineering Research Center (PSERC)
@@ -49,12 +46,14 @@ st_label = obj.valid_named_set_type(set_type);
 if st_label
     ff = set_type;
 else
-    error('@opt_model/init_indexed_name: ''%s'' is not a valid SET_TYPE, must be one of ''var'', ''lin'', ''nle'', ''nli'', ''cost''', set_type);
+    ff = fieldnames(obj.set_types);
+    stypes = sprintf('\n  ''%s''', ff{:});
+    error('@mp_idx_manager/init_indexed_name: ''%s'' is not a valid SET_TYPE, must be one of the following:%s', set_type, stypes);
 end
 
 %% prevent duplicate name in set of specified type
 if isfield(obj.(ff).idx.N, name)
-    error('@opt_model/init_indexed_name: %s set named ''%s'' already exists', ...
+    error('@mp_idx_manager/init_indexed_name: %s set named ''%s'' already exists', ...
         st_label, name);
 end
 

@@ -1,26 +1,19 @@
 function N = getN(obj, set_type, name, idx)
-%GETN  Returns the number of variables, constraints or cost rows.
+%GETN  Returns the number of elements of a given set type.
 %   N = OBJ.GETN(SET_TYPE)
 %   N = OBJ.GETN(SET_TYPE, NAME)
 %   N = OBJ.GETN(SET_TYPE, NAME, IDX)
 %
-%   Returns either the total number of variables/constraints/cost rows
-%   or the number corresponding to a specified named block.
+%   Returns either the total number of elements of a given set type
+%   (e.g. variable, constraint, etc.) or the number corresponding to a
+%   specified named block.
 %
 %   Examples:
-%       N = obj.getN('var')     : total number of variables
-%       N = obj.getN('lin')     : total number of linear constraints
-%       N = obj.getN('nle')     : total number of nonlin equality constraints
-%       N = obj.getN('nli')     : total number of nonlin inequality constraints
-%       N = obj.getN('qdc')     : total number of quadratic cost rows
-%       N = obj.getN('nlc')     : total number of general nonlinear cost rows
-%       N = obj.getN('var', name)   : # of variables in named set
-%       N = obj.getN('lin', name)   : # of linear constraints in named set
-%       N = obj.getN('nle', name)   : # of nonlin eq cons. in named set
-%       N = obj.getN('nli', name)   : # of nonlin ineq cons. in named set
-%       N = obj.getN('qdc', name)   : # of quadratic cost rows in named set
-%       N = obj.getN('nlc', name)   : # of gen nonlin cost rows in named set
-%       N = obj.getN('var', name, idx)  : # of variables in indexed named set
+%       N = obj.getN('var')      : total number of variables
+%       N = obj.getN('lin')      : total number of linear constraints
+%       N = obj.getN('var', name)    : # of variables in named set
+%       N = obj.getN('lin', name)    : # of linear constraints in named set
+%       N = obj.getN('var', name, idx) : # of variables in indexed named set
 %
 %   See also OPT_MODEL.
 

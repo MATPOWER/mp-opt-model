@@ -1,13 +1,10 @@
 function label = describe_idx(obj, set_type, idxs)
-%DESCRIBE_IDX  Identifies variable, constraint and cost row indices.
+%DESCRIBE_IDX  Identifies element indices for a give set type.
 %   LABEL = OBJ.DESCRIBE_IDX(SET_TYPE, IDXS)
 %
-%   Returns strings describing (name and index) the variable, constraint
-%   or cost row that corresponds to the indices in IDXS. SET_TYPE must be
-%   one of the following: 'var', 'lin', 'nle', 'nli' or 'cost',
-%   corresponding to indices for variables, linear constraints, nonlinear
-%   equality constraints, nonlinear inequality constraints and cost rows,
-%   respectively. The return value is a string if IDXS is a scalar,
+%   Returns strings describing (name and index) the element of the
+%   specified set type (e.g. variable or constraint) that corresponds to
+%   the indices in IDXS. The return value is a string if IDXS is a scalar,
 %   otherwise it is a cell array of strings of the same dimension as IDXS.
 %
 %   Examples:
@@ -28,10 +25,10 @@ label = cell(size(idxs));       %% pre-allocate return cell array
 for i = 1:length(idxs(:))
     ii = idxs(i);
     if ii > obj.(set_type).N
-        error('@opt_model/describe_idx: index exceeds maximum %s index (%d)', set_type, obj.(set_type).N);
+        error('@mp_idx_manager/describe_idx: index exceeds maximum %s index (%d)', set_type, obj.(set_type).N);
     end
     if ii < 1
-        error('@opt_model/describe_idx: index must be positive');
+        error('@mp_idx_manager/describe_idx: index must be positive');
     end
     for k = obj.(set_type).NS:-1:1
         name = obj.(set_type).order(k).name;
