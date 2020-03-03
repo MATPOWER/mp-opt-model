@@ -1,7 +1,7 @@
-function om = init_indexed_name(om, set_type, name, dim_list)
+function obj = init_indexed_name(obj, set_type, name, dim_list)
 %INIT_INDEXED_NAME  Initializes the dimensions for an indexed named set.
 %
-%   OM.INIT_INDEXED_NAME(SET_TYPE, NAME, DIM_LIST)
+%   OBJ.INIT_INDEXED_NAME(SET_TYPE, NAME, DIM_LIST)
 %
 %   Initializes the dimensions for an indexed named variable, constraint
 %   or cost set.
@@ -26,10 +26,10 @@ function om = init_indexed_name(om, set_type, name, dim_list)
 %
 %   Examples:
 %       %% linear constraints with indexed named set 'R(i,j)'
-%       om.init_indexed_name('lin', 'R', {2, 3});
+%       obj.init_indexed_name('lin', 'R', {2, 3});
 %       for i = 1:2
 %         for j = 1:3
-%           om.add_lin_constraint('R', {i, j}, A{i,j}, ...);
+%           obj.add_lin_constraint('R', {i, j}, A{i,j}, ...);
 %         end
 %       end
 %
@@ -37,7 +37,7 @@ function om = init_indexed_name(om, set_type, name, dim_list)
 %            ADD_QUAD_COST, ADD_NLN_COST and ADD_LEGACY_COST.
 
 %   MATPOWER
-%   Copyright (c) 2008-2017, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MATPOWER.
@@ -45,7 +45,7 @@ function om = init_indexed_name(om, set_type, name, dim_list)
 %   See https://matpower.org for more info.
 
 %% check for valid type for named set
-st_label = om.valid_named_set_type(set_type);
+st_label = obj.valid_named_set_type(set_type);
 if st_label
     ff = set_type;
 else
@@ -53,7 +53,7 @@ else
 end
 
 %% prevent duplicate name in set of specified type
-if isfield(om.(ff).idx.N, name)
+if isfield(obj.(ff).idx.N, name)
     error('@opt_model/init_indexed_name: %s set named ''%s'' already exists', ...
         st_label, name);
 end
@@ -65,6 +65,6 @@ end
 
 %% add general info about this named set
 zero_vector = zeros(dim_list{:});
-om.(ff).idx.i1.(name)    = zero_vector; %% starting index
-om.(ff).idx.iN.(name)    = zero_vector; %% ending index
-om.(ff).idx.N.(name)     = zero_vector; %% number of vars/constraints/costs
+obj.(ff).idx.i1.(name)  = zero_vector;  %% starting index
+obj.(ff).idx.iN.(name)  = zero_vector;  %% ending index
+obj.(ff).idx.N.(name)   = zero_vector;  %% number of vars/constraints/costs

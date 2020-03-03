@@ -1,12 +1,12 @@
-function varargout = get_idx(om, varargin)
+function varargout = get_idx(obj, varargin)
 %GET_IDX  Returns the idx struct for vars, lin/nonlin constraints, costs.
-%   VV = OM.GET_IDX()
-%   [VV, LL] = OM.GET_IDX()
-%   [VV, LL, NNE] = OM.GET_IDX()
-%   [VV, LL, NNE, NNI] = OM.GET_IDX()
-%   [VV, LL, NNE, NNI, CC] = OM.GET_IDX()
-%   [VV, LL, NNE, NNI, CC, QDC] = OM.GET_IDX()
-%   [VV, LL, NNE, NNI, CC, QDC, NLC] = OM.GET_IDX()
+%   VV = OBJ.GET_IDX()
+%   [VV, LL] = OBJ.GET_IDX()
+%   [VV, LL, NNE] = OBJ.GET_IDX()
+%   [VV, LL, NNE, NNI] = OBJ.GET_IDX()
+%   [VV, LL, NNE, NNI, CC] = OBJ.GET_IDX()
+%   [VV, LL, NNE, NNI, CC, QDC] = OBJ.GET_IDX()
+%   [VV, LL, NNE, NNI, CC, QDC, NLC] = OBJ.GET_IDX()
 %
 %   Returns a structure for each with the beginning and ending
 %   index value and the number of elements for each named block.
@@ -18,9 +18,9 @@ function varargout = get_idx(om, varargin)
 %   Alternatively, you can specify the type of named set(s) directly
 %   as inputs ...
 %
-%   [IDX1, IDX2, ...] = OM.GET_IDX(SET_TYPE1, SET_TYPE2, ...);
-%   [CC, VV] = OM.GET_IDX('cost', 'var');
-%   [LL, NNE, NNI] = OM.GET_IDX('lin', 'nle', 'nli');
+%   [IDX1, IDX2, ...] = OBJ.GET_IDX(SET_TYPE1, SET_TYPE2, ...);
+%   [CC, VV] = OBJ.GET_IDX('cost', 'var');
+%   [LL, NNE, NNI] = OBJ.GET_IDX('lin', 'nle', 'nli');
 %
 %   The specific type of named set being referenced is
 %   given by the SET_TYPE inputs, with the following valid options:
@@ -33,8 +33,8 @@ function varargout = get_idx(om, varargin)
 %       SET_TYPE = 'cost'  => legacy cost set
 %
 %   Examples:
-%       [vv, ll, nne] = om.get_idx();
-%       [vv, ll, cc] = om.get_idx('var', 'lin', 'cost');
+%       [vv, ll, nne] = obj.get_idx();
+%       [vv, ll, cc] = obj.get_idx('var', 'lin', 'cost');
 %
 %       For a variable block named 'z' we have ...
 %           vv.i1.z - starting index for 'z' in optimization vector x
@@ -53,7 +53,7 @@ function varargout = get_idx(om, varargin)
 %       The number of nonlinear equality constraints in a set named 'bar':
 %           nbar = nne.N.bar;
 %         (note: the following is preferable ...
-%           nbar = om.getN('nle', 'bar');
+%           nbar = obj.getN('nle', 'bar');
 %         ... if you haven't already called get_idx to get nne.)
 %
 %       If 'z', 'foo' and 'bar' are indexed sets, then you can
@@ -64,7 +64,7 @@ function varargout = get_idx(om, varargin)
 %            ADD_QUAD_COST, ADD_NLN_COST and ADD_LEGACY_COST.
 
 %   MATPOWER
-%   Copyright (c) 2008-2019, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MATPOWER.
@@ -73,6 +73,6 @@ function varargout = get_idx(om, varargin)
 
 if nargin ~= 1
     for k = nargout:-1:1
-        varargout{k} = om.(varargin{k}).idx;
+        varargout{k} = obj.(varargin{k}).idx;
     end
 end

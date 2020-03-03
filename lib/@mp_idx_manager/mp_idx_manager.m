@@ -50,10 +50,10 @@ classdef mp_idx_manager < handle
 %   of the corresponding blocks of vars, constraints or costs (found in
 %   order in the corresponding .order field). The description next to these
 %   fields gives the meaning of the value for each named sub-field.
-%   E.g. om.var.data.v0.Pg contains a vector of initial values for the 'Pg'
+%   E.g. obj.var.data.v0.Pg contains a vector of initial values for the 'Pg'
 %   block of variables.
 %
-%   om
+%   obj
 %       .var        - data for optimization variable sets that make up
 %                     the full optimization variable x
 %           .idx
@@ -87,7 +87,7 @@ classdef mp_idx_manager < handle
     
     methods
         %% constructor
-        function om = mp_idx_manager(s)
+        function obj = mp_idx_manager(s)
             if nargin > 0
                 if isa(s, 'mp_idx_manager')
                     %% this copy constructor will not be inheritable under
@@ -102,13 +102,13 @@ classdef mp_idx_manager < handle
                         warning(s1.state, 'Octave:classdef-to-struct');
                     end
                     for k = 1:length(props)
-                        om.(props{k}) = s.(props{k});
+                        obj.(props{k}) = s.(props{k});
                     end
                 elseif isstruct(s)
-                    props = fieldnames(om);
+                    props = fieldnames(obj);
                     for k = 1:length(props)
                         if isfield(s, props{k})
-                            om.(props{k}) = s.(props{k});
+                            obj.(props{k}) = s.(props{k});
                         end
                     end
                 else
@@ -116,9 +116,9 @@ classdef mp_idx_manager < handle
                 end
             end
             
-            om.def_set_types();
-%             if isempty(om.????) %% skip if constructed from existing object
-%                 om.init_set_types();%% Octave 5.2 requires this be called from
+            obj.def_set_types();
+%             if isempty(obj.????) %% skip if constructed from existing object
+%                 obj.init_set_types();%% Octave 5.2 and earlier requires this
 %                                     %% be called from the sub-class
 %                                     %% constructor, since it alters fields of
 %                                     %% an object not yet fully constructed.
@@ -127,7 +127,7 @@ classdef mp_idx_manager < handle
 %             end
         end
 
-        function om = init_set_types(om)
+        function obj = init_set_types(obj)
             %% base data struct for each type
             ds = struct( ...
                 'idx', struct( ...
@@ -142,32 +142,32 @@ classdef mp_idx_manager < handle
                 'data', struct() );
 
             %% initialize each (set_type) field with base data structure
-            for f = fieldnames(om.set_types)'
-                om.(f{1}) = ds;
+            for f = fieldnames(obj.set_types)'
+                obj.(f{1}) = ds;
             end
         end
 
-        function new_om = copy(om)
+        function new_obj = copy(obj)
             %% make shallow copy of object
-            new_om = eval(class(om));  %% create new object
+            new_obj = eval(class(obj));  %% create new object
             if have_fcn('octave')
                 s1 = warning('query', 'Octave:classdef-to-struct');
                 warning('off', 'Octave:classdef-to-struct');
             end
-            props = fieldnames(om);
+            props = fieldnames(obj);
             if have_fcn('octave')
                 warning(s1.state, 'Octave:classdef-to-struct');
             end
             for k = 1:length(props)
-                new_om.(props{k}) = om.(props{k});
+                new_obj.(props{k}) = obj.(props{k});
             end
         end
 
-        function display_set(om, stype, sname)
+        function display_set(obj, stype, sname)
             if nargin < 3
                 sname = stype;
             end
-            st = om.(stype);    %% data for set type of interest
+            st = obj.(stype);    %% data for set type of interest
             if st.NS
                 fmt = '%-26s %6s %8s %8s %8s\n';
                 fprintf(fmt, sname, 'name', 'i1', 'iN', 'N');

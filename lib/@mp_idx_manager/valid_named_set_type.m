@@ -1,9 +1,9 @@
-function str = valid_named_set_type(om, set_type)
+function str = valid_named_set_type(obj, set_type)
 %VALID_NAMED_SET_TYPE  Returns a label for the given named set type or empty.
 %
 %   -----  PRIVATE METHOD  -----
 %
-%   STR = OM.VALID_NAMED_SET_TYPE(SET_TYPE)
+%   STR = OBJ.VALID_NAMED_SET_TYPE(SET_TYPE)
 %
 %   Returns a string corresponding to the type of the named set for
 %   valid values of SET_TYPE, otherwise an empty string. Can be used to
@@ -24,8 +24,8 @@ function str = valid_named_set_type(om, set_type)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 
-if isfield(om.set_types, set_type)
-    str = om.set_types.(set_type);
+if isfield(obj.set_types, set_type)
+    str = obj.set_types.(set_type);
 else
     str = '';
 end
