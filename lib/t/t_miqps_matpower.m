@@ -1,11 +1,11 @@
 function t_miqps_matpower(quiet)
 %T_MIQPS_MATPOWER  Tests of MIQPS_MATPOWER MIQP solvers.
 
-%   MATPOWER
-%   Copyright (c) 2010-2016, Power Systems Engineering Research Center (PSERC)
+%   MP-Opt-Model
+%   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 

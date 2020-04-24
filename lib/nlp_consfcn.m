@@ -30,11 +30,11 @@ function [h, g, dh, dg] = nlp_consfcn(om, x, dhs, dgs)
 %
 %   See also NLP_COSTFCN, NLP_HESSFCN.
 
-%   MATPOWER
+%   MP-Opt-Model
 %   Copyright (c) 1996-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 

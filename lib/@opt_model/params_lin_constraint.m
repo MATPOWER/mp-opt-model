@@ -30,11 +30,11 @@ function [A, l, u, vs, i1, iN] = params_lin_constraint(om, name, idx)
 %
 %   See also OPT_MODEL, ADD_LIN_CONSTRAINT.
 
-%   MATPOWER
-%   Copyright (c) 2008-2019, Power Systems Engineering Research Center (PSERC)
+%   MP-Opt-Model
+%   Copyright (c) 2008-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 

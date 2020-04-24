@@ -52,11 +52,11 @@ function varargout = get_idx(obj, varargin)
 %           ADD_LIN_CONSTRAINT, ADD_NLN_CONSTRAINT, ADD_QUAD_COST and
 %           ADD_NLN_COST.
 
-%   MATPOWER
+%   MP-Opt-Model
 %   Copyright (c) 2008-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 

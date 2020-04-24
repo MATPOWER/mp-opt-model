@@ -11,11 +11,11 @@ function xx = varsets_x(om, x, vs, want_vector)
 %
 %   See also VARSET_LEN
 
-%   MATPOWER
-%   Copyright (c) 2017, Power Systems Engineering Research Center (PSERC)
+%   MP-Opt-Model
+%   Copyright (c) 2017-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 

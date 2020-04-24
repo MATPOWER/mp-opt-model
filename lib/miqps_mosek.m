@@ -105,11 +105,11 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 %
 %   See also MIQPS_MATPOWER, MOSEKOPT.
 
-%   MATPOWER
+%   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 

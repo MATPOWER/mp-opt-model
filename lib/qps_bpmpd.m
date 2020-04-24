@@ -95,11 +95,11 @@ function [x, f, eflag, output, lambda] = qps_bpmpd(H, c, A, l, u, xmin, xmax, x0
 %
 %   See also QPS_MATPOWER, BPMPD_MEX, http://www.pserc.cornell.edu/bpmpd/.
 
-%   MATPOWER
+%   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 
