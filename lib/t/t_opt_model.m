@@ -1,5 +1,5 @@
-function t_opf_model(quiet)
-%T_OPF_MODEL Tests for OPF_MODEL.
+function t_opt_model(quiet)
+%T_OPT_MODEL Tests for OPT_MODEL.
 
 %   MATPOWER
 %   Copyright (c) 2012-2020, Power Systems Engineering Research Center (PSERC)
@@ -13,24 +13,13 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 595;
+num_tests = 514;
 
 t_begin(num_tests, quiet);
 
-%% define named indices into data matrices
-[PQ, PV, REF, NONE, BUS_I, BUS_TYPE, PD, QD, GS, BS, BUS_AREA, VM, ...
-    VA, BASE_KV, ZONE, VMAX, VMIN, LAM_P, LAM_Q, MU_VMAX, MU_VMIN] = idx_bus;
-[GEN_BUS, PG, QG, QMAX, QMIN, VG, MBASE, GEN_STATUS, PMAX, PMIN, ...
-    MU_PMAX, MU_PMIN, MU_QMAX, MU_QMIN, PC1, PC2, QC1MIN, QC1MAX, ...
-    QC2MIN, QC2MAX, RAMP_AGC, RAMP_10, RAMP_30, RAMP_Q, APF] = idx_gen;
-[F_BUS, T_BUS, BR_R, BR_X, BR_B, RATE_A, RATE_B, RATE_C, ...
-    TAP, SHIFT, BR_STATUS, PF, QF, PT, QT, MU_SF, MU_ST, ...
-    ANGMIN, ANGMAX, MU_ANGMIN, MU_ANGMAX] = idx_brch;
-
 %%-----  opt_model  -----
 t = 'constructor';
-om = opf_model;
-t_ok(isa(om, 'opf_model'), t);
+om = opt_model;
 t_ok(isa(om, 'opt_model'), t);
 
 %%-----  add_var  -----
@@ -866,192 +855,17 @@ t_is(f, ef, 14, [t, ' : f']);
 t_is(df, edf, 14, [t, ' : df']);
 t_is(d2f, Q, 14, [t, ' : d2f']);
 
-
-%%-----  add_legacy_cost  -----
-t = 'add_legacy_cost';
-cN = 0;
-cNS = 0;
-t_ok(om.getN('cost') == cN, sprintf('%s : cost.N  = %d', t, cN));
-t_ok(om.get('cost', 'NS') == cNS, sprintf('%s : cost.NS = %d', t, cNS));
-
-t = 'om.add_legacy_cost(''ucost'', cp, {''Va'', ''Pg''})';
-cp = struct('N', sparse([1:2 1:2 1:2]', [1:4 5 7]', [1 1 -1 -1 2 2]', 2,7), ...
-            'Cw', [2;3]);
-om.add_legacy_cost('ucost', cp, {'Va', 'Pg'});
-cNS = cNS + 1; cN = cN + 2;
-t_ok(om.getN('cost') == cN, sprintf('%s : cost.N  = %d', t, cN));
-t_ok(om.get('cost', 'NS') == cNS, sprintf('%s : cost.NS = %d', t, cNS));
-
-t = 'om.add_legacy_cost(''vcost'', cp)';
-cp = struct('N', sparse([1:2 1:2 1:2]', [1:4 5 7]', [1 1 -1 -1 2 2]', 2, vN), ...
-            'Cw', [2;3]);
-om.add_legacy_cost('vcost', cp);
-cNS = cNS + 1; cN = cN + 2;
-t_ok(om.getN('cost') == cN, sprintf('%s : cost.N  = %d', t, cN));
-t_ok(om.get('cost', 'NS') == cNS, sprintf('%s : cost.NS = %d', t, cNS));
-
-t = 'om.init_indexed_name(''cost'', ''wc'', {2,2})';
-om.init_indexed_name('cost', 'wc', {2,2});
-t_ok(om.getN('cost') == cN, sprintf('%s : cost.N  = %d', t, cN));
-t_ok(om.get('cost', 'NS') == cNS, sprintf('%s : cost.NS = %d', t, cNS));
-
-for i = 1:2
-    for j = 1:2
-        t = 'om.add_legacy_cost(''wc'', {i, j}, cp, vs)';
-        cp.N = sparse([1:(i+j) 1:(i+j)]', [1:(i+j) 5*ones(1,i+j)]', ...
-            [ones(i+j,1);-ones(i+j,1)], i+j, 3+2+(i==2 && j==1));
-        cp.Cw = (i+j:-1:1)';
-        if i == 2
-            cp.H = sparse((1:i+j)', (1:i+j)', (1:i+j)', i+j, i+j);
-        end
-        vs = struct('name', {'Pg', 'x'}, 'idx', {{}, {i,j}});
-        om.add_legacy_cost('wc', {i, j}, cp, vs);
-        cNS = cNS + 1; cN = cN + i+j;
-        t_ok(om.getN('cost') == cN, sprintf('%s : cost.N  = %d', t, cN));
-        t_ok(om.get('cost', 'NS') == cNS, sprintf('%s : cost.NS = %d', t, cNS));
-    end
-end
-
-t = 'params_legacy_cost';
-cp = om.params_legacy_cost();
-t_ok(isfield(cp, 'N'), t);
-
 %%-----  get_idx  -----
-t = 'get_idx : cost';
-cc = om.get_idx('cost');
-t_is([cc.i1.vcost cc.iN.vcost cc.N.vcost], [3 4 2], 14, [t ' : vcost']);
-t_is(size(cc.i1.wc), [2, 2], 14, [t ' : size(cc.i1.wc)']);
-t_is([cc.i1.wc(2,1) cc.iN.wc(2,1) cc.N.wc(2,1)], [10 12 3], 14, [t ' : wc(2,1)']);
-
-t = 'get_idx(''var'', ''cost'', ''lin'')';
-[vv, cc, ll] = om.get_idx('var', 'cost', 'lin');
+t = 'get_idx(''var'', ''lin'')';
+[ll, vv] = om.get_idx('lin', 'var');
 t_is([vv.i1.Pg vv.iN.Pg vv.N.Pg], [5 7 3], 14, [t ' : Pg']);
 t_is(size(vv.i1.x), [2, 2], 14, [t ' : size(vv.i1.x)']);
 t_is([vv.i1.x(2,1) vv.iN.x(2,1) vv.N.x(2,1)], [22 24 3], 14, [t ' : x(2,1)']);
 t_is(size(vv.i1.y), [2, 3, 4], 14, [t ' : size(vv.i1.y)']);
 t_is([vv.i1.y(2,2,4) vv.iN.y(2,2,4) vv.N.y(2,2,4)], [133 140 8], 14, [t ' : y(2,2,4)']);
-t_is([cc.i1.vcost cc.iN.vcost cc.N.vcost], [3 4 2], 14, [t ' : vcost']);
-t_is(size(cc.i1.wc), [2, 2], 14, [t ' : size(cc.i1.wc)']);
-t_is([cc.i1.wc(2,1) cc.iN.wc(2,1) cc.N.wc(2,1)], [10 12 3], 14, [t ' : wc(2,1)']);
 t_is([ll.i1.Qmis ll.iN.Qmis ll.N.Qmis], [4 6 3], 14, [t ' : Qmis']);
 t_is(size(ll.i1.mylin), [2, 2], 14, [t ' : size(ll.i1.mylin)']);
 t_is([ll.i1.mylin(2,1) ll.iN.mylin(2,1) ll.N.mylin(2,1)], [12 14 3], 14, [t ' : mylin(2,1)']);
-
-%%-----  params_legacy_cost  -----
-t = 'om.params_legacy_cost(''ucost'')';
-cp = om.params_legacy_cost('ucost');
-n = nVa + nPg;
-N = sparse([1:2 1:2 1:2]', [1:4 5 7]', [1 1 -1 -1 2 2]', 2, n);
-t_is(full(cp.N), full(N), 14, [t, ' : N']);
-t_is(cp.Cw, [2;3], 14, [t, ' : Cw']);
-t_is(full(cp.H), zeros(2,2), 14, [t, ' : H']);
-t_is(cp.dd, ones(2,1),  14, [t, ' : dd']);
-t_is(cp.rh, zeros(2,1), 14, [t, ' : rh']);
-t_is(cp.kk, zeros(2,1), 14, [t, ' : kk']);
-t_is(cp.mm, ones(2,1),  14, [t, ' : mm']);
-
-t = 'om.params_legacy_cost(''vcost'')';
-cp = om.params_legacy_cost('vcost');
-N = sparse([1:2 1:2 1:2]', [1:4 5 7]', [1 1 -1 -1 2 2]', 2, vN);
-t_is(full(cp.N), full(N), 14, [t, ' : N']);
-t_is(cp.Cw, [2;3], 14, [t, ' : Cw']);
-t_is(full(cp.H), zeros(2,2), 14, [t, ' : H']);
-t_is(cp.dd, ones(2,1),  14, [t, ' : dd']);
-t_is(cp.rh, zeros(2,1), 14, [t, ' : rh']);
-t_is(cp.kk, zeros(2,1), 14, [t, ' : kk']);
-t_is(cp.mm, ones(2,1),  14, [t, ' : mm']);
-
-t = 'om.params_legacy_cost(''wc'') : error';
-try
-    cp = om.params_legacy_cost('wc')
-    t_ok(0, t);
-catch
-    t_ok(strfind(lasterr, '@opt_model/params_legacy_cost: legacy cost set ''wc'' requires an IDX arg'), t);
-end
-
-t = 'om.params_legacy_cost(''wc'', {1,2})';
-cp = om.params_legacy_cost('wc', {1,2});
-n = nPg + om.getN('var', 'x', {1,2});
-N = sparse([1:3 1:3]', [1:3 nPg+2*ones(1,3)]', [ones(3,1);-ones(3,1)], 3, n);
-t_is(full(cp.N), full(N), 14, [t, ' : N']);
-t_is(cp.Cw, [3;2;1], 14, [t, ' : Cw']);
-t_is(full(cp.H), zeros(3,3), 14, [t, ' : H']);
-t_is(cp.dd, ones(3,1),  14, [t, ' : dd']);
-t_is(cp.rh, zeros(3,1), 14, [t, ' : rh']);
-t_is(cp.kk, zeros(3,1), 14, [t, ' : kk']);
-t_is(cp.mm, ones(3,1),  14, [t, ' : mm']);
-
-t = 'om.params_legacy_cost(''wc'', {2,1})';
-cp = om.params_legacy_cost('wc', {2,1});
-n = nPg + om.getN('var', 'x', {2,1});
-N = sparse([1:3 1:3]', [1:3 nPg+2*ones(1,3)]', [ones(3,1);-ones(3,1)], 3, n);
-t_is(full(cp.N), full(N), 14, [t, ' : N']);
-t_is(cp.Cw, [3;2;1], 14, [t, ' : Cw']);
-H = sparse(1:3, 1:3, 1:3, 3, 3);
-t_is(full(cp.H), full(H), 14, [t, ' : H']);
-t_is(cp.dd, ones(3,1),  14, [t, ' : dd']);
-t_is(cp.rh, zeros(3,1), 14, [t, ' : rh']);
-t_is(cp.kk, zeros(3,1), 14, [t, ' : kk']);
-t_is(cp.mm, ones(3,1),  14, [t, ' : mm']);
-
-t = 'om.params_legacy_cost()';
-cp = om.params_legacy_cost();
-t_ok(issparse(cp.N), [t ' : issparse(cp.N)']);
-t_is(size(cp.N), [cN, vN], 14, [t ' : size(cp.N)']);
-t_is(size(cp.H), [cN, cN], 14, [t ' : size(cp.H)']);
-t_is(length(cp.Cw), cN, 14, [t ' : length(cp.Cw)']);
-t_is(length(cp.dd), cN, 14, [t ' : length(cp.dd)']);
-t_is(length(cp.rh), cN, 14, [t ' : length(cp.rh)']);
-t_is(length(cp.kk), cN, 14, [t ' : length(cp.kk)']);
-t_is(length(cp.mm), cN, 14, [t ' : length(cp.mm)']);
-N = sparse([1:2 1:2]', [1:4]', [1 1 -1 -1]', 2, 4);
-Cw = [2;3];
-H = zeros(2,2);
-t_is(full(cp.N(cc.i1.vcost:cc.iN.vcost, vv.i1.Va:vv.iN.Va)), full(N), 14, [t ' : N(<vcost>,<Va>)']);
-N = sparse([1:2]', [1 3]', [2 2]', 2, 3);
-t_is(full(cp.N(cc.i1.vcost:cc.iN.vcost, vv.i1.Pg:vv.iN.Pg)), full(N), 14, [t ' : N(<vcost>,<Pg>)']);
-t_is(full(cp.Cw(cc.i1.vcost:cc.iN.vcost)), Cw, 14, [t ' : Cw(<vcost>)']);
-t_is(full(cp.H(cc.i1.vcost:cc.iN.vcost, cc.i1.vcost:cc.iN.vcost)), full(H), 14, [t ' : H(<vcost>,<vcost>)']);
-N = sparse([1:3]', [1:3]', [1 1 1]', 3, 3);
-t_is(full(cp.N(cc.i1.wc(1,2):cc.iN.wc(1,2), vv.i1.Pg:vv.iN.Pg)), full(N), 14, [t ' : N(<wc(1,2)>,<Pg>)']);
-N = sparse([1:3]', [2 2 2]', [-1 -1 -1]', 3, 2);
-Cw = [3;2;1];
-H = zeros(3,3);
-t_is(full(cp.N(cc.i1.wc(1,2):cc.iN.wc(1,2), vv.i1.x(1,2):vv.iN.x(1,2))), full(N), 14, [t ' : N(<wc(1,2)>,<x(1,2)>)']);
-t_is(full(cp.Cw(cc.i1.wc(1,2):cc.iN.wc(1,2))), Cw, 14, [t ' : Cw(<wc(1,2)>)']);
-t_is(full(cp.H(cc.i1.wc(1,2):cc.iN.wc(1,2), cc.i1.wc(1,2):cc.iN.wc(1,2))), full(H), 14, [t ' : H(<wc(1,2)>,<wc(1,2)>)']);
-
-N = sparse([1:3]', [1:3]', [1 1 1]', 3, 3);
-t_is(full(cp.N(cc.i1.wc(2,1):cc.iN.wc(2,1), vv.i1.Pg:vv.iN.Pg)), full(N), 14, [t ' : N(<wc(2,1)>,<Pg>)']);
-N = sparse([1:3]', [2 2 2]', [-1 -1 -1]', 3, 3);
-Cw = [3;2;1];
-H = full(sparse((1:3)', (1:3)', (1:3)', 3, 3));
-t_is(full(cp.N(cc.i1.wc(2,1):cc.iN.wc(2,1), vv.i1.x(2,1):vv.iN.x(2,1))), full(N), 14, [t ' : N(<wc(2,1)>,<x(2,1)>)']);
-t_is(full(cp.Cw(cc.i1.wc(2,1):cc.iN.wc(2,1))), Cw, 14, [t ' : Cw(<wc(2,1)>)']);
-t_is(full(cp.H(cc.i1.wc(2,1):cc.iN.wc(2,1), cc.i1.wc(2,1):cc.iN.wc(2,1))), full(H), 14, [t ' : H(<wc(2,1)>,<wc(2,1)>)']);
-
-t_is(cp.dd, ones(cN,1),  14, [t, ' : dd']);
-t_is(cp.rh, zeros(cN,1), 14, [t, ' : rh']);
-t_is(cp.kk, zeros(cN,1), 14, [t, ' : kk']);
-t_is(cp.mm, ones(cN,1),  14, [t, ' : mm']);
-
-%%-----  eval_legacy_cost  -----
-t = 'om.eval_legacy_cost(x)';
-x = [1:7 rand(1,10) 8:(vN-10)]';
-f = om.eval_legacy_cost(x);
-t_is(f, 343, 14, t);
-
-t = 'om.eval_legacy_cost(''ucost'')';
-f = om.eval_legacy_cost(x, 'ucost');
-t_is(f, 52, 14, t);
-
-t = 'om.eval_legacy_cost(''wc'', {2,1})';
-f = om.eval_legacy_cost(x, 'wc', {2,1});
-t_is(f, 91, 14, t);
-
-t = 'om.eval_legacy_cost(''wc'')';
-f = om.eval_legacy_cost(x, 'wc');
-t_is(f, 239, 14, t);
 
 %%-----  add_nln_cost  -----
 t = 'add_nln_cost';
@@ -1191,7 +1005,7 @@ t = 'copy constructor';
 if have_fcn('octave') && have_fcn('octave', 'vnum') < 5.003
     t_skip(1, [t ' - https://savannah.gnu.org/bugs/?52614']);
 else
-    om1 = opf_model(om);
+    om1 = opt_model(om);
     om1.add_var('test', 10);
     t_is(om1.var.N, om.var.N+10, 12, t);
 end
@@ -1238,7 +1052,7 @@ MM = min(M, N);
 d2G = sparse(1:MM, 1:MM, xx(1:MM) + lam(1:MM) + p3, N, N);
 %full(d2G(1:MM,1:MM))
 
-function [varargout] = my_legacy_cost_fcn(x, cp, om, vs)
+function [f, df, d2f] = my_legacy_cost_fcn(x, cp, om, vs)
 [nw, nx] = size(cp.N);
 if ~isfield(cp, 'H') || isempty(cp.H)
     cp.H = sparse(nw, nw);
@@ -1256,8 +1070,50 @@ if ~isfield(cp, 'mm') || isempty(cp.mm)
     cp.mm = ones(nw, 1);
 end
 if iscell(x)
-    xx = vertcat(x{:});
-else
-    xx = x;
+    x = vertcat(x{:});
 end
-[varargout{1:nargout}] = opf_legacy_user_cost_fcn(xx, cp);
+
+%% unpack data
+[N, Cw, H, dd, rh, kk, mm] = ...
+    deal(cp.N, cp.Cw, cp.H, cp.dd, cp.rh, cp.kk, cp.mm);
+nx = length(x);
+
+if isempty(N)
+    f = 0;
+    df = zeros(nx, 1);
+    d2f = sparse(nx, nx);
+else
+    nw = size(N, 1);
+    r = N * x - rh;                 %% Nx - rhat
+    iLT = find(r < -kk);            %% below dead zone
+    iEQ = find(r == 0 & kk == 0);   %% dead zone doesn't exist
+    iGT = find(r > kk);             %% above dead zone
+    iND = [iLT; iEQ; iGT];          %% rows that are Not in the Dead region
+    iL = find(dd == 1);             %% rows using linear function
+    iQ = find(dd == 2);             %% rows using quadratic function
+    LL = sparse(iL, iL, 1, nw, nw);
+    QQ = sparse(iQ, iQ, 1, nw, nw);
+    kbar = sparse(iND, iND, [   ones(length(iLT), 1);
+                                zeros(length(iEQ), 1);
+                                -ones(length(iGT), 1)], nw, nw) * kk;
+    rr = r + kbar;                  %% apply non-dead zone shift
+    M = sparse(iND, iND, mm(iND), nw, nw);  %% dead zone or scale
+    diagrr = sparse(1:nw, 1:nw, rr, nw, nw);
+    
+    %% linear rows multiplied by rr(i), quadratic rows by rr(i)^2
+    w = M * (LL + QQ * diagrr) * rr;
+
+    f = (w' * H * w) / 2 + Cw' * w;
+
+    %%----- evaluate cost gradient -----
+    if nargout > 1
+        HwC = H * w + Cw;
+        AA = N' * M * (LL + 2 * QQ * diagrr);
+        df = AA * HwC;
+
+        %% ---- evaluate cost Hessian -----
+        if nargout > 2
+            d2f = AA * H * AA' + 2 * N' * M * QQ * sparse(1:nw, 1:nw, HwC, nw, nw) * N;
+        end
+    end
+end
