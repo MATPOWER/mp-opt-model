@@ -305,7 +305,7 @@ if have_fcn('fmincon_ipm')
             Af = full(Af);
             Afeq = full(Afeq);
         otherwise
-            error('fmincopf_solver: unknown algorithm specified in ''fmincon.alg'' option');
+            error('nlps_fmincon: unknown algorithm specified in ''fmincon.alg'' option');
     end
 else
     fopts.LargeScale = 'off';

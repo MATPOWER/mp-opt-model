@@ -1,19 +1,18 @@
-function Lxx = opf_hessfcn(x, lambda, cost_mult, om, Hs)
-%OPF_HESSFCN  Evaluates Hessian of Lagrangian for AC OPF.
-%   LXX = OPF_HESSFCN(X, LAMBDA, COST_MULT, OM)
-%   LXX = OPF_HESSFCN(X, LAMBDA, COST_MULT, OM, HS)
+function Lxx = nlp_hessfcn(om, x, lambda, cost_mult, Hs)
+%NLP_HESSFCN  Evaluates Hessian of Lagrangian.
+%   LXX = NLP_HESSFCN(OM, X, LAMBDA, COST_MULT)
+%   LXX = NLP_HESSFCN(OM, X, LAMBDA, COST_MULT, HS)
 %
-%   Hessian evaluation function for AC optimal power flow, suitable
-%   for use with MIPS or FMINCON's interior-point algorithm.
+%   Hessian evaluation function, suitable for use with MIPS, FMINCON, etc.
 %
 %   Inputs:
+%     OM : Opt-Model object
 %     X : optimization vector
 %     LAMBDA (struct)
-%       .eqnonlin : Lagrange multipliers on power balance equations
-%       .ineqnonlin : Kuhn-Tucker multipliers on constrained branch flows
+%       .eqnonlin : Lagrange multipliers on equality constraints
+%       .ineqnonlin : Kuhn-Tucker multipliers on inequality constraints
 %     COST_MULT : (optional) Scale factor to be applied to the cost
 %          (default = 1).
-%     OM : OPF model object
 %     HS : (optional) sparse matrix with tiny non-zero values specifying
 %          the fixed sparsity structure that the resulting LXX should match
 %
@@ -21,38 +20,31 @@ function Lxx = opf_hessfcn(x, lambda, cost_mult, om, Hs)
 %     LXX : Hessian of the Lagrangian.
 %
 %   Examples:
-%       Lxx = opf_hessfcn(x, lambda, cost_mult, om);
-%       Lxx = opf_hessfcn(x, lambda, cost_mult, om, Hs);
+%       Lxx = nlp_hessfcn(om, x, lambda, cost_mult);
+%       Lxx = nlp_hessfcn(om, x, lambda, cost_mult, Hs);
 %
-%   See also OPF_COSTFCN, OPF_CONSFCN.
+%   See also NLP_COSTFCN, NLP_CONSFCN.
 
 %   MATPOWER
 %   Copyright (c) 1996-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
-%   and Carlos E. Murillo-Sanchez, PSERC Cornell & Universidad Nacional de Colombia
 %
 %   This file is part of MATPOWER.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 
 %% ----- evaluate d2f -----
-[f, df, d2f] = opf_costfcn(x, om);
+[f, df, d2f] = nlp_costfcn(om, x);
 d2f = d2f * cost_mult;
 
-%%----- evaluate Hessian of power balance constraints -----
+%%----- evaluate Hessian of equality constraints -----
 d2G = om.eval_nln_constraint_hess(x, lambda.eqnonlin, 1);
 
-%%----- evaluate Hessian of flow constraints -----
+%%----- evaluate Hessian of inequality constraints -----
 d2H = om.eval_nln_constraint_hess(x, lambda.ineqnonlin, 0);
 
 %%-----  do numerical check using (central) finite differences  -----
 if 0
-    mpc = om.get_mpc();
-    nl = size(mpc.branch, 1);       %% number of branches
-    if nargin < 9
-        il = (1:nl);            %% all lines have limits by default
-    end
-
     nx = length(x);
     step = 1e-5;
     num_d2f = sparse(nx, nx);
@@ -64,11 +56,11 @@ if 0
         xp(i) = x(i) + step/2;
         xm(i) = x(i) - step/2;
         % evaluate cost & gradients
-        [fp, dfp] = opf_costfcn(xp, om);
-        [fm, dfm] = opf_costfcn(xm, om);
+        [fp, dfp] = nlp_costfcn(om, xp);
+        [fm, dfm] = nlp_costfcn(om, xm);
         % evaluate constraints & gradients
-        [Hp, Gp, dHp, dGp] = opf_consfcn(xp, om);
-        [Hm, Gm, dHm, dGm] = opf_consfcn(xm, om);
+        [Hp, Gp, dHp, dGp] = nlp_consfcn(om, xp);
+        [Hm, Gm, dHm, dGm] = nlp_consfcn(om, xm);
         num_d2f(:, i) = cost_mult * (dfp - dfm) / step;
         num_d2G(:, i) = (dGp - dGm) * lambda.eqnonlin   / step;
         num_d2H(:, i) = (dHp - dHm) * lambda.ineqnonlin / step;
@@ -88,7 +80,6 @@ if 0
 end
 
 Lxx = d2f + d2G + d2H;
-
 
 %% force specified sparsity structure
 if nargin > 4

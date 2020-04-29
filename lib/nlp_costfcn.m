@@ -1,14 +1,13 @@
-function [f, df, d2f] = opf_costfcn(x, om)
-%OPF_COSTFCN  Evaluates objective function, gradient and Hessian for OPF.
-%   [F, DF, D2F] = OPF_COSTFCN(X, OM)
+function [f, df, d2f] = nlp_costfcn(om, x)
+%NLP_COSTFCN  Evaluates objective function, gradient and Hessian.
+%   [F, DF, D2F] = NLP_COSTFCN(OM, X)
 %
-%   Objective function evaluation routine for AC optimal power flow,
-%   suitable for use with MIPS or FMINCON. Computes objective function value,
-%   gradient and Hessian.
+%   Objective function evaluation routine, suitable for use with MIPS,
+%   FMINCON, etc. Computes objective function value, gradient and Hessian.
 %
 %   Inputs:
+%     OM : Opt-Model object
 %     X : optimization vector
-%     OM : OPF model object
 %
 %   Outputs:
 %     F   : value of objective function
@@ -16,16 +15,15 @@ function [f, df, d2f] = opf_costfcn(x, om)
 %     D2F : (optional) Hessian of objective function (sparse matrix)
 %
 %   Examples:
-%       f = opf_costfcn(x, om);
-%       [f, df] = opf_costfcn(x, om);
-%       [f, df, d2f] = opf_costfcn(x, om);
+%       f = nlp_costfcn(om, x);
+%       [f, df] = nlp_costfcn(om, x);
+%       [f, df, d2f] = nlp_costfcn(om, x);
 %
-%   See also OPF_CONSFCN, OPF_HESSFCN.
+%   See also NLP_CONSFCN, NLP_HESSFCN.
 
 %   MATPOWER
-%   Copyright (c) 1996-2018, Power Systems Engineering Research Center (PSERC)
-%   by Carlos E. Murillo-Sanchez, PSERC Cornell & Universidad Nacional de Colombia
-%   and Ray Zimmerman, PSERC Cornell
+%   Copyright (c) 1996-2020, Power Systems Engineering Research Center (PSERC)
+%   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MATPOWER.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).

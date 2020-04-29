@@ -58,7 +58,7 @@ classdef opt_model < handle
 %   Make a shallow copy of the object:
 %       copy
 %
-%   The following is the structure of the data in the OPF model object.
+%   The following is the structure of the data in the Opt-Model object.
 %   Each field of .idx or .data is a struct whose field names are the names
 %   of the corresponding blocks of vars, constraints or costs (found in
 %   order in the corresponding .order field). The description next to these

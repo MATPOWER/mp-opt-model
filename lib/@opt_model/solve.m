@@ -116,9 +116,9 @@ elseif strcmp(pt, 'NLP')        %% NLP - non-linear program
     end
 
     %% run solver
-    f_fcn = @(x)opf_costfcn(x, om);
-    gh_fcn = @(x)opf_consfcn(x, om);
-    hess_fcn = @(x, lambda, cost_mult)opf_hessfcn(x, lambda, cost_mult, om);
+    f_fcn = @(x)nlp_costfcn(om, x);
+    gh_fcn = @(x)nlp_consfcn(om, x);
+    hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(om, x, lambda, cost_mult);
     [x, f, eflag, output, lambda] = ...
         nlps_matpower(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
     success = (eflag > 0);

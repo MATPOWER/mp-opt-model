@@ -1,55 +1,49 @@
-function [h, g, dh, dg] = opf_consfcn(x, om, dhs, dgs)
-%OPF_CONSFCN  Evaluates nonlinear constraints and their Jacobian for OPF.
-%   [H, G] = OPF_CONSFCN(X, OM)
-%   [H, G, DH, DG] = OPF_CONSFCN(X, OM)
-%   [H, G, DH, DG] = OPF_CONSFCN(X, OM, DHS, DGS)
+function [h, g, dh, dg] = nlp_consfcn(om, x, dhs, dgs)
+%NLP_CONSFCN  Evaluates nonlinear constraints and their Jacobian.
+%   [H, G] = NLP_CONSFCN(OM, X)
+%   [H, G, DH, DG] = NLP_CONSFCN(OM, X)
+%   [H, G, DH, DG] = NLP_CONSFCN(OM, X, DHS, DGS)
 %
-%   Constraint evaluation function for AC optimal power flow, suitable
-%   for use with MIPS or FMINCON. Computes constraint vectors and their
+%   Constraint evaluation function nonlinear constraints, suitable
+%   for use with MIPS, FMINCON, etc. Computes constraint vectors and their
 %   gradients.
 %
 %   Inputs:
+%     OM : Opt-Model object
 %     X : optimization vector
-%     OM : OPF model object
 %     DHS : (optional) sparse matrix with tiny non-zero values specifying
 %          the fixed sparsity structure that the resulting DH should match
 %     DGS : (optional) sparse matrix with tiny non-zero values specifying
 %          the fixed sparsity structure that the resulting DG should match
 %
 %   Outputs:
-%     H  : vector of inequality constraint values (flow limits)
-%          where the flow can be apparent power, real power, or
-%          current, depending on the value of opf.flow_lim in MPOPT
-%          (only for constrained lines), normally expressed as
-%          (limit^2 - flow^2), except when opf.flow_lim == 'P',
-%          in which case it is simply (limit - flow).
-%     G  : vector of equality constraint values (power balances)
+%     H  : vector of inequality constraint values
+%     G  : vector of equality constraint values
 %     DH : (optional) inequality constraint gradients, column j is
 %          gradient of H(j)
 %     DG : (optional) equality constraint gradients
 %
 %   Examples:
-%       [h, g] = opf_consfcn(x, om);
-%       [h, g, dh, dg] = opf_consfcn(x, om);
-%       [...] = opf_consfcn(x, om, dhs, dgs);
+%       [h, g] = nlp_consfcn(om, x);
+%       [h, g, dh, dg] = nlp_consfcn(om, x);
+%       [...] = nlp_consfcn(om, x, dhs, dgs);
 %
-%   See also OPF_COSTFCN, OPF_HESSFCN.
+%   See also NLP_COSTFCN, NLP_HESSFCN.
 
 %   MATPOWER
 %   Copyright (c) 1996-2020, Power Systems Engineering Research Center (PSERC)
-%   by Carlos E. Murillo-Sanchez, PSERC Cornell & Universidad Nacional de Colombia
-%   and Ray Zimmerman, PSERC Cornell
+%   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MATPOWER.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://matpower.org for more info.
 
 if nargout == 2     %% contraints only
-    g = om.eval_nln_constraint(x, 1);       %% equalities (power flow)
-    h = om.eval_nln_constraint(x, 0);       %% inequalities (branch flow limits)
+    g = om.eval_nln_constraint(x, 1);       %% equalities
+    h = om.eval_nln_constraint(x, 0);       %% inequalities
 else                %% constraints and derivatives
-    [g, dg] = om.eval_nln_constraint(x, 1); %% equalities (power flow)
-    [h, dh] = om.eval_nln_constraint(x, 0); %% inequalities (branch flow limits)
+    [g, dg] = om.eval_nln_constraint(x, 1); %% equalities
+    [h, dh] = om.eval_nln_constraint(x, 0); %% inequalities
     dg = dg';
     dh = dh';
 
