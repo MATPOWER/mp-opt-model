@@ -136,7 +136,7 @@ function [x, f, eflag, output, lambda] = nlps_ipopt(f_fcn, x0, A, l, u, xmin, xm
 %       );
 %       [x, f, exitflag, output, lambda] = nlps_ipopt(problem);
 %
-%   See also NLPS_MATPOWER, IPOPT.
+%   See also NLPS_MASTER, IPOPT.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

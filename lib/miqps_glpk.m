@@ -98,7 +98,7 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = miqps_glpk(H, c, A, l, u, xmin, [], x0, vtype, opt);
 %
-%   See also MIQPS_MATPOWER, GLPK.
+%   See also MIQPS_MASTER, GLPK.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

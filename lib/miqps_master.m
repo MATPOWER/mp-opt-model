@@ -1,9 +1,9 @@
-function [x, f, eflag, output, lambda] = qps_matpower(H, c, A, l, u, xmin, xmax, x0, opt)
-%QPS_MATPOWER  Quadratic Program Solver for MATPOWER.
+function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax, x0, vtype, opt)
+%MIQPS_MASTER  Mixed Integer Quadratic Program Solver for MATPOWER.
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
-%       QPS_MATPOWER(H, C, A, L, U, XMIN, XMAX, X0, OPT)
-%   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QPS_MATPOWER(PROBLEM)
-%   A common wrapper function for various QP solvers.
+%       MIQPS_MASTER(H, C, A, L, U, XMIN, XMAX, X0, VTYPE, OPT)
+%   [X, F, EXITFLAG, OUTPUT, LAMBDA] = MIQPS_MASTER(PROBLEM)
+%   A common wrapper function for various QP solvers. 
 %   Solves the following QP (quadratic programming) problem:
 %
 %       min 1/2 X'*H*X + C'*X
@@ -23,45 +23,44 @@ function [x, f, eflag, output, lambda] = qps_matpower(H, c, A, l, u, xmin, xmax,
 %       XMIN, XMAX : optional lower and upper bounds on the
 %           X variables, defaults are -Inf and Inf, respectively.
 %       X0 : optional starting value of optimization vector X
+%       VTYPE : character string of length NX (number of elements in X),
+%               or 1 (value applies to all variables in x),
+%               allowed values are 'C' (continuous), 'B' (binary),
+%               'I' (integer), 'S' (semi-continuous), or 'N' (semi-integer).
+%               (MOSEK, GLPK, OT allow only 'C', 'B', or 'I')
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
 %           alg ('DEFAULT') : determines which solver to use, can be either
 %                   a string (new-style) or a numerical alg code (old-style)
 %               'DEFAULT' : (or 0) automatic, first available of Gurobi,
-%                       CPLEX, MOSEK, Opt Tbx (if MATLAB), GLPK (LPs only),
-%                       BPMPD, MIPS
-%               'MIPS'    : (or 200) MIPS, MATPOWER Interior Point Solver
-%                        pure MATLAB implementation of a primal-dual
-%                        interior point method, if mips_opt.step_control = 1
-%                        (or alg=250) it uses MIPS-sc, a step controlled
-%                        variant of MIPS
-%               'BPMPD'   : (or 100) BPMPD_MEX
-%               'CLP'     : CLP
+%                       CPLEX, MOSEK, Opt Tbx (MILPs only), GLPK (MILPs only)
 %               'CPLEX'   : (or 500) CPLEX
-%               'GLPK'    : GLPK, (LP problems only, i.e. empty H matrix)
+%               'GLPK'    : GLPK, (MILP problems only, i.e. empty H matrix)
 %               'GUROBI'  : (or 700) Gurobi
-%               'IPOPT'   : (or 400) IPOPT, requires MEX interface to IPOPT
-%                           solver, https://github.com/coin-or/Ipopt
 %               'MOSEK'   : (or 600) MOSEK
-%               'OT'      : (or 300) Optimization Toolbox, QUADPROG or LINPROG
+%               'OT'      : (or 300) Optimization Toolbox, INTLINPROG
+%                           (MILP problems only, i.e. empty H matrix)
 %           verbose (0) - controls level of progress output displayed
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
-%           bp_opt      - options vector for BP
-%           clp_opt     - options vector for CLP
-%           cplex_opt   - options struct for CPLEX
+%           skip_prices (0) - flag that specifies whether or not to
+%               skip the price computation stage, in which the problem
+%               is re-solved for only the continuous variables, with all
+%               others being constrained to their solved values
+%           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
+%               value and primal variable relative match required to avoid
+%               mis-match warning message
+%           cplex_opt - options struct for CPLEX
 %           glpk_opt    - options struct for GLPK
-%           grb_opt     - options struct for GUROBI
-%           ipopt_opt   - options struct for IPOPT
+%           grb_opt   - options struct for GUROBI
+%           intlinprog_opt - options struct for INTLINPROG
 %           linprog_opt - options struct for LINPROG
-%           mips_opt    - options struct for QPS_MIPS
-%           mosek_opt   - options struct for MOSEK
-%           quadprog_opt - options struct for QUADPROG
+%           mosek_opt - options struct for MOSEK
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
-%           described above: H, c, A, l, u, xmin, xmax, x0, opt
+%           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
 %
 %   Outputs:
 %       X : solution vector
@@ -86,20 +85,21 @@ function [x, f, eflag, output, lambda] = qps_matpower(H, c, A, l, u, xmin, xmax,
 %
 %   Calling syntax options:
 %       [x, f, exitflag, output, lambda] = ...
-%           qps_matpower(H, c, A, l, u, xmin, xmax, x0, opt)
+%           miqps_master(H, c, A, l, u, xmin, xmax, x0, vtype, opt)
 %
-%       x = qps_matpower(H, c, A, l, u)
-%       x = qps_matpower(H, c, A, l, u, xmin, xmax)
-%       x = qps_matpower(H, c, A, l, u, xmin, xmax, x0)
-%       x = qps_matpower(H, c, A, l, u, xmin, xmax, x0, opt)
-%       x = qps_matpower(problem), where problem is a struct with fields:
-%                       H, c, A, l, u, xmin, xmax, x0, opt
+%       x = miqps_master(H, c, A, l, u)
+%       x = miqps_master(H, c, A, l, u, xmin, xmax)
+%       x = miqps_master(H, c, A, l, u, xmin, xmax, x0)
+%       x = miqps_master(H, c, A, l, u, xmin, xmax, x0, vtype)
+%       x = miqps_master(H, c, A, l, u, xmin, xmax, x0, vtype, opt)
+%       x = miqps_master(problem), where problem is a struct with fields:
+%                       H, c, A, l, u, xmin, xmax, x0, vtype, opt
 %                       all fields except 'c', 'A' and 'l' or 'u' are optional
-%       x = qps_matpower(...)
-%       [x, f] = qps_matpower(...)
-%       [x, f, exitflag] = qps_matpower(...)
-%       [x, f, exitflag, output] = qps_matpower(...)
-%       [x, f, exitflag, output, lambda] = qps_matpower(...)
+%       x = miqps_master(...)
+%       [x, f] = miqps_master(...)
+%       [x, f, exitflag] = miqps_master(...)
+%       [x, f, exitflag, output] = miqps_master(...)
+%       [x, f, exitflag, output, lambda] = miqps_master(...)
 %
 %   Example: (problem from from https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm)
 %       H = [   1003.1  4.3     6.3     5.9;
@@ -114,7 +114,7 @@ function [x, f, eflag, output, lambda] = qps_matpower(H, c, A, l, u, xmin, xmax,
 %       xmin = zeros(4,1);
 %       x0 = [1; 0; 0; 1];
 %       opt = struct('verbose', 2);
-%       [x, f, s, out, lambda] = qps_matpower(H, c, A, l, u, xmin, [], x0, opt);
+%       [x, f, s, out, lambda] = miqps_master(H, c, A, l, u, xmin, [], x0, vtype, opt);
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
@@ -129,6 +129,7 @@ function [x, f, eflag, output, lambda] = qps_matpower(H, c, A, l, u, xmin, xmax,
 if nargin == 1 && isstruct(H)       %% problem struct
     p = H;
     if isfield(p, 'opt'),   opt = p.opt;    else,   opt = [];   end
+    if isfield(p, 'vtype'), vtype = p.vtype;else,   vtype = []; end
     if isfield(p, 'x0'),    x0 = p.x0;      else,   x0 = [];    end
     if isfield(p, 'xmax'),  xmax = p.xmax;  else,   xmax = [];  end
     if isfield(p, 'xmin'),  xmin = p.xmin;  else,   xmin = [];  end
@@ -138,14 +139,17 @@ if nargin == 1 && isstruct(H)       %% problem struct
     if isfield(p, 'c'),     c = p.c;        else,   c = [];     end
     if isfield(p, 'H'),     H = p.H;        else,   H = [];     end
 else                                %% individual args
-    if nargin < 9
+    if nargin < 10
         opt = [];
-        if nargin < 8
-            x0 = [];
-            if nargin < 7
-                xmax = [];
-                if nargin < 6
-                    xmin = [];
+        if nargin < 9
+            vtype = [];
+            if nargin < 8
+                x0 = [];
+                if nargin < 7
+                    xmax = [];
+                    if nargin < 6
+                        xmin = [];
+                    end
                 end
             end
         end
@@ -160,18 +164,8 @@ if ~isempty(opt) && isfield(opt, 'alg') && ~isempty(opt.alg)
         switch alg
             case 0
                 alg = 'DEFAULT';
-            case 100
-                alg = 'BPMPD';
-            case 200
-                alg = 'MIPS';
-                opt.mips_opt.step_control = 0;
-            case 250
-                alg = 'MIPS';
-                opt.mips_opt.step_control = 1;
             case 300
                 alg = 'OT';
-            case 400
-                alg = 'IPOPT';
             case 500
                 alg = 'CPLEX';
             case 600
@@ -179,7 +173,7 @@ if ~isempty(opt) && isfield(opt, 'alg') && ~isempty(opt.alg)
             case 700
                 alg = 'GUROBI';
             otherwise
-                error('qps_matpower: %d is not a valid algorithm code', alg);
+                error('miqps_master: %d is not a valid algorithm code', alg);
         end
     end
 else
@@ -197,70 +191,36 @@ if strcmp(alg, 'DEFAULT')
         alg = 'CPLEX';
     elseif have_fcn('mosek')    %% if not, then MOSEK, if available
         alg = 'MOSEK';
-    elseif have_fcn('quadprog') && have_fcn('matlab')   %% if not, then Opt Tbx, if available in MATLAB
-        alg = 'OT';
-    elseif (isempty(H) || ~any(any(H))) && have_fcn('glpk') %% if not, and
-        alg = 'GLPK';           %% prob is LP (not QP), then GLPK, if available
-    elseif have_fcn('bpmpd')    %% if not, then BPMPD_MEX, if available
-        alg = 'BPMPD';
-    else                        %% otherwise MIPS
-        alg = 'MIPS';
+    elseif isempty(H) || ~any(any(H))   %% if not, and linear objective
+        if have_fcn('intlinprog')       %% then Optimization Tbx, if available
+            alg = 'OT';
+        elseif have_fcn('glpk')         %% if not, and then GLPK, if available
+            alg = 'GLPK';
+        end
+    else
+        error('miqps_master: no solvers available - requires CPLEX, Gurobi, MOSEK, INTLINPROG or GLPK');
     end
 end
 
 %%----- call the appropriate solver  -----
 switch alg
-    case 'BPMPD'                    %% use BPMPD_MEX
-        [x, f, eflag, output, lambda] = ...
-            qps_bpmpd(H, c, A, l, u, xmin, xmax, x0, opt);
-
-        if eflag == -99
-            if verbose
-                fprintf('         Retrying with QPS_MIPS solver ...\n\n');
-            end
-            %% save (incorrect) solution from BPMPD
-            bpmpd = struct('x', x, 'f', f, 'eflag', eflag, ...
-                            'output', output, 'lambda', lambda);
-            opt.alg = 'MIPS';
-            [x, f, eflag, output, lambda] = ...
-                qps_matpower(H, c, A, l, u, xmin, xmax, x0, opt);
-            output.bpmpd = bpmpd;
-        end
-    case 'CLP'
-        [x, f, eflag, output, lambda] = ...
-            qps_clp(H, c, A, l, u, xmin, xmax, x0, opt);
     case 'CPLEX'
         [x, f, eflag, output, lambda] = ...
-            qps_cplex(H, c, A, l, u, xmin, xmax, x0, opt);
+            miqps_cplex(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
     case 'GLPK'
         [x, f, eflag, output, lambda] = ...
-            qps_glpk(H, c, A, l, u, xmin, xmax, x0, opt);
+            miqps_glpk(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
     case 'GUROBI'
         [x, f, eflag, output, lambda] = ...
-            qps_gurobi(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'IPOPT'
-        [x, f, eflag, output, lambda] = ...
-            qps_ipopt(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'MIPS'
-        %% set up options
-        if ~isempty(opt) && isfield(opt, 'mips_opt') && ~isempty(opt.mips_opt)
-            mips_opt = opt.mips_opt;
-        else
-            mips_opt = [];
-        end
-        mips_opt.verbose = verbose;
-        
-        %% call solver
-        [x, f, eflag, output, lambda] = ...
-            qps_mips(H, c, A, l, u, xmin, xmax, x0, mips_opt);
+            miqps_gurobi(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
     case 'MOSEK'
         [x, f, eflag, output, lambda] = ...
-            qps_mosek(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'OT'                   %% use QUADPROG or LINPROG from Opt Tbx ver 2.x+
+            miqps_mosek(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+    case 'OT'
         [x, f, eflag, output, lambda] = ...
-            qps_ot(H, c, A, l, u, xmin, xmax, x0, opt);
+            miqps_ot(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
     otherwise
-        error('qps_matpower: ''%s'' is not a valid algorithm code', alg);
+        error('miqps_master: ''%s'' is not a valid algorithm code', alg);
 end
 if ~isfield(output, 'alg') || isempty(output.alg)
     output.alg = alg;

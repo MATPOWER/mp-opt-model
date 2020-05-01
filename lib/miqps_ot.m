@@ -103,7 +103,7 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = miqps_ot(H, c, A, l, u, xmin, [], x0, vtype, opt);
 %
-%   See also MIQPS_MATPOWER, INTLINPROG, QUADPROG, LINPROG.
+%   See also MIQPS_MASTER, INTLINPROG, QUADPROG, LINPROG.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

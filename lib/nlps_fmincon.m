@@ -144,7 +144,7 @@ function [x, f, eflag, output, lambda] = nlps_fmincon(f_fcn, x0, A, l, u, xmin, 
 %       );
 %       [x, f, exitflag, output, lambda] = nlps_fmincon(problem);
 %
-%   See also NLPS_MATPOWER, FMINCON.
+%   See also NLPS_MASTER, FMINCON.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

@@ -91,7 +91,7 @@ function [x, f, eflag, output, lambda] = qps_ot(H, c, A, l, u, xmin, xmax, x0, o
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = qps_ot(H, c, A, l, u, xmin, [], x0, opt);
 %
-%   See also QPS_MATPOWER, QUADPROG, LINPROG.
+%   See also QPS_MASTER, QUADPROG, LINPROG.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

@@ -52,9 +52,9 @@ of MATLAB or Octave, including setting up your MATLAB path.
   t_mips..................ok
   t_mips_pardiso..........ok
   t_qps_mips..............ok
-  t_qps_matpower..........ok (100 of 396 skipped)
-  t_miqps_matpower........ok (102 of 288 skipped)
-  t_nlps_matpower.........ok
+  t_qps_master............ok (100 of 396 skipped)
+  t_miqps_master..........ok (102 of 288 skipped)
+  t_nlps_master...........ok
   t_opt_model.............ok
   All tests successful (1759 passed, 202 skipped of 1961)
   Elapsed time 1.98 seconds.
@@ -85,7 +85,7 @@ functions and toolbox routines in MATLAB and Octave, you can type `help`
 followed by the name of a command or M-file to get help on that particular
 function. Many of the M-files in MP-Opt-Model have such documentation and this
 should be considered the main reference for the calling options for each
-function, e.g.: `qps_matpower`, `miqps_matpower`, and `nlps_matpower`.
+function, e.g.: `qps_master`, `miqps_master`, and `nlps_master`.
 
 
 [Citing MP-Opt-Model][10]

@@ -134,7 +134,7 @@ if have_mpopt
         otherwise
             if alg == 0     %% MATPOWER still interprets this to be 'default'
                             %% even for MOSEK 8, since the conic optimizer is
-                            %% not directly supported by mi/qps_matpower()
+                            %% not directly supported by mi/qps_master()
                 opt.MSK_IPAR_OPTIMIZER = sc.MSK_OPTIMIZER_FREE;
             else
                 error('mosek_options: %d is not a valid value for MSK_IPAR_OPTIMIZER', alg);

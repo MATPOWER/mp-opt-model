@@ -93,7 +93,7 @@ function [x, f, eflag, output, lambda] = qps_bpmpd(H, c, A, l, u, xmin, xmax, x0
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = qps_bpmpd(H, c, A, l, u, xmin, [], x0, opt);
 %
-%   See also QPS_MATPOWER, BPMPD_MEX, http://www.pserc.cornell.edu/bpmpd/.
+%   See also QPS_MASTER, BPMPD_MEX, http://www.pserc.cornell.edu/bpmpd/.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

@@ -103,7 +103,7 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = miqps_mosek(H, c, A, l, u, xmin, [], x0, vtype, opt);
 %
-%   See also MIQPS_MATPOWER, MOSEKOPT.
+%   See also MIQPS_MASTER, MOSEKOPT.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

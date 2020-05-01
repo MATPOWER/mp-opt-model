@@ -92,7 +92,7 @@ function [x, f, eflag, output, lambda] = qps_ipopt(H, c, A, l, u, xmin, xmax, x0
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = qps_ipopt(H, c, A, l, u, xmin, [], x0, opt);
 %
-%   See also QPS_MATPOWER, IPOPT, IPOPT_OPTIONS.
+%   See also QPS_MASTER, IPOPT, IPOPT_OPTIONS.
 %   https://github.com/coin-or/Ipopt.
 
 %   MP-Opt-Model

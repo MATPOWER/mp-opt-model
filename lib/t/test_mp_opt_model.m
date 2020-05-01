@@ -35,9 +35,9 @@ tests{end+1} = 't_have_fcn';
 tests{end+1} = 't_mips';
 tests{end+1} = 't_mips_pardiso';
 tests{end+1} = 't_qps_mips';
-tests{end+1} = 't_qps_matpower';
-tests{end+1} = 't_miqps_matpower';
-tests{end+1} = 't_nlps_matpower';
+tests{end+1} = 't_qps_master';
+tests{end+1} = 't_miqps_master';
+tests{end+1} = 't_nlps_master';
 tests{end+1} = 't_opt_model';
 
 %% run the tests

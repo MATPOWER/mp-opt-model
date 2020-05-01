@@ -144,7 +144,7 @@ function [x, f, eflag, output, lambda] = nlps_knitro(f_fcn, x0, A, l, u, xmin, x
 %       );
 %       [x, f, exitflag, output, lambda] = nlps_knitro(problem);
 %
-%   See also NLPS_MATPOWER, KNITROMATLAB.
+%   See also NLPS_MASTER, KNITROMATLAB.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
