@@ -4,7 +4,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %       MIQPS_MASTER(H, C, A, L, U, XMIN, XMAX, X0, VTYPE, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = MIQPS_MASTER(PROBLEM)
 %   A common wrapper function for various QP solvers. 
-%   Solves the following QP (quadratic programming) problem:
+%   Solves the following MIQP (quadratic programming) problem:
 %
 %       min 1/2 X'*H*X + C'*X
 %        X
@@ -13,6 +13,8 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %
 %       L <= A*X <= U       (linear constraints)
 %       XMIN <= X <= XMAX   (variable bounds)
+%       X(i) is integer, for i in I (integer variable constraints)
+%       X(b) is binary, for b in B (binary variable constraints)
 %
 %   Inputs (all optional except H, C, A and L):
 %       H : matrix (possibly sparse) of quadratic cost coefficients
@@ -101,20 +103,16 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %       [x, f, exitflag, output] = miqps_master(...)
 %       [x, f, exitflag, output, lambda] = miqps_master(...)
 %
-%   Example: (problem from from https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm)
-%       H = [   1003.1  4.3     6.3     5.9;
-%               4.3     2.2     2.1     3.9;
-%               6.3     2.1     3.5     4.8;
-%               5.9     3.9     4.8     10  ];
-%       c = zeros(4,1);
-%       A = [   1       1       1       1;
-%               0.17    0.11    0.10    0.18    ];
-%       l = [1; 0.10];
-%       u = [1; Inf];
-%       xmin = zeros(4,1);
-%       x0 = [1; 0; 0; 1];
+%   Example: (problem from from %% from MOSEK 6.0 Guided Tour, section  7.13.1
+%             https://docs.mosek.com/6.0/toolbox/node009.html)
+%       c = [-2; -3];
+%       A = sparse([195 273; 4 40]);
+%       u = [1365; 140];
+%       xmax = [4; Inf];
+%       vtype = 'I';
 %       opt = struct('verbose', 2);
-%       [x, f, s, out, lambda] = miqps_master(H, c, A, l, u, xmin, [], x0, vtype, opt);
+%       p = struct('c', c, 'A', A, 'u', u, 'xmax', xmax, 'vtype', vtype, 'opt', opt);
+%       [x, f, s, out, lam] = miqps_master(p);
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

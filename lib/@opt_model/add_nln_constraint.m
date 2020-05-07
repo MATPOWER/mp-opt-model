@@ -32,12 +32,13 @@ function om = add_nln_constraint(om, name, idx, N, iseq, fcn, hess, varsets)
 %
 %   For simple (not indexed) named sets, NAME can be a cell array of
 %   constraint set names, in which case N is a vector, specifying the number
-%   of constraints in each corresponding set. FCN and HESS are still single
-%   function handles for functions that compute the values for the entire
-%   collection of constraint sets together.
+%   of constraints in each corresponding set. FCN and HESS are each still
+%   a single function handle, but the values computed by each correspond
+%   to the entire stacked collection of constraint sets together, as if
+%   they were a single set.
 %
 %   Likewise, if FCN or HESS are empty, it also indicates a placeholder in
-%   the indexing for a constraint set whose implmentation is included in
+%   the indexing for a constraint set whose implementation is included in
 %   another constraint set. This functionality is only intended to be used
 %   internally to handle constraint/gradient and Hessian functions that
 %   compute the values for more than one constraint set simultaneously.

@@ -4,8 +4,8 @@ function varargout = get_idx(om, varargin)
 %   [VV, LL] = OM.GET_IDX()
 %   [VV, LL, NNE] = OM.GET_IDX()
 %   [VV, LL, NNE, NNI] = OM.GET_IDX()
-%   [VV, LL, NNE, NNI, QDC] = OM.GET_IDX()
-%   [VV, LL, NNE, NNI, QDC, NLC] = OM.GET_IDX()
+%   [VV, LL, NNE, NNI, QQ] = OM.GET_IDX()
+%   [VV, LL, NNE, NNI, QQ, NNC] = OM.GET_IDX()
 %
 %   Returns a structure for each with the beginning and ending
 %   index value and the number of elements for each named block.
@@ -27,12 +27,12 @@ function varargout = get_idx(om, varargin)
 %       SET_TYPE = 'lin'   => linear constraint set
 %       SET_TYPE = 'nle'   => nonlinear equality constraint set
 %       SET_TYPE = 'nli'   => nonlinear inequality constraint set
-%       SET_TYPE = 'nlc'   => nonlinear cost set
 %       SET_TYPE = 'qdc'   => quadratic cost set
+%       SET_TYPE = 'nnc'   => nonlinear cost set
 %
 %   Examples:
 %       [vv, ll, nne] = om.get_idx();
-%       [vv, ll, qdc] = om.get_idx('var', 'lin', 'qdc');
+%       [vv, ll, qq] = om.get_idx('var', 'lin', 'qdc');
 %
 %       For a variable block named 'z' we have ...
 %           vv.i1.z - starting index for 'z' in optimization vector x

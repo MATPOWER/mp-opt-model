@@ -40,7 +40,6 @@ classdef opt_model < mp_idx_manager
 %       params_quad_cost
 %       eval_nln_cost
 %       eval_quad_cost
-%       get_cost_params
 %
 %   Retreive user data in the model object:
 %       get_userdata
@@ -185,12 +184,12 @@ classdef opt_model < mp_idx_manager
 %   See https://matpower.org for more info.
 
     properties
-        var = [];
-        nle = [];
-        nli = [];
-        lin = [];
-        qdc = [];
-        nlc = [];
+        var = [];       %% variables
+        lin = [];       %% linear constraints
+        nle = [];       %% nonlinear equality constraints
+        nli = [];       %% nonlinear inequality constraints
+        qdc = [];       %% quadratic costs
+        nlc = [];       %% general nonlinear costs
     end     %% properties
 
     methods

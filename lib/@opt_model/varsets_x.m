@@ -7,7 +7,7 @@ function xx = varsets_x(om, x, vs, want_vector)
 %   the full optimization vector X, if VARSETS is empty.
 %
 %   If a 3rd argument is present (value is ignored) the returned value is
-%   a single numeric vector.
+%   a single numeric vector with the individual components stacked vertically.
 %
 %   See also VARSET_LEN
 

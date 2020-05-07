@@ -74,8 +74,6 @@ classdef mp_idx_manager < handle
 %       params_<SET-TYPE> - (must be implemented in the subclass)
 %           Returns set-type-specific data for a given type.
 %
-%       
-%
 %   The following is the structure of the data in the object, using a set
 %   type named 'var' for illustration. Each field of .idx or .data is a
 %   struct whose field names are the names of the corresponding blocks of
@@ -86,8 +84,8 @@ classdef mp_idx_manager < handle
 %   block of variables.
 %
 %   obj
-%       .var        - data for 'var' set type, e.g. optimization variable
-%                     sets that make up the full optimization variable x
+%       .var        - data for 'var' set type, e.g. variable sets that
+%                     make up the full optimization variable x
 %           .idx
 %               .i1 - starting index within x
 %               .iN - ending index within x
