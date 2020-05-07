@@ -2,7 +2,7 @@ function [v0, vl, vu, vt] = params_var(om, name, idx)
 %PARAMS_VAR  Returns initial value, lower bound and upper bound for opt variables.
 %   [V0, VL, VU] = OM.PARAMS_VAR()
 %   [V0, VL, VU] = OM.PARAMS_VAR(NAME)
-%   [V0, VL, VU] = OM.PARAMS_VAR(NAME, IDX)
+%   [V0, VL, VU] = OM.PARAMS_VAR(NAME, IDX_LIST)
 %   [V0, VL, VU, VT] = PARAMS_VAR(...)
 %   Returns the initial value V0, lower bound VL and upper bound VU for
 %   the full optimization variable vector, or for a specific named or named
@@ -11,8 +11,8 @@ function [v0, vl, vu, vt] = params_var(om, name, idx)
 %   integer and binary variables, respectively.
 %
 %   Examples:
-%       [x, xmin, xmax] = om.params_var();
-%       [Pg, Pmin, Pmax] = om.params_var('Pg');
+%       [x0, xmin, xmax] = om.params_var();
+%       [Pg0, Pmin, Pmax] = om.params_var('Pg');
 %       [zij0, zijmin, zijmax, ztype] = om.params_var('z', {i, j});
 %   
 %   See also OPT_MODEL.

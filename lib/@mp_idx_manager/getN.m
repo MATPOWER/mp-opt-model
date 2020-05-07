@@ -2,11 +2,11 @@ function N = getN(obj, set_type, name, idx)
 %GETN  Returns the number of elements of a given set type.
 %   N = OBJ.GETN(SET_TYPE)
 %   N = OBJ.GETN(SET_TYPE, NAME)
-%   N = OBJ.GETN(SET_TYPE, NAME, IDX)
+%   N = OBJ.GETN(SET_TYPE, NAME, IDX_LIST)
 %
 %   Returns either the total number of elements of a given set type
 %   (e.g. variable, constraint, etc.) or the number corresponding to a
-%   specified named block.
+%   specified named block, or indexed named set.
 %
 %   Examples:
 %       N = obj.getN('var')      : total number of variables
