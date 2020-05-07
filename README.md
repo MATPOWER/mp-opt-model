@@ -57,15 +57,122 @@ of MATLAB or Octave, including setting up your MATLAB path.
   t_nlps_master...........ok
   t_opt_model.............ok
   All tests successful (1759 passed, 202 skipped of 1961)
-  Elapsed time 1.98 seconds.
+  Elapsed time 1.66 seconds.
 ```
 
-Usage
------
+Sample Usage
+------------
 
 Until we get some time to write some documentation, there are examples in the
 test files in `<MPOM>/lib/t`, as well as in the [`opf_setup()`][12] and
 [`opf_execute()`][13] functions in [MATPOWER][2].
+
+Suppose we have the following constrained 4-dimensional quadratic
+programming (QP) problem with two 2-dimensional variables, _y_ and _z_,
+and two constraints, one equality and the other inequality, along with
+lower bounds on all of the variables.
+
+```
+  min  1/2 [y' z'] * Q * [y; z]
+  x,y
+  
+subject to:
+            A1 * [y; z] = b1
+      l2 <= A2 * [y; z]
+    ymin <= y
+    zmin <= z
+```
+
+And suppose the data for the problem is provided as follows.
+
+```matlab
+%% variable initial values
+y0 = [1; 0];
+z0 = [0; 1];
+
+%% variable lower bounds
+ymin = [0; 0];
+zmin = [0; 0];
+
+%% constraint data
+A1 = [ 1 1 1 1 ];               b1 = 1;
+A2 = [ 0.17 0.11 0.10 0.18 ];   l2 = 0.1;
+
+%% quadratic cost coefficients
+Q = [   1003.1 4.3 6.3 5.9;
+        4.3 2.2 2.1 3.9;
+        6.3 2.1 3.5 4.8;
+        5.9 3.9 4.8 10  ];
+```
+
+Below, we will show two approaches to construct and solve the problem.
+The first method, based on the the Optimization Model class `opt_model`,
+allows you to add variables, constraints and costs to the model
+individually. Then `opt_model` automatically assembles and solves the
+full model automatically.
+
+
+```matlab
+%%-----  METHOD 1  -----
+%% build model
+om = opt_model;
+om.add_var('y', 2, y0, ymin);
+om.add_var('z', 2, z0, zmin);
+om.add_lin_constraint('lincon1', A1, b1, b1, {'y', 'z'});
+om.add_lin_constraint('lincon2', A2, l2, [], {'y', 'z'});
+om.add_quad_cost('cost', Q, [], [], {'y', 'z'});
+
+%% solve model
+[x, f, exitflag, output, lambda] = om.solve();
+```
+
+The second method requires you to construct the parameters for the full
+problem manually, then call the solver function directly.
+
+```matlab
+%%-----  METHOD 2  -----
+%% assemble model parameters manually
+xmin = [ymin; zmin];
+x0 = [y0; z0];
+A = [ A1; A2 ];
+l = [ b1; l2 ];
+u = [ b1; Inf ];
+
+%% solve model
+[x, f, exitflag, output, lambda] = qps_master(Q, [], A, l, u, xmin, [], x0);
+```
+
+The above examples are included in `<MPOM>/lib/t/qp_ex1.m` along with
+some commands to print the results, yielding the output below for
+each approach:
+
+
+```matlab
+f = 1.09667   exitflag = 1
+
+x = 
+   0.0000
+   0.9333
+   0.0667
+   0.0000
+
+lambda.lower (var bound shadow price) =
+   2.2400
+   0.0000
+   0.0000
+   1.7667
+
+lambda.mu_l (constraint shadow price) =
+   2.1933
+   0.0000
+```
+
+An options struct can be passed to the `solve` method or the
+`qps_master` function to select a specific solver, control the level of
+progress output, or modify a solver's default parameters.
+
+Both approaches can be applied to each of the types of problems the
+MP-Opt-Model handles, namely, LP, QP, MILP, MIQP and NLP.
 
 
 Documentation
