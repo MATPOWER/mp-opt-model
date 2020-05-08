@@ -36,7 +36,7 @@ function [h, g, dh, dg] = nlp_consfcn(om, x, dhs, dgs)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 if nargout == 2     %% contraints only
     g = om.eval_nln_constraint(x, 1);       %% equalities

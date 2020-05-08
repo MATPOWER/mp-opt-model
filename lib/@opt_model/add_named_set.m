@@ -31,7 +31,7 @@ function om = add_named_set(om, set_type, name, idx, N, varargin)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% call parent method (also checks for valid type for named set)
 om = add_named_set@mp_idx_manager(om, set_type, name, idx, N, varargin{:});

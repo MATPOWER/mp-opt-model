@@ -14,12 +14,12 @@ function rv = mpomver(varargin)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 v = struct( 'Name',     'MP-Opt-Model', ... 
-            'Version',  '0.9', ...
+            'Version',  '1.0', ...
             'Release',  '', ...
-            'Date',     '07-May-2020' );
+            'Date',     '08-May-2020' );
 if nargout > 0
     if nargin > 0
         rv = v;

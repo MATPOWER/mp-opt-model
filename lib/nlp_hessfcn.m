@@ -31,7 +31,7 @@ function Lxx = nlp_hessfcn(om, x, lambda, cost_mult, Hs)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% ----- evaluate d2f -----
 [f, df, d2f] = nlp_costfcn(om, x);

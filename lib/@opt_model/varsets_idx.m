@@ -13,7 +13,7 @@ function kk = varsets_idx(om, vs)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 persistent sn;
 if isempty(vs)

@@ -33,7 +33,7 @@ function str = valid_named_set_type(obj, set_type)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 if isfield(obj.set_types, set_type)
     str = obj.set_types.(set_type);

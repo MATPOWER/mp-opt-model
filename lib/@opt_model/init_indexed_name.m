@@ -43,7 +43,7 @@ function om = init_indexed_name(om, set_type, name, dim_list)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% use column vector if single dimension
 if length(dim_list) == 1

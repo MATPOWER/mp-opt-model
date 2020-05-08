@@ -14,7 +14,7 @@ function TorF = is_mixed_integer(om)
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %   To do: Make this a property that gets set true whenever binary or
 %          integer vars are added to the problem.
