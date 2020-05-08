@@ -150,7 +150,7 @@
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{0.9}
+\newcommand{\mpomver}[0]{1.0}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
@@ -229,8 +229,8 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-%\date{June 20, 2019} % comment this line to display the current date
-%\date{December 14, 2011\thanks{Second revision. First revision was December 13, 2011}} % comment this line to display the current date
+\date{May 8, 2020} % comment this line to display the current date
+%\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
 \begin{document}
@@ -257,7 +257,8 @@ All Rights Reserved}
 
 \subsection{Background}
 
-\mpomlink{} is a package of \matlab{} language M-files\footnote{Also compatible with GNU Octave~\cite{octave}.} for constructing and solving mathematical optimization problems. It provides a unified interface for calling numerous LP, QP, mixed-integer and nonlinear solvers, as well as an object-oriented interface for building and solving your optimization model. The \mpom{} project page can be found at:
+\mpomlink{} is a package of \matlab{} language M-files\footnote{Also compatible with GNU Octave~\cite{octave}.} for constructing and solving mathematical optimization problems. It provides an easy-to-use, object-oriented interface for building and solving your optimization model. It also includes a unified interface for calling numerous LP, QP, mixed-integer and nonlinear solvers, with the ability to switch solvers by simply changing an input option.
+The \mpom{} project page can be found at:
 
 \bigskip
 
@@ -313,12 +314,12 @@ POSSIBILITY OF SUCH DAMAGE.
 \subsection{Citing \mpom{}}
 
 We request that publications derived from the use of \mpom{} explicitly acknowledge that fact by citing the \mpomname{} User's Manual~\cite{mpom_manual}.
-The citation and DOI can be version-specific or general, as appropriate. For version 0.9, use:
+The citation and DOI can be version-specific or general, as appropriate. For version 1.0, use:
 
 \begin{quote}
 \footnotesize
-R.~D. Zimmerman. \mpomname{} User's Manual, Verision 0.9. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-0.9.pdf}\\
-\doi{10.5281/zenodo.???????}
+R.~D. Zimmerman. \mpomname{} User's Manual, Verision 1.0. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-1.0.pdf}\\
+\doi{10.5281/zenodo.3818003}
 \end{quote}
 For a version non-specific citation, use the following citation and DOI,
 with \emph{\textless{}YEAR\textgreater{}} replaced by the year of the most recent release:
@@ -327,11 +328,11 @@ with \emph{\textless{}YEAR\textgreater{}} replaced by the year of the most recen
 \footnotesize
 R.~D. Zimmerman. \mpomname{} User's Manual. \emph{\textless{}YEAR\textgreater{}}.
 [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual.pdf}\\
-\doi{10.5281/zenodo.???????}
+\doi{10.5281/zenodo.3818002}
 \end{quote}
 A list of versions of the User's Manual with release dates and
 version-specific DOI's can be found via the general DOI at
-\url{https://doi.org/10.5281/zenodo.???????}.
+\url{https://doi.org/10.5281/zenodo.3818002}.
 
 \subsection{\mpom{} Development}
 \label{sec:development}
@@ -393,14 +394,14 @@ We will use \mpompath{} to denote the path to this directory.
 t_nested_struct_copy....ok
 t_have_fcn..............ok
 t_mips..................ok
-t_mips_pardiso..........ok
+t_mips_pardiso..........ok (60 of 60 skipped)
 t_qps_mips..............ok
 t_qps_master............ok (100 of 396 skipped)
 t_miqps_master..........ok (102 of 288 skipped)
 t_nlps_master...........ok
 t_opt_model.............ok
-All tests successful (1759 passed, 202 skipped of 1961)
-Elapsed time 1.66 seconds.
+All tests successful (1699 passed, 262 skipped of 1961)
+Elapsed time 1.51 seconds.
 \end{Code}
 \end{enumerate}
 
@@ -2535,18 +2536,18 @@ There is no User's Manual yet.
 \end{itemize}
 
 
-\subsection{Version 0.9 -- released May 8, 2020}
-\label{app:v09}
+\subsection{Version 1.0 -- released May 8, 2020}
+\label{app:v10}
 
 This is the first public release of \mpom{} as its own package.
-The \href{https://matpower.org/docs/MP-Opt-Model-manual-0.9.pdf}{\mpom{} 0.9 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-0.9.pdf}}
+The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.0.pdf}{\mpom{} 1.0 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-1.0.pdf}}
 
 \subsubsection*{New Documentation}
 \begin{itemize}
 \item Add \mpomman{} with \LaTeX{} source code included in \code{docs/src}.
 \end{itemize}
 
-\subsubsection*{Improvements}
+\subsubsection*{Other Improvements}
 \begin{itemize}
 \item Refactor \code{opt\_model} class to inherit from new abstract base class \code{mp\_idx\_manager} which can be used to manage the indexing of other sets of parameters, etc. in other contexts.
 \end{itemize}
@@ -2593,7 +2594,7 @@ The BSD 3-Clause License. [Online]. Available: \url{https://opensource.org/licen
 \bibitem{mpom_manual}
 R.~D. Zimmerman. \mpomname{} User's Manual. 2020.
 [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual.pdf}\\
-\doi{10.5281/zenodo.???????}
+\doi{10.5281/zenodo.3818002}
 
 \bibitem{wang2007a}
 H.~Wang, C.~E. Murillo-S{\'a}nchez, R.~D. Zimmerman, and R.~J. Thomas, ``On

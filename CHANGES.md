@@ -2,8 +2,11 @@ Change history for MP-Opt-Model
 ===============================
 
 
-Changes since 0.8
------------------
+Version 1.0 - *May 8, 2020*
+---------------------------
+
+#### 5/8/20
+  - Release 1.0.
 
 #### 5/7/20
   - Add MP-Opt-Model User's Manual in `docs`, with LaTeX source in
