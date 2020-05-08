@@ -9,7 +9,7 @@ for previous versions, see Appendix C of the [MP-Opt-Model User's
 Manual][2].
 
 #### New Documentation:
-  - Add the [MP-Opt-Model User's Manual][2] with \LaTeX{} source code
+  - Add the [MP-Opt-Model User's Manual][2] with LaTeX source code
     included in `docs/src`.
 
 #### Other Improvements:
