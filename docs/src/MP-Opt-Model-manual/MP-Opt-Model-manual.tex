@@ -2467,23 +2467,90 @@ When available, the \ot{} solvers can be used to solve general LP and QP problem
 The full release history can be found in \code{CHANGES.md} or \href{https://github.com/MATPOWER/mp-opt-model/blob/master/CHANGES.md}{online} at \url{https://github.com/MATPOWER/mp-opt-model/blob/master/CHANGES.md}.
 
 
+\subsection{Version 0.7 -- Jun 20, 2019}
+\label{app:v07}
+
+This release history begins with the code that was part of the \matpower{} 7.0 release.
+
 \subsection{Version 0.8 -- Apr 29, 2020 \emph{(not released publicly)}}
 \label{app:v08}
 
 This version consists of functionality moved directly from \matpowerlink{}.\footnote{From the current \code{master} branch in the \href{\matpowergithuburl}{\matpower{} GitHub repository} at the time.}
 There is no User's Manual yet.
 
+\subsubsection*{New Features}
+\begin{itemize}
+\item New unified interface \code{nlps\_master()} for nonlinear programming solvers \mipslink{}, \code{fmincon}, \ipopt{} and \knitro{}.
+\item New functions:
+    \begin{itemize}
+    \item \code{mpopt2nlpopt()} creates an options struct for \code{nlps\_master()} from at \matpower{} options struct.
+    \item \code{nlps\_fmincon()} provides implementation of unified nonlinear programming solver interface for \code{fmincon}.
+    \item \code{nlps\_ipopt()} provides implementation of unified nonlinear programming solver interface interface for \ipopt{}.
+    \item \code{nlps\_knitro()} provides implementation of unified nonlinear programming solver interface interface for \ipopt{}.
+    \item \code{nlps\_master()} provides a single wrapper function for calling any of \matpower{}'s nonlinear programming solvers.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection*{Other Improvements}
+\begin{itemize}
+\item Significant performance improvement for some problems when constructing sparse matrices for linear constraints or quadratic costs.
+\emph{Thanks to Daniel Muldrew.}
+\item Significant performance improvement for CPLEX on small problems by     eliminating call to \code{cplexoptimset()}, which was a huge bottleneck.
+\item Add four new methods to \code{opt\_model} class:
+    \begin{itemize}
+    \item \code{copy()} -- works around issues with inheritance in constructors that was preventing copy constructor from working in Octave 5.2 and earlier (see also \url{https://savannah.gnu.org/bugs/?52614})
+    \item \code{is\_mixed\_integer()} -- returns true if the model includes any binary or integer variables
+    \item \code{problem\_type()} -- returns one of the following strings, based on
+      the characteristics of the variables, costs and constraints in the
+      model:
+      \begin{itemize}
+      \item{\codeq{LP}} -- linear program
+      \item{\codeq{QP}} -- quadratic program
+      \item{\codeq{NLP}} -- nonlinear program
+      \item{\codeq{MILP}} -- mixed-integer linear program
+      \item{\codeq{MIQP}} -- mixed-integer quadratic program
+      \item{\codeq{MINLP}} -- mixed-integer nonlinear program
+      \end{itemize}
+    \item \code{solve()} - solves the model using \code{qps\_master()}, \code{miqps\_master()}, or \code{nlps\_master()}, depending on the problem type (\codeq{MINLP} problems are not yet implemented)
+    \end{itemize}
+\end{itemize}
+
+% \pagebreak
+\subsubsection*{Bugs Fixed}
+\begin{itemize}
+\item Artelys Knitro 12.1 compatibility fix.
+\item Fix CPLEX 12.10 compatibility issue \#90.
+\item Fix issue with missing objective function value from \code{miqps\_mosek()} and \code{qps\_mosek()} when return status is ``Stalled at or near optimal solution.''
+\item Fix bug orginally in \code{ktropf\_solver()} (code now moved to \code{nlps\_knitro()}) where Artelys Knitro was still using \code{fmincon} options.
+\end{itemize}
+
+\subsubsection*{Incompatible Changes}
+\begin{itemize}
+\item \mpom{} has renamed the following functions and modified the order of their input args so that the \mpom{} object appears first. Ideally, these would be defined as methods of the \code{opt\_model} class, but Octave 4.2 and earlier is not able to find them via a function handle (as used in the \code{solve()} method) if they are inherited by a sub-class.
+    \begin{itemize}
+    \item \code{opf\_consfcn()} $\rightarrow$ \code{nlp\_consfcn()}
+    \item \code{opf\_costfcn()} $\rightarrow$ \code{nlp\_costfcn()}
+    \item \code{opf\_hessfcn()} $\rightarrow$ \code{nlp\_hessfcn()}
+    \end{itemize}
+\end{itemize}
+
 
 \subsection{Version 0.9 -- released May 8, 2020}
 \label{app:v09}
 
+This is the first public release of \mpom{} as its own package.
 The \href{https://matpower.org/docs/MP-Opt-Model-manual-0.9.pdf}{\mpom{} 0.9 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-0.9.pdf}}
 
-\subsubsection*{Changes}
+\subsubsection*{New Documentation}
 \begin{itemize}
-\item Refactor \code{opt\_model} class to use new abstract \code{mp\_idx\_manager} class which can be used to manage the indexing of other sets of parameters, etc. in other contexts.
 \item Add \mpomman{} with \LaTeX{} source code included in \code{docs/src}.
 \end{itemize}
+
+\subsubsection*{Improvements}
+\begin{itemize}
+\item Refactor \code{opt\_model} class to inherit from new abstract base class \code{mp\_idx\_manager} which can be used to manage the indexing of other sets of parameters, etc. in other contexts.
+\end{itemize}
+
 
 % \subsubsection*{New Features}
 % \begin{itemize}
