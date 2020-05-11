@@ -50,15 +50,12 @@ of MATLAB or Octave, including setting up your MATLAB path.
   >> test_mp_opt_model
   t_nested_struct_copy....ok
   t_have_fcn..............ok
-  t_mips..................ok
-  t_mips_pardiso..........ok (60 of 60 skipped)
-  t_qps_mips..............ok
   t_qps_master............ok (100 of 396 skipped)
   t_miqps_master..........ok (102 of 288 skipped)
   t_nlps_master...........ok
   t_opt_model.............ok
-  All tests successful (1699 passed, 262 skipped of 1961)
-  Elapsed time 1.51 seconds.
+  All tests successful (1567 passed, 202 skipped of 1769)
+  Elapsed time 1.42 seconds.
 ```
 
 Sample Usage

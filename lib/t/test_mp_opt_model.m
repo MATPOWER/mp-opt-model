@@ -32,9 +32,6 @@ tests = {};
 %% MATPOWER base test
 tests{end+1} = 't_nested_struct_copy';
 tests{end+1} = 't_have_fcn';
-tests{end+1} = 't_mips';
-tests{end+1} = 't_mips_pardiso';
-tests{end+1} = 't_qps_mips';
 tests{end+1} = 't_qps_master';
 tests{end+1} = 't_miqps_master';
 tests{end+1} = 't_nlps_master';
