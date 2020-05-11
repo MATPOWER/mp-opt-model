@@ -46,7 +46,7 @@ of MATLAB or Octave, including setting up your MATLAB path.
     verify that MP-Opt-Model is properly installed and functioning. (Note: The
     tests require functioning installations of both [MP-Test][5] and
     [MIPS][6]) The result should resemble the following:
-```matlab
+```
   >> test_mp_opt_model
   t_nested_struct_copy....ok
   t_have_fcn..............ok
