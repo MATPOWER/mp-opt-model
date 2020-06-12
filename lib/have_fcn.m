@@ -10,7 +10,7 @@ function rv = have_fcn(tag, rtype)
 %   HAVE_FCN('all', 'clear_cache')
 %
 %   Returns availability, version and release information for optional
-%   MATPOWER functionality. All information is cached, and the cached values
+%   functionality. All information is cached, and the cached values
 %   returned on subsequent calls. If the functionality exists, an attempt is
 %   made to determine the release date and version number. The second
 %   argument defines which value is returned, as follows:

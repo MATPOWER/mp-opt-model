@@ -1,5 +1,5 @@
 function [x, f, eflag, output, lambda] = nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt)
-%NLPS_MASTER  Nonlinear programming (NLP) Solver for MATPOWER.
+%NLPS_MASTER  Nonlinear programming (NLP) Solver wrapper function.
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
 %       NLPS_MASTER(F_FCN, X0, A, L, U, XMIN, XMAX, GH_FCN, HESS_FCN, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = NLPS_MASTER(PROBLEM)

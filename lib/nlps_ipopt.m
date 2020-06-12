@@ -3,7 +3,7 @@ function [x, f, eflag, output, lambda] = nlps_ipopt(f_fcn, x0, A, l, u, xmin, xm
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
 %       NLPS_IPOPT(F_FCN, X0, A, L, U, XMIN, XMAX, GH_FCN, HESS_FCN, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = NLPS_IPOPT(PROBLEM)
-%   A wrapper function providing a MATPOWER standardized interface for using
+%   A wrapper function providing a standardized interface for using
 %   IPOPT to solve the following NLP (nonlinear programming) problem:
 %
 %   Minimize a function F(X) beginning from a starting point X0, subject to

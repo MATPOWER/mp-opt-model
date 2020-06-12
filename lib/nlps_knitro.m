@@ -3,7 +3,7 @@ function [x, f, eflag, output, lambda] = nlps_knitro(f_fcn, x0, A, l, u, xmin, x
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
 %       NLPS_KNITRO(F_FCN, X0, A, L, U, XMIN, XMAX, GH_FCN, HESS_FCN, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = NLPS_KNITRO(PROBLEM)
-%   A wrapper function providing a MATPOWER standardized interface for using
+%   A wrapper function providing a standardized interface for using
 %   Artelys Knitro to solve the following NLP (nonlinear programming) problem:
 %
 %   Minimize a function F(X) beginning from a starting point X0, subject to

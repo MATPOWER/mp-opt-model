@@ -3,7 +3,7 @@ function [x, f, eflag, output, lambda] = nlps_fmincon(f_fcn, x0, A, l, u, xmin, 
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
 %       NLPS_FMINCON(F_FCN, X0, A, L, U, XMIN, XMAX, GH_FCN, HESS_FCN, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = NLPS_FMINCON(PROBLEM)
-%   A wrapper function providing a MATPOWER standardized interface for using
+%   A wrapper function providing a standardized interface for using
 %   FMINCON from the Optimization Toolbox to solve the following NLP
 %   (nonlinear programming) problem:
 %
