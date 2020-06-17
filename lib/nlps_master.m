@@ -145,6 +145,8 @@ function [x, f, eflag, output, lambda] = nlps_master(f_fcn, x0, A, l, u, xmin, x
 %           'opt',      struct('verbose', 2) ...
 %       );
 %       [x, f, exitflag, output, lambda] = nlps_master(problem);
+%
+%   See also MIPS, NLPS_FMINCON, NLPS_IPOPT, NLPS_KNITRO.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)

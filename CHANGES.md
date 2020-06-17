@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 Since Version 1.0
 -----------------
 
+#### 6/17/20
+  - Add `nleqs_master()` function as unified interface for solving
+    nonlinear equations, including implementations for `fsolve` and
+    Newton's method in functions `nleqs_fsolve()` and `nleqs_newton()`,
+    respectively.
+
 #### 6/16/20
   - Add new `'fsolve'` tag to `have_fcn()` to check for availability of
     `fsolve()` function.

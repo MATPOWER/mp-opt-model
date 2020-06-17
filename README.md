@@ -61,10 +61,6 @@ of MATLAB or Octave, including setting up your MATLAB path.
 Sample Usage
 ------------
 
-Until we get some time to write some documentation, there are examples in the
-test files in `<MPOM>/lib/t`, as well as in the [`opf_setup()`][12] and
-[`opf_execute()`][13] functions in [MATPOWER][2].
-
 Suppose we have the following constrained 4-dimensional quadratic
 programming (QP) problem with two 2-dimensional variables, _y_ and _z_,
 and two constraints, one equality and the other inequality, along with
@@ -169,8 +165,11 @@ An options struct can be passed to the `solve` method or the
 `qps_master` function to select a specific solver, control the level of
 progress output, or modify a solver's default parameters.
 
-Both approaches can be applied to each of the types of problems the
-MP-Opt-Model handles, namely, LP, QP, MILP, MIQP and NLP.
+Both approaches can be applied to each of the types of problems that
+MP-Opt-Model handles, namely, LP, QP, MILP, MIQP, NLP and nonlinear equations.
+
+There are also examples in the test files in `<MPOM>/lib/t`, as well as in
+the [`opf_setup()`][12] and [`opf_execute()`][13] functions in [MATPOWER][2].
 
 
 Documentation

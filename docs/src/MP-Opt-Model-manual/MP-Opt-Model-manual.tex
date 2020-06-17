@@ -150,7 +150,7 @@
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{1.0}
+\newcommand{\mpomver}[0]{1.1-dev}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
@@ -494,7 +494,7 @@ lambda.mu_l (constraint shadow price) =
    0.0000
 \end{Code}
 
-Both approaches can be applied to each of the types of problems the \mpom{} handles, namely, LP, QP, MILP, MIQP and NLP.
+Both approaches can be applied to each of the types of problems that \mpom{} handles, namely, LP, QP, MILP, MIQP, NLP and nonlinear equations.
 
 An options struct can be passed to the \code{solve} method or the \code{qps\_master} function to select a specific solver, control the level of
 progress output, or modify a solver's default parameters.
@@ -519,6 +519,7 @@ The first part consists of interfaces to various numerical optimization solvers 
 \item linear (LP) and quadratic (QP) programming problems
 \item mixed-integer linear (MILP) and quadratic (MIQP) programming problems
 \item nonlinear programming problems (NLP)
+\item nonlinear nonlinear equations (NLEQ)
 \end{itemize}
 
 The second part consists of an optimization model class designed to help the user construct an optimization problem by adding variables, constraints and costs, then solve the problem and extract the solution in terms of the individual sets of variables, constraints and costs provided.
@@ -1003,7 +1004,7 @@ name & default & description \\
 \end{threeparttable}
 \end{table}
 
-The \code{nlps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{mips}, \code{nlps\_fmincon}, \code{nlps\_ipopt}, and \code{nlps\_knitro}. Each of these functions has an interface identical to that of \code{qps\_master}, with the exception of the options struct for \code{mips}, which is a simple \mips{} options struct.
+The \code{nlps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{mips}, \code{nlps\_fmincon}, \code{nlps\_ipopt}, and \code{nlps\_knitro}. Each of these functions has an interface identical to that of \code{nlps\_master}, with the exception of the options struct for \code{mips}, which is a simple \mips{} options struct.
 
 \subsubsection{NLP Example 1}
 \label{sec:nlp_ex1}
@@ -1166,6 +1167,237 @@ lambda.ineqnonlin =
 
 
 This example can be found in \code{nlps\_master\_ex2.m}. More example problems for \code{nlps\_master} can be found in \code{t\_nlps\_master.m}, both in \mpompath{lib/t}.
+
+
+
+
+% \clearpage
+\subsection{Nonlinear Equation Solvers -- {\tt nleqs\_master}}
+\label{sec:nleqs_master}
+
+The \code{nleqs\_master} function provides a common \textbf{\underline{n}}on\textbf{\underline{l}}inear \textbf{\underline{eq}}uation \textbf{\underline{s}}olver interface for general nonlinear equations (NLEQ), that is, problems of the form:
+\begin{equation}
+f(x) = 0 \label{eq:nleq}
+\end{equation}
+where $f \colon \R^n \to \R^n$.
+
+This function can be used to solve the problem with any of the available solvers by calling it as follows,
+\begin{Code}
+[x, f, exitflag, output, jac] = nleqs_master(fcn, x0, opt);
+\end{Code}
+where the input and output arguments are described in Tables~\ref{tab:nleqs_master_input} and \ref{tab:nleqs_master_output}, respectively. Alternatively, the input arguments can be packaged as fields in a \code{problem} struct and passed in as a single argument, where the \code{opt} field is optional.
+\begin{Code}
+[x, f, exitflag, output, jac] = nleqs_master(problem);
+\end{Code}
+The calling syntax for \code{nleqs\_master} is identical to that used by \code{fsolve} from the \matlab{} \ot{}.
+
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Input Arguments for \code{nleqs\_master}}
+\label{tab:nleqs_master_input}
+\footnotesize
+\begin{tabular}{lp{0.85\textwidth}}
+\toprule
+name & description \\
+\midrule
+\code{fcn}	& Handle to a function that evaluates the function $f(x)$ and its Jacobian $J(x)$ for a given value of $x$. Calling syntax for this function:	\\
+&~~~~\code{[f, J] = fcn(x)}	\\
+\code{x0}	& Starting value of vector $x$.	\\
+\code{opt}\tnote{\dag}	& Options structure with fields, all of which are also optional, described in Table~\ref{tab:nleqs_master_options}. \\
+\code{problem}	& Alternative, single argument input struct with fields corresponding to arguments above.	\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {Optional.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Output Arguments for \code{nleqs\_master}\tnote{\dag}}
+\label{tab:nleqs_master_output}
+\footnotesize
+\begin{tabular}{lp{0.8\textwidth}}
+\toprule
+name & description \\
+\midrule
+\code{x}	& solution vector	\\
+\code{f}	& final function value, $f(x)$	\\
+\code{exitflag}	& exit flag	\\
+& \begin{tabular}{r @{ -- } l}
+1 & converged successfully \\
+$\le 0$ & solver-specific failure code \\
+\end{tabular}	\\
+\code{output}	& output struct with the following fields:	\\
+& \begin{tabular}{r @{ -- } l}
+alg & algorithm code of solver used \\
+\emph{(others)} & solver-specific fields \\
+\end{tabular}	\\
+\code{jac}	& final value of Jacobian matrix	\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {All output arguments are optional.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Options for \code{nleqs\_master}}
+\label{tab:nleqs_master_options}
+\footnotesize
+\begin{tabular}{lcp{0.62\textwidth}}
+\toprule
+name & default & description \\
+\midrule
+\code{alg}	& \codeq{DEFAULT}	& determines which solver to use \\
+&& \begin{tabular}{c @{ -- } p{0.5\textwidth}}
+\codeq{DEFAULT} & automatic, current default is \codeq{NEWTON} \\
+\codeq{NEWTON} & Newton's method \\
+\codeq{FSOLVE} & \matlab{} Opt Toolbox, \code{fsolve}\tnote{*} \\
+\end{tabular}	\\
+\code{verbose}	& 1	& amount of progress info to be printed \\
+&& \begin{tabular}{r @{ -- } l}
+0 & print no progress info \\
+1 & print a little progress info \\
+2 & print a lot of progress info \\
+\end{tabular}	\\
+\code{mips\_opt}	& \emph{empty}	& options struct for \mips{} \\
+\code{fmincon\_opt}	& \emph{empty}	& options struct for \code{fmincon}\tnote{*} \\
+\code{ipopt\_opt}	& \emph{empty}	& options struct for \ipopt{}\tnote{*} \\
+\code{knitro\_opt}	& \emph{empty}	& options struct for \knitro{}\tnote{*} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {The \code{fsolve()} function is included with GNU Octave, but on \matlab{} it is part of the \matlab{} \ot{}. See Appendix~\ref{app:optional_packages} for more information on the \matlab{} \ot{}.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The \code{nleqs\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{nleqs\_fsolve} and \code{nleqs\_newton}. Each of these functions has an interface identical to that of \code{nleqs\_master}.
+
+\subsubsection{NLEQ Example}
+\label{sec:nleq_ex}
+
+The following code, included as \code{nleqs\_master\_ex1.m} in \mpompath{lib/t}, shows a simple example of using \code{nleqs\_master} to solve a 2-dimensional nonlinear function\footnote{\url{https://www.chilimath.com/lessons/advanced-algebra/systems-non-linear-equations/}}
+\begin{equation}
+f(x) = \left[\begin{array}{c}x_1 + x_2 -1 \\ -x_1^2 + x_2 + 5\end{array}\right]
+\end{equation}
+
+First, create a function that will evaluate the function and its Jacobian for a given value of $x$.
+\begin{Code}
+function [f, J] = f1(x)
+f = [  x(1)   + x(2) - 1;
+      -x(1)^2 + x(2) + 5    ];
+if nargout > 1
+    J = [1 1; -2*x(1) 1];
+end
+\end{Code}
+Then, call the \code{nleqs\_master} function with a handle to that function and a starting value for $x$.
+\begin{Code}
+>> x = nleqs_master(@f1, [0;0])
+
+x =
+
+    2.0000
+   -1.0000
+\end{Code}
+
+Or, alternatively, create a \code{problem} struct with a handle to the function, a starting value for $x$ and an option to print the solver's progress. Then, pass this struct to \code{nleqs\_master} to solve the problem and print some of the return values to get the output below.
+\begin{Code}
+function nleqs_master_ex1(alg)
+if nargin < 1
+    alg = 'DEFAULT';
+end
+problem = struct( ...
+    'fcn',  @f1, ...
+    'x0',   [0; 0], ...
+    'opt',  struct('verbose', 2, 'alg', alg) ...
+);
+[x, f, exitflag, output, jac] = nleqs_master(problem);
+fprintf('\nexitflag = %d\n', exitflag);
+fprintf('\nx = \n');
+fprintf('   %2g\n', x);
+fprintf('\nf = \n');
+fprintf('   %12g\n', f);
+fprintf('\njac =\n');
+fprintf('   %2g  %2g\n', jac');
+\end{Code}
+\begin{Code}
+>> nleqs_master_ex1
+
+ it     max residual
+----  ----------------
+  0      5.000e+00
+  1      3.600e+01
+  2      7.669e+00
+  3      1.056e+00
+  4      3.818e-02
+  5      5.795e-05
+  6      1.343e-10
+Newton's method converged in 6 iterations.
+
+exitflag = 1
+
+x = 
+    2
+   -1
+
+f = 
+    2.22045e-16
+   -1.34308e-10
+
+jac =
+    1   1
+   -4   1
+\end{Code}
+To use a different solver such as \code{fsolve}, assuming it is available, simply specify it in the \code{alg} option.
+\begin{Code}
+>> nleqs_master_ex1('FSOLVE')
+
+                                         Norm of      First-order   Trust-region
+ Iteration  Func-count     f(x)          step         optimality    radius
+     0          1              26                             4               1
+     1          2         18.7537              1           3.65               1
+     2          3         9.28396            2.5           12.9             2.5
+     3          4          0.0148        1.30162          0.493             2.5
+     4          5     3.37211e-07      0.0340793        0.00232            3.25
+     5          6     1.81904e-16    0.000164239       5.39e-08            3.25
+
+Equation solved.
+
+fsolve completed because the vector of function values is near zero
+as measured by the value of the function tolerance, and
+the problem appears regular as measured by the gradient.
+
+
+exitflag = 1
+
+x = 
+    2
+   -1
+
+f = 
+              0
+   -1.34872e-08
+
+jac =
+    1   1
+   -4   1
+\end{Code}
 
 
 %%------------------------------------------
@@ -2173,7 +2405,7 @@ name & description \\
 %\renewcommand{\arraystretch}{1.2}
 \centering
 \begin{threeparttable}
-\caption{LP, QP \& NLP Solver Functions}
+\caption{Solver Functions}
 \label{tab:solvers}
 \footnotesize
 \begin{tabular}{p{0.15\textwidth}p{0.78\textwidth}}
@@ -2196,6 +2428,9 @@ name & description \\
 \code{mosek\_symbcon}	& symbolic constants to use for \mosek{} solver options\tnote{\dag}	\\
 \code{mpopt2nlopt}	& create \code{nlps\_master} options struct from \matpower{} options struct	\\
 \code{mpopt2qpopt}	& create \code{mi/qps\_master} options struct from \matpower{} options struct	\\
+\code{nleqs\_master}	& Nonlinear Equation Solver wrapper function, provides a unified interface for various nonlinear equation (NLEQ) solvers	\\
+\code{nleqs\_fsolve}	& NLEQ solver API implementation for \code{fsolve}	\\
+\code{nleqs\_newton}	& NLEQ solver API implementation for Newton's method solver	\\
 \code{nlps\_master}	& Nonlinear Program Solver wrapper function, provides a unified interface for various NLP solvers	\\
 \code{nlps\_fmincon}	& NLP solver API implementation for \matlab{} Opt Toolbox's \code{fmincon}	\\
 \code{nlps\_ipopt}	& NLP solver API implementation for \ipopt{}-based solver\tnote{\dag}	\\
@@ -2338,6 +2573,7 @@ name & description \\
 name & description \\
 \midrule
 \code{lib/t/}	& \mpom{} examples \& tests	\\
+\code{~~nleqs\_master\_ex1}	& code for NLEQ Example (see Section~\ref{sec:nleq_ex}) for \code{nleqs\_master}	\\
 \code{~~nlps\_master\_ex1}	& code for NLP Example 1 (see Section~\ref{sec:nlp_ex1}) for \code{nlps\_master}	\\
 \code{~~nlps\_master\_ex2}	& code for NLP Example 2 (see Section~\ref{sec:nlp_ex2}) for \code{nlps\_master}	\\
 \code{~~qp\_ex1}	& code for QP example from Section~\ref{sec:usage}	\\
@@ -2345,6 +2581,7 @@ name & description \\
 \code{~~t\_have\_fcn}	& runs tests for \code{have\_fcn}	\\
 \code{~~t\_miqps\_master}	& runs tests for \code{miqps\_master}	\\
 \code{~~t\_nested\_struct\_copy}	& runs tests for \code{nested\_struct\_copy}	\\
+\code{~~t\_nleqs\_master}	& runs tests for \code{nleqs\_master}	\\
 \code{~~t\_nlps\_master}	& runs tests for \code{nlps\_master}	\\
 \code{~~t\_opt\_model}	& runs tests for \code{opt\_model} objects	\\
 \code{~~t\_qps\_master}	& runs tests for \code{qps\_master}	\\
@@ -2444,17 +2681,17 @@ Although \mosek{} is a commercial package, at the time of this writing there is 
 
 When the \matlab{} interface to \mosek{} is installed, it can be used to solve general LP and QP problems via \matpower{}'s common QP solver interface \code{qps\_master}, or MILP and MIQP problems via \code{miqps\_master}, with the algorithm option set to \codeq{MOSEK}, or by calling \code{qps\_mosek} or \code{miqps\_mosek} directly.
 
-\subsection{\ot{} -- LP, QP, NLP and MILP Solvers}
+\subsection{\ot{} -- LP, QP, NLP, NLEQ and MILP Solvers}
 \label{app:ot}
 
 \matlab{}'s \ot{}~\cite{ot, otug}, available from The MathWorks, provides a number of high-performance solvers that \matpower{} can take advantage of.
 
-It includes \code{fmincon} for nonlinear programming problems (NLP), and \code{linprog} and \code{quadprog} for linear programming (LP) and quadratic programming (QP) problems, respectively.
+It includes \code{fsolve} for nonlinear equations (NLEQ), \code{fmincon} for nonlinear programming problems (NLP), and \code{linprog} and \code{quadprog} for linear programming (LP) and quadratic programming (QP) problems, respectively.
 For mixed-integer linear programs (MILP), it provides \code{intlingprog}.
 Each solver implements a number of different solution algorithms.
 More information is available from The MathWorks, Inc. at \url{https://www.mathworks.com/}.
 
-When available, the \ot{} solvers can be used to solve general LP and QP problems via \matpower{}'s common QP solver interface \code{qps\_master}, or MILP problems via \code{miqps\_master}, with the algorithm option set to \codeq{OT}, or by calling \code{qps\_ot} or \code{miqps\_ot} directly. It can also be used to solve general NLP problems via \mpom{}'s common NLP solver interface \code{nlps\_master} with the algorithm option set to \codeq{FMINCON}, or by calling \code{nlps\_fmincon} directly.
+When available, the \ot{} solvers can be used to solve general LP and QP problems via \matpower{}'s common QP solver interface \code{qps\_master}, or MILP problems via \code{miqps\_master}, with the algorithm option set to \codeq{OT}, or by calling \code{qps\_ot} or \code{miqps\_ot} directly. It can be to solve general NLP problems via \mpom{}'s common NLP solver interface \code{nlps\_master} with the algorithm option set to \codeq{FMINCON}, or by calling \code{nlps\_fmincon} directly. It can also be used to solve general NLEQ problems via \mpom{}'s common NLEQ solver interface \code{nleqs\_master} with the algorithm option set to \codeq{FSOLVE}, or by calling \code{nleqs\_fsolve} directly.
 
 
 %%------------------------------------------
@@ -2557,6 +2794,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
+\item Add \code{nleqs\_master()} function as unified interface for solving nonlinear equations, including implementations for \code{fsolve} and Newton's method in functions \code{nleqs\_fsolve()} and \code{nleqs\_newton()}, respectively.
 \item Add new \codeq{fsolve} tag to \code{have\_fcn()} to check for availability of \code{fsolve()} function.
 \end{itemize}
 
@@ -2568,7 +2806,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 
 \subsubsection*{Other Changes}
 \begin{itemize}
-\item Removed redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
+\item Remove redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
 \end{itemize}
 
 \end{appendices}
