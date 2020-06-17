@@ -46,6 +46,7 @@ function rv = have_fcn(tag, rtype)
 %       e4st        - E4ST (https://e4st.com/)
 %       fmincon     - FMINCON, solver from Optimization Toolbox 2.x +
 %       fmincon_ipm - FMINCON with Interior Point solver, from Opt Tbx 4.x +
+%       fsolve      - FSOLVE, nonlinear equation solver from Opt Toolbox
 %       glpk        - GLPK, GNU Linear Programming Kit
 %       gurobi      - GUROBI, Gurobi solver (https://www.gurobi.com/), 5.x +
 %       intlinprog  - INTLINPROG, MILP solver from Optimization
@@ -276,6 +277,8 @@ elseif action == 'D'        %% detect availability
                             end
                     end
                 end
+            case 'fsolve'
+                TorF = exist('fsolve', 'file') == 2;
             case 'glpk'
                 if exist('glpk','file') == 3    %% Windows OPTI install (no glpk.m)
                     TorF = 1;

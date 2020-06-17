@@ -2,6 +2,17 @@ Change history for MP-Opt-Model
 ===============================
 
 
+Since Version 1.0
+-----------------
+
+#### 6/16/20
+  - Add new `'fsolve'` tag to `have_fcn()` to check for availability of
+    `fsolve()` function.
+
+#### 5/11/20
+  - Remove redundant MIPS tests from `test_mp_opt_model`.
+
+
 Version 1.0 - *May 8, 2020*
 ---------------------------
 
