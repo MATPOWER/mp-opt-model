@@ -2592,6 +2592,10 @@ name & description \\
 \code{~~t\_nested\_struct\_copy}	& runs tests for \code{nested\_struct\_copy}	\\
 \code{~~t\_nleqs\_master}	& runs tests of NLEQ solvers via \code{nleqs\_master}	\\
 \code{~~t\_nlps\_master}	& runs tests of NLP solvers via\code{nlps\_master}	\\
+\code{~~t\_om\_solve\_miqps}	& runs tests of MILP/MIQP solvers via \code{om.solve()}	\\
+\code{~~t\_om\_solve\_nleqs}	& runs tests of NLEQ solvers via \code{om.solve()}	\\
+\code{~~t\_om\_solve\_nlps}	& runs tests of NLP solvers via \code{om.solve()}	\\
+\code{~~t\_om\_solve\_qps}	& runs tests of LP/QP solvers via \code{om.solve()}	\\
 \code{~~t\_opt\_model}	& runs tests for \code{opt\_model} objects	\\
 \code{~~t\_qps\_master}	& runs tests of LP/QP solvers via\code{qps\_master}	\\
 \bottomrule
@@ -2817,6 +2821,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 \subsubsection*{Other Changes}
 \begin{itemize}
 \item Remove redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
+\item Add tests for solving LP/QP, MILP/MIQP, NLP and NLEQ problems via \code{opt\_model/solve()}.
 \end{itemize}
 
 \end{appendices}

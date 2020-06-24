@@ -10,6 +10,8 @@ Since Version 1.0
     problems with only nonlinear equality constraints and no costs, the
     `problem_type()` method returns `'NLEQ'` and the `solve()` method
     calls `nleqs_master()` to solve the problem.
+  - Add tests for solving LP/QP, MILP/MIQP, NLP and NLEQ problems via
+    `opt_model/solve()`.
 
 #### 6/17/20
   - Add `nleqs_master()` function as unified interface for solving
