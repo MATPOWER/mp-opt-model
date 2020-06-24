@@ -156,6 +156,7 @@ if verbose > 1
 end
 if normF < tol
     eflag = 1;
+    msg = sprintf('Newton''s method converged in %d iterations.', i);
     if verbose > 1
         fprintf('\nConverged!\n');
     end
