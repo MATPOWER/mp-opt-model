@@ -892,8 +892,7 @@ where the input and output arguments are described in Tables~\ref{tab:nlps_maste
 \begin{Code}
 [x, f, exitflag, output, lambda] = nlps_master(problem);
 \end{Code}
-The calling syntax for \code{nlps\_master} is nearly identical to that of \mipslink{} and very similar to that used by \code{fmincon} from the \matlab{} \ot{}. The primary difference from \code{fmincon} is that the linear constraints are specified in terms of a single doubly-bounded linear function ($l \le A x \le u$) as opposed to separate equality constrained ($A_{eq} x = b_{eq}$) and upper bounded ($A x \le b$) functions. The functions for evaluating the objective function, constraints and Hessian are identical.
-
+The calling syntax for \code{nlps\_master} is nearly identical to that of \mipslink{} and very similar to that used by \code{fmincon} from the \matlab{} \ot{}. The primary difference from \code{fmincon} is that the linear constraints are specified in terms of a single doubly-bounded linear function ($l \le A x \le u$) as opposed to separate equality constrained ($A_{eq} x = b_{eq}$) and upper bounded ($A x \le b$) functions.
 
 \begin{table}[!ht]
 %\renewcommand{\arraystretch}{1.2}
@@ -913,6 +912,7 @@ name & description \\
 \code{xmin}, \code{xmax}	& Optional lower and upper bounds on the $x$ variables, defaults are \code{-Inf} and \code{Inf}, respectively.	\\
 \code{gh\_fcn}	& Handle to function that evaluates the optional nonlinear constraints and their gradients for a given value of $x$. Calling syntax for this function is:	\\
 &~~~~\code{[h, g, dh, dg] = gh\_fcn(x)}	\\
+& where the columns of \code{dh} and \code{dg} are the gradients of the corresponding elements of \code{h} and \code{g}, i.e. \code{dh} and \code{dg} are transposes of the Jacobians of \code{h} and \code{g}, respectively.	\\
 \code{hess\_fcn}	& Handle to function that computes the Hessian\tnote{\ddag} of the Lagrangian for given values of $x$, $\lambda$ and $\mu$, where $\lambda$ and $\mu$ are the multipliers on the equality and inequality constraints, $g$ and $h$, respectively. The calling syntax for this function is:	\\
 &~~~~\code{Lxx = hess\_fcn(x, lam, cost\_mult)},	\\
 &where $\lambda$ = \code{lam.eqnonlin}, $\mu$ = \code{lam.ineqnonlin} and \code{cost\_mult} is a parameter used to scale the objective function	\\
@@ -1003,6 +1003,14 @@ name & default & description \\
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
+
+The user-defined functions for evaluating the objective function, constraints and Hessian are identical to those required by \mipslink{}j. That is, they identical to those required by \code{fmincon}, with one exception described below for the Hessian evaluation function. Specifically, \code{f\_fcn} should return \code{f} as the scalar objective function value $f(x)$, \code{df} as an $n \times 1$ vector equal to $\nabla f$ and, unless \code{gh\_fcn} is provided and the Hessian is computed by \code{hess\_fcn}, \code{d2f} as an $n \times n$ matrix equal to the Hessian $\der{^2f}{x^2}$. Similarly, the constraint evaluation function \code{gh\_fcn} must return the $m \times 1$ vector of nonlinear equality constraint violations $g(x)$, the $p \times 1$ vector of nonlinear inequality constraint violations $h(x)$ along with their gradients in \code{dg} and \code{dh}. Here \code{dg} is an $n \times m$ matrix whose $j^\mathrm{th}$ column is $\nabla g_j$ and \code{dh} is $n \times p$, with $j^\mathrm{th}$ column equal to $\nabla h_j$. Finally, for cases with nonlinear constraints, \code{hess\_fcn} returns the $n \times n$ Hessian $\der{^2\mathcal{L}}{x^2}$ of the Lagrangian function
+\begin{equation}
+\mathcal{L}(x, \lambda, \mu, \sigma) = \sigma f(x) + \trans{\lambda} g(x) + \trans{\mu} h(x)
+\end{equation}
+for given values of the multipliers $\lambda$ and $\mu$, where $\sigma$ is the \code{cost\_mult} scale factor for the objective function. Unlike \code{fmincon}, some solvers, such as \code{mips}, pass this scale factor to the Hessian evaluation function in the 3\textsuperscript{rd} input argument.
+
+The use of \code{nargout} in \code{f\_fcn} and \code{gh\_fcn} is recommended so that the gradients and Hessian are only computed when required.
 
 The \code{nlps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{mips}, \code{nlps\_fmincon}, \code{nlps\_ipopt}, and \code{nlps\_knitro}. Each of these functions has an interface identical to that of \code{nlps\_master}, with the exception of the options struct for \code{mips}, which is a simple \mips{} options struct.
 
