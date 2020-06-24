@@ -94,8 +94,6 @@ for k = 1:length(algs)
         om.add_quad_cost('c', [], c);
         om.add_lin_constraint('Ax', A, [], u);
         [x, f, s, out, lam] = om.solve(opt);
-%         p = struct('c', c, 'A', A, 'u', u, 'xmax', xmax, 'vtype', vtype, 'opt', opt);
-%         [x, f, s, out, lam] = miqps_master(p);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4; 2], 12, [t 'x']);
         t_is(lam.mu_l, [0; 0], 12, [t 'lam.mu_l']);
@@ -127,9 +125,6 @@ for k = 1:length(algs)
             om.add_quad_cost('c', H, c);
             om.add_lin_constraint('Ax', A, l, u);
             [x, f, s, out, lam] = om.solve(opt);
-%             p = struct('H', H, 'c', c, 'A', A, 'l', l, 'u', u, ...
-%                 'xmin', xmin, 'xmax', xmax, 'vtype', vtype, 'opt', opt);
-%             [x, f, s, out, lam] = miqps_master(p);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [7; 7; 0; 2], 7, [t 'x']);
             t_is(lam.mu_l, [466; 0; 0], 6, [t 'lam.mu_l']);

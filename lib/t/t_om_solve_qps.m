@@ -103,7 +103,6 @@ for k = 1:length(algs)
         om.add_quad_cost('c', [], c);
         om.add_lin_constraint('Ax', A, l, u);
         [x, f, s, out, lam] = om.solve(opt);
-%         [x, f, s, out, lam] = qps_master([], c, A, l, u, xmin, [], [], opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [0; 15; 3], 6, [t 'x']);
         t_is(f, -78, 6, [t 'f']);
@@ -126,7 +125,6 @@ for k = 1:length(algs)
             om.add_var('x', 3, x0);
             om.add_quad_cost('c', H, c);
             [x, f, s, out, lam] = om.solve(opt);
-%             [x, f, s, out, lam] = qps_master(H, c, [], [], [], [], [], [], opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [3; 5; 7], 8, [t 'x']);
             t_is(f, -249, 13, [t 'f']);
@@ -152,7 +150,6 @@ for k = 1:length(algs)
             om.add_quad_cost('c', H, c);
             om.add_lin_constraint('Ax', A, l, u);
             [x, f, s, out, lam] = om.solve(opt);
-%             [x, f, s, out, lam] = qps_master(H, c, A, l, u, xmin, [], x0, opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [2; 4]/3, 7, [t 'x']);
             t_is(f, -74/9, 6, [t 'f']);
@@ -183,7 +180,6 @@ for k = 1:length(algs)
             om.add_quad_cost('c', H, c);
             om.add_lin_constraint('Ax', A, l, u);
             [x, f, s, out, lam] = om.solve(opt);
-%             [x, f, s, out, lam] = qps_master(H, c, A, l, u, xmin, [], x0, opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [0; 2.8; 0.2; 0]/3, 5, [t 'x']);
             t_is(f, 3.29/3, 6, [t 'f']);

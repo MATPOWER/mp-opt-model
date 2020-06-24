@@ -57,7 +57,6 @@ om = opt_model;
 om.add_var('x', 2, x0);
 om.add_nln_constraint('f', 2, 1, @f1, []);
 [x, f, e, out, J] = om.solve(opt);
-% [x, f, e, out, J] = nleqs_master(@f1, x0, opt);
 t_is(e, 1, 12, [t 'success']);
 t_is(x, [-3; 4], 8, [t 'x']);
 t_is(f, 0, 10, [t 'f']);
@@ -65,7 +64,6 @@ t_is(f, 0, 10, [t 'f']);
 t = sprintf('%s - 2-d function (max_it) : ', name);
 opt.max_it = 3;
 [x, f, e, out] = om.solve(opt);
-% [x, f, e, out] = nleqs_master(p);
 t_is(e, 0, 12, [t 'no success']);
 t_ok(out.iterations == 3 || out.iterations == 4, [t 'iterations']);
 
