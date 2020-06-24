@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 Since Version 1.0
 -----------------
 
+#### 6/24/20
+  - Add support for nonlinear equations (NLEQ) to `opt_model`. For
+    problems with only nonlinear equality constraints and no costs, the
+    `problem_type()` method returns `'NLEQ'` and the `solve()` method
+    calls `nleqs_master()` to solve the problem.
+
 #### 6/17/20
   - Add `nleqs_master()` function as unified interface for solving
     nonlinear equations, including implementations for `fsolve` and

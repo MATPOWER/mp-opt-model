@@ -1413,7 +1413,7 @@ jac =
 \section{Optimization Model Class -- {\tt opt\_model}}
 \label{sec:opt_model}
 
-The \code{opt\_model} class provides facilities for constructing an optimization problem by adding and managing the indexing of sets of variables, constraints and costs. The model can then be solved by simply calling the \code{solve} method which automatically selects and calls the appropriate master solver function, i.e. \code{qps\_master}, \code{miqps\_master} or  \code{nlps\_master}, depending on the type of problem.
+The \code{opt\_model} class provides facilities for constructing an optimization problem by adding and managing the indexing of sets of variables, constraints and costs. The model can then be solved by simply calling the \code{solve} method which automatically selects and calls the appropriate master solver function, i.e. \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, or \code{nleqs\_master}, depending on the type of problem.
 
 In this manual, and in the code, \code{om} is the name of the variable used by convention for the optimization model object, which is typically created by calling the constructor \code{opt\_model} with no arguments.
 
@@ -1668,7 +1668,7 @@ See Section~\ref{sec:indexed_sets} for details on indexed named sets and the \co
 [x, f, exitflag, output, lambda] = om.solve(opt)
 \end{Code}
 
-After all variables, constraints and costs have been added to the model, the optimization problem can be solved simply by calling the \code{solve} method. This method automatically selects and calls, depending on the problem type, one of the master solver interface functions from Section~\ref{sec:master_solvers}, namely \code{qps\_master}, \code{miqps\_master}, or \code{nlps\_master}.
+After all variables, constraints and costs have been added to the model, the optimization problem can be solved simply by calling the \code{solve} method. This method automatically selects and calls, depending on the problem type, one of the master solver interface functions from Section~\ref{sec:master_solvers}, namely \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, or \code{nleqs\_master}. Note, the nonlinear equation solver \code{nleqs\_master} is chosen, rather than the NLP solver \code{nlps\_master} if the problem is nonlinear, but has only equality constraints, with no costs or inequality constraints defined.
 
 For details on the return values and the input options struct \code{opt}, see the descriptions of the individual solver functions in Sections~\ref{sec:qps_master}, \ref{sec:miqps_master}, and \ref{sec:nlps_master}.
 
@@ -2055,6 +2055,7 @@ Returns a string identifying the type of mathematical program represented by the
 \item \codeq{LP} – linear program
 \item \codeq{QP} – quadratic program
 \item \codeq{NLP} – nonlinear program
+\item \codeq{NLEQ} – nonlinear equation
 \item \codeq{MILP} – mixed-integer linear program
 \item \codeq{MIQP} – mixed-integer quadratic program
 \item \codeq{MINLP} – mixed-integer nonlinear program\footnote{\mpom{} does not yet implement solving MINLP problems.}
@@ -2802,8 +2803,9 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item Add \code{nleqs\_master()} function as unified interface for solving nonlinear equations, including implementations for \code{fsolve} and Newton's method in functions \code{nleqs\_fsolve()} and \code{nleqs\_newton()}, respectively.
 \item Add new \codeq{fsolve} tag to \code{have\_fcn()} to check for availability of \code{fsolve()} function.
+\item Add \code{nleqs\_master()} function as unified interface for solving nonlinear equations, including implementations for \code{fsolve} and Newton's method in functions \code{nleqs\_fsolve()} and \code{nleqs\_newton()}, respectively.
+\item Add support for nonlinear equations (NLEQ) to \code{opt\_model}. For problems with only nonlinear equality constraints and no costs, the \code{problem\_type()} method returns \codeq{NLEQ} and the \code{solve()} method calls \code{nleqs\_master()} to solve the problem.
 \end{itemize}
 
 % \subsubsection*{Bugs Fixed}
