@@ -1,5 +1,5 @@
 function t_nleqs_master(quiet)
-%T_NLEQS_MASTER  Tests of NLP solvers.
+%T_NLEQS_MASTER  Tests of NLEQ solvers via NLEQS_MASTER().
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
@@ -52,7 +52,8 @@ for k = 1:length(cfg)
         end
 
 t = sprintf('%s - 2-d function : ', name);
-[x, f, e, out, J] = nleqs_master(@f1, [-1;0], opt);
+x0 = [-1;0];
+[x, f, e, out, J] = nleqs_master(@f1, x0, opt);
 t_is(e, 1, 12, [t 'success']);
 t_is(x, [-3; 4], 8, [t 'x']);
 t_is(f, 0, 10, [t 'f']);

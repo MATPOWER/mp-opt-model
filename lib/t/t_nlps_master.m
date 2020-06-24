@@ -1,5 +1,5 @@
 function t_nlps_master(quiet)
-%T_NLPS_MASTER  Tests of NLP solvers.
+%T_NLPS_MASTER  Tests of NLP solvers via NLPS_MASTER().
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
@@ -246,14 +246,19 @@ function [f, df, d2f] = f5(x)
     d2f = zeros(2,2);
 
 function [h, g, dh, dg] = gh5(x)
-    h = [ -1 -1; 1 1] * x.^2 + [1; -2];
-    dh = 2 * [-x(1) x(1); -x(2) x(2)];
+    [h, dh] = h5(x);
+    dh = dh';
     g = []; dg = [];
 
-function Lxx = hess5(x, lam, cost_mult)
-    mu = lam.ineqnonlin;
-    Lxx = 2*[-1 1]*mu*eye(2);
+function [h, dh] = h5(x)
+    h = [ -1 -1; 1 1] * x.^2 + [1; -2];
+    dh = 2 * [-x(1) -x(2); x(1) x(2)];
 
+function Lxx = hess5(x, lam, cost_mult)
+    Lxx = hess5a(x, lam.ineqnonlin);
+
+function Lxx = hess5a(x, mu)
+    Lxx = 2*[-1 1]*mu*eye(2);
 
 %% constrained 3-d nonlinear
 %% from https://en.wikipedia.org/wiki/Nonlinear_programming#3-dimensional_example
@@ -263,15 +268,20 @@ function [f, df, d2f] = f6(x)
     d2f = -[0 1 0; 1 0 1; 0 1 0];
 
 function [h, g, dh, dg] = gh6(x)
-    h = [ 1 -1 1; 1 1 1] * x.^2 + [-2; -10];
-    dh = 2 * [x(1) x(1); -x(2) x(2); x(3) x(3)];
+    [h, dh] = h6(x);
+    dh = dh';
     g = []; dg = [];
+
+function [h, dh] = h6(x)
+    h = [ 1 -1 1; 1 1 1] * x.^2 + [-2; -10];
+    dh = 2 * [x(1) -x(2) x(3); x(1) x(2) x(3)];
 
 function Lxx = hess6(x, lam, cost_mult)
     if nargin < 3, cost_mult = 1; end
-    mu = lam.ineqnonlin;
-    Lxx = cost_mult * [0 -1 0; -1 0 -1; 0 -1 0] + ...
-            [2*[1 1]*mu 0 0; 0 2*[-1 1]*mu 0; 0 0 2*[1 1]*mu];
+    Lxx = cost_mult * [0 -1 0; -1 0 -1; 0 -1 0] + hess6a(x, lam.ineqnonlin);
+
+function d2h = hess6a(x, mu)
+    d2h = [2*[1 1]*mu 0 0; 0 2*[-1 1]*mu 0; 0 0 2*[1 1]*mu];
 
 
 %% constrained 4-d nonlinear
@@ -289,18 +299,29 @@ function [f, df, d2f] = f7(x)
         ]);
 
 function [h, g, dh, dg] = gh7(x)
+    [g, dg] = g7(x);
+    [h, dh] = h7(x);
+    dg = dg';
+    dh = dh';
+
+function [g, dg] = g7(x)
     g = sum(x.^2) - 40;
+    dg = 2*x';
+
+function [h, dh] = h7(x)
     h = -prod(x) + 25;
-    dg = 2*x;
-    dh = -prod(x)./x;
+    dh = -(prod(x)./x)';
 
 function Lxx = hess7(x, lam, sigma)
     if nargin < 3, sigma = 1; end
-    lambda = lam.eqnonlin;
-    mu     = lam.ineqnonlin;
     [f, df, d2f] = f7(x);
-    Lxx = sigma * d2f + lambda*2*speye(4) - ...
-       mu*sparse([      0     x(3)*x(4) x(2)*x(4) x(2)*x(3);
-                    x(3)*x(4)     0     x(1)*x(4) x(1)*x(3);
-                    x(2)*x(4) x(1)*x(4)     0     x(1)*x(2);
-                    x(2)*x(3) x(1)*x(3) x(1)*x(2)     0  ]);
+    Lxx = sigma * d2f + hess7g(x, lam.eqnonlin) + hess7h(x, lam.ineqnonlin);
+
+function d2g = hess7g(x, lam)
+    d2g = lam*2*speye(4);
+
+function d2h = hess7h(x, mu)
+    d2h = -mu*sparse([      0     x(3)*x(4) x(2)*x(4) x(2)*x(3);
+                        x(3)*x(4)     0     x(1)*x(4) x(1)*x(3);
+                        x(2)*x(4) x(1)*x(4)     0     x(1)*x(2);
+                        x(2)*x(3) x(1)*x(3) x(1)*x(2)     0  ]);

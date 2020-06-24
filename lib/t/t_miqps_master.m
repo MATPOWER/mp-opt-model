@@ -1,5 +1,5 @@
 function t_miqps_master(quiet)
-%T_MIQPS_MASTER  Tests of MIQPS_MASTER MIQP solvers.
+%T_MIQPS_MASTER  Tests of MILP/MIQP solvers via MIQPS_MASTER().
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
@@ -17,6 +17,9 @@ algs = {'DEFAULT', 'CPLEX', 'MOSEK', 'GUROBI', 'GLPK', 'OT'};
 names = {'DEFAULT', 'CPLEX', 'MOSEK', 'Gurobi', 'glpk', 'intlin/lin/quadprog'};
 check = {[], 'cplex', 'mosek', 'gurobi', 'glpk', 'intlinprog'};
 does_qp = [0 1 1 1 0 0];
+if have_fcn('gurobi') || have_fcn('cplex') || have_fcn('mosek')
+    does_qp(1) = 1;
+end
 
 n = 48;
 nqp = 28;
