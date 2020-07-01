@@ -2343,7 +2343,17 @@ The \code{nested\_struct\_copy} function copies values from a source struct \cod
 
 \subsection{\matpower{}-related Functions}
 
-The following two functions are related specifically to \matpowerlink{}, and are used for extracting relevant solver options from a \matpower{} options struct.
+The following three functions are related specifically to \matpowerlink{}, and are used for extracting relevant solver options from a \matpower{} options struct.
+
+\subsubsection{\tt mpopt2nleqopt}
+\begin{Code}
+  nleqopt = mpopt2nleqopt(mpopt)
+  nleqopt = mpopt2nleqopt(mpopt, model)
+  nleqopt = mpopt2nleqopt(mpopt, model, alg)
+\end{Code}
+
+The \code{mpopt2nleqopt} function returns an options struct suitable for \code{nleqs\_master} or one of the solver specific equivalents. It is constructed from the relevant portions of \code{mpopt}, a \matpower{} options struct. The final \code{alg} argument allows the solver to be set explicitly (in \code{nleqopt.alg}). By default this value is set to \codeq{DEFAULT}, which currently selects Newton's method.
+
 
 \subsubsection{\tt mpopt2nlpopt}
 \begin{Code}
@@ -2435,8 +2445,6 @@ name & description \\
 \code{miqps\_ot}	& QP/MILP solver API implementation for \matlab{} Opt Toolbox's \code{intlinprog}, \code{quadprog}, \code{linprog}	\\
 \code{mosek\_options}	& default options for \mosek{} solver\tnote{\dag}	\\
 \code{mosek\_symbcon}	& symbolic constants to use for \mosek{} solver options\tnote{\dag}	\\
-\code{mpopt2nlopt}	& create \code{nlps\_master} options struct from \matpower{} options struct	\\
-\code{mpopt2qpopt}	& create \code{mi/qps\_master} options struct from \matpower{} options struct	\\
 \code{nleqs\_master}	& Nonlinear Equation Solver wrapper function, provides a unified interface for various nonlinear equation (NLEQ) solvers	\\
 \code{nleqs\_fsolve}	& NLEQ solver API implementation for \code{fsolve}	\\
 \code{nleqs\_newton}	& NLEQ solver API implementation for Newton's method solver	\\
@@ -2564,6 +2572,9 @@ name & description \\
 \midrule
 \code{have\_fcn}	& checks for availability of optional functionality	\\
 \code{mpomver}	& prints version information for \mpom{}	\\
+\code{mpopt2nleqopt}	& create/modify \code{nleqs\_master} options struct from \matpower{} options struct	\\
+\code{mpopt2nlpopt}	& create/modify \code{nlps\_master} options struct from \matpower{} options struct	\\
+\code{mpopt2qpopt}	& create/modify \code{mi/qps\_master} options struct from \matpower{} options struct	\\
 \code{nested\_struct\_copy}	& copies the contents of nested structs	\\
 \bottomrule
 \end{tabular}
@@ -2731,7 +2742,7 @@ There is no User's Manual yet.
 \item New unified interface \code{nlps\_master()} for nonlinear programming solvers \mipslink{}, \code{fmincon}, \ipopt{} and \knitro{}.
 \item New functions:
     \begin{itemize}
-    \item \code{mpopt2nlpopt()} creates an options struct for \code{nlps\_master()} from at \matpower{} options struct.
+    \item \code{mpopt2nlpopt()} creates or modifies an options struct for \code{nlps\_master()} from a \matpower{} options struct.
     \item \code{nlps\_fmincon()} provides implementation of unified nonlinear programming solver interface for \code{fmincon}.
     \item \code{nlps\_ipopt()} provides implementation of unified nonlinear programming solver interface interface for \ipopt{}.
     \item \code{nlps\_knitro()} provides implementation of unified nonlinear programming solver interface interface for \ipopt{}.
@@ -2810,6 +2821,13 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 \item Add new \codeq{fsolve} tag to \code{have\_fcn()} to check for availability of \code{fsolve()} function.
 \item Add \code{nleqs\_master()} function as unified interface for solving nonlinear equations, including implementations for \code{fsolve} and Newton's method in functions \code{nleqs\_fsolve()} and \code{nleqs\_newton()}, respectively.
 \item Add support for nonlinear equations (NLEQ) to \code{opt\_model}. For problems with only nonlinear equality constraints and no costs, the \code{problem\_type()} method returns \codeq{NLEQ} and the \code{solve()} method calls \code{nleqs\_master()} to solve the problem.
+\item New functions:
+    \begin{itemize}
+    \item \code{mpopt2nleqopt()} creates or modifies an options struct for \code{nleqs\_master()} from a \matpower{} options struct.
+    \item \code{nleqs\_fsolve()} provides implementation of unified nonlinear equation solver interface for \code{fsolve}.
+    \item \code{nleqs\_master()} provides a single wrapper function for calling any of \matpower{}'s nonlinear equation solvers.
+    \item \code{nleqs\_newton()} provides implementation of Newton's method solver with a unified nonlinear equation solver interface.
+    \end{itemize}
 \end{itemize}
 
 % \subsubsection*{Bugs Fixed}
