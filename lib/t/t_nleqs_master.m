@@ -28,7 +28,7 @@ else    %% octave
     cfg = {
         {'DEFAULT', 'default',  []          []  },
         {'NEWTON',  'Newton',   [],         []  },
-        {'FSOLVE',  'fsolve', 'fsolve',   []  },
+        {'FSOLVE',  'fsolve', 'fsolve',     struct('TolX', 1e-11)  },
     };
 end
 
@@ -44,7 +44,7 @@ for k = 1:length(cfg)
     if ~isempty(check) && ~have_fcn(check)
         t_skip(n, sprintf('%s not installed', name));
     else
-        opt = struct('verbose', 0, 'alg', alg, 'tol', 1e-10);
+        opt = struct('verbose', 0, 'alg', alg, 'tol', 1e-11);
         switch alg
             case {'DEFAULT', 'NEWTON'}
             case 'FSOLVE'
