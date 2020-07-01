@@ -8,6 +8,7 @@ Since Version 1.0
 #### 7/1/20
   - Add `mpopt2nleqopt()` to create or modify an `nleqs_master()`
     options struct from a MATPOWER options struct.
+  - Add table of valid `have_fcn()` input tags to User's Manual.
 
 #### 6/24/20
   - Add support for nonlinear equations (NLEQ) to `opt_model`. For

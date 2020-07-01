@@ -155,6 +155,14 @@
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
 \newcommand{\mostver}[0]{1.0.2}
+\newcommand{\syngrid}[0]{{SynGrid}}
+\newcommand{\syngridver}[0]{1.0.1}
+\newcommand{\syngridurl}[0]{https://github.com/MATPOWER/mx-syngrid}
+\newcommand{\syngridlink}[0]{\href{\syngridurl}{\syngrid{}}}
+\newcommand{\east}[0]{E4ST}
+\newcommand{\eastver}[0]{1.0b2}
+\newcommand{\easturl}[0]{http://www.e4st.com/}
+\newcommand{\eastlink}[0]{\href{\easturl}{\east}}
 \newcommand{\md}[0]{{\most{} Data struct}}
 \newcommand{\powerweb}[0]{{\sc PowerWeb}}
 \newcommand{\pserc}[0]{{\sc PSerc}}
@@ -2322,6 +2330,72 @@ Alternatively, the optional functionality specified by \code{tag} can be toggled
 \item{$-1$} -- toggle the ON/OFF state of the optional functionality
 \end{itemize}
 
+The valid values of the \code{tag} string input argument are listed in Table~\ref{tab:have_fcn_tags}.
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Valid Tag Values for \code{have\_fcn}}
+\label{tab:have_fcn_tags}
+\footnotesize
+% \begin{tabular}{p{0.17\textwidth}p{0.76\textwidth}}
+\begin{tabular}{ll}
+\toprule
+tag value & description \\
+\midrule
+\code{~~bpmpd}	& \code{bp}, BPMPD interior point LP/QP solver	\\
+\code{~~clp}	& \clp{}, LP/QP solver, \url{https://github.com/coin-or/Clp}	\\
+\code{~~~~opti\_clp}	& version of \clp{} distributed with OPTI Toolbox,	\\
+& ~~~~\url{https://www.inverseproblem.co.nz/OPTI/}	\\
+\code{~~cplex}	& \cplex{}, IBM ILOG CPLEX Optimizer	\\
+\code{~~fmincon}	& \code{fmincon}, solver from \ot{}	\\
+\code{~~~~fmincon\_ipm}	& \code{fmincon} with interior point solver from \ot{} 4.x+	\\
+\code{~~fsolve}	& \code{fsolve}, nonlinear equation solver from \ot{}	\\
+\code{~~glpk}	& \code{glpk}, GNU Linear Programming Kit, LP/MILP solver	\\
+\code{~~gurobi}	& \code{gurobi}, Gurobi solver, \url{https://www.gurobi.com/}	\\
+\code{~~intlinprog}	& \code{intlinprog}, MILP solver from \ot{} 7.0 (R2014a)+	\\
+\code{~~ipopt}	& \ipopt{}, NLP solver, \url{https://github.com/coin-or/Ipopt}	\\
+\code{~~knitro}	& \knitro{}, NLP solver, \url{https://www.artelys.com/solvers/knitro/}	\\
+\code{~~~~knitromatlab}	& \knitro{}, version 9.0.0+ 	\\
+\code{~~~~ktrlink}	& Knitro, version prior to 9.0.0 (requires \ot{})	\\
+\code{~~linprog}	& \code{linprog}, LP solver from \ot{}
+	\\
+\code{~~~~linprog\_ds}	& \code{linprog} w/dual-simplex solver from \ot{} 7.1 (R2014b)+	\\
+\code{~~matlab}	& \matlab{}, as opposed to Octave	\\
+\code{~~mosek}	& \mosek{}, LP/QP solver, \url{https://www.mosek.com/}	\\
+\code{~~octave}	& GNU Octave, as opposed to \matlab{}	\\
+\code{~~optimoptions}	& \code{optimoptions}, option setting funciton for \ot{} 6.3+	\\
+\code{~~pardiso}	& \pardiso{}, {\bf Par}allel Sparse {\bf D}irect \& {\bf I}terative Linear {\bf So}lver,	\\
+& ~~~~\url{https://pardiso-project.org}	\\
+\code{~~quadprog}	& \code{quadprog}, QP solver from \ot{}	\\
+\code{~~~~quadprog\_ls}	& \code{quadprog} with large-scale interior point convex solver from	\\
+& ~~~~\ot{} 6.x+	\\
+\code{~~sdpt3}	& SDPT3 SDP solver, \url{https://github.com/sqlp/sdpt3}	\\
+\code{~~sedumi}	& SeDuMi SDP solver, \url{http://sedumi.ie.lehigh.edu}	\\
+\code{~~yalmip}	& YALMIP modeling platform, \url{https://yalmip.github.io}	\\
+	\\
+\multicolumn{2}{l}{\emph{Functionality related to \matpowerlink{}}}	\\
+\code{~~e4st}	& \eastlink{}, \url{\easturl}	\\
+\code{~~minopf}	& \code{minopf}, MINOPF, MINOS-based optimal power flow (OPF) solver	\\
+\code{~~most}	& \most{}, \mostname{}	\\
+\code{~~pdipmopf}	& PDIPMOPF, primal-dual interior point method OPF solver	\\
+\code{~~scpdipmopf}	& SCPDIPMOPF, step-controlled PDIPM OPF solver	\\
+\code{~~sdp\_pf}	& SDP\_PF, applications of SDP relaxation of power flow equations	\\
+\code{~~smartmarket}	& \code{runmarket} and friends, for running an energy auction	\\
+\code{~~syngrid}	& \syngridlink{}, Synthetic Grid Creation for \matpower{}	\\
+\code{~~tralmopf}	& TRALMOPF, trust region based augmented Langrangian OPF solver	\\
+\bottomrule
+\end{tabular}
+% \begin{tablenotes}
+%  \scriptsize
+%  \item [\dag] {Related specifically to \matpowerlink{}.}
+% \end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+
 \subsection{\tt mpomver}
 \begin{Code}
   mpomver
@@ -2840,6 +2914,8 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 \begin{itemize}
 \item Remove redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
 \item Add tests for solving LP/QP, MILP/MIQP, NLP and NLEQ problems via \code{opt\_model/solve()}.
+\item Add Table~\ref{tab:have_fcn_tags} of valid \code{have\_fcn()} input tags to User's Manual.
+
 \end{itemize}
 
 \end{appendices}
