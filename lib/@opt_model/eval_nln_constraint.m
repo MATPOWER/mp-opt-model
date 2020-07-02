@@ -1,9 +1,10 @@
 function [g, dg] = eval_nln_constraint(om, x, iseq)
 %EVAL_NLN_CONSTRAINT  Builds and returns full set of nonlinear constraints.
 %   [G, DG] = OM.EVAL_NLN_CONSTRAINT(X, ISEQ)
-%   Builds a full set of nonlinear equality or inequality constraints and
-%   their gradients for a given value of the optimization vector X,
-%   based on constraints added by ADD_NLN_CONSTRAINT.
+%   Builds a full set of nonlinear equality or inequality constraints
+%   (ISEQ equal to 1 or 0, respectively) and their gradients
+%   for a given value of the vector X, based on constraints added by
+%   ADD_NLN_CONSTRAINT.
 %
 %       g(X) = 0
 %       h(X) <= 0
