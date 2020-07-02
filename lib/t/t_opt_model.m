@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 518;
+num_tests = 572;
 
 t_begin(num_tests, quiet);
 
@@ -536,6 +536,84 @@ t_is(full(A(ll.i1.mylin(2,1):ll.iN.mylin(2,1), vv.i1.Pg:vv.iN.Pg)), eye(3,3), 14
 t_is(full(A(ll.i1.mylin(2,1):ll.iN.mylin(2,1), vv.i1.x(2,1):vv.iN.x(2,1))), [0 -1 0;0 -1 0;0 -1 0], 14, [t ' : A(<mylin(2,1)>,<x(2,1)>)']);
 
 %om
+
+%%-----  params_nln_constraint  -----
+t = 'om.params_nln_constraint(1, ''Pmise'')';
+N = om.params_nln_constraint(1, 'Pmise');
+t_is(N, 4, 14, [t, ' : N']);
+[N, fcn] = om.params_nln_constraint(1, 'Pmise');
+t_is(N, 4, 14, [t, ' : N']);
+t_ok(isa(fcn, 'function_handle'), [t, ' : fcn']);
+[N, fcn, hess] = om.params_nln_constraint(1, 'Pmise');
+t_is(N, 4, 14, [t, ' : N']);
+t_ok(isa(fcn, 'function_handle'), [t, ' : fcn']);
+t_ok(isa(hess, 'function_handle'), [t, ' : hess']);
+[N, fcn, hess, vs] = om.params_nln_constraint(1, 'Pmise');
+t_is(N, 4, 14, [t, ' : N']);
+t_ok(isa(fcn, 'function_handle'), [t, ' : fcn']);
+t_ok(isa(hess, 'function_handle'), [t, ' : hess']);
+t_ok(isstruct(vs), [t, ' : isstruct(vs)']);
+t_is(length(vs), 2, 14, [t, ' : length(vs)']);
+t_ok(strcmp(vs(1).name, 'Pg'), [t, ' : vs(1).name']);
+t_ok(strcmp(vs(2).name, 'Va'), [t, ' : vs(2).name']);
+t_ok(isempty(vs(1).idx), [t, ' : vs(1).idx']);
+t_ok(isempty(vs(2).idx), [t, ' : vs(2).idx']);
+[N, fcn, hess, vs, include] = om.params_nln_constraint(1, 'Pmise');
+t_ok(strcmp(include, ''), [t, ' : include']);
+
+t = 'om.params_nln_constraint(1, ''P'')';
+[N, fcn, hess, vs, include] = om.params_nln_constraint(1, 'P');
+t_is(N, 3, 14, [t, ' : N']);
+t_ok(isa(fcn, 'function_handle'), [t, ' : fcn']);
+t_ok(isa(hess, 'function_handle'), [t, ' : hess']);
+t_ok(isstruct(vs), [t, ' : isstruct(vs)']);
+t_is(length(vs), 2, 14, [t, ' : length(vs)']);
+t_ok(strcmp(vs(1).name, 'Pg'), [t, ' : vs(1).name']);
+t_ok(strcmp(vs(2).name, 'Va'), [t, ' : vs(2).name']);
+t_ok(isempty(vs(1).idx), [t, ' : vs(1).idx']);
+t_ok(isempty(vs(2).idx), [t, ' : vs(2).idx']);
+t_ok(isstruct(include), [t, ' : istruct(include)']);
+t_is(length(include.name), 2, 14, [t, ' : length(include.name)']);
+t_is(length(include.N), 2, 14, [t, ' : length(include.N)']);
+t_ok(strcmp(include.name{1}, 'Q'), [t, ' : include.name{1}']);
+t_ok(strcmp(include.name{2}, 'R'), [t, ' : include.name{2}']);
+t_is(include.N, [2 1], 14, [t, ' : include.N']);
+
+t = 'om.params_nln_constraint(1, ''mynle'') : error';
+try
+    [N, fcn] = om.params_nln_constraint(1, 'mynle')
+    t_ok(0, t);
+catch
+    t_ok(strfind(lasterr, '@opt_model/params_nln_constraint: nonlinear constraint set ''mynle'' requires an IDX_LIST arg'), t);
+end
+
+t = 'om.params_nln_constraint(0, ''mynli'', {1,2})';
+[N, fcn, hess, vs] = om.params_nln_constraint(0, 'mynli', {1,2});
+t_is(N, 2, 14, [t, ' : N']);
+t_ok(isa(fcn, 'function_handle'), [t, ' : fcn']);
+t_ok(isa(hess, 'function_handle'), [t, ' : hess']);
+t_ok(isstruct(vs), [t, ' : isstruct(vs)']);
+t_is(length(vs), 2, 14, [t, ' : length(vs)']);
+t_ok(strcmp(vs(1).name, 'Pg'), [t, ' : vs(1).name']);
+t_ok(strcmp(vs(2).name, 'x'), [t, ' : vs(2).name']);
+t_ok(isempty(vs(1).idx), [t, ' : vs(1).idx']);
+t_is(length(vs(2).idx), 2, 14, [t, ' : length(vs(2).idx)']);
+t_is(vs(2).idx{1}, 1, 14, [t, ' : vs(2).idx{1}']);
+t_is(vs(2).idx{2}, 2, 14, [t, ' : vs(2).idx{2}']);
+
+t = 'om.params_nln_constraint(0, ''mynli'', {2,2})';
+[N, fcn, hess, vs] = om.params_nln_constraint(0, 'mynli', {2,2});
+t_is(N, 3, 14, [t, ' : N']);
+t_ok(isa(fcn, 'function_handle'), [t, ' : fcn']);
+t_ok(isa(hess, 'function_handle'), [t, ' : hess']);
+t_ok(isstruct(vs), [t, ' : isstruct(vs)']);
+t_is(length(vs), 2, 14, [t, ' : length(vs)']);
+t_ok(strcmp(vs(1).name, 'Pg'), [t, ' : vs(1).name']);
+t_ok(strcmp(vs(2).name, 'x'), [t, ' : vs(2).name']);
+t_ok(isempty(vs(1).idx), [t, ' : vs(1).idx']);
+t_is(length(vs(2).idx), 2, 14, [t, ' : length(vs(2).idx)']);
+t_is(vs(2).idx{1}, 2, 14, [t, ' : vs(2).idx{1}']);
+t_is(vs(2).idx{2}, 2, 14, [t, ' : vs(2).idx{2}']);
 
 %%-----  eval_nln_constraint  -----
 t = 'g = om.eval_nln_constraint';

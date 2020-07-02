@@ -1874,6 +1874,21 @@ If a \code{name} is provided then it simply returns the parameters for the corre
 
 See Section~\ref{sec:indexed_sets} for details on indexed named sets and the \code{idx\_list} argument.
 
+\subsubsection*{\code{params\_nln\_constraint}}
+\begin{Code}
+N = om.params_nln_constraint(iseq, name)
+N = om.params_nln_constraint(iseq, name, idx_list)
+[N, fcn] = om.params_nln_constraint(...)
+[N, fcn, hess] = om.params_nln_constraint(...)
+[N, fcn, hess, vs] = om.params_nln_constraint(...)
+[N, fcn, hess, vs, include] = om.params_nln_constraint(...)
+\end{Code}
+Returns the parameters \code{N}, and optionally \code{fcn}, and \code{hess} provided when the corresponding named nonlinear constraint set was added to the model. Likewise for indexed named sets specified by \code{name} and \code{idx\_list}. The \code{iseq} input should be set to 1 for equality constrainst and to 0 for inequality constraints.
+
+An optional 4th output argument \code{vs} indicates the variable sets used by this constraint set.
+
+And, for constraint sets whose functions compute the constraints for another set, an optional 5th output argument returns a struct with a cell array of set names in the \codeq{name} field and an array of corresponding dimensions in the \codeq{N} field.
+
 \subsubsection*{\code{eval\_nln\_constraint}}
 \label{sec:eval_nln_constraint}
 \begin{Code}
@@ -1932,8 +1947,15 @@ An optional 4th output argument \code{vs} indicates the variable sets used by th
 
 See Section~\ref{sec:indexed_sets} for details on indexed named sets and the \code{idx\_list} argument.
 
-% \subsubsection*{\code{params\_nln\_cost}}
-% Do not add this to the documentation until we have added params_nln_constraint() to the code, then add both to documentation
+\subsubsection*{\code{params\_nln\_cost}}
+\begin{Code}
+[N, fcn] = om.params_nln_cost(name)
+[N, fcn] = om.params_nln_cost(name, idx_list)
+[N, fcn, vs] = om.params_nln_cost(...)
+\end{Code}
+Returns the parameters \code{N} and \code{fcn} provided when the corresponding named general nonlinear cost set was added to the model. Likewise for indexed named sets specified by \code{name} and \code{idx\_list}.
+
+An optional 3rd output argument \code{vs} indicates the variable sets used by this constraint set.
 
 \subsubsection*{\code{eval\_quad\_cost}}
 \label{sec:eval_quad_cost}
@@ -1993,7 +2015,7 @@ om.init_indexed_name(set_type, name, dim_list)
 [f, df, d2f] = om.init_indexed_name('var', 'z', {7, 24});
 \end{Code}
 
-After initializing the dimensions, indexed named sets of variables, constraints or costs can be added by supplying the indices in the \code{idx\_list} argument following the \code{name} argument in call to the corresponding \code{add\_var}, \code{add\_lin\_constraint}, \code{add\_nln\_constraint}, \code{add\_quad\_cost}, or \code{add\_nln\_cost} method. The \code{idx\_list} argument is simply a cell array containing the indices of interest.
+After initializing the dimensions, indexed named sets of variables, constraints or costs can be added by supplying the indices in the \code{idx\_list} argument following the \code{name} argument in the call to the corresponding \code{add\_var}, \code{add\_lin\_constraint}, \code{add\_nln\_constraint}, \code{add\_quad\_cost}, or \code{add\_nln\_cost} method. The \code{idx\_list} argument is simply a cell array containing the indices of interest.
 
 \noindent \\Examples:
 \begin{Code}
@@ -2002,7 +2024,7 @@ for d = 1:7
 end
 for d = 1:7
     for h = 1:24
-        om.add_var('z', {d, h}, nz(d), z0{d}, zl{d}, zu{d});
+        om.add_var('z', {d, h}, nz(d, h), z0{d, h}, zl{d, h}, zu{d, h});
     end
 end
 \end{Code}
@@ -2581,6 +2603,7 @@ name & description \\
 \code{~~init\_indexed\_name}	& initializes dimensions for indexed named set of costs, constraints or variables	\\
 \code{~~is\_mixed\_integer}	& indicates whether any of the variables are binary or integer 	\\
 \code{~~params\_lin\_constraint}	& returns individual or full set of linear constraint parameters	\\
+\code{~~params\_nln\_constraint}	& returns individual nonlinear constraint parameters	\\
 \code{~~params\_nln\_cost}	& returns individual general nonlinear cost parameters	\\
 \code{~~params\_quad\_cost}	& returns individual or full set of quadratic cost coefficients	\\
 \code{~~params\_var}	& returns initial values, bounds and variable type for optimimization vector~$\hat{x}$\tnote{\ddag}	\\
@@ -2906,6 +2929,8 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
     \item \code{nleqs\_fsolve()} provides implementation of unified nonlinear equation solver interface for \code{fsolve}.
     \item \code{nleqs\_master()} provides a single wrapper function for calling any of \matpower{}'s nonlinear equation solvers.
     \item \code{nleqs\_newton()} provides implementation of Newton's method solver with a unified nonlinear equation solver interface.
+    \item \code{opt\_model/params\_nln\_constraint()} method returns parameters for a named (and optionally indexed) set of nonlinear constraints.
+    \item \code{opt\_model/params\_nln\_cost()} method returns parameters for a named (and optionally indexed) set of general nonlinear costs.
     \end{itemize}
 \end{itemize}
 

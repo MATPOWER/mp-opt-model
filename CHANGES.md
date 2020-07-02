@@ -8,6 +8,8 @@ Since Version 1.0
 #### 7/2/20
   - Skip evaluation of gradient if `eval_nln_constraint()` is called
     with a single output argument.
+  - Add `params_nln_constraint()` method, and add documentation to the
+    manual for it and `params_nln_cost()`.
 
 #### 7/1/20
   - Add `mpopt2nleqopt()` to create or modify an `nleqs_master()`

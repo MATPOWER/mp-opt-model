@@ -4,9 +4,9 @@ function [N, fcn, vs] = params_nln_cost(om, name, idx)
 %   [N, FCN] = OM.PARAMS_NLN_COST(NAME, IDX_LIST)
 %   [N, FCN, VS] = OM.PARAMS_NLN_COST(...)
 %
-%   Returns the parameters N and FCN for the corresponding named general
-%   nonlinear cost set. Likewise for indexed named sets specified
-%   by NAME and IDX_LIST.
+%   Returns the parameters N and FCN provided when the corresponding
+%   named general nonlinear cost set was added to the model. Likewise
+%   for indexed named sets specified by NAME and IDX_LIST.
 %
 %   An optional 3rd output argument VS indicates the variable sets used by
 %   this cost set.
