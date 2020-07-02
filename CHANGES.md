@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since Version 1.0
 -----------------
 
+#### 7/2/20
+  - Skip evaluation of gradient if `eval_nln_constraint()` is called
+    with a single output argument.
+
 #### 7/1/20
   - Add `mpopt2nleqopt()` to create or modify an `nleqs_master()`
     options struct from a MATPOWER options struct.

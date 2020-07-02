@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 514;
+num_tests = 518;
 
 t_begin(num_tests, quiet);
 
@@ -538,7 +538,13 @@ t_is(full(A(ll.i1.mylin(2,1):ll.iN.mylin(2,1), vv.i1.x(2,1):vv.iN.x(2,1))), [0 -
 %om
 
 %%-----  eval_nln_constraint  -----
-t = 'eval_nln_constraint';
+t = 'g = om.eval_nln_constraint';
+x = (1:om.var.N)';
+[g, dg] = om.eval_nln_constraint(x, 1);
+t_is(length(g), neN, 14, [t ' : length(g)']);
+t_is(g, [7 8 9 3 3 4 5 7 8 9 3 4 5 6 7 6 7 8 7 8 9 7 8 9 27]', 14, [t ' : g']);
+
+t = '[g, dg] = om.eval_nln_constraint';
 x = (1:om.var.N)';
 [g, dg] = om.eval_nln_constraint(x, 1);
 t_is(length(g), neN, 14, [t ' : length(g)']);
@@ -571,6 +577,12 @@ t_is(full(dg(22:25, :)), e, 14, [t ' : dg(22:25, :) [mynle(2,2)]']);
 % full(dg)
 % full(dg)'
 
+t = 'h = om.eval_nln_constraint';
+h = om.eval_nln_constraint(x, 0);
+t_is(length(h), niN, 14, [t ' : length(h)']);
+t_is(h, [3 4 5 -1 0 6 6 7 7 8 7 8 9]', 14, [t ' : h']);
+
+t = '[h, dh] = om.eval_nln_constraint';
 [h, dh] = om.eval_nln_constraint(x, 0);
 t_is(length(h), niN, 14, [t ' : length(h)']);
 t_ok(issparse(dh), [t ' : issparse(dh)']);

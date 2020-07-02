@@ -1,8 +1,9 @@
 function [g, dg] = eval_nln_constraint(om, x, iseq)
 %EVAL_NLN_CONSTRAINT  Builds and returns full set of nonlinear constraints.
+%   G = OM.EVAL_NLN_CONSTRAINT(X, ISEQ)
 %   [G, DG] = OM.EVAL_NLN_CONSTRAINT(X, ISEQ)
 %   Builds a full set of nonlinear equality or inequality constraints
-%   (ISEQ equal to 1 or 0, respectively) and their gradients
+%   (ISEQ equal to 1 or 0, respectively) and (optionally) their gradients
 %   for a given value of the vector X, based on constraints added by
 %   ADD_NLN_CONSTRAINT.
 %
@@ -32,7 +33,9 @@ end
 
 %% initialize g, dg
 g = NaN(om_nlx.N, 1);
-dg = sparse(0, om.var.N);   %% build gradient by stacking
+if nargout > 1
+    dg = sparse(0, om.var.N);   %% build gradient by stacking
+end
 
 %% calls to substruct() are relatively expensive, so we pre-build the
 %% structs for addressing cell and numeric array fields, updating only
@@ -79,21 +82,25 @@ for k = 1:om_nlx.NS
             vs = subsref(om_nlx.data.vs, sc);   %% var sets
         end
         xx = om.varsets_x(x, vs);
-        [gk, dgk] = fcn(xx);    %% evaluate kth constraint and gradient
-        g(i1:iN) = gk;          %% assign kth constraint
-        
-        if isempty(vs)          %% all rows of x
-            if size(dgk, 2) == om.var.N
-                dg = [dg; dgk];
-            else                %% must have added vars since adding
-                                %% this constraint set
-                dg(i1:iN, 1:size(dgk, 2)) = dgk;
+        if nargout < 2
+            gk = fcn(xx);           %% evaluate kth constraint w/o gradient
+        else
+            [gk, dgk] = fcn(xx);    %% evaluate kth constraint and gradient
+
+            if isempty(vs)          %% all rows of x
+                if size(dgk, 2) == om.var.N
+                    dg = [dg; dgk];
+                else                %% must have added vars since adding
+                                    %% this constraint set
+                    dg(i1:iN, 1:size(dgk, 2)) = dgk;
+                end
+            else                    %% selected rows of x
+                jj = om.varsets_idx(vs);    %% column indices for var set
+                dgi = sparse(N, om.var.N);
+                dgi(:, jj) = dgk;
+                dg = [dg; dgi];
             end
-        else                    %% selected rows of x
-            jj = om.varsets_idx(vs);    %% column indices for var set
-            dgi = sparse(N, om.var.N);
-            dgi(:, jj) = dgk;
-            dg = [dg; dgi];
         end
+        g(i1:iN) = gk;          %% assign kth constraint
     end
 end
