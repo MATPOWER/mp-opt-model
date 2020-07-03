@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since Version 1.0
 -----------------
 
+#### 7/3/20
+  - Add to `eval_nln_constraint()` method the ability to compute
+    constraints for a single named set.
+
 #### 7/2/20
   - Skip evaluation of gradient if `eval_nln_constraint()` is called
     with a single output argument.

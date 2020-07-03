@@ -1892,9 +1892,12 @@ And, for constraint sets whose functions compute the constraints for another set
 \subsubsection*{\code{eval\_nln\_constraint}}
 \label{sec:eval_nln_constraint}
 \begin{Code}
-[g, dg] = om.eval_nln_constraint(x, iseq)
+g = om.eval_nln_constraint(x, iseq)
+g = om.eval_nln_constraint(x, iseq, name)
+g = om.eval_nln_constraint(x, iseq, name, idx_list)
+[g, dg] = om.eval_nln_constraint(...)
 \end{Code}
-Builds a full set of nonlinear equality constraints $g(x)$ or inequality constraints $h(x)$ and their gradients for a given value of the optimization vector $x$, based on constraints added by \code{add\_nln\_constraint}, where $g(x) = 0$ and $h(x) \le 0$.
+Builds the nonlinear equality constraints $g(x)$ or inequality constraints $h(x)$ and optionally their gradients for the full set of constraints or an individual named subset for a given value of the optimization vector $x$, based on constraints added by \code{add\_nln\_constraint}, where $g(x) = 0$ and $h(x) \le 0$.
 
 \noindent \\Examples:
 \begin{Code}
@@ -2942,6 +2945,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 
 \subsubsection*{Other Changes}
 \begin{itemize}
+\item Add to \code{eval\_nln\_constraint()} method the ability to compute constraints for a single named set.
 \item Remove redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
 \item Add tests for solving LP/QP, MILP/MIQP, NLP and NLEQ problems via \code{opt\_model/solve()}.
 \item Add Table~\ref{tab:have_fcn_tags} of valid \code{have\_fcn()} input tags to User's Manual.
