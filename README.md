@@ -212,11 +212,11 @@ with *\<YEAR\>* replaced by the year of the most recent release:
 
 >   R. D. Zimmerman. *MP-Opt-Model User's Manual*. *\<YEAR\>*.
     [Online]. Available: https://matpower.org/docs/MP-Opt-Model-manual.pdf  
-    doi: [10.5281/zenodo.3818003][11]
+    doi: [10.5281/zenodo.3818002][11]
 
 A list of versions of the User's Manual with release dates and
 version-specific DOI's can be found via the general DOI at
-https://doi.org/10.5281/zenodo.3818003.
+https://doi.org/10.5281/zenodo.3818002.
 
 
 Contributing
@@ -242,6 +242,6 @@ MP-Opt-Model is distributed under the [3-clause BSD license][9].
 [8]: CONTRIBUTING.md
 [9]: LICENSE
 [10]: CITATION
-[11]: https://doi.org/10.5281/zenodo.3818003
+[11]: https://doi.org/10.5281/zenodo.3818002
 [12]: https://github.com/MATPOWER/matpower/blob/master/lib/opf_setup.m
 [13]: https://github.com/MATPOWER/matpower/blob/master/lib/opf_execute.m
