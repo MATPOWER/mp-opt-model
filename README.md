@@ -2,11 +2,11 @@ MP-Opt-Model
 ============
 
 [MP-Opt-Model][1] is a package of MATLAB/Octave M-files for constructing
-and solving mathematical optimization problems. It provides an
-easy-to-use, object-oriented interface for building and solving your
-optimization model. It also includes a unified interface for calling
-numerous LP, QP, mixed-integer and nonlinear solvers, with the ability
-to switch solvers by simply changing an input option.
+and solving mathematical programming and optimization problems. It provides
+an easy-to-use, object-oriented interface for building and solving your
+model. It also includes a unified interface for calling numerous LP, QP,
+mixed-integer and nonlinear solvers, with the ability to switch solvers
+simply by changing an input option.
 
 It is based on code that was originally developed by Ray D. Zimmerman of
 Cornell University as part of [MATPOWER][2].
@@ -59,8 +59,8 @@ of MATLAB or Octave, including setting up your MATLAB path.
   t_om_solve_qps..........ok (79 of 319 skipped)
   t_om_solve_miqps........ok (12 of 72 skipped)
   t_om_solve_nlps.........ok
-  All tests successful (2439 passed, 259 skipped of 2698)
-  Elapsed time 3.15 seconds.
+  All tests successful (2519 passed, 259 skipped of 2778)
+  Elapsed time 2.52 seconds.
 ```
 
 Sample Usage
@@ -201,11 +201,11 @@ function, e.g.: `qps_master`, `miqps_master`, and `nlps_master`.
 We request that publications derived from the use of MP-Opt-Model
 explicitly acknowledge that fact by citing the [MP-Opt-Model User's Manual][7].
 The citation and DOI can be version-specific or general, as appropriate.
-For version 1.0, use:
+For version 2.0, use:
 
->   R. D. Zimmerman. *MP-Opt-Model User's Manual, Version 1.0*. 2020.
-    [Online]. Available: https://matpower.org/docs/MP-Opt-Model-manual-1.0.pdf  
-    doi: [10.5281/zenodo.3818003](https://doi.org/10.5281/zenodo.3818003)
+>   R. D. Zimmerman. *MP-Opt-Model User's Manual, Version 2.0*. 2020.
+    [Online]. Available: https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf  
+    doi: [10.5281/zenodo.3935928](https://doi.org/10.5281/zenodo.3935928)
 
 For a version non-specific citation, use the following citation and DOI,
 with *\<YEAR\>* replaced by the year of the most recent release:

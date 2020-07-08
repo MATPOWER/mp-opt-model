@@ -2,8 +2,11 @@ Change history for MP-Opt-Model
 ===============================
 
 
-Since Version 1.0
------------------
+Version 2.0 - *Jul 8, 2020*
+---------------------------
+
+#### 7/8/20
+  - Release 2.0.
 
 #### 7/3/20
   - Add to `eval_nln_constraint()` method the ability to compute

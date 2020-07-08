@@ -150,7 +150,7 @@
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{1.1-dev}
+\newcommand{\mpomver}[0]{2.0}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
@@ -237,7 +237,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-%\date{May 8, 2020} % comment this line to display the current date
+\date{July 8, 2020} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -265,7 +265,7 @@ All Rights Reserved}
 
 \subsection{Background}
 
-\mpomlink{} is a package of \matlab{} language M-files\footnote{Also compatible with GNU Octave~\cite{octave}.} for constructing and solving mathematical optimization problems. It provides an easy-to-use, object-oriented interface for building and solving your optimization model. It also includes a unified interface for calling numerous LP, QP, mixed-integer and nonlinear solvers, with the ability to switch solvers by simply changing an input option.
+\mpomlink{} is a package of \matlab{} language M-files\footnote{Also compatible with GNU Octave~\cite{octave}.} for constructing and solving mathematical programming and optimization problems. It provides an easy-to-use, object-oriented interface for building and solving your model. It also includes a unified interface for calling numerous LP, QP, mixed-integer and nonlinear solvers, with the ability to switch solvers simply by changing an input option.
 The \mpom{} project page can be found at:
 
 \bigskip
@@ -322,12 +322,12 @@ POSSIBILITY OF SUCH DAMAGE.
 \subsection{Citing \mpom{}}
 
 We request that publications derived from the use of \mpom{} explicitly acknowledge that fact by citing the \mpomname{} User's Manual~\cite{mpom_manual}.
-The citation and DOI can be version-specific or general, as appropriate. For version 1.0, use:
+The citation and DOI can be version-specific or general, as appropriate. For version 2.0, use:
 
 \begin{quote}
 \footnotesize
-R.~D. Zimmerman. \mpomname{} User's Manual, Verision 1.0. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-1.0.pdf}\\
-\doi{10.5281/zenodo.3818003}
+R.~D. Zimmerman. \mpomname{} User's Manual, Verision 2.0. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}\\
+\doi{10.5281/zenodo.3935928}
 \end{quote}
 For a version non-specific citation, use the following citation and DOI,
 with \emph{\textless{}YEAR\textgreater{}} replaced by the year of the most recent release:
@@ -353,7 +353,7 @@ The \mpom{} project uses an open development paradigm, hosted on the \mpom{} Git
 
 \bigskip
 
-The \mpom{} GitHub project hosts the public Git code repository as well as a public issue tracker for handling bug reports, patches, and other issues and contributions. There are separate GitHub hosted repositories and issue trackers for \mptest{}, \mips{}, \matpower{}, etc., all available from \url{https://github.com/MATPOWER/}.
+The \mpom{} GitHub project hosts the public Git code repository as well as a public issue tracker for handling bug reports, patches, and other issues and contributions. There are separate GitHub hosted repositories and issue trackers for \mpom{}, \mptest{}, \mips{}, and \matpower{}, etc., all are available from \url{https://github.com/MATPOWER/}.
 
 
 %%------------------------------------------
@@ -410,8 +410,8 @@ t_om_solve_nleqs........ok
 t_om_solve_qps..........ok (79 of 319 skipped)
 t_om_solve_miqps........ok (12 of 72 skipped)
 t_om_solve_nlps.........ok
-All tests successful (2439 passed, 259 skipped of 2698)
-Elapsed time 3.15 seconds.
+All tests successful (2519 passed, 259 skipped of 2778)
+Elapsed time 2.52 seconds.
 \end{Code}
 \end{enumerate}
 
@@ -2808,19 +2808,19 @@ When installed, Knitro's \matlab{} interface function, \code{knitromatlab} or \c
 
 Although \mosek{} is a commercial package, at the time of this writing there is a free academic license available. See \url{https://www.mosek.com/products/academic-licenses/} for more details.
 
-When the \matlab{} interface to \mosek{} is installed, it can be used to solve general LP and QP problems via \matpower{}'s common QP solver interface \code{qps\_master}, or MILP and MIQP problems via \code{miqps\_master}, with the algorithm option set to \codeq{MOSEK}, or by calling \code{qps\_mosek} or \code{miqps\_mosek} directly.
+When the \matlab{} interface to \mosek{} is installed, it can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master}, or MILP and MIQP problems via \code{miqps\_master}, with the algorithm option set to \codeq{MOSEK}, or by calling \code{qps\_mosek} or \code{miqps\_mosek} directly.
 
 \subsection{\ot{} -- LP, QP, NLP, NLEQ and MILP Solvers}
 \label{app:ot}
 
-\matlab{}'s \ot{}~\cite{ot, otug}, available from The MathWorks, provides a number of high-performance solvers that \matpower{} can take advantage of.
+\matlab{}'s \ot{}~\cite{ot, otug}, available from The MathWorks, provides a number of high-performance solvers that \mpom{} can take advantage of.
 
 It includes \code{fsolve} for nonlinear equations (NLEQ), \code{fmincon} for nonlinear programming problems (NLP), and \code{linprog} and \code{quadprog} for linear programming (LP) and quadratic programming (QP) problems, respectively.
 For mixed-integer linear programs (MILP), it provides \code{intlingprog}.
 Each solver implements a number of different solution algorithms.
 More information is available from The MathWorks, Inc. at \url{https://www.mathworks.com/}.
 
-When available, the \ot{} solvers can be used to solve general LP and QP problems via \matpower{}'s common QP solver interface \code{qps\_master}, or MILP problems via \code{miqps\_master}, with the algorithm option set to \codeq{OT}, or by calling \code{qps\_ot} or \code{miqps\_ot} directly. It can be to solve general NLP problems via \mpom{}'s common NLP solver interface \code{nlps\_master} with the algorithm option set to \codeq{FMINCON}, or by calling \code{nlps\_fmincon} directly. It can also be used to solve general NLEQ problems via \mpom{}'s common NLEQ solver interface \code{nleqs\_master} with the algorithm option set to \codeq{FSOLVE}, or by calling \code{nleqs\_fsolve} directly.
+When available, the \ot{} solvers can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master}, or MILP problems via \code{miqps\_master}, with the algorithm option set to \codeq{OT}, or by calling \code{qps\_ot} or \code{miqps\_ot} directly. It can be to solve general NLP problems via \mpom{}'s common NLP solver interface \code{nlps\_master} with the algorithm option set to \codeq{FMINCON}, or by calling \code{nlps\_fmincon} directly. It can also be used to solve general NLEQ problems via \mpom{}'s common NLEQ solver interface \code{nleqs\_master} with the algorithm option set to \codeq{FSOLVE}, or by calling \code{nleqs\_fsolve} directly.
 
 
 %%------------------------------------------
@@ -2851,7 +2851,7 @@ There is no User's Manual yet.
     \item \code{nlps\_fmincon()} provides implementation of unified nonlinear programming solver interface for \code{fmincon}.
     \item \code{nlps\_ipopt()} provides implementation of unified nonlinear programming solver interface interface for \ipopt{}.
     \item \code{nlps\_knitro()} provides implementation of unified nonlinear programming solver interface interface for \ipopt{}.
-    \item \code{nlps\_master()} provides a single wrapper function for calling any of \matpower{}'s nonlinear programming solvers.
+    \item \code{nlps\_master()} provides a single wrapper function for calling any of \mpom{}'s nonlinear programming solvers.
     \end{itemize}
 \end{itemize}
 
@@ -2916,10 +2916,10 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.0.pdf}{\mpom{} 1.0 Use
 \end{itemize}
 
 
-\subsection{Version 1.1 -- released ??? ?, 2020}
-\label{app:v11}
+\subsection{Version 2.0 -- released Jul 8, 2020}
+\label{app:v20}
 
-The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}}
+The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}{\mpom{} 2.0 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}}
 
 \subsubsection*{New Features}
 \begin{itemize}
@@ -2930,7 +2930,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
     \begin{itemize}
     \item \code{mpopt2nleqopt()} creates or modifies an options struct for \code{nleqs\_master()} from a \matpower{} options struct.
     \item \code{nleqs\_fsolve()} provides implementation of unified nonlinear equation solver interface for \code{fsolve}.
-    \item \code{nleqs\_master()} provides a single wrapper function for calling any of \matpower{}'s nonlinear equation solvers.
+    \item \code{nleqs\_master()} provides a single wrapper function for calling any of \mpom{}'s nonlinear equation solvers.
     \item \code{nleqs\_newton()} provides implementation of Newton's method solver with a unified nonlinear equation solver interface.
     \item \code{opt\_model/params\_nln\_constraint()} method returns parameters for a named (and optionally indexed) set of nonlinear constraints.
     \item \code{opt\_model/params\_nln\_cost()} method returns parameters for a named (and optionally indexed) set of general nonlinear costs.
@@ -2946,6 +2946,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-1.1.pdf}{\mpom{} 1.1 Use
 \subsubsection*{Other Changes}
 \begin{itemize}
 \item Add to \code{eval\_nln\_constraint()} method the ability to compute constraints for a single named set.
+\item Skip evaluation of gradient if \code{eval\_nln\_constraint()} is called with a single output argument.
 \item Remove redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
 \item Add tests for solving LP/QP, MILP/MIQP, NLP and NLEQ problems via \code{opt\_model/solve()}.
 \item Add Table~\ref{tab:have_fcn_tags} of valid \code{have\_fcn()} input tags to User's Manual.
