@@ -1,4 +1,4 @@
-function [x, f, eflag, output, lambda] = solve(om, opt)
+function varargout = solve(om, opt)
 %SOLVE  Solve the optimization model.
 %   X = OM.SOLVE()
 %   [X, F] = OM.SOLVE()
@@ -115,8 +115,7 @@ if strcmp(pt, 'MINLP')          %% MINLP - mixed integer non-linear program
 elseif strcmp(pt, 'NLEQ')       %% NLEQ - nonlinear equation
     x0 = om.params_var();
     fcn = @(x)eval_nln_constraint(om, x, 1);
-    [x, f, eflag, output, lambda] = nleqs_master(fcn, x0, opt);
-    success = (eflag > 0);
+    [varargout{1:nargout}] = nleqs_master(fcn, x0, opt);
 elseif strcmp(pt, 'NLP')        %% NLP  - nonlinear program
     %% optimization vars, bounds, types
     [x0, xmin, xmax] = om.params_var();
@@ -128,9 +127,8 @@ elseif strcmp(pt, 'NLP')        %% NLP  - nonlinear program
     f_fcn = @(x)nlp_costfcn(om, x);
     gh_fcn = @(x)nlp_consfcn(om, x);
     hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(om, x, lambda, cost_mult);
-    [x, f, eflag, output, lambda] = ...
+    [varargout{1:nargout}] = ...
         nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
-    success = (eflag > 0);
 else                            %% LP, QP, MILP or MIQP
     %% get cost parameters
     [HH, CC, C0] = om.params_quad_cost();
@@ -143,7 +141,7 @@ else                            %% LP, QP, MILP or MIQP
         end
 
         %% run solver
-        [x, f, eflag, output, lambda] = ...
+        [varargout{1:nargout}] = ...
             miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
     else                        %% LP, QP - linear/quadratic program
         %% optimization vars, bounds, types
@@ -153,9 +151,10 @@ else                            %% LP, QP, MILP or MIQP
         end
 
         %% run solver
-        [x, f, eflag, output, lambda] = ...
+        [varargout{1:nargout}] = ...
             qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
     end
-    f = f + C0;
-    success = (eflag == 1);
+    if nargout > 1
+        varargout{2} = varargout{2} + C0;   %% f = f + C0
+    end
 end

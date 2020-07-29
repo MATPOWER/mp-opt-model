@@ -6,6 +6,8 @@ since last release
 ------------------
 
 #### 7/29/20
+  - Allow `solve()` method to pass along number of requested output
+    arguments `*_master()` solver functions.
   - **INCOMPATIBLE CHANGE:** In `output` return value from
     `nleqs_newton()`, changed the `normF` field of `output.hist` to
     `normf`, for consistency in using lowercase `f` everywhere.
