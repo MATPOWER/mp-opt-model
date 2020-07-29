@@ -2,6 +2,15 @@ Change history for MP-Opt-Model
 ===============================
 
 
+since last release
+------------------
+
+#### 7/29/20
+  - **INCOMPATIBLE CHANGE:** In `output` return value from
+    `nleqs_newton()`, changed the `normF` field of `output.hist` to
+    `normf`, for consistency in using lowercase `f` everywhere.
+
+
 Version 2.0 - *Jul 8, 2020*
 ---------------------------
 

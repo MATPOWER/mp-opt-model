@@ -150,7 +150,7 @@
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{2.0}
+\newcommand{\mpomver}[0]{2.1-dev}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
@@ -237,7 +237,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-\date{July 8, 2020} % comment this line to display the current date
+%\date{July 8, 2020} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -2937,12 +2937,6 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}{\mpom{} 2.0 Use
     \end{itemize}
 \end{itemize}
 
-% \subsubsection*{Bugs Fixed}
-% \begin{itemize}
-% \item 
-%     \emph{Thanks to Fulano.}
-% \end{itemize}
-
 \subsubsection*{Other Changes}
 \begin{itemize}
 \item Add to \code{eval\_nln\_constraint()} method the ability to compute constraints for a single named set.
@@ -2952,6 +2946,65 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}{\mpom{} 2.0 Use
 \item Add Table~\ref{tab:have_fcn_tags} of valid \code{have\_fcn()} input tags to User's Manual.
 
 \end{itemize}
+
+
+\subsection{Version 2.1 -- released ??? ?, 202?}
+\label{app:v21}
+
+The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}}
+
+\subsubsection*{New Features}
+\begin{itemize}
+\item 
+\item New functions:
+    \begin{itemize}
+    \item \code{foobar()} does whizbang.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection*{Bugs Fixed}
+\begin{itemize}
+\item 
+    \emph{Thanks to Fulano.}
+\end{itemize}
+
+\subsubsection*{Incompatible Changes}
+\begin{itemize}
+\item In \code{output} return value from \code{nleqs\_newton()}, changed the \code{normF} field of \code{output.hist} to \code{normf}, for consistency in using lowercase \code{f} everywhere.
+\end{itemize}
+
+\subsubsection*{Other Changes}
+\begin{itemize}
+\item 
+
+\end{itemize}
+
+
+% \subsection{Version 3.0 -- released ??? ?, 202?}
+% \label{app:v30}
+% 
+% The \href{https://matpower.org/docs/MP-Opt-Model-manual-3.0.pdf}{\mpom{} 3.0 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-3.0.pdf}}
+% 
+% \subsubsection*{New Features}
+% \begin{itemize}
+% \item 
+% \item New functions:
+%     \begin{itemize}
+%     \item \code{foobar()} does whizbang.
+%     \end{itemize}
+% \end{itemize}
+% 
+% \subsubsection*{Bugs Fixed}
+% \begin{itemize}
+% \item 
+%     \emph{Thanks to Fulano.}
+% \end{itemize}
+% 
+% \subsubsection*{Other Changes}
+% \begin{itemize}
+% \item 
+% 
+% \end{itemize}
 
 \end{appendices}
 

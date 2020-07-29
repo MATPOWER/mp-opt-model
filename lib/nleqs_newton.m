@@ -1,19 +1,20 @@
-function [x, F, eflag, output, J] = nleqs_newton(fcn, x0, opt)
+function [x, f, eflag, output, J] = nleqs_newton(fcn, x0, opt)
 %NLEQS_NEWTON  Nonlinear Equation Solver based on Newton's method.
 %   [X, F, EXITFLAG, OUTPUT, JAC] = NLEQS_NEWTON(FCN, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, JAC] = NLEQS_NEWTON(PROBLEM)
 %   A function providing a standardized interface for using Newton's
-%   method to solve the nonlinear equation F(X) = 0, beginning from a
-%   starting point X0.
+%   method to solve the nonlinear equation f(x) = 0, beginning from a
+%   starting point x0.
 %
 %   Inputs:
-%       FCN : handle to function that evaluates the function F(X) to
-%           be solved and its Jacobian, J(X). Calling syntax for this
+%       FCN : handle to function that evaluates the function f(x) to
+%           be solved and its Jacobian, J(x). Calling syntax for this
 %           function is:
-%               [F, J] = FCN(X)
-%           If F is M x 1 and and X is N x 1, then J is the M x N matrix
-%           of partial derivatives of F w.r.t. X.
-%       X0 : starting value of vector X
+%               f = FCN(x)
+%               [f, J] = FCN(x)
+%           If f and x are n x 1, then J is the n x n matrix of partial
+%           derivatives of f (rows) w.r.t. x (cols).
+%       X0 : starting value, x0, of vector x
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
@@ -22,7 +23,7 @@ function [x, F, eflag, output, J] = nleqs_newton(fcn, x0, opt)
 %               1 = some progress output
 %               2 = verbose progress output
 %           max_it (10) - maximum number of iterations for Newton's method
-%           tol (1e-8) - tolerance on Inf-norm of F(X)
+%           tol (1e-8) - tolerance on Inf-norm of f(x)
 %           newton_opt - options struct for Newton's method, with field:
 %               lin_solver ('') - linear solver passed to MPLINSOLVE to solve
 %                        Newton update step
@@ -42,8 +43,8 @@ function [x, F, eflag, output, J] = nleqs_newton(fcn, x0, opt)
 %           described above: fcn, x0, opt
 %
 %   Outputs (all optional, except X):
-%       X : solution vector
-%       F : final function value
+%       X : solution vector x
+%       F : final function value, f(x)
 %       EXITFLAG : exit flag
 %           1 = converged
 %           0 or negative values = solver specific failure codes
@@ -51,9 +52,9 @@ function [x, F, eflag, output, J] = nleqs_newton(fcn, x0, opt)
 %           alg - algorithm code of solver used ('NEWTON')
 %           iterations - number of iterations performed
 %           hist - struct array with trajectories of the following:
-%                   normF
+%                   normf
 %           message - exit message
-%       JAC : final Jacobian matrix
+%       JAC : final Jacobian matrix, J(x)
 %
 %   Note the calling syntax is almost identical to that of FSOLVE from
 %   MathWorks' Optimization Toolbox. The function for evaluating the
@@ -142,19 +143,19 @@ end
 eflag = 0;
 i = 0;
 x = x0;
-hist(max_it+1) = struct('normF', 0);
+hist(max_it+1) = struct('normf', 0);
 
-%% evaluate F(x0)
-[F, J] = fcn(x);
+%% evaluate f(x0)
+[f, J] = fcn(x);
 
 %% check tolerance
-normF = norm(F, inf);
+normf = norm(f, inf);
 if verbose > 1
     fprintf('\n it     max residual');
     fprintf('\n----  ----------------');
-    fprintf('\n%3d     %10.3e', i, normF);
+    fprintf('\n%3d     %10.3e', i, normf);
 end
-if normF < tol
+if normf < tol
     eflag = 1;
     msg = sprintf('Newton''s method converged in %d iterations.', i);
     if verbose > 1
@@ -164,7 +165,7 @@ end
 
 %% attempt to pick fastest linear solver, if not specified
 if isempty(lin_solver)
-    nf = length(F);
+    nf = length(f);
     if nf <= 10 || have_fcn('octave')
         lin_solver = '\';       %% default \ operator
     else    %% MATLAB and nf > 10
@@ -173,32 +174,30 @@ if isempty(lin_solver)
 end
 
 %% save history
-hist(i+1).normF = normF;
+hist(i+1).normf = normf;
 
 %% do Newton iterations
 while (~eflag && i < max_it)
     %% update iteration counter
     i = i + 1;
 
-    %% compute update step
-    dx = mplinsolve(J, -F, lin_solver);
-
-    %% update voltage
+    %% update x
+    dx = mplinsolve(J, -f, lin_solver);     %% compute update step
     x = x + dx;
 
-    %% evalute F(x) and J(x)
-    [F, J] = fcn(x);
+    %% evalute f(x) and J(x)
+    [f, J] = fcn(x);
 
     %% check for convergence
-    normF = norm(F, inf);
+    normf = norm(f, inf);
     if verbose > 1
-        fprintf('\n%3d     %10.3e', i, normF);
+        fprintf('\n%3d     %10.3e', i, normf);
     end
 
     %% save history
-    hist(i+1).normF = normF;
+    hist(i+1).normf = normf;
 
-    if normF < tol
+    if normf < tol
         eflag = 1;
         msg = sprintf('Newton''s method converged in %d iterations.', i);
     end
