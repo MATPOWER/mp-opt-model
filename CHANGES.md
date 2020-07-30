@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 7/30/20
+  - Add fast-decoupled Newton's and Gauss-Seidel solvers for nonlinear
+    equations. Use `alg = 'FD'` and `alg = 'GS'` with `nleqs_master()`.
+    See also `nleqs_fd_newton()` and `nleqs_gauss_seidel()`.
+
 #### 7/29/20
   - Allow `solve()` method to pass along number of requested output
     arguments `*_master()` solver functions.

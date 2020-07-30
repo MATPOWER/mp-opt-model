@@ -1224,8 +1224,10 @@ The calling syntax for \code{nleqs\_master} is identical to that used by \code{f
 \toprule
 name & description \\
 \midrule
-\code{fcn}	& Handle to a function that evaluates the function $f(x)$ and its Jacobian $J(x)$ for a given value of $x$. Calling syntax for this function:	\\
+\code{fcn}	& Handle to a function that evaluates the function $f(x)$ and optionally its Jacobian $J(x)$ for a given value of $x$. Calling syntax for this function is:	\\
+&~~~~\code{f = fcn(x)}, or	\\
 &~~~~\code{[f, J] = fcn(x)}	\\
+& Whether \code{fcn} is required to return the Jacobian or not depends on the selected solver algorithm. \\
 \code{x0}	& Starting value of vector $x$.	\\
 \code{opt}\tnote{\dag}	& Options structure with fields, all of which are also optional, described in Table~\ref{tab:nleqs_master_options}. \\
 \code{problem}	& Alternative, single argument input struct with fields corresponding to arguments above.	\\
@@ -1287,7 +1289,9 @@ name & default & description \\
 && \begin{tabular}{c @{ -- } p{0.5\textwidth}}
 \codeq{DEFAULT} & automatic, current default is \codeq{NEWTON} \\
 \codeq{NEWTON} & Newton's method \\
+\codeq{FD} & fast-decoupled Newton's method\tnote{\dag} \\
 \codeq{FSOLVE} & \matlab{} Opt Toolbox, \code{fsolve}\tnote{*} \\
+\codeq{GS} & Gauss-Seidel method\tnote{\ddag} \\
 \end{tabular}	\\
 \code{verbose}	& 1	& amount of progress info to be printed \\
 && \begin{tabular}{r @{ -- } l}
@@ -1295,23 +1299,28 @@ name & default & description \\
 1 & print a little progress info \\
 2 & print a lot of progress info \\
 \end{tabular}	\\
-\code{mips\_opt}	& \emph{empty}	& options struct for \mips{} \\
-\code{fmincon\_opt}	& \emph{empty}	& options struct for \code{fmincon}\tnote{*} \\
-\code{ipopt\_opt}	& \emph{empty}	& options struct for \ipopt{}\tnote{*} \\
-\code{knitro\_opt}	& \emph{empty}	& options struct for \knitro{}\tnote{*} \\
+\code{max\_it}	& 0	& maximum number of iterations\tnote{\S} \\
+\code{tol}	& 0	& termination tolerance on $f(x)$\tnote{\S} \\
+\code{fd\_opt}	& \emph{empty}	& options struct for fast-decoupled Newton's method, \code{nleqs\_fd\_newton}\tnote{\dag} \\
+\code{fsolve\_opt}	& \emph{empty}	& options struct for \code{fsolve}\tnote{*} \\
+\code{gs\_opt}	& \emph{empty}	& options struct for Gauss-Seidel method, \code{nleqs\_gauss\_seidel}\tnote{\ddag} \\
+\code{newton\_opt}	& \emph{empty}	& options struct for Newton's method, \code{nleqs\_newton} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
  \scriptsize
  \item [*] {The \code{fsolve()} function is included with GNU Octave, but on \matlab{} it is part of the \matlab{} \ot{}. See Appendix~\ref{app:optional_packages} for more information on the \matlab{} \ot{}.}
+ \item [\dag] {Fast-decoupled Newton requires setting \code{fd\_opt.jac\_approx\_fcn} to a function handle that returns Jacobian approximations. See \code{help nleqs\_fd\_newton} for more details.}
+ \item [\ddag] {Gauss-Seidel requires setting \code{gs\_opt.x\_update\_fcn} to a function handle that updates $x$. See \code{help nleqs\_gauss\_seidel} for more details.}
+ \item [\S] {A value of 0 indicates to use the solver's own default.}
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
 The \code{nleqs\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{nleqs\_fsolve} and \code{nleqs\_newton}. Each of these functions has an interface identical to that of \code{nleqs\_master}.
 
-\subsubsection{NLEQ Example}
-\label{sec:nleq_ex}
+\subsubsection{NLEQ Example 1}
+\label{sec:nleq_ex1}
 
 The following code, included as \code{nleqs\_master\_ex1.m} in \mpompath{lib/t}, shows a simple example of using \code{nleqs\_master} to solve a 2-dimensional nonlinear function\footnote{\url{https://www.chilimath.com/lessons/advanced-algebra/systems-non-linear-equations/}}
 \begin{equation}
@@ -1420,6 +1429,146 @@ jac =
    -4   1
 \end{Code}
 
+\subsubsection{NLEQ Example 2}
+\label{sec:nleq_ex2}
+
+The following code, included as \code{nleqs\_master\_ex2.m} in \mpompath{lib/t}, shows another simple example of using \code{nleqs\_master} to solve a 2-dimensional nonlinear function.\footnote{From Christi Patton Luks, \url{https://www.youtube.com/watch?v=pJG4yhtgerg}} This example includes the update function required for Gauss-Seidel and the Jacobian approximation function required for the fast-decoupled Newton's method.
+\begin{equation}
+f(x) = \left[\begin{array}{c}x_1^2 + x_1 x_2 - 10 \\
+x_2 + 3 x_1 x_2^2  - 57\end{array}\right]
+\end{equation}
+
+\begin{Code}
+function [f, J] = f2(x)
+f = [  x(1)^2 +   x(1)*x(2)   - 10;
+       x(2)   + 3*x(1)*x(2)^2 - 57  ];
+if nargout > 1
+    J = [   2*x(1)+x(2)    x(1);
+            3*x(2)^2       6*x(1)*x(2)+1    ];
+end
+\end{Code}
+
+\begin{Code}
+function JJ = jac_approx_fcn2()
+J = [7 2; 27 37];
+JJ = {J(1,1), J(2,2)};
+\end{Code}
+
+\begin{Code}
+function x = x_update_fcn2(x, f)
+x(1) = sqrt(10 - x(1)*x(2));
+x(2) = sqrt((57-x(2))/3/x(1));
+\end{Code}
+
+\begin{Code}
+function nleqs_master_ex2(alg)
+if nargin < 1
+    alg = 'DEFAULT';
+end
+x0 = [1; 2];
+opt = struct( ...
+    'verbose', 2, ...
+    'alg', alg, ...
+    'fd_opt', struct( ...
+        'jac_approx_fcn', @jac_approx_fcn2, ...
+        'labels', {{'P','Q'}}), ...
+    'gs_opt', struct('x_update_fcn', @x_update_fcn2) );
+[x, f, exitflag, output] = nleqs_master(@f2, x0, opt);
+fprintf('\nexitflag = %d\n', exitflag);
+fprintf('\nx = \n');
+fprintf('   %2g\n', x);
+fprintf('\nf = \n');
+fprintf('   %12g\n', f);
+\end{Code}
+
+\clearpage
+\noindent Fast-decoupled Newton example results:
+\begin{Code}
+>> nleqs_master_ex2('FD')    
+
+ iteration    max residual    max residual 
+block    #        f[P]            f[Q]     
+------ ----  --------------  --------------
+  -      0       7.000e+00       4.300e+01
+  P      1       2.000e+00       3.100e+01
+  Q      1       3.243e-01       5.842e+00
+  P      2       5.367e-03       4.723e+00
+  Q      2       2.558e-01       4.767e-02
+  P      3       7.894e-04       1.012e+00
+  Q      3       5.417e-02       2.058e-03
+  P      4       3.606e-05       2.100e-01
+  Q      4       1.133e-02       8.642e-05
+  P      5       1.583e-06       4.374e-02
+  Q      5       2.363e-03       3.727e-06
+  P      6       6.892e-08       9.116e-03
+  Q      6       4.927e-04       1.617e-07
+  P      7       2.997e-09       1.901e-03
+  Q      7       1.027e-04       7.028e-09
+  P      8       1.303e-10       3.963e-04
+  Q      8       2.142e-05       3.055e-10
+  P      9       5.665e-12       8.262e-05
+  Q      9       4.466e-06       1.327e-11
+  P     10       2.451e-13       1.723e-05
+  Q     10       9.311e-07       5.969e-13
+  P     11       1.066e-14       3.591e-06
+  Q     11       1.941e-07       1.421e-14
+  P     12       0.000e+00       7.488e-07
+  Q     12       4.048e-08       7.105e-15
+  P     13       0.000e+00       1.561e-07
+  Q     13       8.439e-09       7.105e-15
+Fast-decoupled Newton's method converged in 13 P- and 13 Q-iterations.
+
+exitflag = 1
+
+x = 
+    2
+    3
+
+f = 
+    8.43887e-09
+   -7.10543e-15
+\end{Code}
+
+\clearpage
+\noindent Gauss-Seidel example results:
+\begin{Code}
+>> nleqs_master_ex2('GS')
+
+ it     max residual
+----  ----------------
+  0      4.300e+01
+  1      5.201e+00
+  2      1.690e+00
+  3      6.481e-01
+  4      2.141e-01
+  5      7.413e-02
+  6      2.523e-02
+  7      8.638e-03
+  8      2.951e-03
+  9      1.009e-03
+ 10      3.449e-04
+ 11      1.179e-04
+ 12      4.030e-05
+ 13      1.378e-05
+ 14      4.709e-06
+ 15      1.610e-06
+ 16      5.503e-07
+ 17      1.881e-07
+ 18      6.430e-08
+ 19      2.198e-08
+ 20      7.513e-09
+Gauss-Seidel method converged in 20 iterations.
+
+exitflag = 1
+
+x = 
+    2
+    3
+
+f = 
+   -7.51313e-09
+    4.48558e-09
+\end{Code}
 
 %%------------------------------------------
 \clearpage
@@ -2531,31 +2680,28 @@ name & description \\
 \caption{Solver Functions}
 \label{tab:solvers}
 \footnotesize
-\begin{tabular}{p{0.15\textwidth}p{0.78\textwidth}}
+\begin{tabular}{p{0.19\textwidth}p{0.74\textwidth}}
 \toprule
 name & description \\
 \midrule
-\code{clp\_options}	& default options for \clp{} solver\tnote{\dag}	\\
-\code{cplex\_options}	& default options for \cplex{} solver\tnote{\dag}	\\
-\code{glpk\_options}	& default options for \glpk{} solver\tnote{\dag}	\\
-\code{gurobi\_options}	& default options for \gurobi{} solver\tnote{\dag}	\\
-\code{gurobiver}	& prints version information for \gurobi{}/Gurobi\_MEX	\\
-\code{ipopt\_options}	& default options for \ipopt{} solver\tnote{\dag}	\\
 \code{miqps\_master}	& Mixed-Integer Quadratic Program Solver wrapper function, provides a unified interface for various MIQP/MILP solvers	\\
 \code{miqps\_cplex}	& MIQP/MILP solver API implementation for CPLEX (\code{cplexmiqp} and \code{cplexmilp})\tnote{\dag}	\\
 \code{miqps\_glpk}	& MILP solver API implementation for \glpk{}\tnote{\dag}	\\
 \code{miqps\_gurobi}	& MIQP/MILP solver API implementation for \gurobi{}\tnote{\dag}	\\
 \code{miqps\_mosek}	& MIQP/MILP solver API implementation for \mosek{} (\code{mosekopt})\tnote{\dag}	\\
 \code{miqps\_ot}	& QP/MILP solver API implementation for \matlab{} Opt Toolbox's \code{intlinprog}, \code{quadprog}, \code{linprog}	\\
-\code{mosek\_options}	& default options for \mosek{} solver\tnote{\dag}	\\
-\code{mosek\_symbcon}	& symbolic constants to use for \mosek{} solver options\tnote{\dag}	\\
+\midrule
 \code{nleqs\_master}	& Nonlinear Equation Solver wrapper function, provides a unified interface for various nonlinear equation (NLEQ) solvers	\\
+\code{nleqs\_fd\_newton}	& NLEQ solver API implementation for fast-decoupled Newton's method solver	\\
 \code{nleqs\_fsolve}	& NLEQ solver API implementation for \code{fsolve}	\\
+\code{nleqs\_gauss\_seidel}	& NLEQ solver API implementation for Gauss-Seidel method solver	\\
 \code{nleqs\_newton}	& NLEQ solver API implementation for Newton's method solver	\\
+\midrule
 \code{nlps\_master}	& Nonlinear Program Solver wrapper function, provides a unified interface for various NLP solvers	\\
 \code{nlps\_fmincon}	& NLP solver API implementation for \matlab{} Opt Toolbox's \code{fmincon}	\\
 \code{nlps\_ipopt}	& NLP solver API implementation for \ipopt{}-based solver\tnote{\dag}	\\
 \code{nlps\_knitro}	& NLP solver API implementation for \knitro{}-based solver\tnote{\dag}	\\
+\midrule
 \code{qps\_master}	& Quadratic Program Solver wrapper function, provides a unified interface for various QP/LP solvers	\\
 \code{qps\_bpmpd}	& QP/LP solver API implementation for BPMPD\_MEX\tnote{\dag}	\\
 \code{qps\_clp}	& QP/LP solver API implementation for \clp{}\tnote{\dag}	\\
@@ -2565,10 +2711,38 @@ name & description \\
 \code{qps\_ipopt}	& QP/LP solver API implementation for \ipopt{}-based solver\tnote{\dag}	\\
 \code{qps\_mosek}	& QP/LP solver API implementation for \mosek{} (\code{mosekopt})\tnote{\dag}	\\
 \code{qps\_ot}	& QP/LP solver API implementation for \matlab{} Opt Toolbox's \code{quadprog}, \code{linprog}	\\
-& \\
+\midrule
 \multicolumn{2}{c}{\emph{deprecated functions}} \\
 \code{miqps\_matpower}	& use \code{miqps\_master} instead	\\
 \code{qps\_matpower}	& use \code{qps\_master} instead	\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {Requires the installation of an optional package. See Appendix~\ref{app:optional_packages} for details on the corresponding package.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Solver Options, etc.}
+\label{tab:solver_options}
+\footnotesize
+\begin{tabular}{p{0.19\textwidth}p{0.74\textwidth}}
+\toprule
+name & description \\
+\midrule
+\code{clp\_options}	& default options for \clp{} solver\tnote{\dag}	\\
+\code{cplex\_options}	& default options for \cplex{} solver\tnote{\dag}	\\
+\code{glpk\_options}	& default options for \glpk{} solver\tnote{\dag}	\\
+\code{gurobi\_options}	& default options for \gurobi{} solver\tnote{\dag}	\\
+\code{gurobiver}	& prints version information for \gurobi{}/Gurobi\_MEX	\\
+\code{ipopt\_options}	& default options for \ipopt{} solver\tnote{\dag}	\\
+\code{mosek\_options}	& default options for \mosek{} solver\tnote{\dag}	\\
+\code{mosek\_symbcon}	& symbolic constants to use for \mosek{} solver options\tnote{\dag}	\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -2698,10 +2872,11 @@ name & description \\
 name & description \\
 \midrule
 \code{lib/t/}	& \mpom{} examples \& tests	\\
-\code{~~nleqs\_master\_ex1}	& code for NLEQ Example (see Section~\ref{sec:nleq_ex}) for \code{nleqs\_master}	\\
+\code{~~nleqs\_master\_ex1}	& code for NLEQ Example 1 (see Section~\ref{sec:nleq_ex1}) for \code{nleqs\_master}	\\
+\code{~~nleqs\_master\_ex2}	& code for NLEQ Example 2 (see Section~\ref{sec:nleq_ex2}) for \code{nleqs\_master}	\\
 \code{~~nlps\_master\_ex1}	& code for NLP Example 1 (see Section~\ref{sec:nlp_ex1}) for \code{nlps\_master}	\\
 \code{~~nlps\_master\_ex2}	& code for NLP Example 2 (see Section~\ref{sec:nlp_ex2}) for \code{nlps\_master}	\\
-\code{~~qp\_ex1}	& code for QP example from Section~\ref{sec:usage}	\\
+\code{~~qp\_ex1}	& code for QP Example from Section~\ref{sec:usage}	\\
 \code{~~test\_mp\_opt\_model}	& runs full \mpom{} test suite	\\
 \code{~~t\_have\_fcn}	& runs tests for \code{have\_fcn}	\\
 \code{~~t\_miqps\_master}	& runs tests of MILP/MIQP solvers via \code{miqps\_master}	\\
@@ -2955,10 +3130,11 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item 
+\item Add fast-decoupled Newton's and Gauss-Seidel solvers for nonlinear equations.
 \item New functions:
     \begin{itemize}
-    \item \code{foobar()} does whizbang.
+    \item \code{nleqs\_fd\_newton()} solves a nonlinear set of equations via a fast-decoupled Newton's method.
+    \item \code{nleqs\_gauss\_seidel()} solves a nonlinear set of equations via a Gauss-Seidel method.
     \end{itemize}
 \end{itemize}
 

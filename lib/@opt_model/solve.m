@@ -38,9 +38,11 @@ function varargout = solve(om, opt)
 %               'BPMPD'   : (LP, QP) BPMPD_MEX
 %               'CLP'     : (LP, QP) CLP
 %               'CPLEX'   : (LP, QP, MILP, MIQP) CPLEX
+%               'FD'      : (NLEQ) fast-decoupled Newon's method
 %               'FMINCON' : (NLP) FMINCON, MATLAB Optimization Toolbox
 %               'FSOLVE'  : (NLEQ) FSOLVE, MATLAB Optimization Toolbox
 %               'GLPK'    : (LP, MILP) GLPK
+%               'GS'      : (NLEQ) Gauss-Seidel
 %               'GUROBI'  : (LP, QP, MILP, MIQP) Gurobi
 %               'IPOPT'   : (LP, QP, NLP) IPOPT, requires MEX interface to IPOPT solver
 %                           https://github.com/coin-or/Ipopt

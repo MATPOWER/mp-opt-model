@@ -31,7 +31,7 @@ function varargout = nleqs_master(fcn, x0, opt)
 %               2 = verbose progress output
 %           max_it (0) - maximum number of iterations
 %                       (0 means use solver's own default)
-%           tol (0) - tolerance on f(x)
+%           tol (0) - termination tolerance on f(x)
 %                       (0 means use solver's own default)
 %           newton_opt - options struct for Newton's method, NLEQS_NEWTON
 %           fd_opt - options struct for fast-decoupled Newton, NLEQS_FD_NEWTON
@@ -118,10 +118,15 @@ end
 
 %%----- call the appropriate solver  -----
 switch alg
-    case 'NEWTON'               %% use Newton solver
-        [varargout{1:nargout}] = nleqs_newton(fcn, x0, opt);
+    case 'NEWTON'               %% use Newton's method solver
+        nleqs_fcn = @nleqs_newton;
+    case 'FD'                   %% use fast-decoupled Newton's method solver
+        nleqs_fcn = @nleqs_fd_newton;
     case 'FSOLVE'               %% use fsolve
-        [varargout{1:nargout}] = nleqs_fsolve(fcn, x0, opt);
+        nleqs_fcn = @nleqs_fsolve;
+    case 'GS'                   %% use Gauss-Seidel solver
+        nleqs_fcn = @nleqs_gauss_seidel;
     otherwise
         error('nleqs_master: ''%s'' is not a valid algorithm code', alg);
 end
+[varargout{1:nargout}] = nleqs_fcn(fcn, x0, opt);
