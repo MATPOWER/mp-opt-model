@@ -1,4 +1,4 @@
-function [x, f, eflag, output, J] = nleqs_gauss_seidel(fcn, x0, opt)
+function varargout = nleqs_gauss_seidel(varargin)
 %NLEQS_GAUSS_SEIDEL  Nonlinear Equation Solver based on Gauss-Seidel method.
 %   [X, F, EXITFLAG, OUTPUT] = NLEQS_GAUSS_SEIDEL(FCN, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT] = NLEQS_GAUSS_SEIDEL(PROBLEM)
@@ -86,110 +86,34 @@ function [x, f, eflag, output, J] = nleqs_gauss_seidel(fcn, x0, opt)
 
 %%----- input argument handling  -----
 %% gather inputs
-if nargin == 1 && isstruct(fcn) %% problem struct
-    p = fcn;
+if nargin == 1 && isstruct(varargin{1}) %% problem struct
+    p = varargin{1};
     fcn = p.fcn;
     x0 = p.x0;
     if isfield(p, 'opt'),   opt = p.opt;    else,   opt = [];   end
-else                            %% individual args
+else                                    %% individual args
+    fcn = varargin{1};
+    x0  = varargin{2};
     if nargin < 3
         opt = [];
+    else
+        opt = varargin{3};
     end
 end
-nx = size(x0, 1);           %% number of variables
 
 %% set default options
-opt0 = struct(  'verbose', 0, ...
-                'max_it', 1000, ...
-                'tol', 1e-8 );
 if isempty(opt)
-    opt = opt0;
+    opt = struct();
 end
-if isfield(opt, 'verbose') && ~isempty(opt.verbose)
-    verbose = opt.verbose;
-else
-    verbose = opt0.verbose;
-end
-if isfield(opt, 'max_it') && opt.max_it     %% not empty or zero
-    max_it = opt.max_it;
-else
-    max_it = opt0.max_it;
-end
-if isfield(opt, 'tol') && opt.tol           %% not empty or zero
-    tol = opt.tol;
-else
-    tol = opt0.tol;
-end
-if isfield(opt, 'gs_opt') && isfield(opt.gs_opt, 'x_update_fcn')
-    x_update_fcn = opt.gs_opt.x_update_fcn;
-else
+if ~isfield(opt, 'gs_opt') || ~isfield(opt.gs_opt, 'x_update_fcn')
     error('nleqs_gauss_seidel: required ''gs_opt.x_update_fcn'' option missing');
 end
 
-%% initialize
-eflag = 0;
-i = 0;
-x = x0;
-hist(max_it+1) = struct('normf', 0);
+sp = struct( ...
+    'alg',              'GS', ...
+    'name',             'Gauss-Seidel', ...
+    'default_max_it',   1000, ...
+    'need_jac',         0, ...
+    'update_fcn',       opt.gs_opt.x_update_fcn  );
 
-%% evaluate f(x0)
-f = fcn(x);
-
-%% check tolerance
-normf = norm(f, inf);
-if verbose > 1
-    fprintf('\n it     max residual');
-    fprintf('\n----  ----------------');
-    fprintf('\n%3d     %10.3e', i, normf);
-end
-if normf < tol
-    eflag = 1;
-    msg = sprintf('Gauss-Seidel method converged in %d iterations.', i);
-    if verbose > 1
-        fprintf('\nConverged!\n');
-    end
-end
-
-%% save history
-hist(i+1).normf = normf;
-
-%% do Gauss-Seidel iterations
-while (~eflag && i < max_it)
-    %% update iteration counter
-    i = i + 1;
-
-    %% update x
-    x = x_update_fcn(x, f);
-
-    %% evalute f(x)
-    f = fcn(x);
-
-    %% check for convergence
-    normf = norm(f, inf);
-    if verbose > 1
-        fprintf('\n%3d     %10.3e', i, normf);
-    end
-
-    %% save history
-    hist(i+1).normf = normf;
-
-    if normf < tol
-        eflag = 1;
-        msg = sprintf('Gauss-Seidel method converged in %d iterations.', i);
-    end
-end
-if eflag ~= 1
-    msg = sprintf('Gauss-Seidel method did not converge in %d iterations.', i);
-end
-if verbose
-    fprintf('\n%s\n', msg);
-end
-if nargout > 3
-    output = struct('alg', 'GS', ...
-                    'iterations', i, ...
-                    'hist', hist(1:i+1), ...
-                    'message', msg  );
-    if nargout > 4
-        J = [];
-    end
-end
+[varargout{1:nargout}] = nleqs_base(sp, fcn, x0, opt);

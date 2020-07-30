@@ -1,4 +1,4 @@
-function [x, f, eflag, output, J] = nleqs_newton(fcn, x0, opt)
+function varargout = nleqs_newton(varargin)
 %NLEQS_NEWTON  Nonlinear Equation Solver based on Newton's method.
 %   [X, F, EXITFLAG, OUTPUT, JAC] = NLEQS_NEWTON(FCN, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, JAC] = NLEQS_NEWTON(PROBLEM)
@@ -99,39 +99,24 @@ function [x, f, eflag, output, J] = nleqs_newton(fcn, x0, opt)
 
 %%----- input argument handling  -----
 %% gather inputs
-if nargin == 1 && isstruct(fcn) %% problem struct
-    p = fcn;
+if nargin == 1 && isstruct(varargin{1}) %% problem struct
+    p = varargin{1};
     fcn = p.fcn;
     x0 = p.x0;
     if isfield(p, 'opt'),   opt = p.opt;    else,   opt = [];   end
-else                            %% individual args
+else                                    %% individual args
+    fcn = varargin{1};
+    x0  = varargin{2};
     if nargin < 3
         opt = [];
+    else
+        opt = varargin{3};
     end
 end
-nx = size(x0, 1);           %% number of variables
 
 %% set default options
-opt0 = struct(  'verbose', 0, ...
-                'max_it', 10, ...
-                'tol', 1e-8 );
 if isempty(opt)
-    opt = opt0;
-end
-if isfield(opt, 'verbose') && ~isempty(opt.verbose)
-    verbose = opt.verbose;
-else
-    verbose = opt0.verbose;
-end
-if isfield(opt, 'max_it') && opt.max_it     %% not empty or zero
-    max_it = opt.max_it;
-else
-    max_it = opt0.max_it;
-end
-if isfield(opt, 'tol') && opt.tol           %% not empty or zero
-    tol = opt.tol;
-else
-    tol = opt0.tol;
+    opt = struct();
 end
 if isfield(opt, 'newton_opt') && isfield(opt.newton_opt, 'lin_solver')
     lin_solver = opt.newton_opt.lin_solver;
@@ -139,78 +124,25 @@ else
     lin_solver = '';
 end
 
-%% initialize
-eflag = 0;
-i = 0;
-x = x0;
-hist(max_it+1) = struct('normf', 0);
-
-%% evaluate f(x0)
-[f, J] = fcn(x);
-
-%% check tolerance
-normf = norm(f, inf);
-if verbose > 1
-    fprintf('\n it     max residual');
-    fprintf('\n----  ----------------');
-    fprintf('\n%3d     %10.3e', i, normf);
-end
-if normf < tol
-    eflag = 1;
-    msg = sprintf('Newton''s method converged in %d iterations.', i);
-    if verbose > 1
-        fprintf('\nConverged!\n');
-    end
-end
-
 %% attempt to pick fastest linear solver, if not specified
 if isempty(lin_solver)
-    nf = length(f);
-    if nf <= 10 || have_fcn('octave')
+    nx = size(x0, 1);           %% number of variables
+    if nx <= 10 || have_fcn('octave')
         lin_solver = '\';       %% default \ operator
-    else    %% MATLAB and nf > 10
+    else    %% MATLAB and nx > 10
         lin_solver = 'LU3';     %% LU decomp with 3 output args, AMD ordering
     end
 end
 
-%% save history
-hist(i+1).normf = normf;
+sp = struct( ...
+    'alg',              'NEWTON', ...
+    'name',             'Newton''s', ...
+    'default_max_it',   10, ...
+    'need_jac',         1, ...
+    'update_fcn',       @(x, f, J)newton_update_fcn(x, f, J, lin_solver)  );
 
-%% do Newton iterations
-while (~eflag && i < max_it)
-    %% update iteration counter
-    i = i + 1;
+[varargout{1:nargout}] = nleqs_base(sp, fcn, x0, opt);
 
-    %% update x
-    dx = mplinsolve(J, -f, lin_solver);     %% compute update step
-    x = x + dx;
-
-    %% evalute f(x) and J(x)
-    [f, J] = fcn(x);
-
-    %% check for convergence
-    normf = norm(f, inf);
-    if verbose > 1
-        fprintf('\n%3d     %10.3e', i, normf);
-    end
-
-    %% save history
-    hist(i+1).normf = normf;
-
-    if normf < tol
-        eflag = 1;
-        msg = sprintf('Newton''s method converged in %d iterations.', i);
-    end
-end
-if eflag ~= 1
-    msg = sprintf('Newton''s method did not converge in %d iterations.', i);
-end
-if verbose
-    fprintf('\n%s\n', msg);
-end
-if nargout > 3
-    output = struct('alg', 'NEWTON', ...
-                    'iterations', i, ...
-                    'hist', hist(1:i+1), ...
-                    'message', msg  );
-end
+function x = newton_update_fcn(x, f, J, lin_solver)
+dx = mplinsolve(J, -f, lin_solver);     %% compute update step
+x = x + dx;                             %% update x
