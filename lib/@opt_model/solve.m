@@ -30,6 +30,7 @@ function varargout = solve(om, opt)
 %                   MIQP - Gurobi, CPLEX, MOSEK
 %                   NLP - MIPS
 %                   MINLP - Artelys Knitro (not yet implemented)
+%                   NLEQ - Newton's method
 %               'MIPS'    : (LP, QP, NLP) MIPS, MATPOWER Interior Point Solver
 %                        pure MATLAB implementation of a primal-dual
 %                        interior point method, if mips_opt.step_control = 1
@@ -38,6 +39,7 @@ function varargout = solve(om, opt)
 %               'CLP'     : (LP, QP) CLP
 %               'CPLEX'   : (LP, QP, MILP, MIQP) CPLEX
 %               'FMINCON' : (NLP) FMINCON, MATLAB Optimization Toolbox
+%               'FSOLVE'  : (NLEQ) FSOLVE, MATLAB Optimization Toolbox
 %               'GLPK'    : (LP, MILP) GLPK
 %               'GUROBI'  : (LP, QP, MILP, MIQP) Gurobi
 %               'IPOPT'   : (LP, QP, NLP) IPOPT, requires MEX interface to IPOPT solver
@@ -45,6 +47,7 @@ function varargout = solve(om, opt)
 %               'KNITRO'  : (NLP, MINLP) Artelys Knitro, requires Artelys Knitro solver
 %                           https://www.artelys.com/solvers/knitro/
 %               'MOSEK'   : (LP, QP, MILP, MIQP) MOSEK
+%               'NEWTON'  : (NLEQ) Newton's method
 %               'OT'      : (LP, QP, MILP) MATLAB Optimization Toolbox,
 %                           LINPROG, QUADPROG or INTLINPROG
 %           bp_opt      - options vector for BP
