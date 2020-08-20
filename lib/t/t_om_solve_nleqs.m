@@ -36,7 +36,7 @@ else    %% octave
     };
 end
 
-n = 10;
+n = 12;
 
 t_begin(n*length(cfg), quiet);
 
@@ -70,6 +70,14 @@ for k = 1:length(cfg)
                 t_is(e, 1, 12, [t 'success']);
                 t_is(x, [-3; 4], 8, [t 'x']);
                 t_is(f, 0, 10, [t 'f']);
+                if strcmp(alg, 'DEFAULT')
+                    out_alg = 'NEWTON';
+                else
+                    out_alg = alg;
+                end
+                t_ok(strcmp(out.alg, out_alg), [t 'out.alg']);
+                eJ = [1 1; 6 1];
+                t_is(J, eJ, 5.8, [t 'J']);
 
                 t = sprintf('%s - 2-d function (max_it) : ', name);
                 opt.max_it = 3;
@@ -78,7 +86,7 @@ for k = 1:length(cfg)
                 t_ok(out.iterations == 3 || out.iterations == 4, [t 'iterations']);
                 opt = rmfield(opt, 'max_it');
             otherwise
-                t_skip(5, sprintf('not implemented for solver ''%s''', alg));
+                t_skip(7, sprintf('not implemented for solver ''%s''', alg));
         end
         
         t = sprintf('%s - 2-d function2 (struct) : ', name);

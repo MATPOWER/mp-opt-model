@@ -183,7 +183,7 @@ if nargout > 3
                     'iterations', i, ...
                     'hist', hist(1:i+1), ...
                     'message', msg  );
-    if nargout > 4
+    if nargout > 4 && ~sp.need_jac
         J = [];
     end
 end

@@ -36,7 +36,7 @@ else    %% octave
     };
 end
 
-n = 13;
+n = 15;
 
 t_begin(n*length(cfg), quiet);
 
@@ -67,6 +67,14 @@ for k = 1:length(cfg)
                 t_is(e, 1, 12, [t 'success']);
                 t_is(x, [-3; 4], 8, [t 'x']);
                 t_is(f, 0, 10, [t 'f']);
+                if strcmp(alg, 'DEFAULT')
+                    out_alg = 'NEWTON';
+                else
+                    out_alg = alg;
+                end
+                t_ok(strcmp(out.alg, out_alg), [t 'out.alg']);
+                eJ = [1 1; 6 1];
+                t_is(J, eJ, 5.8, [t 'J']);
 
                 t = sprintf('%s - 2-d function (struct) : ', name);
                 p = struct('fcn', @f1, 'x0', [1;0], 'opt', opt);
@@ -81,7 +89,7 @@ for k = 1:length(cfg)
                 t_is(e, 0, 12, [t 'no success']);
                 t_ok(out.iterations == 3 || out.iterations == 4, [t 'iterations']);
             otherwise
-                t_skip(8, sprintf('not implemented for solver ''%s''', alg));
+                t_skip(10, sprintf('not implemented for solver ''%s''', alg));
         end
         
         t = sprintf('%s - 2-d function2 (struct) : ', name);
