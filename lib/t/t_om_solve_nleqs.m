@@ -140,7 +140,7 @@ end
 f = [  x(1)   + x(2) - 1;
       -x(1)^2 + x(2) + 5    ];
 if nargout > 1
-    J = [1 1; -2*x(1) 1];
+    J = sparse([1 1; -2*x(1) 1]);
 end
 
 %% another 2-d problem
@@ -149,8 +149,8 @@ function [f, J] = f2(x)
 f = [  x(1)^2 +   x(1)*x(2)   - 10;
        x(2)   + 3*x(1)*x(2)^2 - 57  ];
 if nargout > 1
-    J = [   2*x(1)+x(2)    x(1);
-            3*x(2)^2       6*x(1)*x(2)+1    ];
+    J = sparse([    2*x(1)+x(2)    x(1);
+                    3*x(2)^2       6*x(1)*x(2)+1    ]);
 end
 
 function JJ = jac_approx_fcn2()
