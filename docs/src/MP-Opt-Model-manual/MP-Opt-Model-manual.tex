@@ -230,7 +230,7 @@
 \numberwithin{figure}{section}
 \renewcommand{\thefigure}{\thesection\mbox{-}\arabic{figure}}
 
-% \externaldocument[MIPSMAN-]{MIPS-manual}[\mipsmanurl]
+\externaldocument[MIPSMAN-]{MIPS-manual}[\mipsmanurl]
 % \externaldocument[MOSTMAN-]{MOST-manual}[\mostmanurl]
 
 
@@ -401,17 +401,18 @@ We will use \mpompath{} to denote the path to this directory.
 >> test_mp_opt_model
 t_nested_struct_copy....ok
 t_have_fcn..............ok
-t_nleqs_master..........ok
+t_nleqs_master..........ok (20 of 120 skipped)
 t_qps_master............ok (100 of 396 skipped)
 t_miqps_master..........ok (68 of 288 skipped)
 t_nlps_master...........ok
 t_opt_model.............ok
-t_om_solve_nleqs........ok
+t_om_solve_leqs.........ok
+t_om_solve_nleqs........ok (24 of 136 skipped)
 t_om_solve_qps..........ok (79 of 319 skipped)
 t_om_solve_miqps........ok (12 of 72 skipped)
 t_om_solve_nlps.........ok
-All tests successful (2519 passed, 259 skipped of 2778)
-Elapsed time 2.52 seconds.
+All tests successful (2671 passed, 303 skipped of 2974)
+Elapsed time 2.84 seconds.
 \end{Code}
 \end{enumerate}
 
@@ -532,7 +533,7 @@ The first part consists of interfaces to various numerical optimization solvers 
 \item linear (LP) and quadratic (QP) programming problems
 \item mixed-integer linear (MILP) and quadratic (MIQP) programming problems
 \item nonlinear programming problems (NLP)
-\item nonlinear nonlinear equations (NLEQ)
+\item nonlinear equations (NLEQ)
 \end{itemize}
 
 The second part consists of an optimization model class designed to help the user construct an optimization problem by adding variables, constraints and costs, then solve the problem and extract the solution in terms of the individual sets of variables, constraints and costs provided.
@@ -973,7 +974,7 @@ alg & algorithm code of solver used \\
 \code{mu\_u} & upper (right-hand) limit on linear constraints	\\
 \code{lower} & lower bound on optimization variables	\\
 \code{upper} & upper bound on optimization variables	\\
-\end{tabular} 	\\
+\end{tabular}	\\
 \bottomrule
 \end{tabular}
 \end{threeparttable}
@@ -1575,7 +1576,7 @@ f =
 \section{Optimization Model Class -- {\tt opt\_model}}
 \label{sec:opt_model}
 
-The \code{opt\_model} class provides facilities for constructing an optimization problem by adding and managing the indexing of sets of variables, constraints and costs. The model can then be solved by simply calling the \code{solve} method which automatically selects and calls the appropriate master solver function, i.e. \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, or \code{nleqs\_master}, depending on the type of problem.
+The \code{opt\_model} class provides facilities for constructing an optimization problem by adding and managing the indexing of sets of variables, constraints and costs. The model can then be solved by simply calling the \code{solve} method which automatically selects and calls the appropriate master solver function, i.e. \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, \code{nleqs\_master} or \code{mplinsolve}, depending on the type of problem.
 
 In this manual, and in the code, \code{om} is the name of the variable used by convention for the optimization model object, which is typically created by calling the constructor \code{opt\_model} with no arguments.
 
@@ -1830,9 +1831,9 @@ See Section~\ref{sec:indexed_sets} for details on indexed named sets and the \co
 [x, f, exitflag, output, lambda] = om.solve(opt)
 \end{Code}
 
-After all variables, constraints and costs have been added to the model, the optimization problem can be solved simply by calling the \code{solve} method. This method automatically selects and calls, depending on the problem type, one of the master solver interface functions from Section~\ref{sec:master_solvers}, namely \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, or \code{nleqs\_master}. Note, the nonlinear equation solver \code{nleqs\_master} is chosen, rather than the NLP solver \code{nlps\_master} if the problem is nonlinear, but has only equality constraints, with no costs or inequality constraints defined.
+After all variables, constraints and costs have been added to the model, the optimization problem can be solved simply by calling the \code{solve} method. This method automatically selects and calls, depending on the problem type, \code{mplinsolve} or one of the master solver interface functions from Section~\ref{sec:master_solvers}, namely \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, or \code{nleqs\_master}. Note that one of the equation solvers, \code{mplinsolve} or \code{nleqs\_master} is chosen if the model has only equality constraints, with no costs and no inequality constraints.
 
-For details on the return values and the input options struct \code{opt}, see the descriptions of the individual solver functions in Sections~\ref{sec:qps_master}, \ref{sec:miqps_master}, and \ref{sec:nlps_master}.
+For details on the return values and the input options struct \code{opt}, see the descriptions of the individual solver functions in Sections~\ref{sec:qps_master}, \ref{sec:miqps_master}, \ref{sec:nlps_master}, and \ref{sec:nleqs_master}. For linear equations, the \code{solver} and \code{opt} arguments for \code{mplinsolve}, described in Section~\ref{MIPSMAN-sec:mplinsolve} of the \mipsman{}, can be provided in \code{opt.leq\_opt.solver} and \code{opt.leq\_opt.opt}, respectively.
 
 \subsection{Accessing the Model}
 
@@ -2236,13 +2237,18 @@ Returns 1 if any of the variables are binary or integer, 0 otherwise.
 \begin{Code}
 prob_type = om.problem_type()
 \end{Code}
-Returns a string identifying the type of mathematical program represented by the current model. The string is one of the following:
+Returns a string identifying the type of mathematical program represented by the current model, based on the variables, costs,and constraints that have been added to the model. Used to automatically select an appropriate solver. 
+
+Linear and nonlinear equations are models with no costs, no inequality constraints, and an equal number of continuous variables and equality constraints.
+
+The \code{prob\_type} string is one of the following:
 \begin{itemize}
 \setlength{\parskip}{-6pt}%
+\item \codeq{LEQ} – linear equation
+\item \codeq{NLEQ} – nonlinear equation
 \item \codeq{LP} – linear program
 \item \codeq{QP} – quadratic program
 \item \codeq{NLP} – nonlinear program
-\item \codeq{NLEQ} – nonlinear equation
 \item \codeq{MILP} – mixed-integer linear program
 \item \codeq{MIQP} – mixed-integer quadratic program
 \item \codeq{MINLP} – mixed-integer nonlinear program\footnote{\mpom{} does not yet implement solving MINLP problems.}
@@ -2884,6 +2890,7 @@ name & description \\
 \code{~~t\_nested\_struct\_copy}	& runs tests for \code{nested\_struct\_copy}	\\
 \code{~~t\_nleqs\_master}	& runs tests of NLEQ solvers via \code{nleqs\_master}	\\
 \code{~~t\_nlps\_master}	& runs tests of NLP solvers via\code{nlps\_master}	\\
+\code{~~t\_om\_solve\_leqs}	& runs tests of LEQ solvers via \code{om.solve()}	\\
 \code{~~t\_om\_solve\_miqps}	& runs tests of MILP/MIQP solvers via \code{om.solve()}	\\
 \code{~~t\_om\_solve\_nleqs}	& runs tests of NLEQ solvers via \code{om.solve()}	\\
 \code{~~t\_om\_solve\_nlps}	& runs tests of NLP solvers via \code{om.solve()}	\\
@@ -3131,7 +3138,9 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item Add fast-decoupled Newton's and Gauss-Seidel solvers for nonlinear equations.
+\item Fast-decoupled Newton's and Gauss-Seidel solvers for nonlinear equations.
+\item New linear equation (\codeq{LEQ}) problem type for models with equal number of variables and linear equality constraints, no costs, and no inequality or nonlinear equality constraints. Solved via \code{mplinsolve()}.
+\item The \code{solve()} method of \code{opt\_model} can now automatically handle mixed systems of equations, with both linear and nonlinear equality constraints.
 \item New functions:
     \begin{itemize}
     \item \code{nleqs\_fd\_newton()} solves a nonlinear set of equations via a fast-decoupled Newton's method.
@@ -3139,22 +3148,22 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 Use
     \end{itemize}
 \end{itemize}
 
-\subsubsection*{Bugs Fixed}
-\begin{itemize}
-\item 
-    \emph{Thanks to Fulano.}
-\end{itemize}
+% \subsubsection*{Bugs Fixed}
+% \begin{itemize}
+% \item 
+%     \emph{Thanks to Fulano.}
+% \end{itemize}
 
 \subsubsection*{Incompatible Changes}
 \begin{itemize}
 \item In \code{output} return value from \code{nleqs\_newton()}, changed the \code{normF} field of \code{output.hist} to \code{normf}, for consistency in using lowercase \code{f} everywhere.
 \end{itemize}
 
-\subsubsection*{Other Changes}
-\begin{itemize}
-\item 
-
-\end{itemize}
+% \subsubsection*{Other Changes}
+% \begin{itemize}
+% \item 
+% 
+% \end{itemize}
 
 
 % \subsection{Version 3.0 -- released ??? ?, 202?}

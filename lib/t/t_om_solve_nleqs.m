@@ -36,7 +36,7 @@ else    %% octave
     };
 end
 
-n = 12;
+n = 17;
 
 t_begin(n*length(cfg), quiet);
 
@@ -85,8 +85,28 @@ for k = 1:length(cfg)
                 t_is(e, 0, 12, [t 'no success']);
                 t_ok(out.iterations == 3 || out.iterations == 4, [t 'iterations']);
                 opt = rmfield(opt, 'max_it');
+
+                t = sprintf('%s - 5-d lin/nonlin function : ', name);
+                x0_1 = [-1;0];
+                x0_2 = [0;0;0];
+                A2 = sparse([2 -1 0; -3 1 -2; 0 5 -4]);
+                b2 = [-5; 1; -7];
+                x2 = [-2; 1; 3];
+                om = opt_model;
+                om.add_var('x1', 2, x0_1);
+                om.add_var('x2', 3, x0_2);
+                om.add_nln_constraint('f', 2, 1, @f1, [], {'x1'});
+                om.add_lin_constraint('Ax_b', A2, b2, b2, {'x2'});
+                [x, f, e, out, J] = om.solve(opt);
+                t_is(e, 1, 12, [t 'success']);
+                t_is(x, [-3; 4; -2; 1; 3], 8, [t 'x']);
+                t_is(f, 0, 10, [t 'f']);
+                t_ok(strcmp(out.alg, out_alg), [t 'out.alg']);
+                eJ = [[1 1; 6 1] zeros(2, 3);
+                      zeros(3, 2) A2 ];
+                t_is(J, eJ, 5.8, [t 'J']);
             otherwise
-                t_skip(7, sprintf('not implemented for solver ''%s''', alg));
+                t_skip(12, sprintf('not implemented for solver ''%s''', alg));
         end
         
         t = sprintf('%s - 2-d function2 (struct) : ', name);
@@ -114,6 +134,9 @@ t_end;
 %% 2-d problem with 2 solutions
 %% from https://www.chilimath.com/lessons/advanced-algebra/systems-non-linear-equations/
 function [f, J] = f1(x)
+if iscell(x)    %% in case it was part of a varset
+    x = x{1};
+end
 f = [  x(1)   + x(2) - 1;
       -x(1)^2 + x(2) + 5    ];
 if nargout > 1

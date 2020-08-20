@@ -5,6 +5,15 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 8/20/20
+  - Add linear equation (`'LEQ'`) problem type for models with equal
+    number of variables and linear equality constraints, no costs,
+    and no inequality or nonlinear equality constraints. Solved via
+    `mplinsolve()`.
+  - The `solve()` method of `opt_model` can now automatically handle
+    mixed systems of equations, with both linear and nonlinear equality
+    constraints.
+
 #### 7/30/20
   - Add fast-decoupled Newton's and Gauss-Seidel solvers for nonlinear
     equations. Use `alg = 'FD'` and `alg = 'GS'` with `nleqs_master()`.

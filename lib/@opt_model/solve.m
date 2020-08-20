@@ -65,6 +65,8 @@ function varargout = solve(om, opt)
 %           linprog_opt - options struct for LINPROG
 %           mips_opt    - options struct for MIPS
 %           mosek_opt   - options struct for MOSEK
+%           leq_opt     - options struct with 'solver' and 'opt' fields
+%               corresponding to the respective MPLINSOLVE args
 %           newton_opt  - options struct for Newton method, NLEQS_NEWTON
 %           quadprog_opt - options struct for QUADPROG
 %           x0 (empty)  - initial value of x, overrides value stored in model
@@ -115,40 +117,40 @@ end
 [A, l, u] = om.params_lin_constraint();
 
 pt = om.problem_type();
-if strcmp(pt, 'MINLP')          %% MINLP - mixed integer non-linear program
-    error('@opt_model/solve: not yet implemented for ''MINLP'' problems.')
-elseif strcmp(pt, 'NLEQ')       %% NLEQ - nonlinear equation
-    x0 = om.params_var();
-    fcn = @(x)eval_nln_constraint(om, x, 1);
-    [varargout{1:nargout}] = nleqs_master(fcn, x0, opt);
-elseif strcmp(pt, 'NLP')        %% NLP  - nonlinear program
-    %% optimization vars, bounds, types
-    [x0, xmin, xmax] = om.params_var();
-    if isfield(opt, 'x0')
-        x0 = opt.x0;
-    end
-
-    %% run solver
-    f_fcn = @(x)nlp_costfcn(om, x);
-    gh_fcn = @(x)nlp_consfcn(om, x);
-    hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(om, x, lambda, cost_mult);
-    [varargout{1:nargout}] = ...
-        nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
-else                            %% LP, QP, MILP or MIQP
-    %% get cost parameters
-    [HH, CC, C0] = om.params_quad_cost();
-
-    if strcmp(pt(1:2), 'MI')    %% MILP, MIQP - mixed integer linear/quadratic program
-        %% optimization vars, bounds, types
-        [x0, xmin, xmax, vtype] = om.params_var();
-        if isfield(opt, 'x0')
-            x0 = opt.x0;
+switch pt
+    case 'MINLP'        %% MINLP - mixed integer non-linear program
+        error('@opt_model/solve: not yet implemented for ''MINLP'' problems.')
+    case 'LEQ'          %% LEQ   - linear equations
+        if isfield(opt, 'leq_opt')
+            if isfield(opt.leq_opt, 'solver')
+                leq_solver = opt.leq_opt.solver;
+            else
+                leq_solver = '';
+            end
+            if isfield(opt.leq_opt, 'opt')
+                leq_opt = opt.leq_opt.opt;
+            else
+                leq_opt = struct();
+            end
         end
-
-        %% run solver
-        [varargout{1:nargout}] = ...
-            miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
-    else                        %% LP, QP - linear/quadratic program
+        [A, b, ~] = om.params_lin_constraint();
+        x = mplinsolve(A, b, leq_solver, leq_opt);
+        tmp = {x, [], 1, struct('alg', leq_solver), A};
+        if nargout > 1
+            tmp{2} = A*x - b;
+        end
+        varargout = tmp(1:nargout);
+    case 'NLEQ'         %% NLEQ  - nonlinear equations
+        x0 = om.params_var();
+        if om.getN('lin')
+            [A, b, ~] = om.params_lin_constraint();
+            fcn = @(x)nleq_fcn_(om, x, A, b);
+        else
+            fcn = @(x)om.eval_nln_constraint(x, 1);
+            fcn = @(x)nleq_fcn_(om, x, sparse(0, om.getN('var')), []);
+        end
+        [varargout{1:nargout}] = nleqs_master(fcn, x0, opt);
+    case 'NLP'          %% NLP  - nonlinear program
         %% optimization vars, bounds, types
         [x0, xmin, xmax] = om.params_var();
         if isfield(opt, 'x0')
@@ -156,10 +158,48 @@ else                            %% LP, QP, MILP or MIQP
         end
 
         %% run solver
+        f_fcn = @(x)nlp_costfcn(om, x);
+        gh_fcn = @(x)nlp_consfcn(om, x);
+        hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(om, x, lambda, cost_mult);
         [varargout{1:nargout}] = ...
-            qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
-    end
-    if nargout > 1
-        varargout{2} = varargout{2} + C0;   %% f = f + C0
-    end
+            nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
+    otherwise
+        %% get cost parameters
+        [HH, CC, C0] = om.params_quad_cost();
+
+        if strcmp(pt(1:2), 'MI')    %% MILP, MIQP - mixed integer linear/quadratic program
+            %% optimization vars, bounds, types
+            [x0, xmin, xmax, vtype] = om.params_var();
+            if isfield(opt, 'x0')
+                x0 = opt.x0;
+            end
+
+            %% run solver
+            [varargout{1:nargout}] = ...
+                miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
+        else                        %% LP, QP - linear/quadratic program
+            %% optimization vars, bounds, types
+            [x0, xmin, xmax] = om.params_var();
+            if isfield(opt, 'x0')
+                x0 = opt.x0;
+            end
+
+            %% run solver
+            [varargout{1:nargout}] = ...
+                qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
+        end
+        if nargout > 1
+            varargout{2} = varargout{2} + C0;   %% f = f + C0
+        end
 end
+
+
+%% system of nonlinear and linear equations
+function [f, J] = nleq_fcn_(om, x, A, b)
+if nargout > 1
+    [ff, JJ] = om.eval_nln_constraint(x, 1);
+    J = [JJ; A];
+else
+    ff = om.eval_nln_constraint(x, 1);
+end
+f = [ff; A*x - b];
