@@ -121,17 +121,15 @@ switch pt
     case 'MINLP'        %% MINLP - mixed integer non-linear program
         error('@opt_model/solve: not yet implemented for ''MINLP'' problems.')
     case 'LEQ'          %% LEQ   - linear equations
-        if isfield(opt, 'leq_opt')
-            if isfield(opt.leq_opt, 'solver')
-                leq_solver = opt.leq_opt.solver;
-            else
-                leq_solver = '';
-            end
-            if isfield(opt.leq_opt, 'opt')
-                leq_opt = opt.leq_opt.opt;
-            else
-                leq_opt = struct();
-            end
+        if isfield(opt, 'leq_opt') && isfield(opt.leq_opt, 'solver')
+            leq_solver = opt.leq_opt.solver;
+        else
+            leq_solver = '';
+        end
+        if isfield(opt, 'leq_opt') && isfield(opt.leq_opt, 'opt')
+            leq_opt = opt.leq_opt.opt;
+        else
+            leq_opt = struct();
         end
         [A, b, ~] = om.params_lin_constraint();
         x = mplinsolve(A, b, leq_solver, leq_opt);

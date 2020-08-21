@@ -41,7 +41,11 @@ for k = 1:length(cfg)
     om = opt_model;
     om.add_var('x', 2, zeros(size(x1)));
     om.add_lin_constraint('A', A1, b1, b1);
-    opt = struct('leq_opt', struct('solver', alg));
+    if isempty(alg)
+        opt = struct();
+    else
+        opt = struct('leq_opt', struct('solver', alg));
+    end
     x = om.solve(opt);
     t_is(x, x1, 14, [t 'x']);
     
