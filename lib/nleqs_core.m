@@ -44,6 +44,7 @@ function [x, f, eflag, output, J] = nleqs_core(sp, fcn, x0, opt)
 %           iterations - number of iterations performed
 %           hist - struct array with trajectories of the following:
 %                   normf
+%                   normdx
 %           message - exit message
 %       JAC : final Jacobian matrix, J
 %
@@ -113,7 +114,7 @@ end
 eflag = 0;
 i = 0;
 x = x0;
-hist(max_it+1) = struct('normf', 0);
+hist(max_it+1) = struct('normf', 0, 'normdx', 0);
 
 %% evaluate f(x0)
 if sp.need_jac
@@ -125,9 +126,9 @@ end
 %% check tolerance
 normf = norm(f, inf);
 if verbose > 1
-    fprintf('\n it     max residual');
-    fprintf('\n----  ----------------');
-    fprintf('\n%3d     %10.3e', i, normf);
+    fprintf('\n it    max residual        max ∆x');
+    fprintf('\n----  --------------  --------------');
+    fprintf('\n%3d     %10.3e           -    ', i, normf);
 end
 if normf < tol
     eflag = 1;
@@ -145,6 +146,9 @@ while (~eflag && i < max_it)
     %% update iteration counter
     i = i + 1;
 
+    %% save previous x
+    xp = x;
+
     if sp.need_jac
         %% update x
         x = sp.update_fcn(x, f, J);
@@ -160,9 +164,10 @@ while (~eflag && i < max_it)
     end
 
     %% check for convergence
-    normf = norm(f, inf);
+    normf  = norm(f, inf);
+    normdx = norm(x-xp, inf);
     if verbose > 1
-        fprintf('\n%3d     %10.3e', i, normf);
+        fprintf('\n%3d     %10.3e      %10.3e', i, normf, normdx);
     end
     if normf < tol
         eflag = 1;
@@ -170,7 +175,8 @@ while (~eflag && i < max_it)
     end
 
     %% save history
-    hist(i+1).normf = normf;
+    hist(i+1).normf  = normf;
+    hist(i+1).normfx = normdx;
 end
 if eflag ~= 1
     msg = sprintf('%s method did not converge in %d iterations.', sp.name, i);
