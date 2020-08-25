@@ -1,9 +1,9 @@
-function [x, f, eflag, output, J] = nleqs_base(sp, fcn, x0, opt)
-%NLEQS_BASE  Nonlinear Equation Solver base code for various methods.
-%   [X, F, EXITFLAG, OUTPUT, JAC] = NLEQS_BASE(SP, FCN, X0, OPT)
-%   A private function providing the base code for a standardized interface
-%   for various methods of solving the nonlinear equation f(x) = 0, beginning
-%   from a starting point x0.
+function [x, f, eflag, output, J] = nleqs_core(sp, fcn, x0, opt)
+%NLEQS_CORE  Core Nonlinear Equation Solver with arbitrary update function.
+%   [X, F, EXITFLAG, OUTPUT, JAC] = NLEQS_CORE(SP, FCN, X0, OPT)
+%   A function providing the core code for a standardized interface for
+%   various methods of solving the nonlinear equation f(x) = 0, beginning
+%   from a starting point x0. Allows for an arbitrary update function.
 %
 %   Inputs:
 %       SP : solver parameters, struct with the following fields (all required)
@@ -48,13 +48,13 @@ function [x, f, eflag, output, J] = nleqs_base(sp, fcn, x0, opt)
 %       JAC : final Jacobian matrix, J
 %
 %   Calling syntax options:
-%       [x, f, exitflag, output, jac] = nleqs_base(sp, fcn, x0);
-%       [x, f, exitflag, output, jac] = nleqs_base(sp, fcn, x0, opt);
-%       x = nleqs_base(...);
-%       [x, f] = nleqs_base(...);
-%       [x, f, exitflag] = nleqs_base(...);
-%       [x, f, exitflag, output] = nleqs_base(...);
-%       [x, f, exitflag, output, jac] = nleqs_base(...);
+%       [x, f, exitflag, output, jac] = nleqs_core(sp, fcn, x0);
+%       [x, f, exitflag, output, jac] = nleqs_core(sp, fcn, x0, opt);
+%       x = nleqs_core(...);
+%       [x, f] = nleqs_core(...);
+%       [x, f, exitflag] = nleqs_core(...);
+%       [x, f, exitflag, output] = nleqs_core(...);
+%       [x, f, exitflag, output, jac] = nleqs_core(...);
 %
 %   Example: (problem from https://www.chilimath.com/lessons/advanced-algebra/systems-non-linear-equations/)
 %       function [f, J] = f1(x)
@@ -74,7 +74,7 @@ function [x, f, eflag, output, J] = nleqs_base(sp, fcn, x0, opt)
 %           'need_jac',         1, ...
 %           'update_fcn',       @newton_update_fcn, ...
 %           )
-%       [x, f, exitflag, output, jac] = nleqs_base(sp, fcn, x0, opt);
+%       [x, f, exitflag, output, jac] = nleqs_core(sp, fcn, x0, opt);
 %
 %   See also NLEQS_MASTER, NLEQS_NEWTON, NLEQS_GAUSS_SEIDEL.
 

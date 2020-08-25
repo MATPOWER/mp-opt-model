@@ -87,7 +87,7 @@ function varargout = nleqs_newton(varargin)
 %       );
 %       [x, f, exitflag, output, jac] = nleqs_newton(problem);
 %
-%   See also NLEQS_MASTER.
+%   See also NLEQS_MASTER, NLEQS_CORE.
 
 %   MP-Opt-Model
 %   Copyright (c) 1996-2020, Power Systems Engineering Research Center (PSERC)
@@ -141,7 +141,8 @@ sp = struct( ...
     'need_jac',         1, ...
     'update_fcn',       @(x, f, J)newton_update_fcn(x, f, J, lin_solver)  );
 
-[varargout{1:nargout}] = nleqs_base(sp, fcn, x0, opt);
+[varargout{1:nargout}] = nleqs_core(sp, fcn, x0, opt);
+
 
 function x = newton_update_fcn(x, f, J, lin_solver)
 dx = mplinsolve(J, -f, lin_solver);     %% compute update step

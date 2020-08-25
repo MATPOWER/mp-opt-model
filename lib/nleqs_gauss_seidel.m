@@ -74,7 +74,7 @@ function varargout = nleqs_gauss_seidel(varargin)
 %                   'x_update_fcn', @x_update_fcn2 )));
 %       [x, f, exitflag, output] = nleqs_gauss_seidel(problem);
 %
-%   See also NLEQS_MASTER.
+%   See also NLEQS_MASTER, NLEQS_CORE.
 
 %   MP-Opt-Model
 %   Copyright (c) 1996-2020, Power Systems Engineering Research Center (PSERC)
@@ -116,4 +116,4 @@ sp = struct( ...
     'need_jac',         0, ...
     'update_fcn',       opt.gs_opt.x_update_fcn  );
 
-[varargout{1:nargout}] = nleqs_base(sp, fcn, x0, opt);
+[varargout{1:nargout}] = nleqs_core(sp, fcn, x0, opt);
