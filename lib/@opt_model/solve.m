@@ -145,7 +145,6 @@ switch pt
             fcn = @(x)nleq_fcn_(om, x, A, b);
         else
             fcn = @(x)om.eval_nln_constraint(x, 1);
-            fcn = @(x)nleq_fcn_(om, x, sparse(0, om.getN('var')), []);
         end
         [varargout{1:nargout}] = nleqs_master(fcn, x0, opt);
     case 'NLP'          %% NLP  - nonlinear program
