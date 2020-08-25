@@ -144,13 +144,13 @@
 \newcommand{\mipsurl}[0]{https://github.com/MATPOWER/mips}
 \newcommand{\mipslink}[0]{\href{\mipsurl}{\mips{}}}
 \newcommand{\mipsname}[0]{{{\bf M}{\sc atpower} \textbf{I}nterior \textbf{P}oint \textbf{S}olver}}
-\newcommand{\mipsver}[0]{1.3.1+}
+\newcommand{\mipsver}[0]{1.3.1}
 \newcommand{\mpom}[0]{\mbox{MP-Opt-Model}}
 \newcommand{\mpomurl}[0]{https://github.com/MATPOWER/mp-opt-model}
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{2.1-dev}
+\newcommand{\mpomver}[0]{2.1}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
@@ -237,7 +237,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-%\date{July 8, 2020} % comment this line to display the current date
+\date{August 25, 2020} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -322,12 +322,12 @@ POSSIBILITY OF SUCH DAMAGE.
 \subsection{Citing \mpom{}}
 
 We request that publications derived from the use of \mpom{} explicitly acknowledge that fact by citing the \mpomname{} User's Manual~\cite{mpom_manual}.
-The citation and DOI can be version-specific or general, as appropriate. For version 2.0, use:
+The citation and DOI can be version-specific or general, as appropriate. For version 2.1, use:
 
 \begin{quote}
 \footnotesize
-R.~D. Zimmerman. \mpomname{} User's Manual, Verision 2.0. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}\\
-\doi{10.5281/zenodo.3935928}
+R.~D. Zimmerman. \mpomname{} User's Manual, Verision 2.1. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}\\
+\doi{10.5281/zenodo.4001106}
 \end{quote}
 For a version non-specific citation, use the following citation and DOI,
 with \emph{\textless{}YEAR\textgreater{}} replaced by the year of the most recent release:
@@ -401,18 +401,18 @@ We will use \mpompath{} to denote the path to this directory.
 >> test_mp_opt_model
 t_nested_struct_copy....ok
 t_have_fcn..............ok
-t_nleqs_master..........ok (20 of 120 skipped)
+t_nleqs_master..........ok (30 of 150 skipped)
 t_qps_master............ok (100 of 396 skipped)
 t_miqps_master..........ok (68 of 288 skipped)
 t_nlps_master...........ok
 t_opt_model.............ok
 t_om_solve_leqs.........ok
-t_om_solve_nleqs........ok (24 of 136 skipped)
+t_om_solve_nleqs........ok (36 of 170 skipped)
 t_om_solve_qps..........ok (79 of 319 skipped)
 t_om_solve_miqps........ok (12 of 72 skipped)
 t_om_solve_nlps.........ok
-All tests successful (2671 passed, 303 skipped of 2974)
-Elapsed time 2.84 seconds.
+All tests successful (2713 passed, 325 skipped of 3038)
+Elapsed time 3.29 seconds.
 \end{Code}
 \end{enumerate}
 
@@ -3135,8 +3135,8 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}{\mpom{} 2.0 Use
 
 \end{itemize}
 
-
-\subsection{Version 2.1 -- released ??? ?, 202?}
+\clearpage
+\subsection{Version 2.1 -- released Aug 25, 2020}
 \label{app:v21}
 
 The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}}

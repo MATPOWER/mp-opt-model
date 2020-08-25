@@ -2,10 +2,11 @@ Change history for MP-Opt-Model
 ===============================
 
 
-since last release
-------------------
+Version 2.0 - *Aug 25, 2020*
+---------------------------
 
 #### 8/25/20
+  - Release 2.1.
   - Add core NLEQ solver function `nleqs_core()` with arbitrary,
     user-defined update function, used to implement Gauss-Seidel and
     Newton solvers, `nleqs_gauss_seidel()` and `nleqs_newton()`.
