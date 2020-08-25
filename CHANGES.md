@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 8/25/20
+  - Add core NLEQ solver function `nleqs_core()` with arbitrary,
+    user-defined update function, used to implement Gauss-Seidel and
+    Newton solvers, `nleqs_gauss_seidel()` and `nleqs_newton()`.
+
 #### 8/20/20
   - Add linear equation (`'LEQ'`) problem type for models with equal
     number of variables and linear equality constraints, no costs,

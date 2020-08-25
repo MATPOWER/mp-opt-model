@@ -6,6 +6,8 @@ function varargout = nleqs_newton(varargin)
 %   method to solve the nonlinear equation f(x) = 0, beginning from a
 %   starting point x0.
 %
+%   Calls NLEQS_CORE with a Newton update function.
+%
 %   Inputs:
 %       FCN : handle to function that evaluates the function f(x) to
 %           be solved and its Jacobian, J(x). Calling syntax for this
@@ -142,6 +144,9 @@ sp = struct( ...
     'update_fcn',       @(x, f, J)newton_update_fcn(x, f, J, lin_solver)  );
 
 [varargout{1:nargout}] = nleqs_core(sp, fcn, x0, opt);
+% opt.alg = 'CORE';
+% opt.core_sp = sp;
+% [varargout{1:nargout}] = nleqs_master(fcn, x0, opt);
 
 
 function x = newton_update_fcn(x, f, J, lin_solver)

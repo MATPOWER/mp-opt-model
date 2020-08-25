@@ -6,6 +6,9 @@ function varargout = nleqs_gauss_seidel(varargin)
 %   method to solve the nonlinear equation f(x) = 0, beginning from a
 %   starting point x0.
 %
+%   Calls NLEQS_CORE with a user-provided update function implementing
+%   the Gauss-Seidel update.
+%
 %   Inputs:
 %       FCN : handle to function that evaluates the function f(x) to
 %           be solved. Calling syntax for this function is:
@@ -117,3 +120,6 @@ sp = struct( ...
     'update_fcn',       opt.gs_opt.x_update_fcn  );
 
 [varargout{1:nargout}] = nleqs_core(sp, fcn, x0, opt);
+% opt.alg = 'CORE';
+% opt.core_sp = sp;
+% [varargout{1:nargout}] = nleqs_master(fcn, x0, opt);

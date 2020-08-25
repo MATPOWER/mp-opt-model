@@ -22,6 +22,7 @@ function varargout = nleqs_master(fcn, x0, opt)
 %           alg ('DEFAULT') : determines which solver to use
 %               'DEFAULT' : automatic, current default is NEWTON
 %               'NEWTON'  : standard, full-Jacobian Newton's method
+%               'CORE'    : core algorithm, with arbitrary update function
 %               'FD'      : fast-decoupled Newton's method
 %               'FSOLVE'  : FSOLVE, MATLAB Optimization Toolbox
 %               'GS'      : Gauss-Seidel method
@@ -33,10 +34,12 @@ function varargout = nleqs_master(fcn, x0, opt)
 %                       (0 means use solver's own default)
 %           tol (0) - termination tolerance on f(x)
 %                       (0 means use solver's own default)
-%           newton_opt - options struct for Newton's method, NLEQS_NEWTON
+%           core_sp - solver parameters struct for NLEQS_CORE, required
+%               when alg = 'CORE' (see NLEQS_CORE for details)
 %           fd_opt - options struct for fast-decoupled Newton, NLEQS_FD_NEWTON
 %           fsolve_opt - options struct for FSOLVE
 %           gs_opt - options struct for Gauss-Seidel method, NLEQS_GAUSS_SEIDEL
+%           newton_opt - options struct for Newton's method, NLEQS_NEWTON
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: fcn, x0, opt
@@ -83,7 +86,8 @@ function varargout = nleqs_master(fcn, x0, opt)
 %       );
 %       [x, f, exitflag, output, jac] = nleqs_master(problem);
 %
-%   See also FSOLVE, NLEQS_NEWTON.
+%   See also NLEQS_NEWTON, NLEQS_CORE, NLEQS_FD_NEWTON, NLEQS_FSOLVE,
+%   NLEQS_GAUSS_SEIDEL, FSOLVE.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
@@ -126,6 +130,8 @@ switch alg
         nleqs_fcn = @nleqs_fsolve;
     case 'GS'                   %% use Gauss-Seidel solver
         nleqs_fcn = @nleqs_gauss_seidel;
+    case 'CORE'                 %% use core solver
+        nleqs_fcn = @(f, x, o)nleqs_core(opt.core_sp, f, x, o);
     otherwise
         error('nleqs_master: ''%s'' is not a valid algorithm code', alg);
 end

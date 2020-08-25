@@ -1290,6 +1290,7 @@ name & default & description \\
 && \begin{tabular}{c @{ -- } p{0.5\textwidth}}
 \codeq{DEFAULT} & automatic, current default is \codeq{NEWTON} \\
 \codeq{NEWTON} & Newton's method \\
+\codeq{CORE} & core algorithm, with arbitrary update function\tnote{\P} \\
 \codeq{FD} & fast-decoupled Newton's method\tnote{\dag} \\
 \codeq{FSOLVE} & \matlab{} Opt Toolbox, \code{fsolve}\tnote{*} \\
 \codeq{GS} & Gauss-Seidel method\tnote{\ddag} \\
@@ -1302,6 +1303,7 @@ name & default & description \\
 \end{tabular}	\\
 \code{max\_it}	& 0	& maximum number of iterations\tnote{\S} \\
 \code{tol}	& 0	& termination tolerance on $f(x)$\tnote{\S} \\
+\code{core\_sp}	& \emph{empty}	& solver parameters struct for \code{nleqs\_core}\tnote{\P} \\
 \code{fd\_opt}	& \emph{empty}	& options struct for fast-decoupled Newton's method, \code{nleqs\_fd\_newton}\tnote{\dag} \\
 \code{fsolve\_opt}	& \emph{empty}	& options struct for \code{fsolve}\tnote{*} \\
 \code{gs\_opt}	& \emph{empty}	& options struct for Gauss-Seidel method, \code{nleqs\_gauss\_seidel}\tnote{\ddag} \\
@@ -1314,11 +1316,14 @@ name & default & description \\
  \item [\dag] {Fast-decoupled Newton requires setting \code{fd\_opt.jac\_approx\_fcn} to a function handle that returns Jacobian approximations. See \code{help nleqs\_fd\_newton} for more details.}
  \item [\ddag] {Gauss-Seidel requires setting \code{gs\_opt.x\_update\_fcn} to a function handle that updates $x$. See \code{help nleqs\_gauss\_seidel} for more details.}
  \item [\S] {A value of 0 indicates to use the solver's own default.}
+ \item [\P] {The \code{opt.core\_sp} field is required when \code{alg} is set to \codeq{CORE}. See \code{help nleqs\_core} for details.}
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-The \code{nleqs\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{nleqs\_fsolve} and \code{nleqs\_newton}. Each of these functions has an interface identical to that of \code{nleqs\_master}.
+The \code{nleqs\_master} function is simply a master wrapper around corresponding solver-specific functions, namely, \code{nleqs\_newton}, \code{nleqs\_fd\_newton}, \code{nleqs\_gauss\_seidel} and \code{nleqs\_fsolve}. Each of these functions has an interface identical to that of \code{nleqs\_master}.
+
+There is also a more general function named \code{nleqs\_core} which takes an arbitrary, user-defined update function. In fact, \code{nleqs\_core} provides the core implementation for both \code{nleqs\_newton} and \code{nleqs\_gauss\_seidel}. See \code{help nleqs\_core} for details.
 
 \subsubsection{NLEQ Example 1}
 \label{sec:nleq_ex1}
@@ -3141,10 +3146,12 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 Use
 \item Fast-decoupled Newton's and Gauss-Seidel solvers for nonlinear equations.
 \item New linear equation (\codeq{LEQ}) problem type for models with equal number of variables and linear equality constraints, no costs, and no inequality or nonlinear equality constraints. Solved via \code{mplinsolve()}.
 \item The \code{solve()} method of \code{opt\_model} can now automatically handle mixed systems of equations, with both linear and nonlinear equality constraints.
+\item New core nonlinear equation solver function with arbitrary, user-defined update function, used to implement Gauss-Seidel and Newton solvers.
 \item New functions:
     \begin{itemize}
     \item \code{nleqs\_fd\_newton()} solves a nonlinear set of equations via a fast-decoupled Newton's method.
     \item \code{nleqs\_gauss\_seidel()} solves a nonlinear set of equations via a Gauss-Seidel method.
+    \item \code{nleqs\_core()} implements core nonlinear equation solver with arbitrary update function.
     \end{itemize}
 \end{itemize}
 

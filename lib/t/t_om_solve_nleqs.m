@@ -13,6 +13,19 @@ if nargin < 1
     quiet = 0;
 end
 
+core_sp_newton = struct( ...
+    'alg',              'NEWTON', ...
+    'name',             'Newton''s', ...
+    'default_max_it',   10, ...
+    'need_jac',         1, ...
+    'update_fcn',       @(x, f, J)newton_update_fcn(x, f, J, '')  );
+core_sp_gs = struct( ...
+    'alg',              'GS', ...
+    'name',             'Gauss-Seidel', ...
+    'default_max_it',   1000, ...
+    'need_jac',         0, ...
+    'update_fcn',       @(x, f)x_update_fcn2(x, f)  );
+
 if have_fcn('matlab')
     %%  alg         name        check       opts
     cfg = {
@@ -24,6 +37,8 @@ if have_fcn('matlab')
         {'FSOLVE',  'fsolve-3', 'fsolve',   struct('Algorithm', 'trust-region-reflective')  },
         {'FSOLVE',  'fsolve-4', 'fsolve',   struct('Algorithm', 'levenberg-marquardt', 'TolX', 1e-11) },
         {'GS',      'Gauss-Seidel',[],      []  },
+        {'CORE-N',  'Newton-CORE',   [],    core_sp_newton  },
+        {'CORE-GS', 'Gauss-Seidel-CORE',[], core_sp_gs  },
     };
 else    %% octave
     %%  alg         name        check       opts
@@ -33,6 +48,8 @@ else    %% octave
         {'FD',      'fast-decoupled Newton',[],[]  },
         {'FSOLVE',  'fsolve', 'fsolve',     struct('TolX', 1e-11)  },
         {'GS',      'Gauss-Seidel',[],      []  },
+        {'CORE-N',  'Newton-CORE',   [],    core_sp_newton  },
+        {'CORE-GS', 'Gauss-Seidel-CORE',[], core_sp_gs  },
     };
 end
 
@@ -55,12 +72,15 @@ for k = 1:length(cfg)
                 opt.fd_opt.jac_approx_fcn = @jac_approx_fcn2;
             case 'FSOLVE'
                 opt.fsolve_opt = opts;
-            case {'GS'}
+            case 'GS'
                 opt.gs_opt.x_update_fcn = @(x, f)x_update_fcn2(x, f);
+            case {'CORE-N', 'CORE-GS'}
+                opt.core_sp = opts;
+                opt.alg = 'CORE';
         end
 
         switch alg
-            case {'DEFAULT', 'NEWTON', 'FSOLVE'}
+            case {'DEFAULT', 'NEWTON', 'FSOLVE', 'CORE-N'}
                 t = sprintf('%s - 2-d function : ', name);
                 x0 = [-1;0];
                 om = opt_model;
@@ -70,10 +90,11 @@ for k = 1:length(cfg)
                 t_is(e, 1, 12, [t 'success']);
                 t_is(x, [-3; 4], 8, [t 'x']);
                 t_is(f, 0, 10, [t 'f']);
-                if strcmp(alg, 'DEFAULT')
-                    out_alg = 'NEWTON';
-                else
-                    out_alg = alg;
+                switch alg
+                    case {'DEFAULT', 'CORE-N'}
+                        out_alg = 'NEWTON';
+                    otherwise
+                        out_alg = alg;
                 end
                 t_ok(strcmp(out.alg, out_alg), [t 'out.alg']);
                 eJ = [1 1; 6 1];
@@ -162,3 +183,7 @@ function x = x_update_fcn2(x, f)
 %% for use with Gauss-Seidel method
 x(1) = sqrt(10 - x(1)*x(2));
 x(2) = sqrt((57-x(2))/3/x(1));
+
+function x = newton_update_fcn(x, f, J, lin_solver)
+dx = mplinsolve(J, -f, lin_solver);     %% compute update step
+x = x + dx;                             %% update x
