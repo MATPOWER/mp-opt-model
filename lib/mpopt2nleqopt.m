@@ -65,6 +65,9 @@ switch alg
         nleqopt.max_it = mpopt.pf.fd.max_it;
     case 'GS'
         nleqopt.max_it = mpopt.pf.gs.max_it;
+    case 'ZG'
+        nleqopt.max_it = mpopt.pf.zg.max_it;
+        nleqopt.alg = 'CORE';
     case 'FSOLVE'
         %% basic optimset options needed for fmincon
 %         nleqopt.fsolve_opt.Algorithm = '';
