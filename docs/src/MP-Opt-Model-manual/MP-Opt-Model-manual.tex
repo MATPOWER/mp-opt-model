@@ -150,7 +150,7 @@
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{2.1}
+\newcommand{\mpomver}[0]{2.2-dev}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
@@ -237,7 +237,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-\date{August 25, 2020} % comment this line to display the current date
+%\date{August 25, 2020} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -420,17 +420,17 @@ Elapsed time 3.29 seconds.
 \subsection{Sample Usage}
 \label{sec:usage}
 
-Suppose we have the following constrained 4-dimensional quadratic programming (QP) problem\footnote{Based on the one from  \url{https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm}.} with two 2-dimensional variables, $y$ and $z$, and two constraints, one equality and the other inequality, along with lower bounds on all of the variables.
+Suppose we have the following constrained 4-dimensional quadratic programming (QP) problem with two 2-dimensional variables, $y$ and $z$, and two constraints, one equality and the other inequality, along with lower bounds on all of the variables.
 
 \begin{equation}
 \min_{y, z} \frac{1}{2} \left[\begin{array}{cc}\trans{y} & \trans{z} \end{array}\right] Q \left[\begin{array}{c}y \\ z \end{array}\right]
 \end{equation}
 subject to
 \begin{align}
- &A_1 \left[\begin{array}{c}y \\ z \end{array}\right] = b_1 \\
-l_2 \le &A_2 \left[\begin{array}{c}y \\ z \end{array}\right] \\
-y_\mathrm{min} \le &y \\
-z_\mathrm{min} \le &z
+A_1 \left[\begin{array}{c}y \\ z \end{array}\right] &= b_1 \\
+A_2 y &\le u_2 \\
+y &\ge y_\mathrm{min} \\
+z &\le z_\mathrm{max}
 \end{align}
 
 And suppose the data for the problem is provided as follows.
@@ -442,17 +442,17 @@ z0 = [0; 1];
 
 %% variable lower bounds
 ymin = [0; 0];
-zmin = [0; 0];
+zmax = [0; 2];
 
 %% constraint data
-A1 = [ 1 1 1 1 ];               b1 = 1;
-A2 = [ 0.17 0.11 0.10 0.18 ];   l2 = 0.1;
+A1 = [ 6 1 5 -4 ];  b1 = 4;
+A2 = [ 4 9 ];       u2 = 2;
 
 %% quadratic cost coefficients
-Q = [   1003.1 4.3 6.3 5.9;
-        4.3 2.2 2.1 3.9;
-        6.3 2.1 3.5 4.8;
-        5.9 3.9 4.8 10  ];
+Q = [ 8  1 -3 -4;
+      1  4 -2 -1;
+     -3 -2  5  4;
+     -4 -1  4  12  ];
 \end{Code}
 
 Below, we will show two approaches to construct and solve the problem. The first method, based on the the Optimization Model class \code{opt\_model}, allows you to add variables, constraints and costs to the model individually. Then \code{opt\_model} automatically assembles and solves the full model automatically.
@@ -462,10 +462,10 @@ Below, we will show two approaches to construct and solve the problem. The first
 %% build model
 om = opt_model;
 om.add_var('y', 2, y0, ymin);
-om.add_var('z', 2, z0, zmin);
-om.add_lin_constraint('lincon1', A1, b1, b1, {'y', 'z'});
-om.add_lin_constraint('lincon2', A2, l2, [], {'y', 'z'});
-om.add_quad_cost('cost', Q, [], [], {'y', 'z'});
+om.add_var('z', 2, z0, [], zmax);
+om.add_lin_constraint('lincon1', A1, b1, b1);
+om.add_lin_constraint('lincon2', A2, [], u2, {'y'});
+om.add_quad_cost('cost', Q, []);
 
 %% solve model
 [x, f, exitflag, output, lambda] = om.solve();
@@ -476,39 +476,36 @@ The second method requires you to construct the parameters for the full problem 
 \begin{Code}
 %%-----  METHOD 2  -----
 %% assemble model parameters manually
-xmin = [ymin; zmin];
+xmin = [ymin; -Inf(2, 1)];
+xmax = [ Inf(2,1); zmax];
 x0 = [y0; z0];
-A = [ A1; A2 ];
-l = [ b1; l2 ];
-u = [ b1; Inf ];
+A = [ A1; A2 0 0];
+l = [ b1; -Inf ];
+u = [ b1;  u2  ];
 
 %% solve model
-[x, f, exitflag, output, lambda] = qps_master(Q, [], A, l, u, xmin, [], x0);
+[x, f, exitflag, output, lambda] = qps_master(Q, [], A, l, u, xmin, xmax, x0);
 \end{Code}
 
 The above examples are included in \mpompath{lib/t/qp\_ex1.m} along with some commands to print the results, yielding the output below for each approach:
 
 \begin{Code}
-f = 1.09667   exitflag = 1
+f = 1.875      exitflag = 1
 
-x = 
-   0.0000
-   0.9333
-   0.0667
-   0.0000
+             var bound shadow prices
+     x     lambda.lower  lambda.upper
+  0.5000      0.0000        0.0000
+  0.0000      5.1250        0.0000
+ -0.0000      0.0000        8.7500
+ -0.2500      0.0000        0.0000
 
-lambda.lower (var bound shadow price) =
-   2.2400
-   0.0000
-   0.0000
-   1.7667
-
-lambda.mu_l (constraint shadow price) =
-   2.1933
-   0.0000
+constraint shadow prices
+lambda.mu_l  lambda.mu_u
+  1.2500       0.0000
+  0.0000       0.6250
 \end{Code}
 
-Both approaches can be applied to each of the types of problems that \mpom{} handles, namely, LP, QP, MILP, MIQP, NLP and nonlinear equations.
+Both approaches can be applied to each of the types of problems that \mpom{} handles, namely, LP, QP, MILP, MIQP, NLP and linear and nonlinear equations.
 
 An options struct can be passed to the \code{solve} method or the \code{qps\_master} function to select a specific solver, control the level of
 progress output, or modify a solver's default parameters.
@@ -533,6 +530,7 @@ The first part consists of interfaces to various numerical optimization solvers 
 \item linear (LP) and quadratic (QP) programming problems
 \item mixed-integer linear (MILP) and quadratic (MIQP) programming problems
 \item nonlinear programming problems (NLP)
+\item linear equations (LEQ)
 \item nonlinear equations (NLEQ)
 \end{itemize}
 
