@@ -74,7 +74,7 @@ lower bounds on all of the variables.
 
 ```
   min  1/2 [y' z'] * Q * [y; z]
-  x,y
+  y,z
   
 subject to:
             A1 * [y; z] = b1
