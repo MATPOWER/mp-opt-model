@@ -44,7 +44,7 @@ fprintf('%8.4f  %11.4f\n', [lambda.mu_l lambda.mu_u]');
 
 %%-----  METHOD 2  -----
 %% assemble model parameters manually
-xmin = [ymin; -Inf(2, 1)];
+xmin = [ymin; -Inf(2,1)];
 xmax = [ Inf(2,1); zmax];
 x0 = [y0; z0];
 A = [ A1; A2 0 0];
