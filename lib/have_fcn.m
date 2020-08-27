@@ -258,7 +258,7 @@ elseif action == 'D'        %% detect availability
                             if matlab
                                 switch tag
                                     case 'fmincon_ipm'
-                                        if otver >= 4       %% Opt Tbx 4.0+ (R208a+, MATLAB 7.6+)
+                                        if otver >= 4       %% Opt Tbx 4.0+ (R2008a+, MATLAB 7.6+)
                                             TorF = 1;
                                         end
                                     case 'linprog_ds'
