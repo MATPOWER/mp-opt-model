@@ -3153,15 +3153,30 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 Use
     \end{itemize}
 \end{itemize}
 
-% \subsubsection*{Bugs Fixed}
-% \begin{itemize}
-% \item 
-%     \emph{Thanks to Fulano.}
-% \end{itemize}
-
 \subsubsection*{Incompatible Changes}
 \begin{itemize}
 \item In \code{output} return value from \code{nleqs\_newton()}, changed the \code{normF} field of \code{output.hist} to \code{normf}, for consistency in using lowercase \code{f} everywhere.
+\end{itemize}
+
+
+\clearpage
+\subsection{Version 2.2 -- released ??? ?, 202?}
+\label{app:v22}
+
+The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}}
+
+% \subsubsection*{New Features}
+% \begin{itemize}
+% \item 
+% \item New functions:
+%     \begin{itemize}
+%     \item \code{foobar()} does whizbang.
+%     \end{itemize}
+% \end{itemize}
+% 
+\subsubsection*{Bugs Fixed}
+\begin{itemize}
+\item Starting point supplied to \code{solve()} via \code{opt.x0} is no longer ignored for nonlinear equations.
 \end{itemize}
 
 % \subsubsection*{Other Changes}

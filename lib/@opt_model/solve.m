@@ -113,9 +113,7 @@ if nargin < 2
     opt = struct();
 end
 
-%% linear constraints
-[A, l, u] = om.params_lin_constraint();
-
+%% call appropriate solver
 pt = om.problem_type();
 switch pt
     case 'MINLP'        %% MINLP - mixed integer non-linear program
@@ -140,6 +138,10 @@ switch pt
         varargout = tmp(1:nargout);
     case 'NLEQ'         %% NLEQ  - nonlinear equations
         x0 = om.params_var();
+        if isfield(opt, 'x0')
+            x0 = opt.x0;
+        end
+
         if om.getN('lin')
             [A, b, ~] = om.params_lin_constraint();
             fcn = @(x)nleq_fcn_(om, x, A, b);
@@ -155,14 +157,16 @@ switch pt
         end
 
         %% run solver
+        [A, l, u] = om.params_lin_constraint();
         f_fcn = @(x)nlp_costfcn(om, x);
         gh_fcn = @(x)nlp_consfcn(om, x);
         hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(om, x, lambda, cost_mult);
         [varargout{1:nargout}] = ...
             nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
     otherwise
-        %% get cost parameters
+        %% get parameters
         [HH, CC, C0] = om.params_quad_cost();
+        [A, l, u] = om.params_lin_constraint();
 
         if strcmp(pt(1:2), 'MI')    %% MILP, MIQP - mixed integer linear/quadratic program
             %% optimization vars, bounds, types

@@ -2,6 +2,14 @@ Change history for MP-Opt-Model
 ===============================
 
 
+since last release
+------------------
+
+#### 8/27/20
+  - Starting point supplied to `solve()` via `opt.x0` is no longer
+    ignored for nonlinear equations.
+
+
 Version 2.0 - *Aug 25, 2020*
 ---------------------------
 
