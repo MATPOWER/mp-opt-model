@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 8/28/20
+  - Add `eval_lin_constraint()` method to evaluate the constraint
+    values for the full set or an individual named subset of linear
+    constraints.
+
 #### 8/27/20
   - Starting point supplied to `solve()` via `opt.x0` is no longer
     ignored for nonlinear equations.

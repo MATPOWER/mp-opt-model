@@ -2782,7 +2782,8 @@ name & description \\
 \code{~~add\_quad\_cost}	& adds a named subset of quadratic costs to the model	\\
 \code{~~add\_var}	& adds a named subset of optimization variables to the model	\\
 \code{~~display}	& called to display object when statement not ended with semicolon	\\
-\code{~~eval\_nln\_constraint}	& returns full set of nonlinear equality or inequality constraints and their gradients	\\
+\code{~~eval\_lin\_constraint}	& computes linear constraint values	\\
+\code{~~eval\_nln\_constraint}	& computes nonlinear equality or inequality constraints and their gradients	\\
 \code{~~eval\_nln\_constraint\_hess}	& returns Hessian for full set of nonlinear equality or inequality constraints	\\
 \code{~~eval\_nln\_cost}	& evaluates general nonlinear costs and derivatives	\\
 \code{~~eval\_quad\_cost}	& evaluates quadratic costs and derivatives	\\
@@ -3165,15 +3166,15 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 Use
 
 The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}}
 
-% \subsubsection*{New Features}
-% \begin{itemize}
-% \item 
-% \item New functions:
-%     \begin{itemize}
-%     \item \code{foobar()} does whizbang.
-%     \end{itemize}
-% \end{itemize}
-% 
+\subsubsection*{New Features}
+\begin{itemize}
+\item 
+\item New functions:
+    \begin{itemize}
+    \item \code{opt\_model/eval\_lin\_constraint()} method computes the constraint values for the full set or an individual named subset of linear constraints.
+    \end{itemize}
+\end{itemize}
+
 \subsubsection*{Bugs Fixed}
 \begin{itemize}
 \item Starting point supplied to \code{solve()} via \code{opt.x0} is no longer ignored for nonlinear equations.

@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 594;
+num_tests = 646;
 
 t_begin(num_tests, quiet);
 
@@ -373,16 +373,16 @@ t_ok(om.getN('lin') == lN, sprintf('%s : lin.N  = %d', t, lN));
 t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
 
 t = 'om.add_lin_constraint(''Pmis'', A, l, u, {''Va'', ''Pg''})';
-A = sparse([1:3 1:3 1:3]', [1:3 4:6 7 7 7]', [1 1 1 -1 -1 -1 2 3 4]', 3, 7);
-l = -(1:3)'; u = (1:3)';
-om.add_lin_constraint('Pmis', A, l, u, {'Va', 'Pg'});
+A1 = sparse([1:3 1:3 1:3]', [1:3 4:6 7 7 7]', [1 1 1 -1 -1 -1 2 3 4]', 3, 7);
+l1 = -(1:3)'; u1 = (1:3)';
+om.add_lin_constraint('Pmis', A1, l1, u1, {'Va', 'Pg'});
 lNS = lNS + 1; lN = lN + 3;
 t_ok(om.getN('lin') == lN, sprintf('%s : lin.N  = %d', t, lN));
 t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
 
 t = 'om.add_lin_constraint(''Qmis'', A, l, u)';
-A = sparse([1:3 1:3 1:3]', [1:3 4:6 7 7 7]', [1 1 1 -1 -1 -1 2 3 4]', 3, vN);
-om.add_lin_constraint('Qmis', A, l, u);
+A2 = sparse([1:3 1:3 1:3]', [1:3 4:6 7 7 7]', [1 1 1 -1 -1 -1 2 3 4]', 3, vN);
+om.add_lin_constraint('Qmis', A2, l1, u1);
 lNS = lNS + 1; lN = lN + 3;
 t_ok(om.getN('lin') == lN, sprintf('%s : lin.N  = %d', t, lN));
 t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
@@ -407,8 +407,8 @@ for i = 1:2
 end
 
 t = 'om.add_lin_constraint(''onerow'', A, l, u)';
-A = sparse([1 1 1]', [1:3]', [-1 -2 -3]', 1, vN);
-om.add_lin_constraint('onerow', A, 0, Inf);
+A4 = sparse([1 1 1]', [1:3]', [-1 -2 -3]', 1, vN);
+om.add_lin_constraint('onerow', A4, 0, Inf);
 lNS = lNS + 1; lN = lN + 1;
 t_ok(om.getN('lin') == lN, sprintf('%s : lin.N  = %d', t, lN));
 t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
@@ -524,7 +524,44 @@ t_is(size(ll.i1.mylin), [2, 2], 14, [t ' : size(ll.i1.mylin)']);
 t_is([ll.i1.mylin(2,1) ll.iN.mylin(2,1) ll.N.mylin(2,1)], [12 14 3], 14, [t ' : mylin(2,1)']);
 
 %%-----  params_lin_constraint  -----
-t = 'params_lin_constraint';
+t = 'om.params_lin_constraint(''Pmis'')';
+[A, l, u, vs] = om.params_lin_constraint('Pmis');
+t_is(A, A1, 14, [t, ' : A']);
+t_is(l, l1, 14, [t, ' : l']);
+t_is(u, u1, 14, [t, ' : u']);
+vs1 = struct('name', {'Va', 'Pg'}, 'idx', {{}, {}});
+t_ok(isequal(vs, vs1), [t, ' : vs']);
+
+t = 'om.params_lin_constraint(''Qmis'')';
+[A, l, u, vs] = om.params_lin_constraint('Qmis');
+t_is(A, A2, 14, [t, ' : A']);
+t_is(l, l1, 14, [t, ' : l']);
+t_is(u, u1, 14, [t, ' : u']);
+t_ok(isequal(vs, {}), [t, ' : vs']);
+
+for i = 1:2
+    for j = 1:2
+        t = sprintf('om.params_lin_constraint(''mylin'', {%d,%d})', i,j);
+        A3 = sparse([1:(i+j) 1:(i+j)]', [1:(i+j) 5*ones(1,i+j)]', ...
+            [ones(i+j,1);-ones(i+j,1)], i+j, 3+2+(i==2 && j==1));
+        l3 = -ones(i+j, 1); u = [];
+        vvs = struct('name', {'Pg', 'x'}, 'idx', {{}, {i,j}});
+        [A, l, u, vs] = om.params_lin_constraint('mylin', {i,j});
+        t_is(A, A3, 14, [t, ' : A']);
+        t_is(l, l3, 14, [t, ' : l']);
+        t_ok(all(isinf(u)) & all(u > 0), [t, ' : u']);
+        t_ok(isequal(vs, vvs), [t, ' : vs']);
+    end
+end
+
+t = 'om.params_lin_constraint(''onerow'')';
+[A, l, u, vs] = om.params_lin_constraint('onerow');
+t_is(A, A4, 14, [t, ' : A']);
+t_is(l, 0, 14, [t, ' : l']);
+t_ok(all(isinf(u)) & all(u > 0), [t, ' : u']);
+t_ok(isequal(vs, {}), [t, ' : vs']);
+
+t = 'om.params_lin_constraint()';
 [A, l, u] = om.params_lin_constraint();
 t_ok(issparse(A), [t ' : issparse(A)']);
 t_is(size(A), [lN, vN], 14, [t ' : size(A)']);
@@ -535,7 +572,53 @@ t_is(full(A(ll.i1.Qmis:ll.iN.Qmis, :)), full(AA), 14, [t ' : A(<Qmis>,:)']);
 t_is(full(A(ll.i1.mylin(2,1):ll.iN.mylin(2,1), vv.i1.Pg:vv.iN.Pg)), eye(3,3), 14, [t ' : A(<mylin(2,1)>,<Pg>)']);
 t_is(full(A(ll.i1.mylin(2,1):ll.iN.mylin(2,1), vv.i1.x(2,1):vv.iN.x(2,1))), [0 -1 0;0 -1 0;0 -1 0], 14, [t ' : A(<mylin(2,1)>,<x(2,1)>)']);
 
-%om
+%%-----  eval_lin_constraint  -----
+t = '[Ax_u, l_Ax, A] = om.eval_lin_constraint(x)';
+x = (1:om.var.N)';
+[Ax_u, l_Ax, AA] = om.eval_lin_constraint(x);
+t_is(Ax_u, A*x-u, 14, [t ' : Ax_u']);
+t_is(l_Ax, l-A*x, 14, [t ' : l_Ax']);
+t_is(AA, A, 14, [t ' : A']);
+
+t = 'Ax_u = om.eval_lin_constraint(x, ''Pmis'')';
+vs = om.varsets_cell2struct({'Va', 'Pg'});
+xx = om.varsets_x(x, vs, 'vector');
+Ax_u = om.eval_lin_constraint(x, 'Pmis');
+t_is(Ax_u, A1*xx-u1, 14, [t ' : Ax_u']);
+
+t = '[Ax_u, l_Ax] = om.eval_lin_constraint(x, ''Pmis'')';
+[Ax_u, l_Ax, A] = om.eval_lin_constraint(x, 'Pmis');
+t_is(Ax_u, A1*xx-u1, 14, [t ' : Ax_u']);
+t_is(l_Ax, l1-A1*xx, 14, [t ' : l_Ax']);
+
+t = '[Ax_u, l_Ax, A] = om.eval_lin_constraint(x, ''Pmis'')';
+[Ax_u, l_Ax, A] = om.eval_lin_constraint(x, 'Pmis');
+t_is(Ax_u, A1*xx-u1, 14, [t ' : Ax_u']);
+t_is(l_Ax, l1-A1*xx, 14, [t ' : l_Ax']);
+t_is(A, A1, 14, [t ' : A']);
+
+t = '[Ax_u, l_Ax, A] = om.eval_lin_constraint(x, ''Qmis'')';
+vs = om.varsets_cell2struct({'Va', 'Pg'});
+xx = om.varsets_x(x, vs, 'vector');
+[Ax_u, l_Ax, A] = om.eval_lin_constraint(x, 'Qmis');
+t_is(Ax_u, A2*x-u1, 14, [t ' : Ax_u']);
+t_is(l_Ax, l1-A2*x, 14, [t ' : l_Ax']);
+t_is(A, A2, 14, [t ' : A']);
+
+for i = 1:2
+    for j = 1:2
+        t = sprintf('om.params_lin_constraint(''mylin'', {%d,%d})', i,j);
+        A3 = sparse([1:(i+j) 1:(i+j)]', [1:(i+j) 5*ones(1,i+j)]', ...
+            [ones(i+j,1);-ones(i+j,1)], i+j, 3+2+(i==2 && j==1));
+        l3 = -ones(i+j, 1); u = [];
+        vs = struct('name', {'Pg', 'x'}, 'idx', {{}, {i,j}});
+        xx = om.varsets_x(x, vs, 'vector');
+        [Ax_u, l_Ax, A] = om.eval_lin_constraint(x, 'mylin', {i,j});
+        t_ok(all(isinf(Ax_u)) & all(Ax_u < 0), [t ' : Ax_u']);
+        t_is(l_Ax, l3-A3*xx, 14, [t ' : l_Ax']);
+        t_is(A, A3, 14, [t ' : A']);
+    end
+end
 
 %%-----  params_nln_constraint  -----
 t = 'om.params_nln_constraint(1, ''Pmise'')';
