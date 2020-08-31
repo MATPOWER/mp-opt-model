@@ -55,7 +55,7 @@ end
 
 n = 17;
 
-t_begin(n*length(cfg), quiet);
+t_begin(5+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -86,7 +86,7 @@ for k = 1:length(cfg)
                 om = opt_model;
                 om.add_var('x', 2, x0);
                 om.add_nln_constraint('f', 2, 1, @f1, []);
-                [x, f, e, out, J] = om.solve(opt);
+                [x, f, e, out, jac] = om.solve(opt);
                 t_is(e, 1, 12, [t 'success']);
                 t_is(x, [-3; 4], 8, [t 'x']);
                 t_is(f, 0, 10, [t 'f']);
@@ -98,7 +98,7 @@ for k = 1:length(cfg)
                 end
                 t_ok(strcmp(out.alg, out_alg), [t 'out.alg']);
                 eJ = [1 1; 6 1];
-                t_is(J, eJ, 5.8, [t 'J']);
+                t_is(jac, eJ, 5.8, [t 'jac']);
 
                 t = sprintf('%s - 2-d function (max_it) : ', name);
                 opt.max_it = 3;
@@ -118,14 +118,14 @@ for k = 1:length(cfg)
                 om.add_var('x2', 3, x0_2);
                 om.add_nln_constraint('f', 2, 1, @f1, [], {'x1'});
                 om.add_lin_constraint('Ax_b', A2, b2, b2, {'x2'});
-                [x, f, e, out, J] = om.solve(opt);
+                [x, f, e, out, jac] = om.solve(opt);
                 t_is(e, 1, 12, [t 'success']);
                 t_is(x, [-3; 4; -2; 1; 3], 8, [t 'x']);
                 t_is(f, 0, 10, [t 'f']);
                 t_ok(strcmp(out.alg, out_alg), [t 'out.alg']);
                 eJ = [[1 1; 6 1] zeros(2, 3);
                       zeros(3, 2) A2 ];
-                t_is(J, eJ, 5.8, [t 'J']);
+                t_is(jac, eJ, 5.8, [t 'jac']);
             otherwise
                 t_skip(12, sprintf('not implemented for solver ''%s''', alg));
         end
@@ -148,6 +148,25 @@ for k = 1:length(cfg)
         opt = rmfield(opt, 'max_it');
     end
 end
+
+t = 'om.soln.';
+opt.alg = 'DEFAULT';
+x0_1 = [-1;0];
+x0_2 = [0;0;0];
+A2 = sparse([2 -1 0; -3 1 -2; 0 5 -4]);
+b2 = [-5; 1; -7];
+x2 = [-2; 1; 3];
+om = opt_model;
+om.add_var('x1', 2, x0_1);
+om.add_var('x2', 3, x0_2);
+om.add_nln_constraint('f', 2, 1, @f1, [], {'x1'});
+om.add_lin_constraint('Ax_b', A2, b2, b2, {'x2'});
+[x, f, e, out, jac] = om.solve(opt);
+t_is(om.soln.x, x, 14, [t 'x']);
+t_is(om.soln.f, f, 14, [t 'f']);
+t_is(om.soln.eflag, e, 14, [t 'eflag']);
+t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
+t_is(om.soln.jac, jac, 14, [t 'jac']);
 
 t_end;
 

@@ -190,6 +190,21 @@ classdef opt_model < mp_idx_manager
         nli;            %% nonlinear inequality constraints
         qdc;            %% quadratic costs
         nlc;            %% general nonlinear costs
+        soln = struct( ...      %% solution information
+            'eflag', [], ...
+            'output', [], ...
+            'x', [], ...        %% solution vector
+            'f', [], ...        %% final (objective) function value
+            'jac', [], ...      %% Jacobian (if available) for LEQ/NLEQ
+            'mu', struct( ...
+                'var', struct( ...
+                    'l', [], ...%% variable lower bound shadow prices
+                    'u', []), ...%% variable upper bound shadow prices
+                'lin', struct( ...
+                    'l', [], ...%% linear constraint lower bound shadow prices
+                    'u', []), ...%% linear constraint upper bound shadow prices
+                'nle', [], ...  %% nonlinear equality shadow prices
+                'nli', [] ) );  %% nonlinear inequality shadow prices
     end     %% properties
 
     methods

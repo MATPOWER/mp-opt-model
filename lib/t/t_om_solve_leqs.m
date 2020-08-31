@@ -31,7 +31,7 @@ x2 = [-2; 1; 3];
 
 n = 6;
 
-t_begin(n*length(cfg), quiet);
+t_begin(5+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -55,12 +55,19 @@ for k = 1:length(cfg)
     om.add_lin_constraint('A12', A2(1:2, :), b2(1:2), b2(1:2));
     om.add_lin_constraint('A3', A2(3, :), b2(3), b2(3));
     opt = struct('leq_opt', struct('solver', alg));
-    [x, f, e, out, J] = om.solve(opt);
+    [x, f, e, out, jac] = om.solve(opt);
     t_is(x, x2, 14, [t 'x']);
     t_is(f, A2*x-b2, 14, [t 'f']);
     t_is(e, 1, 14, [t 'exitflag']);
     t_ok(strcmp(out.alg, alg), [t 'output']);
-    t_is(J, A2, 14, [t 'J']);
+    t_is(jac, A2, 14, [t 'jac']);
 end
+
+t = 'om.soln.';
+t_is(om.soln.x, x, 14, [t 'x']);
+t_is(om.soln.f, f, 14, [t 'f']);
+t_is(om.soln.eflag, e, 14, [t 'eflag']);
+t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
+t_is(om.soln.jac, jac, 14, [t 'jac']);
 
 t_end;

@@ -21,9 +21,9 @@ if have_fcn('gurobi') || have_fcn('cplex') || have_fcn('mosek')
     does_qp(1) = 1;
 end
 
-n = 12;
-nmiqp = 6;
-t_begin(n*length(algs), quiet);
+n = 14;
+nmiqp = 7;
+t_begin(8+n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
@@ -96,6 +96,7 @@ for k = 1:length(algs)
         [x, f, s, out, lam] = om.solve(opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4; 2], 12, [t 'x']);
+        t_is(f, -14, 12, [t 'f']);
         t_is(lam.mu_l, [0; 0], 12, [t 'lam.mu_l']);
         t_is(lam.mu_u, [0; 0], 12, [t 'lam.mu_u']);
         t_is(lam.lower, [0; 0], 12, [t 'lam.lower']);
@@ -127,6 +128,7 @@ for k = 1:length(algs)
             [x, f, s, out, lam] = om.solve(opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [7; 7; 0; 2], 7, [t 'x']);
+            t_is(f, 1618.5, 5, [t 'f']);
             t_is(lam.mu_l, [466; 0; 0], 6, [t 'lam.mu_l']);
             t_is(lam.mu_u, [0; 272; 0], 6, [t 'lam.mu_u']);
             t_is(lam.lower, [0; 0; 349.5; 4350], 5, [t 'lam.lower']);
@@ -137,6 +139,16 @@ for k = 1:length(algs)
 % opt.verbose = 0;
     end
 end
+
+t = 'om.soln.';
+t_is(om.soln.x, x, 14, [t 'x']);
+t_is(om.soln.f, f, 14, [t 'f']);
+t_is(om.soln.eflag, s, 14, [t 'eflag']);
+t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
+t_is(om.soln.mu.var.l, lam.lower, 14, [t 'om.soln.mu.var.l']);
+t_is(om.soln.mu.var.u, lam.upper, 14, [t 'om.soln.mu.var.u']);
+t_is(om.soln.mu.lin.l, lam.mu_l, 14, [t 'om.soln.mu.lin.l']);
+t_is(om.soln.mu.lin.u, lam.mu_u, 14, [t 'om.soln.mu.lin.u']);
 
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);

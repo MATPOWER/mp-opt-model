@@ -1830,13 +1830,15 @@ See Section~\ref{sec:indexed_sets} for details on indexed named sets and the \co
 \label{sec:solve}
 
 \begin{Code}
-[x, f, exitflag, output, lambda] = om.solve()
+om.solve()
+[x, f, exitflag, output, jac] = om.solve()
 [x, f, exitflag, output, lambda] = om.solve(opt)
+[...] = om.solve(opt)
 \end{Code}
 
 After all variables, constraints and costs have been added to the model, the optimization problem can be solved simply by calling the \code{solve} method. This method automatically selects and calls, depending on the problem type, \code{mplinsolve} or one of the master solver interface functions from Section~\ref{sec:master_solvers}, namely \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, or \code{nleqs\_master}. Note that one of the equation solvers, \code{mplinsolve} or \code{nleqs\_master} is chosen if the model has only equality constraints, with no costs and no inequality constraints.
 
-For details on the return values and the input options struct \code{opt}, see the descriptions of the individual solver functions in Sections~\ref{sec:qps_master}, \ref{sec:miqps_master}, \ref{sec:nlps_master}, and \ref{sec:nleqs_master}. For linear equations, the \code{solver} and \code{opt} arguments for \code{mplinsolve}, described in Section~\ref{MIPSMAN-sec:mplinsolve} of the \mipsman{}, can be provided in \code{opt.leq\_opt.solver} and \code{opt.leq\_opt.opt}, respectively.
+The results are stored in the \code{soln} field (see Section~\ref{sec:soln}) of the \mpom{} object and can be returned in the optional output arguments. For details on the return values and the input options struct \code{opt}, see the descriptions of the individual solver functions in Sections~\ref{sec:qps_master}, \ref{sec:miqps_master}, \ref{sec:nlps_master}, and \ref{sec:nleqs_master}. For linear equations, the \code{solver} and \code{opt} arguments for \code{mplinsolve}, described in Section~\ref{MIPSMAN-sec:mplinsolve} of the \mipsman{}, can be provided in \code{opt.leq\_opt.solver} and \code{opt.leq\_opt.opt}, respectively.
 
 \subsection{Accessing the Model}
 
@@ -2152,6 +2154,57 @@ The \code{eval\_nln\_cost} method evaluates the cost function and its derivative
 \end{Code}
 
 See Section~\ref{sec:indexed_sets} for details on indexed named sets and the \code{idx\_list} argument.
+
+\subsubsection{Model Solution}
+\label{sec:soln}
+The solved results of a model, as returned by the \code{solve()} method, are stored in the \code{soln} field of the \mpom{} object as summarized in Table~\ref{tab:soln}.
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Model Solution}
+\label{tab:soln}
+\footnotesize
+\begin{tabular}{lp{0.82\textwidth}}
+\toprule
+field & description \\
+\midrule
+\code{om} & \mpom{} object	\\
+\code{~~.soln} & model solution struct	\\
+\code{~~~~.x} & solution vector	\\
+\code{~~~~.f} & final function value\tnote{*}, $f(x)$ 	\\
+\code{~~~~.eflag} & exit flag	\\
+& \begin{tabular}{r @{ -- } l}
+1 & converged successfully \\
+$\le 0$ & solver-specific failure code \\
+\end{tabular}	\\
+\code{~~~~.output} & output struct with the following fields:	\\
+& \begin{tabular}{r @{ -- } l}
+alg & algorithm code of solver used \\
+\emph{(others)} & solver-specific fields \\
+\end{tabular}	\\
+\code{~~~~.jac} & final value of Jacobian matrix (for LEQ/NLEQ)	\\
+\code{~~~~.mu} & shadow prices on constraints (taken from \code{lambda} return value)	\\
+\code{~~~~~~.var} & variable bounds	\\
+\code{~~~~~~~~.l} & lower bound (from \code{lambda.lower})	\\
+\code{~~~~~~~~.u} & upper bound (from \code{lambda.upper})	\\
+\code{~~~~~~.lin} & linear constraints	\\
+\code{~~~~~~~~.l} & lower bound (from \code{lambda.mu\_l})	\\
+\code{~~~~~~~~.u} & upper bound (from \code{lambda.mu\_u})	\\
+\code{~~~~~~.nle} & nonlinear equality constraints (from \code{lambda.eqnonlin})	\\
+\code{~~~~~~.nli} & nonlinear inequality constraints (from \code{lambda.ineqnonlin})	\\
+& \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {Objective function value for optimization problems, constraint function value for sets of equations.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
 
 \subsection{Indexed Sets}
 \label{sec:indexed_sets}
@@ -3168,7 +3221,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item 
+\item Save the results of the \code{solve()} method to the \code{soln} field of the \mpom{} object.
 \item New functions:
     \begin{itemize}
     \item \code{opt\_model/eval\_lin\_constraint()} method computes the constraint values for the full set or an individual named subset of linear constraints.

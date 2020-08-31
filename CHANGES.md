@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 8/31/20
+  - Save the results of `solve()` method to the `soln` field of the
+    MP-Opt-Model object.
+
 #### 8/28/20
   - Add `eval_lin_constraint()` method to evaluate the constraint
     values for the full set or an individual named subset of linear

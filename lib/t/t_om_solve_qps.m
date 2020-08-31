@@ -20,7 +20,7 @@ does_qp = [1 1 1 1 1 1 1 1 1 1 0];
 
 n = 29;
 nqp = 21;
-t_begin(n*length(algs), quiet);
+t_begin(8+n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
@@ -201,6 +201,34 @@ for k = 1:length(algs)
         t_ok(s <= 0, [t 'no success']);
     end
 end
+
+t = 'om.soln.';
+opt.alg = 'DEFAULT';
+%% from https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm
+H = [   1003.1  4.3     6.3     5.9;
+        4.3     2.2     2.1     3.9;
+        6.3     2.1     3.5     4.8;
+        5.9     3.9     4.8     10  ];
+c = zeros(4,1);
+A = [   1       1       1       1;
+        0.17    0.11    0.10    0.18    ];
+l = [1; 0.10];
+u = [1; Inf];
+xmin = zeros(4,1);
+x0 = [1; 0; 0; 1];
+om = opt_model;
+om.add_var('x', 4, x0, xmin);
+om.add_quad_cost('c', H, c);
+om.add_lin_constraint('Ax', A, l, u);
+[x, f, s, out, lam] = om.solve(opt);
+t_is(om.soln.x, x, 14, [t 'x']);
+t_is(om.soln.f, f, 14, [t 'f']);
+t_is(om.soln.eflag, s, 14, [t 'eflag']);
+t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
+t_is(om.soln.mu.var.l, lam.lower, 14, [t 'om.soln.mu.var.l']);
+t_is(om.soln.mu.var.u, lam.upper, 14, [t 'om.soln.mu.var.u']);
+t_is(om.soln.mu.lin.l, lam.mu_l, 14, [t 'om.soln.mu.lin.l']);
+t_is(om.soln.mu.lin.u, lam.mu_u, 14, [t 'om.soln.mu.lin.u']);
 
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);

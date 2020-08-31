@@ -1,4 +1,4 @@
-function varargout = solve(om, opt)
+function [x, f, eflag, output, lambda] = solve(om, opt)
 %SOLVE  Solve the optimization model.
 %   X = OM.SOLVE()
 %   [X, F] = OM.SOLVE()
@@ -131,11 +131,10 @@ switch pt
         end
         [A, b, ~] = om.params_lin_constraint();
         x = mplinsolve(A, b, leq_solver, leq_opt);
-        tmp = {x, [], 1, struct('alg', leq_solver), A};
-        if nargout > 1
-            tmp{2} = A*x - b;
-        end
-        varargout = tmp(1:nargout);
+        f = A*x - b;
+        eflag = 1;
+        output = struct('alg', leq_solver);
+        lambda = A;     %% jac
     case 'NLEQ'         %% NLEQ  - nonlinear equations
         x0 = om.params_var();
         if isfield(opt, 'x0')
@@ -148,7 +147,7 @@ switch pt
         else
             fcn = @(x)om.eval_nln_constraint(x, 1);
         end
-        [varargout{1:nargout}] = nleqs_master(fcn, x0, opt);
+        [x, f, eflag, output, lambda] = nleqs_master(fcn, x0, opt);
     case 'NLP'          %% NLP  - nonlinear program
         %% optimization vars, bounds, types
         [x0, xmin, xmax] = om.params_var();
@@ -161,7 +160,7 @@ switch pt
         f_fcn = @(x)nlp_costfcn(om, x);
         gh_fcn = @(x)nlp_consfcn(om, x);
         hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(om, x, lambda, cost_mult);
-        [varargout{1:nargout}] = ...
+        [x, f, eflag, output, lambda] = ...
             nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
     otherwise
         %% get parameters
@@ -176,7 +175,7 @@ switch pt
             end
 
             %% run solver
-            [varargout{1:nargout}] = ...
+            [x, f, eflag, output, lambda] = ...
                 miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
         else                        %% LP, QP - linear/quadratic program
             %% optimization vars, bounds, types
@@ -186,14 +185,39 @@ switch pt
             end
 
             %% run solver
-            [varargout{1:nargout}] = ...
+            [x, f, eflag, output, lambda] = ...
                 qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
         end
-        if nargout > 1
-            varargout{2} = varargout{2} + C0;   %% f = f + C0
-        end
+        f = f + C0;
 end
 
+%% store solution
+om.soln.eflag = eflag;
+om.soln.x = x;
+om.soln.f = f;
+om.soln.output = output;
+if isstruct(lambda)
+    if isfield(lambda, 'lower')
+        om.soln.mu.var.l = lambda.lower;
+    end
+    if isfield(lambda, 'upper')
+        om.soln.mu.var.u = lambda.upper;
+    end
+    if isfield(lambda, 'mu_l')
+        om.soln.mu.lin.l = lambda.mu_l;
+    end
+    if isfield(lambda, 'mu_u')
+        om.soln.mu.lin.u = lambda.mu_u;
+    end
+    if isfield(lambda, 'eqnonlin')
+        om.soln.mu.nle = lambda.eqnonlin;
+    end
+    if isfield(lambda, 'ineqnonlin')
+        om.soln.mu.nli = lambda.ineqnonlin;
+    end
+else
+    om.soln.jac = lambda;
+end
 
 %% system of nonlinear and linear equations
 function [f, J] = nleq_fcn_(om, x, A, b)

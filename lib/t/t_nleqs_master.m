@@ -83,7 +83,7 @@ for k = 1:length(cfg)
             case {'DEFAULT', 'NEWTON', 'FSOLVE', 'CORE-N'}
                 t = sprintf('%s - 2-d function : ', name);
                 x0 = [-1;0];
-                [x, f, e, out, J] = nleqs_master(@f1, x0, opt);
+                [x, f, e, out, jac] = nleqs_master(@f1, x0, opt);
                 t_is(e, 1, 12, [t 'success']);
                 t_is(x, [-3; 4], 8, [t 'x']);
                 t_is(f, 0, 10, [t 'f']);
@@ -95,7 +95,7 @@ for k = 1:length(cfg)
                 end
                 t_ok(strcmp(out.alg, out_alg), [t 'out.alg']);
                 eJ = [1 1; 6 1];
-                t_is(J, eJ, 5.8, [t 'J']);
+                t_is(jac, eJ, 5.8, [t 'jac']);
 
                 t = sprintf('%s - 2-d function (struct) : ', name);
                 p = struct('fcn', @f1, 'x0', [1;0], 'opt', opt);
