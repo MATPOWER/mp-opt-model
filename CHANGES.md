@@ -8,6 +8,8 @@ since last release
 #### 9/11/20
   - Add `get_soln()` method to `opt_model` for extracting solved
     results for a given named set of variables, constraints or costs.
+  - Add `parse_soln()` method which returns a struct with a complete
+    set of solution vector and shadow price values for a solved model.
 
 #### 9/10/20
   - Add caching of problem_type() return value.

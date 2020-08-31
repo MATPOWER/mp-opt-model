@@ -76,6 +76,8 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %           newton_opt  - options struct for Newton method, NLEQS_NEWTON
 %           osqp_opt    - options struct for OSQP
 %           quadprog_opt - options struct for QUADPROG
+%           parse_soln (0) - flag that specifies whether or not to call
+%               the PARSE_SOLN method and place the return values in OM.soln.
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message if mixed integer price computation
@@ -120,6 +122,7 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 if nargin < 2
     opt = struct();
 end
+% opt.parse_soln = 1;
 
 %% call appropriate solver
 pt = om.problem_type();
@@ -208,6 +211,12 @@ if isstruct(lambda)
     om.soln.lambda = lambda;
 else
     om.soln.jac = lambda;
+end
+
+%% parse solution
+if isfield(opt, 'parse_soln') && opt.parse_soln
+    ps = om.parse_soln();
+    om.soln = nested_struct_copy(om.soln, ps, struct('copy_mode', '='));
 end
 
 %% system of nonlinear and linear equations

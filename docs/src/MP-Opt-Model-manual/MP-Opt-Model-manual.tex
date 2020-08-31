@@ -2414,6 +2414,49 @@ set type & valid tag values & description \\
 \end{threeparttable}
 \end{table}
 
+\clearpage
+\subsubsection*{\code{parse\_soln}}
+\label{sec:parse_soln}
+\begin{Code}
+ps = om.parse_soln()
+\end{Code}
+
+The \code{parse\_soln} method returns a struct of parsed solution vector and shadow price values for each named set of variables and constraints. The returned \code{ps} (parsed solution) struct has the format shown in Table~\ref{tab:parse_soln}, where each of the terminal elements is a struct with fields corresponding to the respective named sets.
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Output of \code{parse\_soln}}
+\label{tab:parse_soln}
+\footnotesize
+\begin{tabular}{ll}
+\toprule
+fields & description \\
+\midrule
+\code{ps} \\
+\code{~~~.var} & variables \\
+\code{~~~~~~.val} & struct of solution vectors \\
+\code{~~~~~~.mu\_l} & struct of lower bound shadow prices \\
+\code{~~~~~~.mu\_u} & struct of upper bound shadow prices \\
+\code{~~~.lin} & linear constraints \\
+\code{~~~~~~.mu\_l} & struct of lower bound shadow prices \\
+\code{~~~~~~.mu\_u} & struct of upper bound shadow prices \\
+\code{~~~.nle} & nonlinear equality constraints \\
+\code{~~~~~~.lam} & struct of shadow prices \\
+\code{~~~.nli} & nonlinear inequality constraints \\
+\code{~~~~~~.mu} & struct of shadow prices \\
+\bottomrule
+\end{tabular}
+% \begin{tablenotes}
+%  \scriptsize
+%  \item [\dag] {Footnote.}
+% \end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The value of each element in the returned struct can be obtained
+via the \code{get\_soln} method as well, but \code{parse\_soln} is generally more efficient if a complete set of values is needed.
 
 \clearpage
 \subsection{Indexed Sets}
@@ -2729,6 +2772,7 @@ name & description \\
 % \code{~~params\_nln\_cost}	& returns parameters for general nonlinear costs\tnote{\ddag}	\\
 \code{~~params\_quad\_cost}	& assembles and returns parameters for quadratic costs\tnote{\ddag}		\\
 \code{~~params\_var}	& assembles and returns inital values, bounds, types for variables\tnote{\ddag}	\\
+\code{~~parse\_soln}	& returns struct of all named solution vectors and shadow prices	\\
 \code{~~problem\_type}	& type of mathematical program represented by current model	\\
 \code{~~solve}	& solves the model, see Section~\ref{sec:solve}	\\
 \code{~~varsets\_cell2struct}	& converts variable subset \code{varsets} from cell array to struct array	\\
@@ -3068,6 +3112,7 @@ name & description \\
 \code{~~params\_nln\_cost}	& returns individual general nonlinear cost parameters	\\
 \code{~~params\_quad\_cost}	& returns individual or full set of quadratic cost coefficients	\\
 \code{~~params\_var}	& returns initial values, bounds and variable type for optimimization vector~$\hat{x}$\tnote{\ddag}	\\
+\code{~~parse\_soln}	& returns struct of all named solution vectors and shadow prices	\\
 \code{~~problem\_type}	& indicates type of mathematical program (e.g. LP, QP, MILP, MIQP, or NLP)	\\
 \code{~~solve}	& solves the optimization model	\\
 \code{~~varsets\_cell2struct}\tnote{\dag}	& converts variable set list from cell array to struct array	\\
@@ -3455,6 +3500,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \item New functions:
     \begin{itemize}
     \item \code{opt\_model/get\_soln()} method extracts solved results for a given named set of variables, constraints or costs.
+    \item \code{opt\_model/parse\_soln()} method returns a complete set of solution vector and shadow price values for a solved model.
     \item \code{opt\_model/eval\_lin\_constraint()} method computes the constraint values for the full set or an individual named subset of linear constraints.
     \item \code{qps\_osqp()} provides standardized interface for using \osqp{} to solve LP/QP problems
     \item \code{osqp\_options()} initializes options for \osqp{} solver
