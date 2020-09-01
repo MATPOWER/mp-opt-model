@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 9/1/20
+  - Add support for OSQP solver from [https://osqp.org][7], including
+    functions `qps_osqp()`, `osqpver()`, and `osqp_options()`.
+
 #### 8/31/20
   - Save the results of `solve()` method to the `soln` field of the
     MP-Opt-Model object.
@@ -233,3 +237,4 @@ Version 0.7.0 - *Jun 20, 2019*
 [4]: https://github.com/MATPOWER/matpower/pull/70
 [5]: https://github.com/MATPOWER/matpower/issues/79
 [6]: https://github.com/MATPOWER/matpower/issues/90
+[7]: https://osqp.org

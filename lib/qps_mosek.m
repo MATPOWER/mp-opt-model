@@ -101,7 +101,7 @@ function [x, f, eflag, output, lambda] = qps_mosek(H, c, A, l, u, xmin, xmax, x0
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
-%% check for Optimization Toolbox
+%% check for MOSEK
 % if ~have_fcn('mosek')
 %     error('qps_mosek: requires MOSEK');
 % end

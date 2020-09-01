@@ -174,6 +174,7 @@
 \newcommand{\glpk}[0]{{GLPK}}
 \newcommand{\gurobi}[0]{{Gurobi}}
 \newcommand{\mosek}[0]{{MOSEK}}
+\newcommand{\osqp}[0]{{OSQP}}
 \newcommand{\ot}[0]{{Optimization Toolbox}}
 \newcommand{\pardiso}[0]{{PARDISO}}
 \newcommand{\sdppf}[0]{\texttt{SDP\_PF}}
@@ -2607,6 +2608,7 @@ tag value & description \\
 \code{~~mosek}	& \mosek{}, LP/QP solver, \url{https://www.mosek.com/}	\\
 \code{~~octave}	& GNU Octave, as opposed to \matlab{}	\\
 \code{~~optimoptions}	& \code{optimoptions}, option setting funciton for \ot{} 6.3+	\\
+\code{~~osqp}	& \osqp{}, {\bf O}perator {\bf S}plitting {\bf Q}uadratic {\bf P}rogram solver, \url{https://osqp.org}	\\
 \code{~~pardiso}	& \pardiso{}, {\bf Par}allel Sparse {\bf D}irect \& {\bf I}terative Linear {\bf So}lver,	\\
 & ~~~~\url{https://pardiso-project.org}	\\
 \code{~~quadprog}	& \code{quadprog}, QP solver from \ot{}	\\
@@ -2636,7 +2638,7 @@ tag value & description \\
 \end{table}
 
 
-
+\clearpage
 \subsection{\tt mpomver}
 \begin{Code}
   mpomver
@@ -2773,6 +2775,7 @@ name & description \\
 \code{qps\_gurobi}	& QP/LP solver API implementation for \gurobi{}\tnote{\dag}	\\
 \code{qps\_ipopt}	& QP/LP solver API implementation for \ipopt{}-based solver\tnote{\dag}	\\
 \code{qps\_mosek}	& QP/LP solver API implementation for \mosek{} (\code{mosekopt})\tnote{\dag}	\\
+\code{qps\_osqp}	& QP/LP solver API implementation for \osqp{}\tnote{\dag}	\\
 \code{qps\_ot}	& QP/LP solver API implementation for \matlab{} Opt Toolbox's \code{quadprog}, \code{linprog}	\\
 \midrule
 \multicolumn{2}{c}{\emph{deprecated functions}} \\
@@ -2806,6 +2809,8 @@ name & description \\
 \code{ipopt\_options}	& default options for \ipopt{} solver\tnote{\dag}	\\
 \code{mosek\_options}	& default options for \mosek{} solver\tnote{\dag}	\\
 \code{mosek\_symbcon}	& symbolic constants to use for \mosek{} solver options\tnote{\dag}	\\
+\code{osqp\_options}	& default options for \osqp{} solver\tnote{\dag}	\\
+\code{osqpver}	& prints version information for \osqp{}	\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -2946,14 +2951,14 @@ name & description \\
 \code{~~t\_miqps\_master}	& runs tests of MILP/MIQP solvers via \code{miqps\_master}	\\
 \code{~~t\_nested\_struct\_copy}	& runs tests for \code{nested\_struct\_copy}	\\
 \code{~~t\_nleqs\_master}	& runs tests of NLEQ solvers via \code{nleqs\_master}	\\
-\code{~~t\_nlps\_master}	& runs tests of NLP solvers via\code{nlps\_master}	\\
+\code{~~t\_nlps\_master}	& runs tests of NLP solvers via \code{nlps\_master}	\\
 \code{~~t\_om\_solve\_leqs}	& runs tests of LEQ solvers via \code{om.solve()}	\\
 \code{~~t\_om\_solve\_miqps}	& runs tests of MILP/MIQP solvers via \code{om.solve()}	\\
 \code{~~t\_om\_solve\_nleqs}	& runs tests of NLEQ solvers via \code{om.solve()}	\\
 \code{~~t\_om\_solve\_nlps}	& runs tests of NLP solvers via \code{om.solve()}	\\
 \code{~~t\_om\_solve\_qps}	& runs tests of LP/QP solvers via \code{om.solve()}	\\
 \code{~~t\_opt\_model}	& runs tests for \code{opt\_model} objects	\\
-\code{~~t\_qps\_master}	& runs tests of LP/QP solvers via\code{qps\_master}	\\
+\code{~~t\_qps\_master}	& runs tests of LP/QP solvers via \code{qps\_master}	\\
 \bottomrule
 \end{tabular}
 % \begin{tablenotes}
@@ -3061,6 +3066,15 @@ Each solver implements a number of different solution algorithms.
 More information is available from The MathWorks, Inc. at \url{https://www.mathworks.com/}.
 
 When available, the \ot{} solvers can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master}, or MILP problems via \code{miqps\_master}, with the algorithm option set to \codeq{OT}, or by calling \code{qps\_ot} or \code{miqps\_ot} directly. It can be to solve general NLP problems via \mpom{}'s common NLP solver interface \code{nlps\_master} with the algorithm option set to \codeq{FMINCON}, or by calling \code{nlps\_fmincon} directly. It can also be used to solve general NLEQ problems via \mpom{}'s common NLEQ solver interface \code{nleqs\_master} with the algorithm option set to \codeq{FSOLVE}, or by calling \code{nleqs\_fsolve} directly.
+
+\subsection{\osqp{} -- Operator Splitting Quadratic Program Solver}
+\label{app:osqp}
+
+\osqp{}~\cite{osqp} is a numerical optimization package for solving convex quadratic programming problems. It uses a custom ADMM-based first-order method requiring only a single matrix factorization in the setup phase. More information is available at \url{https://osqp.org}.
+
+\osqp{} is a free, open-source package distributed under the Apache 2.0 License.
+
+When the \matlab{} interface to \osqp{} is installed, it can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master} with the algorithm option set to \codeq{OSQP}, or by calling \code{qps\_osqp} directly.
 
 
 %%------------------------------------------
@@ -3221,10 +3235,14 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
+\item Support for \osqp{} solver from \url{https://osqp.org}.
 \item Save the results of the \code{solve()} method to the \code{soln} field of the \mpom{} object.
 \item New functions:
     \begin{itemize}
     \item \code{opt\_model/eval\_lin\_constraint()} method computes the constraint values for the full set or an individual named subset of linear constraints.
+    \item \code{qps\_osqp()} provides standardized interface for using \osqp{} to solve LP/QP problems
+    \item \code{osqp\_options()} initializes options for \osqp{} solver
+    \item \code{osqpver()} returns/displays version information for \osqp{}
     \end{itemize}
 \end{itemize}
 
@@ -3347,6 +3365,10 @@ doi:~\href{https://doi.org/10.1007/0-387-30065-1_4}{10.1007/0-387-30065-1\_4}
 \bibitem{otug}
 \emph{Optimization Toolbox Users's Guide}, The MathWorks, Inc., 2016.
   [Online]. Available: \url{https://www.mathworks.com/help/releases/R2016b/pdf_doc/optim/optim_tb.pdf}.
+
+\bibitem{osqp}
+B.~Stellato, G.~Banjac, P.~Goulart, A.~Bemporad, and S.~Boyd, S., ``{OSQP}: An Operator Splitting Solver for Quadratic Programs'', \emph{Mathematical Programming Computation}, 2020.
+doi:~\href{https://doi.org/10.1007/s12532-020-00179-2}{10.1007/s12532-020-00179-2}
 
 \end{thebibliography}
 

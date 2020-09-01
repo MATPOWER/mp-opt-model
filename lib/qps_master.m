@@ -44,6 +44,7 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %               'IPOPT'   : (or 400) IPOPT, requires MEX interface to IPOPT
 %                           solver, https://github.com/coin-or/Ipopt
 %               'MOSEK'   : (or 600) MOSEK
+%               'OSQP'    : OSQP, https://osqp.org
 %               'OT'      : (or 300) Optimization Toolbox, QUADPROG or LINPROG
 %           verbose (0) - controls level of progress output displayed
 %               0 = no progress output
@@ -58,6 +59,7 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %           linprog_opt - options struct for LINPROG
 %           mips_opt    - options struct for QPS_MIPS
 %           mosek_opt   - options struct for MOSEK
+%           osqp_opt    - options struct for OSQP
 %           quadprog_opt - options struct for QUADPROG
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
@@ -256,6 +258,9 @@ switch alg
     case 'MOSEK'
         [x, f, eflag, output, lambda] = ...
             qps_mosek(H, c, A, l, u, xmin, xmax, x0, opt);
+    case 'OSQP'
+        [x, f, eflag, output, lambda] = ...
+            qps_osqp(H, c, A, l, u, xmin, xmax, x0, opt);
     case 'OT'                   %% use QUADPROG or LINPROG from Opt Tbx ver 2.x+
         [x, f, eflag, output, lambda] = ...
             qps_ot(H, c, A, l, u, xmin, xmax, x0, opt);

@@ -63,6 +63,7 @@ function rv = have_fcn(tag, rtype)
 %       mosek       - MOSEK, LP/QP solver (https://www.mosek.com/)
 %       octave      - code is running under GNU Octave, as opposed to MATLAB
 %       optimoptions - OPTIMOPTIONS, option setting funciton for Optim Tbx 6.3+
+%       osqp        - OSQP (Operator Splitting QP) solver (https://osqp.org)
 %       pardiso     - PARDISO, Parallel Sparse Direct & Iterative Linear Solver
 %                       (https://pardiso-project.org)
 %       quadprog    - QUADPROG, QP solver from Optimization Toolbox 2.x +
@@ -438,6 +439,17 @@ elseif action == 'D'        %% detect availability
                     else
                         vstr = t{1}{1};
                         rdate = datestr(t{1}{2}, 'dd-mmm-yyyy');
+                    end
+                end
+            case 'osqp'
+                TorF = exist('osqp', 'file') == 2;
+                if TorF
+                    try
+                        o = osqp();
+                        vstr = o.version();
+                    catch
+                        TorF = 0;
+                        fprintf('OSQP Error!\n');
                     end
                 end
             case 'smartmarket'

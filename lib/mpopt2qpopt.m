@@ -123,6 +123,8 @@ switch alg
         qpopt.grb_opt = gurobi_options([], mpopt);
     case {'MOSEK', 600}
         qpopt.mosek_opt = mosek_options([], mpopt);
+    case 'OSQP'
+        qpopt.osqp_opt = osqp_options([], mpopt);
     case {'OT', 300}
         if isfield(mpopt, 'linprog') && ~isempty(mpopt.linprog)
             qpopt.linprog_opt = mpopt.linprog;

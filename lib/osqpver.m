@@ -1,12 +1,12 @@
-function rv = gurobiver(varargin)
-%GUROBIVER  Prints or returns GUROBI version info.
-%   V = GUROBIVER returns the current GUROBI version numbers.
-%   V = GUROBIVER('all') returns a struct with the fields Name, Version,
-%   Release and Date (all strings). Calling GUROBIVER without assigning the
+function rv = osqpver(varargin)
+%OSQPVER  Prints or returns OSQP version info.
+%   V = OSQPVER returns the current OSQP version numbers.
+%   V = OSQPVER('all') returns a struct with the fields Name, Version,
+%   Release and Date (all strings). Calling OSQPVER without assigning the
 %   return value prints the version and release date of the current
-%   installation of GUROBI.
+%   installation of OSQP.
 %
-%   See also MPVER, GUROBI.
+%   See also MPVER, OSQP.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
@@ -16,15 +16,15 @@ function rv = gurobiver(varargin)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
-g = have_fcn('gurobi', 'all');
-if ~g.av
-    g.vstr = '<unknown>';
+o = have_fcn('osqp', 'all');
+if ~o.av
+    o.vstr = '<unknown>';
 end
 
-v = struct( 'Name',     'Gurobi', ... 
-            'Version',  g.vstr, ...
+v = struct( 'Name',     'OSQP', ... 
+            'Version',  o.vstr, ...
             'Release',  '', ...
-            'Date',     g.date );
+            'Date',     o.date );
 if nargout > 0
     if nargin > 0
         rv = v;
@@ -32,7 +32,7 @@ if nargout > 0
         rv = v.Version;
     end
 else
-    if g.av
+    if o.av
         fprintf('%-22s Version %-10s %-11s\n', v.Name, v.Version, v.Date);
     else
         fprintf('%-22s -- not installed --\n', v.Name);
