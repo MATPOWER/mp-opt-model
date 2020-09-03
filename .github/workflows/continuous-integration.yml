@@ -95,6 +95,9 @@ jobs:
         octave-cli --no-gui -p $MP_OPT_MODEL_PATH --eval mpomver
         octave-cli --no-gui -p $MP_OPT_MODEL_PATH --eval "qps_glpk( [],[1; 1],[1 1],[2],[2],[1; 1],[1; 1],[1; 1],struct('verbose', 3));"
         octave-cli --no-gui -p $MP_OPT_MODEL_PATH --eval "qps_ipopt([],[1; 1],[1 1],[2],[2],[1; 1],[1; 1],[1; 1],struct('verbose', 2));"
+        # fail if either Ipopt or OSQP are not successfully installed
+        octave-cli --no-gui -p $MP_OPT_MODEL_PATH --eval "if ~have_fcn('ipopt'), exit(1); end"
+        octave-cli --no-gui -p $MP_OPT_MODEL_PATH --eval "if ~have_fcn('osqp'), exit(1); end"
     - name: Test MP-Test
       run: octave-cli --no-gui -p $MPTEST_PATH --eval "test_mptest(0,1)"
     - name: Test MIPS
