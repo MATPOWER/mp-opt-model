@@ -28,13 +28,13 @@ jobs:
       run: |
         sudo apt-get install -y -qq coinor-libipopt-dev liboctave-dev octave
         octave-cli --no-gui --eval ver
-        echo "::set-env name=OCTAVE_VER::`octave-cli --no-gui --eval "fprintf('%s', ver.Version)"`"
+        echo "::set-env name=OCTAVE_VER::`octave-cli --no-gui --eval "fprintf('%s', ver('octave').Version)"`"
     - name: Install GNU Octave (Mac)
       if: startsWith(matrix.os, 'macos')
       run: |
         brew install octave
         octave-cli --no-gui --eval ver
-        echo "::set-env name=OCTAVE_VER::`octave-cli --no-gui --eval "fprintf('%s', ver.Version)"`"
+        echo "::set-env name=OCTAVE_VER::`octave-cli --no-gui --eval "fprintf('%s', ver('octave').Version)"`"
     - name: Build OSQP
       run: |
         mkdir $HOME/build
