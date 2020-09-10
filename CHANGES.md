@@ -5,6 +5,9 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 9/10/20
+  - Add caching of problem_type() return value.
+
 #### 9/1/20
   - Add support for OSQP solver from [https://osqp.org][7], including
     functions `qps_osqp()`, `osqpver()`, and `osqp_options()`.

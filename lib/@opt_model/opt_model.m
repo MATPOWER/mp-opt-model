@@ -172,6 +172,7 @@ classdef opt_model < mp_idx_manager
 %                     in the order they were added
 %               .name   - name of the block, e.g. R
 %               .idx    - indices for name, {2,3} => R(2,3)
+%       .prob_type  - used to cache the return value of problem_type()
 %       .soln       - struct containing the output of the solve() method
 %                     with the following fields
 %           .eflag  - exit flag
@@ -200,6 +201,7 @@ classdef opt_model < mp_idx_manager
         nli;            %% nonlinear inequality constraints
         qdc;            %% quadratic costs
         nlc;            %% general nonlinear costs
+        prob_type = ''; %% problem type
         soln = struct( ...  %% results of solve()
             'eflag', [], ...    %% exit flag
             'output', [], ...   %% algorithm code & solver-specific fields

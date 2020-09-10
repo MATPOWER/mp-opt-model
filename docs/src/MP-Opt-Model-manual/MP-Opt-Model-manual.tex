@@ -2291,6 +2291,7 @@ Returns 1 if any of the variables are binary or integer, 0 otherwise.
 \subsubsection*{\code{problem\_type}}
 \begin{Code}
 prob_type = om.problem_type()
+prob_type = om.problem_type(recheck)
 \end{Code}
 Returns a string identifying the type of mathematical program represented by the current model, based on the variables, costs,and constraints that have been added to the model. Used to automatically select an appropriate solver. 
 
@@ -2308,6 +2309,8 @@ The \code{prob\_type} string is one of the following:
 \item \codeq{MIQP} – mixed-integer quadratic program
 \item \codeq{MINLP} – mixed-integer nonlinear program\footnote{\mpom{} does not yet implement solving MINLP problems.}
 \end{itemize}
+
+The output value is cached for future calls, but calling with a true value for the optional \code{recheck} argument will force it to recheck in case the problem type has changed due to modifying the variables, constraints or costs in the model.
 
 \subsubsection*{\code{varsets\_cell2struct}}
 \begin{Code}
@@ -2455,6 +2458,7 @@ The properties in \code{opt\_model} consist of those inherited from the base cla
 name & description \\
 \midrule
 \code{set\_types}\tnote{\dag}	& struct whose fields define the valid set types\tnote{*}	\\
+\code{prob\_type}	& used to cache the return value of \code{problem\_type()}	\\
 \code{var}\tnote{\ddag}	& data for \codeq{var} set type, variables	\\
 \code{lin}\tnote{\ddag}	& data for \codeq{lin} set type, linear constraints	\\
 \code{nle}\tnote{\ddag}	& data for \codeq{nle} set type, nonlinear equality constraints	\\
