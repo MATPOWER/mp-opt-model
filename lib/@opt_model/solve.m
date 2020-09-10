@@ -87,9 +87,10 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %           0 or negative values = solver specific failure codes
 %       OUTPUT : output struct with the following fields:
 %           alg - algorithm code of solver used
-%           (others) - algorithm specific fields
+%           (others) - solver specific fields
+%       JAC : final Jacobian matrix (if available, for LEQ/NLEQ problems)
 %       LAMBDA : (for all non-NLEQ problem types) struct containing the
-%           Langrange and Kuhn-Tucker multiplierson the constraints, with
+%           Langrange and Kuhn-Tucker multipliers on the constraints, with
 %           fields:
 %           eqnonlin - nonlinear equality constraints
 %           ineqnonlin - nonlinear inequality constraints
@@ -97,7 +98,6 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %           mu_u - upper (right-hand) limit on linear constraints
 %           lower - lower bound on optimization variables
 %           upper - upper bound on optimization variables
-%       JAC : (for NLEQ problems) final Jacobian matrix
 %
 %   See also OPT_MODEL, QPS_MASTER, MIQPS_MASTER, NLPS_MASTER
 
@@ -197,24 +197,7 @@ om.soln.x = x;
 om.soln.f = f;
 om.soln.output = output;
 if isstruct(lambda)
-    if isfield(lambda, 'lower')
-        om.soln.mu.var.l = lambda.lower;
-    end
-    if isfield(lambda, 'upper')
-        om.soln.mu.var.u = lambda.upper;
-    end
-    if isfield(lambda, 'mu_l')
-        om.soln.mu.lin.l = lambda.mu_l;
-    end
-    if isfield(lambda, 'mu_u')
-        om.soln.mu.lin.u = lambda.mu_u;
-    end
-    if isfield(lambda, 'eqnonlin')
-        om.soln.mu.nle = lambda.eqnonlin;
-    end
-    if isfield(lambda, 'ineqnonlin')
-        om.soln.mu.nli = lambda.ineqnonlin;
-    end
+    om.soln.lambda = lambda;
 else
     om.soln.jac = lambda;
 end

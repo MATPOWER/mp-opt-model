@@ -172,6 +172,16 @@ classdef opt_model < mp_idx_manager
 %                     in the order they were added
 %               .name   - name of the block, e.g. R
 %               .idx    - indices for name, {2,3} => R(2,3)
+%       .soln       - struct containing the output of the solve() method
+%                     with the following fields
+%           .eflag  - exit flag
+%           .output - output struct with the following fields
+%               .alg     - algorithm code of solver used
+%               (others) - solver specific fields
+%           .x      - solution vector
+%           .f      - final (objective) function value
+%           .jac    - final Jacobian matrix (if available, for LEQ/NLEQ probs)
+%           .lambda - Lagrange and Kuhn-Tucker multipliers on constraints
 %       .userdata   - any user defined data
 %           .(user defined fields)
 
@@ -190,21 +200,13 @@ classdef opt_model < mp_idx_manager
         nli;            %% nonlinear inequality constraints
         qdc;            %% quadratic costs
         nlc;            %% general nonlinear costs
-        soln = struct( ...      %% solution information
-            'eflag', [], ...
-            'output', [], ...
+        soln = struct( ...  %% results of solve()
+            'eflag', [], ...    %% exit flag
+            'output', [], ...   %% algorithm code & solver-specific fields
             'x', [], ...        %% solution vector
             'f', [], ...        %% final (objective) function value
             'jac', [], ...      %% Jacobian (if available) for LEQ/NLEQ
-            'mu', struct( ...
-                'var', struct( ...
-                    'l', [], ...%% variable lower bound shadow prices
-                    'u', []), ...%% variable upper bound shadow prices
-                'lin', struct( ...
-                    'l', [], ...%% linear constraint lower bound shadow prices
-                    'u', []), ...%% linear constraint upper bound shadow prices
-                'nle', [], ...  %% nonlinear equality shadow prices
-                'nli', [] ) );  %% nonlinear inequality shadow prices
+            'lambda', [] );     %% constraint shadow prices
     end     %% properties
 
     methods

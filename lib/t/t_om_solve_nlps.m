@@ -196,12 +196,12 @@ t_is(om.soln.x, x, 14, [t 'x']);
 t_is(om.soln.f, f, 14, [t 'f']);
 t_is(om.soln.eflag, s, 14, [t 'eflag']);
 t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
-t_is(om.soln.mu.var.l, lam.lower, 14, [t 'om.soln.mu.var.l']);
-t_is(om.soln.mu.var.u, lam.upper, 14, [t 'om.soln.mu.var.u']);
-t_is(om.soln.mu.lin.l, lam.mu_l, 14, [t 'om.soln.mu.lin.l']);
-t_is(om.soln.mu.lin.u, lam.mu_u, 14, [t 'om.soln.mu.lin.u']);
-t_is(om.soln.mu.nle, lam.eqnonlin, 14, [t 'om.soln.mu.lin.l']);
-t_is(om.soln.mu.nli, lam.ineqnonlin, 14, [t 'om.soln.mu.lin.u']);
+t_is(om.soln.lambda.lower, lam.lower, 14, [t 'om.soln.lambda.lower']);
+t_is(om.soln.lambda.upper, lam.upper, 14, [t 'om.soln.lambda.upper']);
+t_is(om.soln.lambda.mu_l, lam.mu_l, 14, [t 'om.soln.lambda.mu_l']);
+t_is(om.soln.lambda.mu_u, lam.mu_u, 14, [t 'om.soln.lambda.mu_u']);
+t_is(om.soln.lambda.eqnonlin, lam.eqnonlin, 14, [t 'om.soln.lambda.eqnonlin']);
+t_is(om.soln.lambda.ineqnonlin, lam.ineqnonlin, 14, [t 'om.soln.lambda.ineqnonlin']);
 
 t_end;
 

@@ -2186,15 +2186,13 @@ alg & algorithm code of solver used \\
 \emph{(others)} & solver-specific fields \\
 \end{tabular}	\\
 \code{~~~~.jac} & final value of Jacobian matrix (for LEQ/NLEQ)	\\
-\code{~~~~.mu} & shadow prices on constraints (taken from \code{lambda} return value)	\\
-\code{~~~~~~.var} & variable bounds	\\
-\code{~~~~~~~~.l} & lower bound (from \code{lambda.lower})	\\
-\code{~~~~~~~~.u} & upper bound (from \code{lambda.upper})	\\
-\code{~~~~~~.lin} & linear constraints	\\
-\code{~~~~~~~~.l} & lower bound (from \code{lambda.mu\_l})	\\
-\code{~~~~~~~~.u} & upper bound (from \code{lambda.mu\_u})	\\
-\code{~~~~~~.nle} & nonlinear equality constraints (from \code{lambda.eqnonlin})	\\
-\code{~~~~~~.nli} & nonlinear inequality constraints (from \code{lambda.ineqnonlin})	\\
+\code{~~~~.lambda} & shadow prices on constraints	\\
+\code{~~~~~~.lower} & variable lower bound	\\
+\code{~~~~~~.upper} & variable upper bound	\\
+\code{~~~~~~.mu\_l} & linear constraint lower bound	\\
+\code{~~~~~~.mu\_u} & linear constraint upper bound	\\
+\code{~~~~~~.eqnonlin} & nonlinear equality constraints	\\
+\code{~~~~~~.ineqnonlin} & nonlinear inequality constraints	\\
 & \\
 \bottomrule
 \end{tabular}

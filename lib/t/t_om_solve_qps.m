@@ -231,10 +231,10 @@ t_is(om.soln.x, x, 14, [t 'x']);
 t_is(om.soln.f, f, 14, [t 'f']);
 t_is(om.soln.eflag, s, 14, [t 'eflag']);
 t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
-t_is(om.soln.mu.var.l, lam.lower, 14, [t 'om.soln.mu.var.l']);
-t_is(om.soln.mu.var.u, lam.upper, 14, [t 'om.soln.mu.var.u']);
-t_is(om.soln.mu.lin.l, lam.mu_l, 14, [t 'om.soln.mu.lin.l']);
-t_is(om.soln.mu.lin.u, lam.mu_u, 14, [t 'om.soln.mu.lin.u']);
+t_is(om.soln.lambda.lower, lam.lower, 14, [t 'om.soln.lambda.lower']);
+t_is(om.soln.lambda.upper, lam.upper, 14, [t 'om.soln.lambda.upper']);
+t_is(om.soln.lambda.mu_l, lam.mu_l, 14, [t 'om.soln.lambda.mu_l']);
+t_is(om.soln.lambda.mu_u, lam.mu_u, 14, [t 'om.soln.lambda.mu_u']);
 
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);
