@@ -15,26 +15,19 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           verbose (0) - controls level of progress output displayed
-%               0 = no progress output
-%               1 = some progress output
-%               2 = verbose progress output
 %           alg ('DEFAULT') : determines which solver to use, list of relevant
 %                   problem types are listed in parens next to each
 %               'DEFAULT' : automatic, depending on problem type, uses the
 %                       the first available of:
-%                   LP - Gurobi, CPLEX, MOSEK, Opt Tbx (if MATLAB), GLPK, BPMPD,
+%                   LP - Gurobi, CPLEX, MOSEK, linprog (if MATLAB), GLPK,
+%                           BPMPD, MIPS
+%                   QP - Gurobi, CPLEX, MOSEK, quadprog (if MATLAB), BPMPD,
 %                           MIPS
-%                   QP - Gurobi, CPLEX, MOSEK, Opt Tbx (if MATLAB), BPMPD, MIPS
 %                   MILP - Gurobi, CPLEX, MOSEK, Opt Tbx (intlingprog), GLPK
 %                   MIQP - Gurobi, CPLEX, MOSEK
 %                   NLP - MIPS
 %                   MINLP - Artelys Knitro (not yet implemented)
 %                   NLEQ - Newton's method
-%               'MIPS'    : (LP, QP, NLP) MIPS, MATPOWER Interior Point Solver
-%                        pure MATLAB implementation of a primal-dual
-%                        interior point method, if mips_opt.step_control = 1
-%                        it uses MIPS-sc, a step controlled variant of MIPS
 %               'BPMPD'   : (LP, QP) BPMPD_MEX
 %               'CLP'     : (LP, QP) CLP
 %               'CPLEX'   : (LP, QP, MILP, MIQP) CPLEX
@@ -48,36 +41,51 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %                           https://github.com/coin-or/Ipopt
 %               'KNITRO'  : (NLP, MINLP) Artelys Knitro, requires Artelys Knitro solver
 %                           https://www.artelys.com/solvers/knitro/
+%               'MIPS'    : (LP, QP, NLP) MIPS, MATPOWER Interior Point Solver
+%                        pure MATLAB implementation of a primal-dual
+%                        interior point method, if mips_opt.step_control = 1
+%                        it uses MIPS-sc, a step controlled variant of MIPS
 %               'MOSEK'   : (LP, QP, MILP, MIQP) MOSEK
 %               'NEWTON'  : (NLEQ) Newton's method
+%               'OSQP'    : (LP, QP) OSQP, https://osqp.org
 %               'OT'      : (LP, QP, MILP) MATLAB Optimization Toolbox,
 %                           LINPROG, QUADPROG or INTLINPROG
-%           bp_opt      - options vector for BP
+%           verbose (0) - controls level of progress output displayed
+%               0 = no progress output
+%               1 = some progress output
+%               2 = verbose progress output
+%           bp_opt      - options vector for BP (BPMPD)
 %           clp_opt     - options vector for CLP
 %           cplex_opt   - options struct for CPLEX
+%           fd_opt      - options struct for fast-decoupled Newton's method,
+%                           nleqs_fd_newton()
 %           fmincon_opt - options struct for FMINCON
 %           fsolve_opt  - options struct for FSOLVE
 %           glpk_opt    - options struct for GLPK
 %           grb_opt     - options struct for GUROBI
+%           gs_opt      - options struct for Gauss-Seidel method,
+%                           nleqs_gauss_seidel()
 %           intlinprog_opt - options struct for INTLINPROG
 %           ipopt_opt   - options struct for IPOPT
 %           knitro_opt  - options struct for Artelys Knitro
+%           leq_opt     - options struct for MPLINSOLVE, with 'solver' and
+%               'opt' fields corresponding to respective MPLINSOLVE args
 %           linprog_opt - options struct for LINPROG
 %           mips_opt    - options struct for MIPS
 %           mosek_opt   - options struct for MOSEK
-%           leq_opt     - options struct with 'solver' and 'opt' fields
-%               corresponding to the respective MPLINSOLVE args
 %           newton_opt  - options struct for Newton method, NLEQS_NEWTON
+%           osqp_opt    - options struct for OSQP
 %           quadprog_opt - options struct for QUADPROG
-%           x0 (empty)  - initial value of x, overrides value stored in model
-%           skip_prices (0) - flag that specifies whether or not to skip the
-%               price computation stage for mixed integer problems, in which
-%               the problem is re-solved for only the continuous variables,
-%               with all others being constrained to their solved values
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message if mixed integer price computation
 %               stage is not skipped
+%           skip_prices (0) - flag that specifies whether or not to skip the
+%               price computation stage for mixed integer problems, in which
+%               the problem is re-solved for only the continuous variables,
+%               with all others being constrained to their solved values
+%           x0 (empty)  - optional initial value of x, overrides value
+%               stored in model (ignored by some solvers)
 %
 %   Outputs:
 %       X : solution vector

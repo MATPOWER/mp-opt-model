@@ -591,7 +591,6 @@ name & description \\
 \code{xmin}	& column vector $x_\mathrm{min}$ of lower bounds on $x$, defaults to $-\infty$	\\
 \code{xmax}	& 	column vector $x_\mathrm{max}$ of upper bounds on $x$, defaults to $+\infty$	\\
 \code{x0}	& optional starting value of optimization vector $x$ \emph{(ignored by some solvers)}	\\
-\code{opt}	& optional options struct, all fields (shown in Table~\ref{tab:qps_master_options}) optional	\\
 \code{opt}	& optional options struct (all fields optional), see Table~\ref{tab:qps_master_options} for details	\\
 \code{problem}	& alternative, single argument input struct with fields corresponding to arguments above	\\
 \bottomrule
@@ -663,7 +662,7 @@ name & default & description \\
 \codeq{GLPK} & \glpk{}\tnote{*} \emph{(LP only)} \\
 \codeq{GUROBI} & \gurobi{}\tnote{*} \\
 \codeq{IPOPT} & \ipopt{}\tnote{*} \\
-\codeq{MIPS} & \mips{}, \mipsname{}, primal/dual interior point method \\
+\codeq{MIPS} & \mipslink{}, \mipsname{} \\
 \codeq{MOSEK} & \mosek{}\tnote{*} \\
 \codeq{OT} & \matlab{} Opt Toolbox, \code{quadprog}, \code{linprog} \\
 \end{tabular}	\\
@@ -840,7 +839,7 @@ name & default & description \\
 3 & print all progress info \\
 \end{tabular}	\\
 \code{skip\_prices}	& 0	& flag that specifies whether or not to skip the price computation stage, in which the problem is re-solved for only the continuous variables, with all others being constrained to their solved values \\
-\code{price\_stage\_warn\_tol}	& \emph{$10^-7$}	& tolerance on the objective function value and primal variable relative mismatch required to avoid mismatch warning message \\
+\code{price\_stage\_warn\_tol}	& \emph{$10^{-7}$}	& tolerance on the objective function value and primal variable relative mismatch required to avoid mismatch warning message \\
 \code{cplex\_opt}	& \emph{empty}	& options struct for \cplex{}\tnote{*} \\
 \code{glpk\_opt}	& \emph{empty}	& options struct for \glpk{}\tnote{*} \\
 \code{grb\_opt}	& \emph{empty}	& options struct for \gurobi{}\tnote{*} \\
@@ -918,19 +917,19 @@ The calling syntax for \code{nlps\_master} is nearly identical to that of \mipsl
 \toprule
 name & description \\
 \midrule
-\code{f\_fcn}	& Handle to a function that evaluates the objective function, its gradients and Hessian\tnote{\ddag} for a given value of $x$. Calling syntax for this function:	\\
+\code{f\_fcn}	& handle to function that evaluates the objective function, its gradients and Hessian\tnote{\ddag} for a given value of $x$, with calling syntax:	\\
 &~~~~\code{[f, df, d2f] = f\_fcn(x)}	\\
-\code{x0}	& Starting value of optimization vector $x$.	\\
-\code{A}, \code{l}, \code{u}	& Define the optional linear constraints $l \le A x \le u$. Default values for the elements of \code{l} and \code{u} are \code{-Inf} and \code{Inf}, respectively.	\\
-\code{xmin}, \code{xmax}	& Optional lower and upper bounds on the $x$ variables, defaults are \code{-Inf} and \code{Inf}, respectively.	\\
-\code{gh\_fcn}	& Handle to function that evaluates the optional nonlinear constraints and their gradients for a given value of $x$. Calling syntax for this function is:	\\
+\code{x0}	& starting value of optimization vector $x$	\\
+\code{A}, \code{l}, \code{u}	& define optional linear constraints $l \le A x \le u$, where default values for elements of \code{l} and \code{u} are \code{-Inf} and \code{Inf}, respectively.	\\
+\code{xmin}, \code{xmax}	& optional lower and upper bounds on $x$, with defaults \code{-Inf} and \code{Inf}, respectively	\\
+\code{gh\_fcn}	& handle to function that evaluates the optional nonlinear constraints and their gradients for a given value of $x$, with calling syntax:	\\
 &~~~~\code{[h, g, dh, dg] = gh\_fcn(x)}	\\
-& where the columns of \code{dh} and \code{dg} are the gradients of the corresponding elements of \code{h} and \code{g}, i.e. \code{dh} and \code{dg} are transposes of the Jacobians of \code{h} and \code{g}, respectively.	\\
-\code{hess\_fcn}	& Handle to function that computes the Hessian\tnote{\ddag} of the Lagrangian for given values of $x$, $\lambda$ and $\mu$, where $\lambda$ and $\mu$ are the multipliers on the equality and inequality constraints, $g$ and $h$, respectively. The calling syntax for this function is:	\\
+& where the columns of \code{dh} and \code{dg} are the gradients of the corresponding elements of \code{h} and \code{g}, i.e. \code{dh} and \code{dg} are transposes of the Jacobians of \code{h} and \code{g}, respectively	\\
+\code{hess\_fcn}	& handle to function that computes the Hessian\tnote{\ddag} of the Lagrangian for given values of $x$, $\lambda$ and $\mu$, where $\lambda$ and $\mu$ are the multipliers on the equality and inequality constraints, $g$ and $h$, respectively, with calling syntax:	\\
 &~~~~\code{Lxx = hess\_fcn(x, lam, cost\_mult)},	\\
 &where $\lambda$ = \code{lam.eqnonlin}, $\mu$ = \code{lam.ineqnonlin} and \code{cost\_mult} is a parameter used to scale the objective function	\\
-\code{opt}	& Optional options structure with fields, all of which are also optional, described in Table~\ref{tab:nlps_master_options}. \\
-\code{problem}	& Alternative, single argument input struct with fields corresponding to arguments above.	\\
+\code{opt}	& optional options struct (all fields optional), see Table~\ref{tab:nlps_master_options} for details	\\
+\code{problem}	& alternative, single argument input struct with fields corresponding to arguments above	\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -993,7 +992,7 @@ name & default & description \\
 \code{alg}	& \codeq{DEFAULT}	& determines which solver to use \\
 && \begin{tabular}{c @{ -- } p{0.5\textwidth}}
 \codeq{DEFAULT} & automatic, current default is \mips{} \\
-\codeq{MIPS} & \mips{} \\
+\codeq{MIPS} & \mipslink{}, \mipsname{} \\
 \codeq{FMINCON} & \matlab{} Opt Toolbox, \code{fmincon}\tnote{*} \\
 \codeq{IPOPT} & \ipopt{}\tnote{*} \\
 \codeq{KNITRO} & \knitro{}\tnote{*} \\
@@ -1224,13 +1223,13 @@ The calling syntax for \code{nleqs\_master} is identical to that used by \code{f
 \toprule
 name & description \\
 \midrule
-\code{fcn}	& Handle to a function that evaluates the function $f(x)$ and optionally its Jacobian $J(x)$ for a given value of $x$. Calling syntax for this function is:	\\
+\code{fcn}	& handle to function that evaluates the function $f(x)$ and optionally its Jacobian $J(x)$ for a given value of $x$, with calling syntax:	\\
 &~~~~\code{f = fcn(x)}, or	\\
 &~~~~\code{[f, J] = fcn(x)}	\\
-& Whether \code{fcn} is required to return the Jacobian or not depends on the selected solver algorithm. \\
-\code{x0}	& Starting value of vector $x$.	\\
-\code{opt}\tnote{\dag}	& Options structure with fields, all of which are also optional, described in Table~\ref{tab:nleqs_master_options}. \\
-\code{problem}	& Alternative, single argument input struct with fields corresponding to arguments above.	\\
+& where selected solver algorithm determines whether \code{fcn} is required to return the Jacobian or not \\
+\code{x0}	& starting value of vector $x$	\\
+\code{opt}	& optional options struct (all fields optional), see Table~\ref{tab:nleqs_master_options} for details	\\
+\code{problem}	& alternative, single argument input struct with fields corresponding to arguments above	\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -1311,7 +1310,7 @@ name & default & description \\
 \end{tabular}
 \begin{tablenotes}
  \scriptsize
- \item [*] {The \code{fsolve()} function is included with GNU Octave, but on \matlab{} it is part of the \matlab{} \ot{}. See Appendix~\ref{app:optional_packages} for more information on the \matlab{} \ot{}.}
+ \item [*] {The \code{fsolve} function is included with GNU Octave, but on \matlab{} it is part of the \matlab{} \ot{}. See Appendix~\ref{app:optional_packages} for more information on the \matlab{} \ot{}.}
  \item [\dag] {Fast-decoupled Newton requires setting \code{fd\_opt.jac\_approx\_fcn} to a function handle that returns Jacobian approximations. See \code{help nleqs\_fd\_newton} for more details.}
  \item [\ddag] {Gauss-Seidel requires setting \code{gs\_opt.x\_update\_fcn} to a function handle that updates $x$. See \code{help nleqs\_gauss\_seidel} for more details.}
  \item [\S] {A value of 0 indicates to use the solver's own default.}
@@ -1839,7 +1838,113 @@ om.solve()
 
 After all variables, constraints and costs have been added to the model, the optimization problem can be solved simply by calling the \code{solve} method. This method automatically selects and calls, depending on the problem type, \code{mplinsolve} or one of the master solver interface functions from Section~\ref{sec:master_solvers}, namely \code{qps\_master}, \code{miqps\_master}, \code{nlps\_master}, or \code{nleqs\_master}. Note that one of the equation solvers, \code{mplinsolve} or \code{nleqs\_master} is chosen if the model has only equality constraints, with no costs and no inequality constraints.
 
-The results are stored in the \code{soln} field (see Section~\ref{sec:soln}) of the \mpom{} object and can be returned in the optional output arguments. For details on the return values and the input options struct \code{opt}, see the descriptions of the individual solver functions in Sections~\ref{sec:qps_master}, \ref{sec:miqps_master}, \ref{sec:nlps_master}, and \ref{sec:nleqs_master}. For linear equations, the \code{solver} and \code{opt} arguments for \code{mplinsolve}, described in Section~\ref{MIPSMAN-sec:mplinsolve} of the \mipsman{}, can be provided in \code{opt.leq\_opt.solver} and \code{opt.leq\_opt.opt}, respectively.
+The results are stored in the \code{soln} field (see Section~\ref{sec:soln}) of the \mpom{} object and can be returned in the optional output arguments. The input options struct \code{opt}, summarized in Tables~\ref{tab:solve_options} and \ref{tab:solve_alg_option}, is optional, as are all of its fields. For details on the return values see the descriptions of the individual solver functions in Sections~\ref{sec:qps_master}, \ref{sec:miqps_master}, \ref{sec:nlps_master}, and \ref{sec:nleqs_master}. For linear equations, the \code{solver} and \code{opt} arguments for \code{mplinsolve}, described in Section~\ref{MIPSMAN-sec:mplinsolve} of the \mipsman{}, can be provided in the respective fields of \code{opt.leq\_opt}.
+
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Options for \code{solve}}
+\label{tab:solve_options}
+\footnotesize
+\begin{tabular}{lcp{0.62\textwidth}}
+\toprule
+name & default & description \\
+\midrule
+\code{alg}	& \codeq{DEFAULT}	& determines which solver to use, see Table~\ref{tab:solve_alg_option} \\
+\code{verbose}	& 1	& amount of progress info to be printed \\
+&& \begin{tabular}{r @{ -- } l}
+0 & print no progress info \\
+1 & print a little progress info \\
+2 & print a lot of progress info \\
+3 & print all progress info \\
+\end{tabular}	\\
+\code{bp\_opt}	& \emph{empty}	& options vector for \code{bp} (BPMPD)\tnote{*} \\
+\code{clp\_opt}	& \emph{empty}	& options vector for \clp{}\tnote{*} \\
+\code{cplex\_opt}	& \emph{empty}	& options struct for \cplex{}\tnote{*} \\
+\code{fd\_opt}	& \emph{empty}	& options struct for fast-decoupled Newton's method, \code{nleqs\_fd\_newton}\tnote{\dag} \\
+\code{fmincon\_opt}	& \emph{empty}	& options struct for \code{fmincon}\tnote{*} \\
+\code{fsolve\_opt}	& \emph{empty}	& options struct for \code{fsolve}\tnote{\S} \\
+\code{glpk\_opt}	& \emph{empty}	& options struct for \glpk{}\tnote{*} \\
+\code{grb\_opt}	& \emph{empty}	& options struct for \gurobi{}\tnote{*} \\
+\code{gs\_opt}	& \emph{empty}	& options struct for Gauss-Seidel method, \code{nleqs\_gauss\_seidel}\tnote{\ddag} \\
+\code{intlinprog\_opt}	& \emph{empty}	& options struct for \code{intlinprog}\tnote{*} \\
+\code{ipopt\_opt}	& \emph{empty}	& options struct for \ipopt{}\tnote{*} \\
+\code{knitro\_opt}	& \emph{empty}	& options struct for \knitro{}\tnote{*} \\
+\code{leq\_opt}	& \emph{empty}	& options struct for \code{mplinsolve}, with \code{solver} and \code{opt} fields corresponding to respective \code{mplinsolve} args \\
+\code{linprog\_opt}	& \emph{empty}	& options struct for \code{linprog}\tnote{*} \\
+\code{mips\_opt}	& \emph{empty}	& options struct for \mips{} \\
+\code{mosek\_opt}	& \emph{empty}	& options struct for \mosek{}\tnote{*} \\
+\code{newton\_opt}	& \emph{empty}	& options struct for Newton's method, \code{nleqs\_newton} \\
+\code{osqp\_opt}	& \emph{empty}	& options struct for \osqp{}\tnote{*} \\
+\code{quadprog\_opt}	& \emph{empty}	& options struct for \code{quadprog}\tnote{*} \\
+\code{parse\_soln}	& 0	& flag that specifies whether or not to call the \code{parse\_soln} method and place the return values in \code{om.soln}	\\
+\code{price\_stage\_warn\_tol}	& \emph{$10^{-7}$}	& tolerance on the objective function value and primal variable relative mismatch required to avoid mismatch warning message \\
+\code{skip\_prices}	& 0	& flag that specifies whether or not to skip the price computation stage, in which the problem is re-solved for only the continuous variables, with all others being constrained to their solved values \\
+\code{x0}	& \emph{empty}	& optional initial value of $x$, overrides value stored in model, \emph{(ignored by some solvers)}	\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {Requires the installation of an optional package. See Appendix~\ref{app:optional_packages} for details on the corresponding package.}
+ \item [\dag] {Fast-decoupled Newton requires setting \code{fd\_opt.jac\_approx\_fcn} to a function handle that returns Jacobian approximations. See \code{help nleqs\_fd\_newton} for more details.}
+ \item [\ddag] {Gauss-Seidel requires setting \code{gs\_opt.x\_update\_fcn} to a function handle that updates $x$. See \code{help nleqs\_gauss\_seidel} for more details.}
+ \item [\S] {The \code{fsolve} function is included with GNU Octave, but on \matlab{} it is part of the \matlab{} \ot{}. See Appendix~\ref{app:optional_packages} for more information on the \matlab{} \ot{}.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\clearpage
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Values for \code{alg} Option to \code{solve}}
+\label{tab:solve_alg_option}
+\footnotesize
+\begin{tabular}{lcp{0.62\textwidth}}
+\toprule
+\code{alg} value & problem type(s) & description \\
+\midrule
+\codeq{DEFAULT} & \emph{all} & automatic, depends on problem type, uses first available of: \\
+& LP & \gurobi{}, \cplex{}, \mosek{}, \code{linprog},\tnote{\P}, \glpk{}, BPMPD, \mips{} \\
+& QP & \gurobi{}, \cplex{}, \mosek{}, \code{quadprog}\tnote{\P}, BPMPD, \mips{} \\
+& MILP & \gurobi{}, \cplex{}, \mosek{}, \code{intlinprog}, \glpk{} \\
+& MIQP & \gurobi{}, \cplex{}, \mosek{} \\
+& NLP & \mips{} \\
+& MINLP & \knitro{} (not yet implemented) \\
+& NLEQ & Newton's method \\
+\codeq{BPMPD} & LP, QP & BPMPD\tnote{*} \\
+\codeq{CLP} & LP, QP & \clp{}\tnote{*} \\
+\codeq{CPLEX} & LP, QP, MILP, MIQP & \cplex{}\tnote{*} \\
+\codeq{FD} & NLEQ & fast-decoupled Newton's method\tnote{\dag} \\
+\codeq{FMINCON} & NLP & \matlab{} Opt Toolbox, \code{fmincon}\tnote{*} \\
+\codeq{FSOLVE} & NLEQ & \matlab{} Opt Toolbox, \code{fsolve}\tnote{\S} \\
+\codeq{GLPK} & LP, MILP & \glpk{}\tnote{*} \emph{(LP only)} \\
+\codeq{GS} & NLEQ & Gauss-Seidel method\tnote{\ddag} \\
+\codeq{GUROBI} & LP, QP, MILP, MIQP & \gurobi{}\tnote{*} \\
+\codeq{IPOPT} & LP, QP, NLP & \ipopt{}\tnote{*} \\
+\codeq{KNITRO} & NLP, MINLP & \knitro{}\tnote{*} \\
+\codeq{MIPS} & LP, QP, NLP & \mipslink{}, \mipsname{} \\
+\codeq{MOSEK} & LP, QP, MILP, MIQP & \mosek{}\tnote{*} \\
+\codeq{NEWTON} & NLEQ & Newton's method \\
+\codeq{OSQP} & LP, QP & \osqp{}\tnote{*} \\
+\codeq{OT} & LP, QP, MILP & \matlab{} Opt Toolbox, \code{quadprog}, \code{linprog}, \code{intlinprog} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {Requires the installation of an optional package. See Appendix~\ref{app:optional_packages} for details on the corresponding package.}
+ \item [\dag] {Fast-decoupled Newton requires setting \code{fd\_opt.jac\_approx\_fcn} to a function handle that returns Jacobian approximations. See \code{help nleqs\_fd\_newton} for more details.}
+ \item [\ddag] {Gauss-Seidel requires setting \code{gs\_opt.x\_update\_fcn} to a function handle that updates $x$. See \code{help nleqs\_gauss\_seidel} for more details.}
+ \item [\S] {The \code{fsolve} function is included with GNU Octave, but on \matlab{} it is part of the \matlab{} \ot{}. See Appendix~\ref{app:optional_packages} for more information on the \matlab{} \ot{}.}
+ \item [\P] {If running on \matlab{}.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
 
 \subsection{Accessing the Model}
 
@@ -2158,7 +2263,7 @@ See Section~\ref{sec:indexed_sets} for details on indexed named sets and the \co
 
 \subsubsection{Model Solution}
 \label{sec:soln}
-The solved results of a model, as returned by the \code{solve()} method, are stored in the \code{soln} field of the \mpom{} object as summarized in Table~\ref{tab:soln}.
+The solved results of a model, as returned by the \code{solve} method, are stored in the \code{soln} field of the \mpom{} object as summarized in Table~\ref{tab:soln}.
 
 \begin{table}[!ht]
 %\renewcommand{\arraystretch}{1.2}
@@ -2212,7 +2317,7 @@ vals = om.get_soln(set_type, tags, name)
 vals = om.get_soln(set_type, tags, name, idx)
 \end{Code}
 
-The \code{get\_soln()} method can be used to extract solved results for a given named set of variables, constraints or costs. The input arguments for \code{get\_soln()} are summarized in Table~\ref{tab:get_soln} and Table~\ref{tab:get_soln_tags}. The variable number of output arguments correspond to the \code{tags} input. If \code{tags} is empty or not specified, the calling context will define the number of outputs, returned in order of default tags for the specified \code{set\_type}.
+The \code{get\_soln} method can be used to extract solved results for a given named set of variables, constraints or costs. The input arguments for \code{get\_soln} are summarized in Table~\ref{tab:get_soln} and Table~\ref{tab:get_soln_tags}. The variable number of output arguments correspond to the \code{tags} input. If \code{tags} is empty or not specified, the calling context will define the number of outputs, returned in order of default tags for the specified \code{set\_type}.
 
 \subsubsection*{Examples:}
 
@@ -2564,7 +2669,7 @@ The properties in \code{opt\_model} consist of those inherited from the base cla
 name & description \\
 \midrule
 \code{set\_types}\tnote{\dag}	& struct whose fields define the valid set types\tnote{*}	\\
-\code{prob\_type}	& used to cache the return value of \code{problem\_type()}	\\
+\code{prob\_type}	& used to cache return value of \code{problem\_type} method	\\
 \code{var}\tnote{\ddag}	& data for \codeq{var} set type, variables	\\
 \code{lin}\tnote{\ddag}	& data for \codeq{lin} set type, linear constraints	\\
 \code{nle}\tnote{\ddag}	& data for \codeq{nle} set type, nonlinear equality constraints	\\
@@ -2615,6 +2720,7 @@ name & description \\
 \code{~~eval\_quad\_cost}	& evaluates quadratic cost function and its derivatives\tnote{\ddag} for given value of $x$, see Section~\ref{sec:eval_quad_cost}	\\
 \code{~~get}\tnote{\dag}	& access (possibly nested) fields of the object	\\
 \code{~~get\_idx}\tnote{\dag}	& returns index structures for specified set types, see Section~\ref{sec:get_idx}	\\
+\code{~~get\_soln}	& returns named/indexed results for solved model	\\
 \code{~~get\_userdata}\tnote{\dag}	& retreives values of user data stored in the object	\\
 \code{~~getN}\tnote{\dag}	& returns the number of elements of any given set type\tnote{\ddag}	\\
 \code{~~init\_indexed\_name}\tnote{\dag}	& initializes dimensions for a particular indexed named set	\\
@@ -2954,6 +3060,7 @@ name & description \\
 \code{~~eval\_nln\_cost}	& evaluates general nonlinear costs and derivatives	\\
 \code{~~eval\_quad\_cost}	& evaluates quadratic costs and derivatives	\\
 \code{~~get\_idx}	& returns the idx struct for vars, lin/nln constraints, costs	\\
+\code{~~get\_soln}	& returns named/indexed results for solved model	\\
 \code{~~init\_indexed\_name}	& initializes dimensions for indexed named set of costs, constraints or variables	\\
 \code{~~is\_mixed\_integer}	& indicates whether any of the variables are binary or integer 	\\
 \code{~~params\_lin\_constraint}	& returns individual or full set of linear constraint parameters	\\
