@@ -32,7 +32,7 @@ cfg = {
 
 n = 46;
 
-t_begin(10+n*length(cfg), quiet);
+t_begin(29+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -202,6 +202,51 @@ t_is(om.soln.lambda.mu_l, lam.mu_l, 14, [t 'om.soln.lambda.mu_l']);
 t_is(om.soln.lambda.mu_u, lam.mu_u, 14, [t 'om.soln.lambda.mu_u']);
 t_is(om.soln.lambda.eqnonlin, lam.eqnonlin, 14, [t 'om.soln.lambda.eqnonlin']);
 t_is(om.soln.lambda.ineqnonlin, lam.ineqnonlin, 14, [t 'om.soln.lambda.ineqnonlin']);
+
+t = 'om.get_soln(''var'', ''x'') : ';
+[x1, mu_l, mu_u] = om.get_soln('var', 'x');
+t_is(x1, x, 14, [t 'x']);
+t_is(mu_l, lam.lower, 14, [t 'mu_l']);
+t_is(mu_u, lam.upper, 14, [t 'mu_u']);
+
+t = 'om.get_soln(''var'', ''mu_l'', ''x'') : ';
+t_is(om.get_soln('var', 'mu_l', 'x'), lam.lower, 14, [t 'mu_l']);
+
+t = 'om.get_soln(''nle'', ''g'') : ';
+[g, lm, dg] = om.get_soln('nle', 'g');
+[eg, edg] = g_fcn(x);
+t_is(g, eg, 14, [t 'g']);
+t_is(dg, edg, 14, [t 'dg']);
+t_is(lm, lam.eqnonlin, 14, [t 'lam']);
+
+t = 'om.get_soln(''nle'', {''lam'', ''g''}, ''g'') : ';
+[lm, g] = om.get_soln('nle', {'lam', 'g'}, 'g');
+t_is(g, eg, 14, [t 'g']);
+t_is(dg, edg, 14, [t 'dg']);
+t_is(lm, lam.eqnonlin, 14, [t 'lam']);
+
+t = 'om.get_soln(''nli'', ''h'') : ';
+[h, mu, dh] = om.get_soln('nli', 'h');
+[eh, edh] = h_fcn(x);
+t_is(h, eh, 14, [t 'h']);
+t_is(dh, edh, 14, [t 'dh']);
+t_is(mu, lam.ineqnonlin, 14, [t 'mu']);
+
+t = 'om.get_soln(''nli'', {''dh'', ''mu''}, ''h'') : ';
+[dh, mu] = om.get_soln('nli', {'dh', 'mu'}, 'h');
+t_is(dh, edh, 14, [t 'dh']);
+t_is(mu, lam.ineqnonlin, 14, [t 'mu']);
+
+t = 'om.get_soln(''nlc'', ''f'') : ';
+[f1, df, d2f] = om.get_soln('nlc', 'f');
+[ef, edf, ed2f] = f_fcn(x);
+t_is(f1, f, 14, [t 'f']);
+t_is(df, edf, 14, [t 'df']);
+t_is(d2f, ed2f, 14, [t 'd2f']);
+
+t = 'om.get_soln(''nlc'',  ''df'', ''f'') : ';
+df = om.get_soln('nlc', 'df', 'f');
+t_is(df, edf, 14, [t 'df']);
 
 t_end;
 

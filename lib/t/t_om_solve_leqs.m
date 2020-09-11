@@ -31,7 +31,7 @@ x2 = [-2; 1; 3];
 
 n = 6;
 
-t_begin(5+n*length(cfg), quiet);
+t_begin(9+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -69,5 +69,20 @@ t_is(om.soln.f, f, 14, [t 'f']);
 t_is(om.soln.eflag, e, 14, [t 'eflag']);
 t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
 t_is(om.soln.jac, jac, 14, [t 'jac']);
+
+t = 'om.get_soln(''var'', ''x'') : ';
+t_is(om.get_soln('var', 'x'), x, 14, [t 'x']);
+
+t = 'om.get_soln(''lin'', ''A12'') : ';
+f12 = om.get_soln('lin', 'A12');
+t_is(f12, f(1:2), 14, [t 'A12 * x - u12']);
+
+t = 'om.get_soln(''lin'', ''f'', ''A3'') : ';
+g = om.get_soln('lin', 'Ax_u', 'A3');
+t_is(g, f(3), 14, [t 'A3 * x - u3']);
+
+t = 'om.get_soln(''lin'', ''l_Ax'', ''A3'') : ';
+g = om.get_soln('lin', 'l_Ax', 'A3');
+t_is(g, f(3), 14, [t 'l3 - A3 * x']);
 
 t_end;

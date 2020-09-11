@@ -2203,8 +2203,114 @@ alg & algorithm code of solver used \\
 \end{threeparttable}
 \end{table}
 
+\subsubsection*{\code{get\_soln}}
+\label{sec:get_soln}
+\begin{Code}
+vals = om.get_soln(set_type, name)
+vals = om.get_soln(set_type, name, idx)
+vals = om.get_soln(set_type, tags, name)
+vals = om.get_soln(set_type, tags, name, idx)
+\end{Code}
+
+The \code{get\_soln()} method can be used to extract solved results for a given named set of variables, constraints or costs. The input arguments for \code{get\_soln()} are summarized in Table~\ref{tab:get_soln} and Table~\ref{tab:get_soln_tags}. The variable number of output arguments correspond to the \code{tags} input. If \code{tags} is empty or not specified, the calling context will define the number of outputs, returned in order of default tags for the specified \code{set\_type}.
+
+\subsubsection*{Examples:}
+
+Value of variable named \codeq{P} and shadow prices on its bounds.
+\begin{Code}
+[P, muPmin, muPmax] = om.get_soln('var', 'P');
+\end{Code}
+
+\noindent Shadow prices on upper and lower linear constraint set named \codeq{lin\_con\_1}.
+\begin{Code}
+[mu_u, mu_l] = om.get_soln('lin', {'mu_u', 'mu_l'}, 'lin_con_1');
+\end{Code}
+
+\noindent Jacobian of the (2,3)-element of the indexed nonlinear equality constraint set named \codeq{nle\_con\_b}.
+\begin{Code}
+dg_b_2_3 = om.get_soln('nle', 'dg', 'nle_con_b', {2,3});
+\end{Code}
 
 
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Inputs for \code{get\_soln}}
+\label{tab:get_soln}
+\footnotesize
+\begin{tabular}{lcp{0.7\textwidth}}
+\toprule
+name & default & description \\
+\midrule
+\code{set\_type}	& \emph{required}	& one of the following, specifying the type of set \\
+&& \begin{tabular}{c @{ -- } p{0.5\textwidth}}
+\codeq{var} & variables \\
+\codeq{lin} & linear constraints \\
+\codeq{nle} & nonlinear equality constraints \\
+\codeq{nli} & nonlinear inequality constraints \\
+\codeq{nlc} & nonlinear costs \\
+\codeq{qdc} & quadratic costs \\
+\end{tabular}	\\
+\code{tags}	& \emph{depends}	& char array or cell array of char arrays specifying the desired output(s)\tnote{\dag} \\
+\code{name}	& \emph{required}	& char array specifying the name of the set \\
+\code{idx}	& \emph{empty}	& cell array specifying the indices of the set \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {Valid values and defaults for \code{tags} depend on \code{set\_type}. See Table~\ref{tab:get_soln_tags} for details.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Values of \code{tags} input to \code{get\_soln}}
+\label{tab:get_soln_tags}
+\footnotesize
+\begin{tabular}{lcp{0.58\textwidth}}
+\toprule
+set type & valid tag values & description \\
+\midrule
+\codeq{var} && default \code{tags} = \{\codeq{x}, \codeq{mu\_l}, \codeq{mu\_u}\} \\
+&\codeq{x} & value of solution variable \\
+&\codeq{mu\_l} & shadow price on variable lower bound \\
+&\codeq{mu\_u} & shadow price on variable upper bound \\
+\codeq{lin} && default \code{tags} =  \{\codeq{f}\} for LEQ problems, \{\codeq{g}, \codeq{mu\_l}, \codeq{mu\_u}\} otherwise \\
+&\codeq{f}\tnote{\dag} & equality constraint values, $Ax - u$ \\
+&\codeq{g} & $1 \times 2$ cell array of upper and lower constraint values, \\
+&&\{$Ax - u$, $l - Ax$\} \\
+&\codeq{Ax\_u} & upper constraint value, $Ax - u$ \\
+&\codeq{l\_Ax} & lower constraint value, $l - Ax$ \\
+&\codeq{mu\_l} & shadow price on constraint lower bound \\
+&\codeq{mu\_u} & shadow price on constraint upper bound \\
+\codeq{nle} && default \code{tags} =  \{\codeq{g}, \codeq{lam}, \codeq{dg}\} \\
+&\codeq{g} & constraint value, $g(x)$ \\
+&\codeq{lam} & shadow price on constraint \\
+&\codeq{dg} & Jacobian of constraint \\
+\codeq{nli} && default \code{tags} =  \{\codeq{h}, \codeq{mu}, \codeq{dh}\} \\
+&\codeq{h} & constraint value, $h(x)$ \\
+&\codeq{mu} & shadow price on constraint \\
+&\codeq{dh} & Jacobian of constraint \\
+\codeq{nlc} or \codeq{qdc} && default \code{tags} =  \{\codeq{f}, \codeq{df}, \codeq{d2f}\} \\
+&\codeq{f} & cost function value, $f(x)$\tnote{\ddag} \\
+&\codeq{df} & gradient of cost function \\
+&\codeq{d2f} & Hession of cost function \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {For LEQ problems only.}
+ \item [\ddag] {For \codeq{qdc}, $f(x)$ can return be a vector.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\clearpage
 \subsection{Indexed Sets}
 \label{sec:indexed_sets}
 
@@ -3241,6 +3347,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \item Save the results of the \code{solve()} method to the \code{soln} field of the \mpom{} object.
 \item New functions:
     \begin{itemize}
+    \item \code{opt\_model/get\_soln()} method extracts solved results for a given named set of variables, constraints or costs.
     \item \code{opt\_model/eval\_lin\_constraint()} method computes the constraint values for the full set or an individual named subset of linear constraints.
     \item \code{qps\_osqp()} provides standardized interface for using \osqp{} to solve LP/QP problems
     \item \code{osqp\_options()} initializes options for \osqp{} solver

@@ -55,7 +55,7 @@ end
 
 n = 17;
 
-t_begin(5+n*length(cfg), quiet);
+t_begin(12+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -167,6 +167,26 @@ t_is(om.soln.f, f, 14, [t 'f']);
 t_is(om.soln.eflag, e, 14, [t 'eflag']);
 t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
 t_is(om.soln.jac, jac, 14, [t 'jac']);
+
+t = 'om.get_soln(''var'', ''x1'') : ';
+t_is(om.get_soln('var', 'x1'), x(1:2), 14, [t 'x1']);
+
+t = 'om.get_soln(''var'', ''x'', ''x2'') : ';
+t_is(om.get_soln('var', 'x', 'x2'), x(3:5), 14, [t 'x2']);
+
+t = 'om.get_soln(''lin'', ''g'', ''Ax_b'') : ';
+g = om.get_soln('lin', 'g', 'Ax_b');
+t_is(g{1}, f(3:5), 14, [t 'A * x - u']);
+t_is(g{2}, f(3:5), 14, [t 'l - A * x']);
+
+t = 'om.get_soln(''nle'', ''f'') : ';
+g = om.get_soln('nle', 'f');
+t_is(g, f(1:2), 14, [t 'f']);
+
+t = 'om.get_soln(''nle'', {''g'', ''dg''}, ''f'') : ';
+[g, dg] = om.get_soln('nle', {'g', 'dg'}, 'f');
+t_is(g, f(1:2), 14, [t 'f']);
+t_is(dg, jac(1:2, 1:2), 14, [t 'jac']);
 
 t_end;
 

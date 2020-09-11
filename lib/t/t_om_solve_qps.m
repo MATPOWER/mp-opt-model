@@ -20,7 +20,7 @@ does_qp = [1 1 1 1 1 1 1 1 1 1 0 1];
 
 n = 29;
 nqp = 21;
-t_begin(8+n*length(algs), quiet);
+t_begin(22+n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
@@ -235,6 +235,37 @@ t_is(om.soln.lambda.lower, lam.lower, 14, [t 'om.soln.lambda.lower']);
 t_is(om.soln.lambda.upper, lam.upper, 14, [t 'om.soln.lambda.upper']);
 t_is(om.soln.lambda.mu_l, lam.mu_l, 14, [t 'om.soln.lambda.mu_l']);
 t_is(om.soln.lambda.mu_u, lam.mu_u, 14, [t 'om.soln.lambda.mu_u']);
+
+t = 'om.get_soln(''var'', ''x'') : ';
+[x1, mu_l, mu_u] = om.get_soln('var', 'x');
+t_is(x1, x, 14, [t 'x']);
+t_is(mu_l, lam.lower, 14, [t 'mu_l']);
+t_is(mu_u, lam.upper, 14, [t 'mu_u']);
+
+t = 'om.get_soln(''var'', ''mu_l'', ''x'') : ';
+t_is(om.get_soln('var', 'mu_l', 'x'), lam.lower, 14, [t 'mu_l']);
+
+t = 'om.get_soln(''lin'', ''Ax'') : ';
+[g, mu_l] = om.get_soln('lin', 'Ax');
+t_is(g{1}, A*x-u, 14, [t 'A * x - u']);
+t_is(g{2}, l-A*x, 14, [t 'l - A * x']);
+t_is(mu_l, lam.mu_l, 14, [t 'mu_l']);
+
+t = 'om.get_soln(''lin'', {''mu_u'', ''mu_l'', ''Ax_u''}, ''Ax'') : ';
+[mu_u, mu_l, g] = om.get_soln('lin', {'mu_u', 'mu_l', 'Ax_u'}, 'Ax');
+t_is(g, A*x-u, 14, [t 'A * x - u']);
+t_is(mu_l, lam.mu_l, 14, [t 'mu_l']);
+t_is(mu_u, lam.mu_u, 14, [t 'mu_u']);
+
+t = 'om.get_soln(''qdc'', ''c'') : ';
+[f1, df, d2f] = om.get_soln('qdc', 'c');
+t_is(f1, f, 14, [t 'f']);
+t_is(df, H*x+c, 14, [t 'df']);
+t_is(d2f, H, 14, [t 'd2f']);
+
+t = 'om.get_soln(''qdc'', ''df'', ''c'') : ';
+df = om.get_soln('qdc', 'df', 'c');
+t_is(df, H*x+c, 14, [t 'df']);
 
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);
