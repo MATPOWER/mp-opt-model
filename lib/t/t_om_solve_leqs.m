@@ -29,9 +29,9 @@ A2 = sparse([2 -1 0; -3 1 -2; 0 5 -4]);
 b2 = [-5; 1; -7];
 x2 = [-2; 1; 3];
 
-n = 6;
+n = 7;
 
-t_begin(9+n*length(cfg), quiet);
+t_begin(10+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -48,19 +48,21 @@ for k = 1:length(cfg)
     end
     x = om.solve(opt);
     t_is(x, x1, 14, [t 'x']);
+    t_ok(~isfield(om.soln, 'var'), [t 'no parse_soln() outputs']);
     
     t = sprintf('%s - sparse A matrix : ', name);
     om = opt_model;
     om.add_var('x', 3, zeros(size(x2)));
     om.add_lin_constraint('A12', A2(1:2, :), b2(1:2), b2(1:2));
     om.add_lin_constraint('A3', A2(3, :), b2(3), b2(3));
-    opt = struct('leq_opt', struct('solver', alg));
+    opt = struct('leq_opt', struct('solver', alg), 'parse_soln', 1);
     [x, f, e, out, jac] = om.solve(opt);
     t_is(x, x2, 14, [t 'x']);
     t_is(f, A2*x-b2, 14, [t 'f']);
     t_is(e, 1, 14, [t 'exitflag']);
     t_ok(strcmp(out.alg, alg), [t 'output']);
     t_is(jac, A2, 14, [t 'jac']);
+    opt.parse_soln = 0;
 end
 
 t = 'om.soln.';
@@ -84,5 +86,8 @@ t_is(g, f(3), 14, [t 'A3 * x - u3']);
 t = 'om.get_soln(''lin'', ''l_Ax'', ''A3'') : ';
 g = om.get_soln('lin', 'l_Ax', 'A3');
 t_is(g, f(3), 14, [t 'l3 - A3 * x']);
+
+t = 'parse_soln : ';
+t_is(om.soln.var.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
 
 t_end;

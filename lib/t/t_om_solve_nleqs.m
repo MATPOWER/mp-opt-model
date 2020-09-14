@@ -53,9 +53,9 @@ else    %% octave
     };
 end
 
-n = 17;
+n = 18;
 
-t_begin(12+n*length(cfg), quiet);
+t_begin(14+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -139,6 +139,7 @@ for k = 1:length(cfg)
         t_is(e, 1, 12, [t 'success']);
         t_is(x, [2; 3], 8, [t 'x']);
         t_is(f, 0, 10, [t 'f']);
+        t_ok(~isfield(om.soln, 'var'), [t 'no parse_soln() outputs']);
 
         opt.max_it = 3;
         t = sprintf('%s - 2-d function2 (max_it) : ', name);
@@ -161,6 +162,7 @@ om.add_var('x1', 2, x0_1);
 om.add_var('x2', 3, x0_2);
 om.add_nln_constraint('f', 2, 1, @f1, [], {'x1'});
 om.add_lin_constraint('Ax_b', A2, b2, b2, {'x2'});
+opt.parse_soln = 1;
 [x, f, e, out, jac] = om.solve(opt);
 t_is(om.soln.x, x, 14, [t 'x']);
 t_is(om.soln.f, f, 14, [t 'f']);
@@ -187,6 +189,10 @@ t = 'om.get_soln(''nle'', {''g'', ''dg''}, ''f'') : ';
 [g, dg] = om.get_soln('nle', {'g', 'dg'}, 'f');
 t_is(g, f(1:2), 14, [t 'f']);
 t_is(dg, jac(1:2, 1:2), 14, [t 'jac']);
+
+t = 'parse_soln : ';
+t_is(om.soln.var.val.x1, om.get_soln('var', 'x1'), 14, [t 'var.val.x1']);
+t_is(om.soln.var.val.x2, om.get_soln('var', 'x2'), 14, [t 'var.val.x2']);
 
 t_end;
 

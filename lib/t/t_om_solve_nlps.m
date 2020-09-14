@@ -30,9 +30,9 @@ cfg = {
 %     {'KNITRO',  'Knitro',   'knitro',       []                          },
 % };
 
-n = 46;
+n = 47;
 
-t_begin(29+n*length(cfg), quiet);
+t_begin(34+n*length(cfg), quiet);
 
 for k = 1:length(cfg)
     alg   = cfg{k}{1};
@@ -162,8 +162,10 @@ for k = 1:length(cfg)
         t_ok(isempty(lam.mu_u), [t 'lam.mu_u']);
         t_is(lam.lower, zeros(size(x)), 13, [t 'lam.lower']);
         t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
+        t_ok(~isfield(om.soln, 'var'), [t 'no parse_soln() outputs']);
 
         t = sprintf('%s - constrained 4-d nonlinear : ', name);
+        opt.parse_soln = 1;
         %% Hock & Schittkowski test problem #71
         f_fcn = @(x)f7(x);
         g_fcn = @(x)g7(x);
@@ -188,6 +190,7 @@ for k = 1:length(cfg)
         t_ok(isempty(lam.mu_u), [t 'lam.mu_u']);
         t_is(lam.lower, [1.08787121024; 0; 0; 0], 5, [t 'lam.lower']);
         t_is(lam.upper, zeros(size(x)), 7, [t 'lam.upper']);
+        opt.parse_soln = 0;
     end
 end
 
@@ -247,6 +250,13 @@ t_is(d2f, ed2f, 14, [t 'd2f']);
 t = 'om.get_soln(''nlc'',  ''df'', ''f'') : ';
 df = om.get_soln('nlc', 'df', 'f');
 t_is(df, edf, 14, [t 'df']);
+
+t = 'parse_soln : ';
+t_is(om.soln.var.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
+t_is(om.soln.var.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
+t_is(om.soln.var.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
+t_is(om.soln.nle.lam.g, om.get_soln('nle', 'lam', 'g'), 14, [t 'nle.lam.g']);
+t_is(om.soln.nli.mu.h, om.get_soln('nli', 'mu', 'h'), 14, [t 'nli.mu.h']);
 
 t_end;
 

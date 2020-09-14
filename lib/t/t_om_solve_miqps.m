@@ -21,9 +21,9 @@ if have_fcn('gurobi') || have_fcn('cplex') || have_fcn('mosek')
     does_qp(1) = 1;
 end
 
-n = 14;
+n = 15;
 nmiqp = 7;
-t_begin(23+n*length(algs), quiet);
+t_begin(28+n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
@@ -101,6 +101,7 @@ for k = 1:length(algs)
         t_is(lam.mu_u, [0; 0], 12, [t 'lam.mu_u']);
         t_is(lam.lower, [0; 0], 12, [t 'lam.lower']);
         t_is(lam.upper, [2; 3], 12, [t 'lam.upper']);
+        t_ok(~isfield(om.soln, 'var'), [t 'no parse_soln() outputs']);
 
         if does_qp(k)
             t = sprintf('%s - 4-d MIQP : ', names{k});
@@ -141,6 +142,17 @@ for k = 1:length(algs)
 end
 
 t = 'om.soln.';
+c = [-2; -3];
+A = sparse([195 273; 4 40]);
+u = [1365; 140];
+xmax = [4; Inf];
+vtype = 'I';
+om = opt_model;
+om.add_var('x', 2, [], [], xmax, vtype);
+om.add_quad_cost('c', [], c);
+om.add_lin_constraint('Ax', A, [], u);
+opt.parse_soln = 1;
+[x, f, s, out, lam] = om.solve(opt);
 t_is(om.soln.x, x, 14, [t 'x']);
 t_is(om.soln.f, f, 14, [t 'f']);
 t_is(om.soln.eflag, s, 14, [t 'eflag']);
@@ -181,6 +193,13 @@ t_is(d2f, zeros(2,1), 14, [t 'd2f']);
 t = 'om.get_soln(''qdc'', ''df'', ''c'') : ';
 df = om.get_soln('qdc', 'df', 'c');
 t_is(df, c, 14, [t 'df']);
+
+t = 'parse_soln : ';
+t_is(om.soln.var.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
+t_is(om.soln.var.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
+t_is(om.soln.var.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
+t_is(om.soln.lin.mu_l.Ax, om.get_soln('lin', 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
+t_is(om.soln.lin.mu_u.Ax, om.get_soln('lin', 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
 
 if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);
