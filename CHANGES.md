@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 9/14/20
+  - In `opt_model/add_var()` method, allow `v0`, `vl`, and `vu` to
+    be scalars that get expanded automatically to the appropriate
+    vector dimension.
+
 #### 9/11/20
   - Add `get_soln()` method to `opt_model` for extracting solved
     results for a given named set of variables, constraints or costs.
@@ -15,8 +20,9 @@ since last release
   - Add caching of problem_type() return value.
 
 #### 9/1/20
-  - Add support for OSQP solver from [https://osqp.org][7], including
-    functions `qps_osqp()`, `osqpver()`, and `osqp_options()`.
+  - Add support for OSQP solver from [https://osqp.org][7] for LP
+    and QP problems, including functions `qps_osqp()`, `osqpver()`,
+    and `osqp_options()`.
 
 #### 8/31/20
   - Save the results of `solve()` method to the `soln` field of the
@@ -32,7 +38,7 @@ since last release
     ignored for nonlinear equations.
 
 
-Version 2.0 - *Aug 25, 2020*
+Version 2.1 - *Aug 25, 2020*
 ---------------------------
 
 #### 8/25/20

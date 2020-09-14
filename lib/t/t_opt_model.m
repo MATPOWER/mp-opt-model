@@ -44,8 +44,8 @@ t_ok(om.getN('var') == vN, sprintf('%s : var.N  = %d', t, vN));
 t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.add_var(''Vm1'', 5, V0, Vmin, Vmax, ''I'')';
-V0 = [1;1;1;1;1];
-Vmin = zeros(5, 1);
+V0 = 1;             %% should get expanded to ones(5, 1)
+Vmin = 0;           %% should get expanded to zeros(5, 1)
 Vmax = 1 + 0.01*(1:5)';
 vt = 'I';
 om.add_var('Vm1', 5, V0, Vmin, Vmax, vt);
