@@ -6,7 +6,8 @@ since last release
 ------------------
 
 #### 9/14/20
-  - In `opt_model/add_var()` method, allow `v0`, `vl`, and `vu` to
+  - Allow `v0`, `vl`, and `vu` inputs to `opt_model/add_var()` method,
+    and `l` and `u` inputs to `opt_model/add_lin_constraint()` to
     be scalars that get expanded automatically to the appropriate
     vector dimension.
 

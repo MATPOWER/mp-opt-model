@@ -397,7 +397,7 @@ for i = 1:2
         t = sprintf('om.add_lin_constraint(''mylin'', {%d,%d}, A, l, u, vs)', i,j);
         A = sparse([1:(i+j) 1:(i+j)]', [1:(i+j) 5*ones(1,i+j)]', ...
             [ones(i+j,1);-ones(i+j,1)], i+j, 3+2+(i==2 && j==1));
-        l = -ones(i+j, 1); u = [];
+        l = -1; u = [];
         vs = struct('name', {'Pg', 'x'}, 'idx', {{}, {i,j}});
         om.add_lin_constraint('mylin', {i, j}, A, l, u, vs);
         lNS = lNS + 1; lN = lN + i+j;

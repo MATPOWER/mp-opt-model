@@ -3497,7 +3497,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \begin{itemize}
 \item Support for \osqp{} solver from \url{https://osqp.org} for LP and QP problems.
 \item Save the results of the \code{solve()} method to the \code{soln} field of the \mpom{} object.
-\item In \code{opt\_model/add\_var()} method, allow \code{v0}, and \code{vl}, \code{vu}, to be scalars that get expanded automatically to the appropriate vector dimension.
+\item Allow \code{v0}, \code{vl}, and \code{vu} inputs to \code{opt\_model/add\_var()} method, and \code{l} and \code{u} inputs to \code{opt\_model/add\_lin\_constraint()} to be scalars that get expanded automatically to the appropriate vector dimension.
 \item New functions:
     \begin{itemize}
     \item \code{opt\_model/get\_soln()} method extracts solved results for a given named set of variables, constraints or costs.
