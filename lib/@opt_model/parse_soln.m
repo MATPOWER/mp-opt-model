@@ -61,7 +61,7 @@ ps.var = parse_soln_fields(om, 'var', params, sn, sc);
 if om.getN('lin')
     if isfield(s.lambda, 'mu_l')
         if isfield(s.lambda, 'mu_u')
-            params = struct('src', {s.lambda.mu_l, s.lambda.mu_l}, ...
+            params = struct('src', {s.lambda.mu_l, s.lambda.mu_u}, ...
                             'dst', {'mu_l', 'mu_u'});
         else
             params = struct('src', s.lambda.mu_l, 'dst', 'mu_l');
