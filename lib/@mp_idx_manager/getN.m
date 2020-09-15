@@ -32,8 +32,9 @@ else
         if nargin < 4
             idx = {};
         end
-        s1 = substruct('.', name, '()', idx);
-        N = subsref(obj.(set_type).idx.N, s1);
+        % s1 = substruct('.', name, '()', idx);
+        sn = struct('type', {'.', '()'}, 'subs', {name, idx});  %% num array field
+        N = subsref(obj.(set_type).idx.N, sn);
     else
         N = 0;
     end
