@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 646;
+num_tests = 686;
 
 t_begin(num_tests, quiet);
 
@@ -1232,6 +1232,411 @@ t = 'om.eval_nln_cost(''wc'') : ';
 f = om.eval_nln_cost(x, 'wc');
 t_is(f, 239, 14, [t 'f']);
 
+t = 'om.set_params';
+%% turn object to struct warnings off
+if have_fcn('octave')
+    warn_id = 'Octave:classdef-to-struct';
+else
+    warn_id = 'MATLAB:structOnObject';
+end
+s1 = warning('query', warn_id);
+warning('off', warn_id);
+
+s = struct(om);
+t_ok(isequaln(struct(om), s), [t 'initial params']);
+
+t = 'om.set_params(''var'' ...) : ';
+val = [1:3]';
+try
+    om.set_params('var', 'Va', 'v0', val);
+    t_ok(0, [t 'Va, v0 (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'parameter ''var'' ''Va'' ''v0'' should have length 4 (or 1)');
+    t_ok(TorF, [t 'Va, v0 (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+
+t = 'om.set_params(''var'', name, ...) : ';
+val = [1:4]';
+s.var.data.v0.Va = val;
+om.set_params('var', 'Va', 'v0', val);
+t_ok(isequaln(struct(om), s), [t 'Va, v0']);
+
+val = {[3;2;1], [30;20;10]};
+s.var.data.vl.Pg = val{1};
+s.var.data.vu.Pg = val{2};
+om.set_params('var', 'Pg', {'vl', 'vu'}, val);
+t_ok(isequaln(struct(om), s), [t 'Pg, {vl,vu}']);
+
+val = {2, [4;2], [2;1], [20;10]};
+try
+    om.set_params('var', 'Pg', 'all', val);
+    t_ok(0, [t 'Pg, all (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'dimension change for ''var'' ''Pg'' not allowed');
+    t_ok(TorF, [t 'Pg, all (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+
+val = {3, [6;4;2], [3;2;1], [30;20;10]};
+s.var.data.v0.Pg = val{2};
+s.var.data.vl.Pg = val{3};
+s.var.data.vu.Pg = val{4};
+om.set_params('var', 'Pg', 'all', val);
+t_ok(isequaln(struct(om), s), [t 'Pg, all']);
+
+t = 'om.set_params(''var'', name, idx, ...) : ';
+val = 'C';
+s.var.data.vt.y{1,3,4} = val;
+om.set_params('var', 'y', {1,3,4}, 'vt', val);
+t_ok(isequaln(struct(om), s), [t 'y{1,3,4}, vt']);
+
+val = {7};
+s.var.data.v0.y{1,2,4} = zeros(7,1);
+s.var.data.vl.y{1,2,4} = -Inf(7,1);
+s.var.data.vu.y{1,2,4} = Inf(7,1);
+s.var.data.vt.y{1,2,4} = 'C';
+om.set_params('var', 'y', {1,2,4}, 'all', val);
+t_ok(isequaln(struct(om), s), [t 'y{1,2,4}, all']);
+
+t = 'om.set_params(''lin'', name, ...) : ';
+[m, n] = size(s.lin.data.A.Qmis);
+val = sparse(m+1, n);
+try
+    om.set_params('lin', 'Qmis', 'A', val);
+    t_ok(0, [t 'Qmis, A (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'dimension change for ''lin'' ''Qmis'' not allowed except for ''all''');
+    t_ok(TorF, [t 'Qmis, A (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+
+val = sparse(m, n);
+s.lin.data.A.Qmis = val;
+om.set_params('lin', 'Qmis', 'A', val);
+t_ok(isequaln(struct(om), s), [t 'Qmis, A']);
+
+val = {'Pg', 'Va'};
+s.lin.data.vs.Pmis = om.varsets_cell2struct(val);
+om.set_params('lin', 'Pmis', 'vs', val);
+t_ok(isequaln(struct(om), s), [t 'Pmis, vs']);
+
+[A, l, u, vs] = om.params_lin_constraint('Pmis');
+val = {A(2:3, :), l(2:3), u(2:3), vs};
+s.lin.data.A.Pmis = val{1};
+s.lin.data.l.Pmis = val{2};
+s.lin.data.u.Pmis = val{3};
+dN = -1;
+s.lin.idx.N.Pmis    = s.lin.idx.N.Pmis + dN;
+s.lin.idx.iN.Pmis   = s.lin.idx.iN.Pmis + dN;
+s.lin.idx.iN.Qmis   = s.lin.idx.iN.Qmis + dN;
+s.lin.idx.iN.mylin  = s.lin.idx.iN.mylin + dN;
+s.lin.idx.iN.onerow = s.lin.idx.iN.onerow + dN;
+s.lin.idx.i1.Qmis   = s.lin.idx.i1.Qmis + dN;
+s.lin.idx.i1.mylin  = s.lin.idx.i1.mylin + dN;
+s.lin.idx.i1.onerow = s.lin.idx.i1.onerow + dN;
+s.lin.N = s.lin.N + dN;
+om.set_params('lin', 'Pmis', 'all', val);
+t_ok(isequaln(struct(om), s), [t 'Pmis, all']);
+
+t = 'om.set_params(''lin'', name, idx, ...) : ';
+val = {-Inf(3,1), ones(3,1)};
+s.lin.data.u.mylin{2,1} = val{1};
+s.lin.data.l.mylin{2,1} = val{2};
+om.set_params('lin', 'mylin', {2,1}, {'u', 'l'}, val);
+t_ok(isequaln(struct(om), s), [t 'mylin{2,1}, {u,l}']);
+
+[A, l, u, vs] = om.params_lin_constraint('mylin', {2,2});
+val = {A(2:3, :), l(2:3), u(2:3)};
+try
+    om.set_params('lin', 'mylin', {2,2}, 'all', val);
+    t_ok(0, [t 'mylin{2,2}, all (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'for ''lin'' ''mylin(2,2)'' number of columns of ''A'' (5) must be consistent with ''vs'' (170)');
+    t_ok(TorF, [t 'mylin{2,2}, all (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+val = {A(2:3, :), l(2:3), u(2:3), vs};
+s.lin.data.A.mylin{2,2} = val{1};
+s.lin.data.l.mylin{2,2} = val{2};
+s.lin.data.u.mylin{2,2} = val{3};
+dN = -2;
+s.lin.idx.N.mylin(2,2)  = s.lin.idx.N.mylin(2,2) + dN;
+s.lin.idx.iN.mylin(2,2)  = s.lin.idx.iN.mylin(2,2) + dN;
+s.lin.idx.iN.onerow = s.lin.idx.iN.onerow + dN;
+s.lin.idx.i1.onerow = s.lin.idx.i1.onerow + dN;
+s.lin.N = s.lin.N + dN;
+om.set_params('lin', 'mylin', {2,2}, 'all', val);
+t_ok(isequaln(struct(om), s), [t 'mylin{2,2}, all']);
+
+t = 'om.set_params(''nle'', name, ...) : ';
+[N, fcn, hess, vs, include] = om.params_nln_constraint(1, 'Pmise');
+val = N + 1;
+try
+    om.set_params('nle', 'Qmise', 'N', val);
+    t_ok(0, [t 'Qmise, N (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'dimension change for ''nle'' ''Qmise'' not allowed except for ''all''');
+    t_ok(TorF, [t 'Qmise, N (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+
+val = @(x)my_fcn(x, 4, 1);
+s.nle.data.fcn.Qmise = val;
+om.set_params('nle', 'Qmise', 'fcn', val);
+t_ok(isequaln(struct(om), s), [t 'Qmise, fcn']);
+
+val = {'Va', 'Pg'};
+s.nle.data.vs.Pmise = om.varsets_cell2struct(val);
+om.set_params('nle', 'Pmise', 'vs', val);
+t_ok(isequaln(struct(om), s), [t 'Pmise, vs']);
+
+[N, fcn, hess, vs, include] = om.params_nln_constraint(1, 'Pmise');
+fcn = @(x)my_fcn(x, N-1, 2);
+hess = @(x, lam)my_hess(x, lam, 12);
+val = {N-1, fcn, hess, vs};
+s.nle.data.fcn.Pmise = val{2};
+s.nle.data.hess.Pmise = val{3};
+dN = -1;
+s.nle.idx.N.Pmise   = s.nle.idx.N.Pmise + dN;
+s.nle.idx.iN.Pmise  = s.nle.idx.iN.Pmise + dN;
+s.nle.idx.iN.Qmise  = s.nle.idx.iN.Qmise + dN;
+s.nle.idx.iN.P      = s.nle.idx.iN.P + dN;
+s.nle.idx.iN.Q      = s.nle.idx.iN.Q + dN;
+s.nle.idx.iN.R      = s.nle.idx.iN.R + dN;
+s.nle.idx.iN.mynle  = s.nle.idx.iN.mynle + dN;
+s.nle.idx.i1.Qmise  = s.nle.idx.i1.Qmise + dN;
+s.nle.idx.i1.P      = s.nle.idx.i1.P + dN;
+s.nle.idx.i1.Q      = s.nle.idx.i1.Q + dN;
+s.nle.idx.i1.R      = s.nle.idx.i1.R + dN;
+s.nle.idx.i1.mynle  = s.nle.idx.i1.mynle + dN;
+s.nle.N = s.nle.N + dN;
+om.set_params('nle', 'Pmise', 'all', val);
+t_ok(isequaln(struct(om), s), [t 'Pmise, all']);
+
+t = 'om.set_params(''nle'', name, idx, ...) : ';
+fcn = @(x)my_fcn(x, N-1, -7);
+hess = @(x, lam)my_hess(x, lam, 11);
+val = {hess, fcn};
+s.nle.data.hess.mynle{2,1} = val{1};
+s.nle.data.fcn.mynle{2,1}  = val{2};
+om.set_params('nle', 'mynle', {2,1}, {'hess', 'fcn'}, val);
+t_ok(isequaln(struct(om), s), [t 'mynle{2,1}, {hess,fcn}']);
+
+[N, fcn, hess, vs] = om.params_nln_constraint(1, 'mynle', {2,2});
+fcn = @(x)my_fcn(x, N-2, -7);
+hess = @(x, lam)my_hess(x, lam, 6);
+val = {N-2, fcn, hess, vs};
+s.nle.data.fcn.mynle{2,2} = val{2};
+s.nle.data.hess.mynle{2,2} = val{3};
+s.nle.data.vs.mynle{2,2} = val{4};
+dN = -2;
+s.nle.idx.N.mynle(2,2)  = s.nle.idx.N.mynle(2,2) + dN;
+s.nle.idx.iN.mynle(2,2) = s.nle.idx.iN.mynle(2,2) + dN;
+s.nle.N = s.nle.N + dN;
+om.set_params('nle', 'mynle', {2,2}, 'all', val);
+t_ok(isequaln(struct(om), s), [t 'mynle{2,2}, all']);
+
+t = 'om.set_params(''nli'', name, ...) : ';
+[N, fcn, hess, vs, include] = om.params_nln_constraint(0, 'Pmisi');
+val = N + 1;
+try
+    om.set_params('nli', 'Qmisi', 'N', val);
+    t_ok(0, [t 'Qmisi, N (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'dimension change for ''nli'' ''Qmisi'' not allowed except for ''all''');
+    t_ok(TorF, [t 'Qmisi, N (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+
+val = @(x)my_fcn(x, 3, 1);
+s.nli.data.fcn.Qmisi = val;
+om.set_params('nli', 'Qmisi', 'fcn', val);
+t_ok(isequaln(struct(om), s), [t 'Qmisi, fcn']);
+
+val = {'Va', 'Pg'};
+s.nli.data.vs.Pmisi = om.varsets_cell2struct(val);
+om.set_params('nli', 'Pmisi', 'vs', val);
+t_ok(isequaln(struct(om), s), [t 'Pmisi, vs']);
+
+[N, fcn, hess, vs, include] = om.params_nln_constraint(0, 'Pmisi');
+fcn = @(x)my_fcn(x, N+1, 8);
+hess = @(x, lam)my_hess(x, lam, 6);
+val = {N+1, fcn, hess, vs};
+s.nli.data.fcn.Pmisi = val{2};
+s.nli.data.hess.Pmisi = val{3};
+dN = 1;
+s.nli.idx.N.Pmisi   = s.nli.idx.N.Pmisi + dN;
+s.nli.idx.iN.Pmisi  = s.nli.idx.iN.Pmisi + dN;
+s.nli.idx.iN.Qmisi  = s.nli.idx.iN.Qmisi + dN;
+s.nli.idx.iN.mynli  = s.nli.idx.iN.mynli + dN;
+s.nli.idx.i1.Qmisi  = s.nli.idx.i1.Qmisi + dN;
+s.nli.idx.i1.mynli  = s.nli.idx.i1.mynli + dN;
+s.nli.N = s.nli.N + dN;
+om.set_params('nli', 'Pmisi', 'all', val);
+t_ok(isequaln(struct(om), s), [t 'Pmisi, all']);
+
+t = 'om.set_params(''nli'', name, idx, ...) : ';
+fcn = @(x)my_fcn(x, N+1, -7);
+hess = @(x, lam)my_hess(x, lam, 11);
+val = {hess, fcn};
+s.nli.data.hess.mynli{2,1} = val{1};
+s.nli.data.fcn.mynli{2,1}  = val{2};
+om.set_params('nli', 'mynli', {2,1}, {'hess', 'fcn'}, val);
+t_ok(isequaln(struct(om), s), [t 'mynli{2,1}, {hess,fcn}']);
+
+[N, fcn, hess, vs] = om.params_nln_constraint(0, 'mynli', {2,2});
+fcn = @(x)my_fcn(x, N+2, -7);
+hess = @(x, lam)my_hess(x, lam, 6);
+val = {N+2, fcn, hess, vs};
+s.nli.data.fcn.mynli{2,2} = val{2};
+s.nli.data.hess.mynli{2,2} = val{3};
+s.nli.data.vs.mynli{2,2} = val{4};
+dN = 2;
+s.nli.idx.N.mynli(2,2)  = s.nli.idx.N.mynli(2,2) + dN;
+s.nli.idx.iN.mynli(2,2) = s.nli.idx.iN.mynli(2,2) + dN;
+s.nli.N = s.nli.N + dN;
+om.set_params('nli', 'mynli', {2,2}, 'all', val);
+t_ok(isequaln(struct(om), s), [t 'mynli{2,2}, all']);
+
+t = 'om.set_params(''qdc'', name, ...) : ';
+[m, n] = size(s.qdc.data.Q.qc1);
+val = sparse(m+1, n+1);
+try
+    om.set_params('qdc', 'qc1', 'Q', val);
+    t_ok(0, [t 'qc1, Q (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'dimension change for ''qdc'' ''qc1'' not allowed except for ''all''');
+    t_ok(TorF, [t 'qc1, Q (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+
+val = sparse(m, n);
+s.qdc.data.Q.qc1 = val;
+om.set_params('qdc', 'qc1', 'Q', val);
+t_ok(isequaln(struct(om), s), [t 'qc1, Q']);
+
+val = {'Pg', 'Vm1'};
+s.qdc.data.vs.qc3 = om.varsets_cell2struct(val);
+om.set_params('qdc', 'qc3', 'vs', val);
+t_ok(isequaln(struct(om), s), [t 'qc3, vs']);
+
+[Q, c, k, vs] = om.params_quad_cost('qc4');
+vs(2) = [];
+val = {Q(2:2:6, :), c, k, vs};
+s.qdc.data.Q.qc4 = val{1};
+s.qdc.data.vs.qc4 = val{4};
+dN = -3;
+s.qdc.idx.N.qc4    = s.qdc.idx.N.qc4 + dN;
+s.qdc.idx.iN.qc4   = s.qdc.idx.iN.qc4 + dN;
+s.qdc.idx.iN.qc5   = s.qdc.idx.iN.qc5 + dN;
+s.qdc.idx.iN.qc6   = s.qdc.idx.iN.qc6 + dN;
+s.qdc.idx.iN.qc    = s.qdc.idx.iN.qc + dN;
+s.qdc.idx.i1.qc5   = s.qdc.idx.i1.qc5 + dN;
+s.qdc.idx.i1.qc6   = s.qdc.idx.i1.qc6 + dN;
+s.qdc.idx.i1.qc    = s.qdc.idx.i1.qc + dN;
+s.qdc.N = s.qdc.N + dN;
+om.set_params('qdc', 'qc4', 'all', val);
+t_ok(isequaln(struct(om), s), [t 'qc4, all']);
+
+t = 'om.set_params(''qdc'', name, idx, ...) : ';
+val = {[-12:2:-2]', 2000};
+s.qdc.data.c.qc{2,1} = val{1};
+s.qdc.data.k.qc{2,1} = val{2};
+om.set_params('qdc', 'qc', {2,1}, {'c', 'k'}, val);
+t_ok(isequaln(struct(om), s), [t 'qc{2,1}, {u,l}']);
+
+[Q, c, k, vs] = om.params_quad_cost('qc', {2,2});
+val = {Q(1:3, 1:3), c(1:3), k};
+try
+    om.set_params('qdc', 'qc', {2,2}, 'all', val);
+    t_ok(0, [t 'qc{2,2}, all (wrong size)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'for ''qdc'' ''qc(2,2)'' dimensions of ''Q'', ''c'', ''k'' (3) must be consistent with ''vs'' (170)');
+    t_ok(TorF, [t 'qc{2,2}, all (wrong size)']);
+    if ~TorF
+        me
+    end
+end
+vs(2) = [];
+val = {Q(1:3, 1:3), c(1:3), k, vs};
+s.qdc.data.Q.qc{2,2} = val{1};
+s.qdc.data.c.qc{2,2} = val{2};
+s.qdc.data.k.qc{2,2} = val{3};
+s.qdc.data.vs.qc{2,2} = val{4};
+om.set_params('qdc', 'qc', {2,2}, 'all', val);
+t_ok(isequaln(struct(om), s), [t 'qc{2,2}, all']);
+
+t = 'om.set_params(''nlc'', name, ...) : ';
+val = @my_nln_cost_fcn;
+s.nlc.data.fcn.ucost = val;
+om.set_params('nlc', 'ucost', 'fcn', val);
+t_ok(isequaln(struct(om), s), [t 'ucost, fcn']);
+
+[N, fcn, vs] = om.params_nln_cost('vcost');
+val = {N, @my_nln_cost_fcn, vs};
+s.nlc.data.fcn.vcost = val{2};
+om.set_params('nlc', 'vcost', 'all', val);
+t_ok(isequaln(struct(om), s), [t 'vcost, all']);
+
+cp = struct('N', sparse([1:2 1:2 1:2]', [1:4 5 7]', [1 1 -1 -1 2 2]', 2,7), ...
+            'Cw', [2;3]);
+fcn = @(x)my_legacy_cost_fcn(x, cp, om, {'Va', 'Pg'});
+val = {fcn, 1};
+s.nlc.data.fcn.ucost = val{1};
+om.set_params('nlc', 'ucost', {'fcn', 'N'}, val);
+t_ok(isequaln(struct(om), s), [t 'ucost, {fcn, N}']);
+
+t = 'om.set_params(''nlc'', name, idx, ...) : ';
+val = @my_nln_cost_fcn;
+s.nlc.data.fcn.wc{2,1} = val;
+om.set_params('nlc', 'wc', {2,1}, 'fcn', val);
+t_ok(isequaln(struct(om), s), [t 'wc{2,1}, fcn']);
+
+[N, fcn, vs] = om.params_nln_cost('wc', {2,2});
+val = {2, @my_nln_cost_fcn, vs};
+try
+    om.set_params('nlc', 'wc', {2,2}, 'all', val);
+    t_ok(0, [t 'wc{2,2}, all (vector cost)']);
+catch
+    me = lasterr;
+    TorF = strfind(me, 'vector value for ''nlc'' ''wc(2,2)'' not yet implemented');
+    t_ok(TorF, [t 'wc{2,2}, all (vector cost)']);
+    if ~TorF
+        me
+    end
+end
+val = {N, @my_nln_cost_fcn, vs};
+s.nlc.data.fcn.wc{2,2} = val{2};
+om.set_params('nlc', 'wc', {2,2}, 'all', val);
+t_ok(isequaln(struct(om), s), [t 'wc{2,2}, all']);
+
+%% turn object to struct warnings back on
+warning(s1.state, warn_id);
+
+
 %%-----  copy  -----
 t = 'copy constructor';
 if have_fcn('octave') && have_fcn('octave', 'vnum') < 5.003
@@ -1349,3 +1754,9 @@ else
         end
     end
 end
+
+function [f, df, d2f] = my_nln_cost_fcn(x)
+nx = length(x);
+f = sum(2*x.^3 + x.^2 - 4*x -12);
+df = 6*x.^2 + 2*x + 4;
+d2f = 12*spdiags(x+2, 0, nx, nx);

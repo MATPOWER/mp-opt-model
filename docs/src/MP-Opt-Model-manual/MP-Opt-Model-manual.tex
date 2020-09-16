@@ -2458,6 +2458,70 @@ fields & description \\
 The value of each element in the returned struct can be obtained
 via the \code{get\_soln} method as well, but \code{parse\_soln} is generally more efficient if a complete set of values is needed.
 
+
+\clearpage
+\subsection{Modifying the Model}
+\label{sec:modifying}
+
+The parameters for an existing \mpom{} object can be modified, rather than having to rebuild a new model from scratch.
+
+\subsubsection*{\code{set\_params}}
+\label{sec:set_params}
+\begin{Code}
+om.set_params(set_type, name, params, vals)
+om.set_params(set_type, name, idx, params, vals)
+\end{Code}
+
+The \code{set\_params} method, inputs summarized in Table~\ref{tab:set_params}, can be used to modify any of the parameters associated with an existing variable, cost or constraint set.
+
+\subsubsection*{Examples:}
+\begin{Code}
+om.set_params('var', 'v0', v0, 'Pg');
+om.set_params('lin', {'l', 'u'}, {l, u}, 'y', {2,3});
+om.set_params('nle', 'all', {N, @fcn, @hess, vs}, 'Pmis');
+\end{Code}
+
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Inputs for \code{set\_params}}
+\label{tab:set_params}
+\footnotesize
+\begin{tabular}{lp{0.8\textwidth}}
+\toprule
+name & description \\
+\midrule
+\code{set\_type}	& one of the following, specifying the type of set, with the corresponding valid parameter names \\
+& \begin{tabular}{c @{ -- } p{0.65\textwidth}}
+\codeq{var} & variables: \code{N}, \code{v0}\tnote{\dag}, \code{vl}\tnote{\dag}, \code{vu}\tnote{\dag}, \code{vt}\tnote{\dag} \\
+\codeq{lin} & linear constraints: \code{A}, \code{l}, \code{u}\tnote{\dag}, \code{vs}\tnote{\dag} \\
+\codeq{nle} & nonlinear equality constraints:  \code{N}, \code{fcn}, \code{hess}, \code{vs}\tnote{\dag} \\
+\codeq{nli} & nonlinear inequality constraints: \code{N}, \code{fcn}, \code{hess}, \code{vs}\tnote{\dag} \\
+\codeq{nlc} & nonlinear costs: \code{N}, \code{fcn}, \code{vs}\tnote{\dag} \\
+\codeq{qdc} & quadratic costs: \code{Q}, \code{c}\tnote{\dag}, \code{k}\tnote{\dag}, \code{vs}\tnote{\dag} \\
+\end{tabular}	\\
+\code{name}	& char array specifying the name of the set \\
+\code{idx}\tnote{\ddag}	& cell array specifying the indices of the set \\
+\code{params}	& one of the following: \\
+& \begin{tabular}{c @{ -- } p{0.65\textwidth}}
+\codeq{all} & indicates that \code{vals} is a cell array of values whose elements correspond to the input parameters of the respective \code{add\_*} method \\
+\emph{char array} & name of parameter to modify \\
+\emph{cell array} & names of parameters to modify \\
+\end{tabular}	\\
+\code{vals}	& new value or cell array of new values corresponding the parameter name(s) specified in \code{params} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [\ddag] {Optional when \code{params} = \codeq{all}.}
+ \item [\ddag] {The \code{idx} argument is optional.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
 \clearpage
 \subsection{Indexed Sets}
 \label{sec:indexed_sets}
@@ -3496,10 +3560,13 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \subsubsection*{New Features}
 \begin{itemize}
 \item Support for \osqp{} solver from \url{https://osqp.org} for LP and QP problems.
-\item Save the results of the \code{solve()} method to the \code{soln} field of the \mpom{} object.
+\item Support for modifying parameters of an existing \mpom{} object.
+\item Support for extracting specific named/indexed variables, costs, constraint values and shadow prices, etc. from a solved  \mpom{} object.
+\item Results of the \code{solve()} method saved to the \code{soln} field of the \mpom{} object.
 \item Allow \code{v0}, \code{vl}, and \code{vu} inputs to \code{opt\_model/add\_var()} method, and \code{l} and \code{u} inputs to \code{opt\_model/add\_lin\_constraint()} to be scalars that get expanded automatically to the appropriate vector dimension.
 \item New functions:
     \begin{itemize}
+    \item \code{opt\_model/set\_params()} method modifies parameters for a given named set of existing variables, costs, or constraints of an \mpom{} object.
     \item \code{opt\_model/get\_soln()} method extracts solved results for a given named set of variables, constraints or costs.
     \item \code{opt\_model/parse\_soln()} method returns a complete set of solution vector and shadow price values for a solved model.
     \item \code{opt\_model/eval\_lin\_constraint()} method computes the constraint values for the full set or an individual named subset of linear constraints.

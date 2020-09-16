@@ -6,6 +6,8 @@ since last release
 ------------------
 
 #### 9/16/20
+  - Add `set_params()` method to modify parameters of existing
+    variables, costs and constraints of an MP-Opt-Model object.
   - Calling `params_var()` method with empty `idx` no longer results
     in fatal error.
   - For `opt_model`, fixed incorrect evaluation of constant term in
