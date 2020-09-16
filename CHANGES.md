@@ -8,6 +8,13 @@ since last release
 #### 9/16/20
   - Calling `params_var()` method with empty `idx` no longer results
     in fatal error.
+  - For `opt_model`, fixed incorrect evaluation of constant term in
+    vector valued quadratic costs with constant term supplied as a
+    vector.
+  - Simplified logic to determine whether a quadratic cost for an
+    MP-Opt-Model object is vector vs. scalar valued. If the quadratic
+    coefficient is supplied as a matrix, the cost is scalar varied,
+    otherwise it is vector valued.
 
 #### 9/14/20
   - Allow `v0`, `vl`, and `vu` inputs to `opt_model/add_var()` method,

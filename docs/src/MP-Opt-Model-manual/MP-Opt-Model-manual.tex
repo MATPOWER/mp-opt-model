@@ -1759,11 +1759,11 @@ f(x) = \frac{1}{2} \trans{x} Q x + \trans{c} x + k \label{eq:quad_cost}
 \end{equation}
 where $x$ here refers to either the full optimization vector \emph{(default)}, or the vector obtained by stacking the subset of variables specified in \code{varsets}. Here \code{Q} contains the $n_x \times n_x$ matrix $Q$, \code{c} the $n_x \times 1$ vector $c$, and \code{k} the scalar $k$.\footnote{The \code{Q} matrix can be sparse.}
 
-Alternatively, \code{Q} can be an $n_x \times 1$ vector, in which case $f(x)$ and $k$ are also $n_x \times 1$ vectors and the $i$-th element of $f(x)$ is given by
+Alternatively, if \code{Q} is an $n_x \times 1$ vector or empty, then $f(x)$ is also an $n_x \times 1$ vector, \code{k} can be $n_x \times 1$ or scalar, and the $i$-th element of $f(x)$ is given by
 \begin{equation}
 f_i(x) = \frac{1}{2} Q_i x_i^2 + c_i x_i + k_i. \label{eq:quad_cost2}
 \end{equation}
-If \code{Q} is empty, then $f(x)$ is also an $n_x \times 1$ vector, unless \code{k} is scalar and non-zero.
+where $k_i = k$ for all $i$ if \code{k} is scalar.
 
 For example, suppose our problem has the following three sets of quadratic costs,
 \begin{align}
@@ -3513,13 +3513,13 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \begin{itemize}
 \item Starting point supplied to \code{solve()} via \code{opt.x0} is no longer ignored for nonlinear equations.
 \item Calling \code{params\_var()} method with empty \code{idx} no longer results in fatal error.
+\item For \code{opt\_model}, fixed incorrect evaluation of constant term in vector valued quadratic costs with constant term supplied as a vector.
 \end{itemize}
 
-% \subsubsection*{Other Changes}
-% \begin{itemize}
-% \item 
-% 
-% \end{itemize}
+\subsubsection*{Other Changes}
+\begin{itemize}
+\item Simplified logic to determine whether a quadratic cost for an \mpom{} object is vector vs. scalar valued. If the quadratic coefficient is supplied as a matrix, the cost is scalar varied, otherwise it is vector valued.
+\end{itemize}
 
 
 % \subsection{Version 3.0 -- released ??? ?, 202?}
