@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 9/16/20
+  - Calling `params_var()` method with empty `idx` no longer results
+    in fatal error.
+
 #### 9/14/20
   - Allow `v0`, `vl`, and `vu` inputs to `opt_model/add_var()` method,
     and `l` and `u` inputs to `opt_model/add_lin_constraint()` to

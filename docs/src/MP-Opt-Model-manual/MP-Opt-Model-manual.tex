@@ -3512,6 +3512,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \subsubsection*{Bugs Fixed}
 \begin{itemize}
 \item Starting point supplied to \code{solve()} via \code{opt.x0} is no longer ignored for nonlinear equations.
+\item Calling \code{params\_var()} method with empty \code{idx} no longer results in fatal error.
 \end{itemize}
 
 % \subsubsection*{Other Changes}
