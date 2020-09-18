@@ -136,9 +136,11 @@ if nargin > 1
             case 'clear_cache'
                 action = 'C';   %% clearing cache
                 if strcmpi(tag, 'all')
-                    fcns = struct();            %% delete all fields
+                    fcns = struct();        %% delete all fields
                 else
-                    fcns = rmfield(fcns, tag);  %% delete field to force re-check
+                    if isfield(fcns, tag)   %% delete field to force re-check
+                        fcns = rmfield(fcns, tag);
+                    end
                 end
         end
     end
@@ -146,7 +148,9 @@ end
 
 if action == 'T'            %% change availability
     if on_off                   %% turn on if available
-        fcns = rmfield(fcns, tag);  %% delete field to force re-check
+        if isfield(fcns, tag)   %% delete field to force re-check
+            fcns = rmfield(fcns, tag);
+        end
     else                        %% turn off
         if ~isfield(fcns, tag)      %% not yet been checked
             TorF = have_fcn(tag);   %% cache result first
