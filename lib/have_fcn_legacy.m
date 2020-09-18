@@ -1,13 +1,13 @@
-function rv = have_fcn(tag, rtype)
+function rv = have_fcn_legacy(tag, rtype)
 %HAVE_FCN  Test for optional functionality / version info.
-%   TORF = HAVE_FCN(TAG)
-%   TORF = HAVE_FCN(TAG, TOGGLE)
-%   VER_STR = HAVE_FCN(TAG, 'vstr')
-%   VER_NUM = HAVE_FCN(TAG, 'vnum')
-%   DATE    = HAVE_FCN(TAG, 'date')
-%   INFO    = HAVE_FCN(TAG, 'all')
-%   HAVE_FCN(TAG, 'clear_cache')
-%   HAVE_FCN('all', 'clear_cache')
+%   TORF = HAVE_FCN_LEGACY(TAG)
+%   TORF = HAVE_FCN_LEGACY(TAG, TOGGLE)
+%   VER_STR = HAVE_FCN_LEGACY(TAG, 'vstr')
+%   VER_NUM = HAVE_FCN_LEGACY(TAG, 'vnum')
+%   DATE    = HAVE_FCN_LEGACY(TAG, 'date')
+%   INFO    = HAVE_FCN_LEGACY(TAG, 'all')
+%   HAVE_FCN_LEGACY(TAG, 'clear_cache')
+%   HAVE_FCN_LEGACY('all', 'clear_cache')
 %
 %   Returns availability, version and release information for optional
 %   functionality. All information is cached, and the cached values
@@ -26,8 +26,8 @@ function rv = have_fcn(tag, rtype)
 %   second argument will return an empty value.
 %
 %   Alternatively, the optional functionality specified by TAG can be toggled
-%   OFF or ON by calling HAVE_FCN with a numeric second argument TOGGLE with
-%   one of the following values:
+%   OFF or ON by calling HAVE_FCN_LEGACY with a numeric second argument
+%   TOGGLE with one of the following values:
 %       0 - turn OFF the optional functionality
 %       1 - turn ON the optional functionality (if available)
 %      -1 - toggle the ON/OFF state of the optional functionality
@@ -87,7 +87,7 @@ function rv = have_fcn(tag, rtype)
 %                     OPF solver
 %
 %   Examples:
-%       if have_fcn('minopf')
+%       if have_fcn_legacy('minopf')
 %           results = runopf(mpc, mpoption('opf.ac.solver', 'MINOPF'));
 %       end
 
@@ -99,12 +99,12 @@ function rv = have_fcn(tag, rtype)
 %       pardiso_legacy  - PARDISO v5, individual MEX files for factor, solve, etc
 %       pardiso_object  - PARDISO v6 and later, object interface
 %       regexp_split    - support for 'split' argument to regexp()
-%       rithmaticker    - used for testing HAVE_FCN
+%       rithmaticker    - used for testing HAVE_FCN_LEGACY
 %
 %   The following calling syntaxes are also implemented to set and get the
 %   entire cache struct and are used during testing only.
-%       CACHE = HAVE_FCN('all', 'get_cache')
-%       HAVE_FCN(CACHE, 'set_cache')
+%       CACHE = HAVE_FCN_LEGACY('all', 'get_cache')
+%       HAVE_FCN_LEGACY(CACHE, 'set_cache')
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)
@@ -122,7 +122,7 @@ if nargin > 1
         action = 'T';           %% toggling functionality
         on_off = rtype;
         if on_off < 0                   %% flip the toggle
-            TorF = have_fcn(tag);
+            TorF = have_fcn_legacy(tag);
             on_off = ~TorF;
         end
     else
@@ -153,11 +153,11 @@ if action == 'T'            %% change availability
         end
     else                        %% turn off
         if ~isfield(fcns, tag)      %% not yet been checked
-            TorF = have_fcn(tag);   %% cache result first
+            TorF = have_fcn_legacy(tag);    %% cache result first
         end
         fcns.(tag).av = 0;          %% then turn off
     end
-    TorF = have_fcn(tag);           %% return availability
+    TorF = have_fcn_legacy(tag);    %% return availability
                                     %% (recheck if ON, cached 0 if OFF)
 elseif action == 'D'        %% detect availability
     %% info not yet cached?
@@ -178,7 +178,7 @@ elseif action == 'D'        %% detect availability
                     rdate = v.Date;
                 end
             case 'clp'
-                tmp = have_fcn('opti_clp', 'all');
+                tmp = have_fcn_legacy('opti_clp', 'all');
                 if tmp.av   %% have opti_clp
                     TorF = tmp.av;
                     vstr = tmp.vstr;
@@ -228,7 +228,7 @@ elseif action == 'D'        %% detect availability
                 end
             case {'fmincon', 'fmincon_ipm', 'intlinprog', 'linprog', ...
                         'linprog_ds', 'optimoptions', 'quadprog', 'quadprog_ls'}
-                matlab = have_fcn('matlab');
+                matlab = have_fcn_legacy('matlab');
                 if ~matlab || (matlab && license('test', 'optimization_toolbox'))
                     v = ver('optim');
                     if length(v) > 1
@@ -303,7 +303,7 @@ elseif action == 'D'        %% detect availability
                 elseif exist('glpk','file') == 2    %% others have glpk.m and ...
                     if exist('__glpk__','file') == 3    %% octave __glpk__ MEX
                         TorF = 1;
-                        if have_fcn('evalc')
+                        if have_fcn_legacy('evalc')
                             str = evalc('glpk(1, 1, 1, 1, 1, ''U'', ''C'', -1, struct(''msglev'', 3))');
                             pat = 'GLPK Simplex Optimizer, v([^\s,]+)';
                             [s,e,tE,m,t] = regexp(str, pat);
@@ -347,7 +347,7 @@ elseif action == 'D'        %% detect availability
             case 'ipopt'
                 TorF = exist('ipopt', 'file') == 3;
                 if TorF
-                    if have_fcn('evalc')
+                    if have_fcn_legacy('evalc')
                         str = evalc('qps_ipopt([],[1; 1],[1 1],[2],[2],[1; 1],[1; 1],[1; 1],struct(''verbose'', 2))');
                         pat = 'Ipopt version ([^\s,]+)';
                         [s,e,tE,m,t] = regexp(str, pat);
@@ -372,13 +372,13 @@ elseif action == 'D'        %% detect availability
                     end
                 end
             case 'knitro'       %% any Knitro
-                tmp = have_fcn('knitromatlab', 'all');
+                tmp = have_fcn_legacy('knitromatlab', 'all');
                 if tmp.av
                     TorF = tmp.av;
                     vstr = tmp.vstr;
                     rdate = tmp.date;
                 else
-                    tmp = have_fcn('ktrlink', 'all');
+                    tmp = have_fcn_legacy('ktrlink', 'all');
                     if tmp.av
                         TorF = tmp.av;
                         vstr = tmp.vstr;
@@ -478,10 +478,11 @@ elseif action == 'D'        %% detect availability
                     rdate = v.Date;
                 end
             case 'pardiso'
-                TorF = have_fcn('pardiso_object') || have_fcn('pardiso_legacy');
+                TorF = have_fcn_legacy('pardiso_object') || ...
+                    have_fcn_legacy('pardiso_legacy');
             case {'pdipmopf', 'scpdipmopf', 'tralmopf'}
-                if have_fcn('matlab')
-                    vn = have_fcn('matlab', 'vnum');
+                if have_fcn_legacy('matlab')
+                    vn = have_fcn_legacy('matlab', 'vnum');
                     %% requires >= MATLAB 6.5 (R13) (released 20-Jun-2002)
                     %% older versions do not have mxCreateDoubleScalar() function
                     %% (they have mxCreateScalarDouble() instead)
@@ -506,7 +507,7 @@ elseif action == 'D'        %% detect availability
                     end
                 end
             case 'sdp_pf'
-                TorF = have_fcn('yalmip') && exist('mpoption_info_sdp_pf', 'file') == 2;
+                TorF = have_fcn_legacy('yalmip') && exist('mpoption_info_sdp_pf', 'file') == 2;
                 if TorF
                     v = sdp_pf_ver('all');
                     vstr = v.Version;
@@ -525,7 +526,7 @@ elseif action == 'D'        %% detect availability
                 end
             case 'sdpt3'
                 TorF = exist('sdpt3','file') == 2;
-                if TorF && have_fcn('evalc')
+                if TorF && have_fcn_legacy('evalc')
                     str = evalc('help sdpt3');
                     pat = 'version\s+([^\s]+).*Last Modified: ([^\n]+)\n';
                     [s,e,tE,m,t] = regexp(str, pat);
@@ -536,7 +537,7 @@ elseif action == 'D'        %% detect availability
                 end
             case 'sedumi'
                 TorF = exist('sedumi','file') == 2;
-                if TorF && have_fcn('evalc')
+                if TorF && have_fcn_legacy('evalc')
                     warn_state = warning;  %% sedumi turns (and leaves!) off all warnings
                     str = evalc('x = sedumi([1 1], 1, [1;2])');
                     warning(warn_state);
@@ -549,24 +550,24 @@ elseif action == 'D'        %% detect availability
 
             %%-----  private tags  -----
             case 'catchme'  %% not supported by MATLAB <= 7.4 (R2007a), Octave <= 3.6
-                if have_fcn('octave')
-                    if have_fcn('octave', 'vnum') > 3.006
+                if have_fcn_legacy('octave')
+                    if have_fcn_legacy('octave', 'vnum') > 3.006
                         TorF = 1;
                     end
                 else
-                    if have_fcn('matlab', 'vnum') > 7.004
+                    if have_fcn_legacy('matlab', 'vnum') > 7.004
                         TorF = 1;
                     end
                 end
             case 'evalc'
-                if have_fcn('matlab')
+                if have_fcn_legacy('matlab')
                     TorF = 1;
                 end
             case 'ipopt_auxdata'
-                if have_fcn('ipopt')
-                    vn = have_fcn('ipopt', 'vnum');
+                if have_fcn_legacy('ipopt')
+                    vn = have_fcn_legacy('ipopt', 'vnum');
                     if ~isempty(vn)
-                        if vn >= 3.011  %% have_fcn('ipopt') already checked
+                        if vn >= 3.011  %% have_fcn_legacy('ipopt') already checked
                             TorF = 1;   %% for existence of 'ipopt_auxdata'
                         else
                             TorF = 0;   %% don't use it, even if it exists
@@ -582,7 +583,7 @@ elseif action == 'D'        %% detect availability
                     TorF = 0;
                 end
             case 'lu_vec'       %% lu(..., 'vector') syntax supported?
-                if have_fcn('matlab') && have_fcn('matlab', 'vnum') < 7.003
+                if have_fcn_legacy('matlab') && have_fcn_legacy('matlab', 'vnum') < 7.003
                     TorF = 0;     %% lu(..., 'vector') syntax not supported
                 else
                     TorF = 1;
@@ -635,12 +636,12 @@ elseif action == 'D'        %% detect availability
                     end
                 end
             case 'regexp_split'     %% missing for MATLAB < 7.3 & Octave < 3.8
-                if have_fcn('matlab') && have_fcn('matlab', 'vnum') >= 7.003
+                if have_fcn_legacy('matlab') && have_fcn_legacy('matlab', 'vnum') >= 7.003
                     TorF = 1;
-                elseif have_fcn('octave', 'vnum') >= 3.008
+                elseif have_fcn_legacy('octave', 'vnum') >= 3.008
                     TorF = 1;
                 end
-            case 'rithmaticker'     %% used for testing HAVE_FCN
+            case 'rithmaticker'     %% used for testing HAVE_FCN_LEGACY
                 TorF = exist('rithmaticker', 'file') == 2;
                 if TorF
                     vstr = '3.1.4';
@@ -649,7 +650,7 @@ elseif action == 'D'        %% detect availability
 
         %%-----  unknown tag  -----
             otherwise
-                warning('have_fcn: unknown functionality ''%s''', tag);
+                warning('have_fcn_legacy: unknown functionality ''%s''', tag);
                 vstr = 'unknown';
         end
 
