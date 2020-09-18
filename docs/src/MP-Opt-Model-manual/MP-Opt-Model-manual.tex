@@ -3687,7 +3687,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \item Allow \code{v0}, \code{vl}, and \code{vu} inputs to \code{opt\_model/add\_var()} method, and \code{l} and \code{u} inputs to \code{opt\_model/add\_lin\_constraint()} to be scalars that get expanded automatically to the appropriate vector dimension.
 \item New functions:
     \begin{itemize}
-    \item \code{have\_feature()} is a new modularized, extensible replacement for \code{have\_fcn()}, used to check for availability and version information for optional functionality.
+    \item \code{have\_feature()} is a new modular and extensible replacement for \code{have\_fcn()}, used to check for availability and version information for optional functionality.
     \item \code{opt\_model/set\_params()} method modifies parameters for a given named set of existing variables, costs, or constraints of an \mpom{} object.
     \item \code{opt\_model/get\_soln()} method extracts solved results for a given named set of variables, constraints or costs.
     \item \code{opt\_model/parse\_soln()} method returns a complete set of solution vector and shadow price values for a solved model.
@@ -3708,6 +3708,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \subsubsection*{Other Changes}
 \begin{itemize}
 \item Simplified logic to determine whether a quadratic cost for an \mpom{} object is vector vs. scalar valued. If the quadratic coefficient is supplied as a matrix, the cost is scalar varied, otherwise it is vector valued.
+\item Deprecate \code{have\_fcn()} and make it a simple wrapper around the new modular and extensible \code{have\_feature()}.
 \end{itemize}
 
 

@@ -9,6 +9,7 @@ since last release
   - Add `have_feature()` as a modular, extensible alternative
     to `have_fcn()`, where the detection of a feature named
     `<tag>` is implemented by the function `have_feature_<tag>()`.
+  - Make `have_fcn()` a simple wrapper around the new `have_feature()`.
 
 #### 9/16/20
   - Add `set_params()` method to modify parameters of existing
