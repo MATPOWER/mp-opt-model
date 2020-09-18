@@ -2867,16 +2867,22 @@ name & description \\
 \section{Utility Functions}
 
 \subsection{\tt have\_fcn}
+
+This function is deprecated. Please use \code{have\_feature} (see below) instead, which has identical calling syntax. It is simply a drop-in replacement that has been reimplemented with an extensible, modular design, where the detection of a feature named \code{<tag>} is implemented by the function named \code{have\_feature\_<tag>}.
+
+\subsection{\tt have\_feature}
 \begin{Code}
-  TorF = have_fcn(tag)
-  TorF = have_fcn(tag, toggle)
-  ver_str = have_fcn(tag, 'vstr')
-  ver_num = have_fcn(tag, 'vnum')
-  rdate   = have_fcn(tag, 'date')
-  info    = have_fcn(tag, 'all')
+  TorF = have_feature(tag)
+  TorF = have_feature(tag, toggle)
+  ver_str = have_feature(tag, 'vstr')
+  ver_num = have_feature(tag, 'vnum')
+  rdate   = have_feature(tag, 'date')
+  info    = have_feature(tag, 'all')
+  have_feature(tag, 'clear_cache')
+  have_feature('all', 'clear_cache')
 \end{Code}
 
-The \code{have\_fcn} function provides a unified mechanism for testing for optional functionality, such as the presence of certain solvers, or to detect whether the code is running under \matlab{} or Octave. Since its results are cached they allow for a very quick way to check frequently for functionality that may initially be a bit more costly to determine. For installed functionality, \code{have\_fcn} also determines the installed version and
+The \code{have\_feature} function provides a unified mechanism for testing for optional functionality, such as the presence of certain solvers, or to detect whether the code is running under \matlab{} or Octave. Since its results are cached they allow for a very quick way to check frequently for functionality that may initially be a bit more costly to determine. For installed functionality, \code{have\_feature} also determines the installed version and
 release date, if possible. The optional second argument, when it is a string, defines which value
 is returned, as follows:
 \begin{itemize}
@@ -2887,21 +2893,22 @@ is returned, as follows:
 \item{\codeq{all}} -- struct with fields named \code{av} (for ``availability''), \code{vstr}, \code{vnum} and \code{date}, and values corresponding to each of the above, respectively.
 \end{itemize}
 
-Alternatively, the optional functionality specified by \code{tag} can be toggled OFF or ON by calling \code{have\_fcn} with a numeric second argument \code{toggle} with one of the following values:
+Alternatively, the optional functionality specified by \code{tag} can be toggled OFF or ON by calling \code{have\_feature} with a numeric second argument \code{toggle} with one of the following values:
 \begin{itemize}
 \item{0} -- turn OFF the optional functionality
 \item{1} -- turn ON the optional functionality (if available)
 \item{$-1$} -- toggle the ON/OFF state of the optional functionality
 \end{itemize}
+The valid values of the \code{tag} string input argument are listed in Table~\ref{tab:have_feature_tags}.
 
-The valid values of the \code{tag} string input argument are listed in Table~\ref{tab:have_fcn_tags}.
+Finally, calling \code{have\_feature} with the string \codeq{clear\_cache} as the second argument, and either \codeq{all} or a tag name as the first, clears any corresponding cached information about the feature(s), forcing a re-detection. This can be useful, for example, to get it to recognize a feature whose availability has changed as a result of adding or removing entries from \matlab{}'s search path.
 
 \begin{table}[!ht]
 %\renewcommand{\arraystretch}{1.2}
 \centering
 \begin{threeparttable}
-\caption{Valid Tag Values for \code{have\_fcn}}
-\label{tab:have_fcn_tags}
+\caption{Valid Tag Values for \code{have\_feature}}
+\label{tab:have_feature_tags}
 \footnotesize
 % \begin{tabular}{p{0.17\textwidth}p{0.76\textwidth}}
 \begin{tabular}{ll}
@@ -2929,6 +2936,7 @@ tag value & description \\
 \code{~~matlab}	& \matlab{}, as opposed to Octave	\\
 \code{~~mosek}	& \mosek{}, LP/QP solver, \url{https://www.mosek.com/}	\\
 \code{~~octave}	& GNU Octave, as opposed to \matlab{}	\\
+\code{~~optim}	& \ot{}	\\
 \code{~~optimoptions}	& \code{optimoptions}, option setting funciton for \ot{} 6.3+	\\
 \code{~~osqp}	& \osqp{}, {\bf O}perator {\bf S}plitting {\bf Q}uadratic {\bf P}rogram solver, \url{https://osqp.org}	\\
 \code{~~pardiso}	& \pardiso{}, {\bf Par}allel Sparse {\bf D}irect \& {\bf I}terative Linear {\bf So}lver,	\\
@@ -2959,8 +2967,6 @@ tag value & description \\
 \end{threeparttable}
 \end{table}
 
-
-\clearpage
 \subsection{\tt mpomver}
 \begin{Code}
   mpomver
@@ -2979,7 +2985,7 @@ Prints or returns \mpom{} version information for the current installation. When
 
 The \code{nested\_struct\_copy} function copies values from a source struct \code{s} to a destination struct \code{d} in a nested, recursive manner. That is, the value of each field in \code{s} is copied directly to the corresponding field in \code{d}, unless that value is itself a struct, in which case the copy is done via a recursive call to \code{nested\_struct\_copy}. Certain aspects of the copy behavior can be controled via the optional options struct \code{opt}, including the possible checking of valid field names.
 
-
+\clearpage
 \subsection{\matpower{}-related Functions}
 
 The following three functions are related specifically to \matpowerlink{}, and are used for extracting relevant solver options from a \matpower{} options struct.
@@ -3242,7 +3248,8 @@ name & description \\
 \toprule
 name & description \\
 \midrule
-\code{have\_fcn}	& checks for availability of optional functionality	\\
+\code{have\_fcn}	& checks for availability of optional functionality\tnote{*}	\\
+\code{have\_feature}	& checks for availability of optional functionality	\\
 \code{mpomver}	& prints version information for \mpom{}	\\
 \code{mpopt2nleqopt}	& create/modify \code{nleqs\_master} options struct from \matpower{} options struct	\\
 \code{mpopt2nlpopt}	& create/modify \code{nlps\_master} options struct from \matpower{} options struct	\\
@@ -3250,6 +3257,118 @@ name & description \\
 \code{nested\_struct\_copy}	& copies the contents of nested structs	\\
 \bottomrule
 \end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {Deprecated. Please use \code{have\_feature} instead.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Feature Detection Functions for \code{have\_feature}}
+\label{tab:have_feature_fcns}
+\footnotesize
+\begin{tabular}{p{0.28\textwidth}p{0.64\textwidth}}
+\toprule
+name & description \\
+\midrule
+\code{have\_feature\_bpmpd}	& \code{bp}, BPMPD interior point LP/QP solver	\\
+\code{have\_feature\_clp}	& \clp{}, LP/QP solver, \url{https://github.com/coin-or/Clp}	\\
+\code{have\_feature\_opti\_clp}	& version of \clp{} distributed with OPTI Toolbox,	\\
+& ~~~~\url{https://www.inverseproblem.co.nz/OPTI/}	\\
+\code{have\_feature\_cplex}	& \cplex{}, IBM ILOG CPLEX Optimizer	\\
+\code{have\_feature\_fmincon}	& \code{fmincon}, solver from \ot{}	\\
+\code{have\_feature\_fmincon\_ipm}	& \code{fmincon} with interior point solver from \ot{} 4.x+	\\
+\code{have\_feature\_fsolve}	& \code{fsolve}, nonlinear equation solver from \ot{}	\\
+\code{have\_feature\_glpk}	& \code{glpk}, GNU Linear Programming Kit, LP/MILP solver	\\
+\code{have\_feature\_gurobi}	& \code{gurobi}, Gurobi solver, \url{https://www.gurobi.com/}	\\
+\code{have\_feature\_intlinprog}	& \code{intlinprog}, MILP solver from \ot{} 7.0 (R2014a)+	\\
+\code{have\_feature\_ipopt}	& \ipopt{}, NLP solver, \url{https://github.com/coin-or/Ipopt}	\\
+\code{have\_feature\_knitro}	& \knitro{}, NLP solver, \url{https://www.artelys.com/solvers/knitro/}	\\
+\code{have\_feature\_knitromatlab}	& \knitro{}, version 9.0.0+ 	\\
+\code{have\_feature\_ktrlink}	& Knitro, version prior to 9.0.0 (requires \ot{})	\\
+\code{have\_feature\_linprog}	& \code{linprog}, LP solver from \ot{}
+	\\
+\code{have\_feature\_linprog\_ds}	& \code{linprog} w/dual-simplex solver from \ot{} 7.1 (R2014b)+	\\
+\code{have\_feature\_matlab}	& \matlab{}, as opposed to Octave	\\
+\code{have\_feature\_mosek}	& \mosek{}, LP/QP solver, \url{https://www.mosek.com/}	\\
+\code{have\_feature\_octave}	& GNU Octave, as opposed to \matlab{}	\\
+\code{have\_feature\_optim}	& \ot{}	\\
+\code{have\_feature\_optimoptions}	& \code{optimoptions}, option setting funciton for \ot{} 6.3+	\\
+\code{have\_feature\_osqp}	& \osqp{}, {\bf O}perator {\bf S}plitting {\bf Q}uadratic {\bf P}rogram solver, \url{https://osqp.org}	\\
+\code{have\_feature\_pardiso}	& \pardiso{}, {\bf Par}allel Sparse {\bf D}irect \& {\bf I}terative Linear {\bf So}lver,	\\
+& ~~~~\url{https://pardiso-project.org}	\\
+\code{have\_feature\_quadprog}	& \code{quadprog}, QP solver from \ot{}	\\
+\code{have\_feature\_quadprog\_ls}	& \code{quadprog} with large-scale interior point convex solver from	\\
+& ~~~~\ot{} 6.x+	\\
+\code{have\_feature\_sdpt3}	& SDPT3 SDP solver, \url{https://github.com/sqlp/sdpt3}	\\
+\code{have\_feature\_sedumi}	& SeDuMi SDP solver, \url{http://sedumi.ie.lehigh.edu}	\\
+\code{have\_feature\_yalmip}	& YALMIP modeling platform, \url{https://yalmip.github.io}	\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {Deprecated. Please use \code{have\_feature} instead.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Private\tnote{*} Feature Detection Functions for \code{have\_feature}}
+\label{tab:have_feature_fcns_private}
+\footnotesize
+\begin{tabular}{p{0.32\textwidth}p{0.61\textwidth}}
+\toprule
+name & description \\
+\midrule
+\code{have\_feature\_catchme}	& support for \code{catch me} syntax in \code{try/catch} constructs	\\
+\code{have\_feature\_evalc}	& support for \code{evalc()} function	\\
+\code{have\_feature\_ipopt\_auxdata}	& support for \code{ipopt\_auxdata()}, required by \ipopt{} 3.11 and later	\\
+\code{have\_feature\_lu\_vec}	& support for \code{lu(..., \textquotesingle{}vector\textquotesingle{})} syntax	\\
+\code{have\_feature\_pardiso\_legacy}	& \pardiso{} v5, individual MEX files for factor, solve, etc.	\\
+\code{have\_feature\_pardiso\_object}	& \pardiso{} v6 and later, object interface	\\
+\code{have\_feature\_regexp\_split}	& support for \codeq{split} argument to \code{regexp()}	\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {For internal use only.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{\matpowerlink{}-Related Feature Detection Functions for \code{have\_feature}}
+\label{tab:have_feature_fcns_matpower}
+\footnotesize
+\begin{tabular}{p{0.28\textwidth}p{0.64\textwidth}}
+\toprule
+name & description \\
+\midrule
+\code{have\_feature\_e4st}	& \eastlink{}, \url{\easturl}	\\
+\code{have\_feature\_minopf}	& \code{minopf}, MINOPF, MINOS-based optimal power flow (OPF) solver	\\
+\code{have\_feature\_most}	& \most{}, \mostname{}	\\
+\code{have\_feature\_pdipmopf}	& PDIPMOPF, primal-dual interior point method OPF solver	\\
+\code{have\_feature\_scpdipmopf}	& SCPDIPMOPF, step-controlled PDIPM OPF solver	\\
+\code{have\_feature\_sdp\_pf}	& SDP\_PF, applications of SDP relaxation of power flow equations	\\
+\code{have\_feature\_smartmarket}	& \code{runmarket} and friends, for running an energy auction	\\
+\code{have\_feature\_syngrid}	& \syngridlink{}, Synthetic Grid Creation for \matpower{}	\\
+\code{have\_feature\_tralmopf}	& TRALMOPF, trust region based augmented Langrangian OPF solver	\\
+\bottomrule
+\end{tabular}
+% \begin{tablenotes}
+%  \scriptsize
+%  \item [*] {Deprecated. Please use \code{...} instead.}
+% \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
@@ -3260,11 +3379,12 @@ name & description \\
 \caption{\mpom{} Examples \& Tests}
 \label{tab:tests}
 \footnotesize
-\begin{tabular}{p{0.28\textwidth}p{0.67\textwidth}}
+\begin{tabular}{p{0.31\textwidth}p{0.64\textwidth}}
 \toprule
 name & description \\
 \midrule
 \code{lib/t/}	& \mpom{} examples \& tests	\\
+\code{~~have\_feature\_rithmaticker}	& detection function used by \code{t\_have\_feature}	\\
 \code{~~nleqs\_master\_ex1}	& code for NLEQ Example 1 (see Section~\ref{sec:nleq_ex1}) for \code{nleqs\_master}	\\
 \code{~~nleqs\_master\_ex2}	& code for NLEQ Example 2 (see Section~\ref{sec:nleq_ex2}) for \code{nleqs\_master}	\\
 \code{~~nlps\_master\_ex1}	& code for NLP Example 1 (see Section~\ref{sec:nlp_ex1}) for \code{nlps\_master}	\\
@@ -3272,6 +3392,7 @@ name & description \\
 \code{~~qp\_ex1}	& code for QP Example from Section~\ref{sec:usage}	\\
 \code{~~test\_mp\_opt\_model}	& runs full \mpom{} test suite	\\
 \code{~~t\_have\_fcn}	& runs tests for \code{have\_fcn}	\\
+\code{~~t\_have\_feature}	& runs tests for \code{have\_feature}	\\
 \code{~~t\_miqps\_master}	& runs tests of MILP/MIQP solvers via \code{miqps\_master}	\\
 \code{~~t\_nested\_struct\_copy}	& runs tests for \code{nested\_struct\_copy}	\\
 \code{~~t\_nleqs\_master}	& runs tests of NLEQ solvers via \code{nleqs\_master}	\\
@@ -3521,7 +3642,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}{\mpom{} 2.0 Use
 \item Skip evaluation of gradient if \code{eval\_nln\_constraint()} is called with a single output argument.
 \item Remove redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
 \item Add tests for solving LP/QP, MILP/MIQP, NLP and NLEQ problems via \code{opt\_model/solve()}.
-\item Add Table~\ref{tab:have_fcn_tags} of valid \code{have\_fcn()} input tags to User's Manual.
+\item Add Table~\ref{tab:have_feature_tags} of valid \code{have\_fcn()} input tags to User's Manual.
 
 \end{itemize}
 
@@ -3566,6 +3687,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.2.pdf}{\mpom{} 2.2 Use
 \item Allow \code{v0}, \code{vl}, and \code{vu} inputs to \code{opt\_model/add\_var()} method, and \code{l} and \code{u} inputs to \code{opt\_model/add\_lin\_constraint()} to be scalars that get expanded automatically to the appropriate vector dimension.
 \item New functions:
     \begin{itemize}
+    \item \code{have\_feature()} is a new modularized, extensible replacement for \code{have\_fcn()}, used to check for availability and version information for optional functionality.
     \item \code{opt\_model/set\_params()} method modifies parameters for a given named set of existing variables, costs, or constraints of an \mpom{} object.
     \item \code{opt\_model/get\_soln()} method extracts solved results for a given named set of variables, constraints or costs.
     \item \code{opt\_model/parse\_soln()} method returns a complete set of solution vector and shadow price values for a solved model.

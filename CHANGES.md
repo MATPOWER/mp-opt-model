@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 9/18/20
+  - Add `have_feature()` as a modular, extensible alternative
+    to `have_fcn()`, where the detection of a feature named
+    `<tag>` is implemented by the function `have_feature_<tag>()`.
+
 #### 9/16/20
   - Add `set_params()` method to modify parameters of existing
     variables, costs and constraints of an MP-Opt-Model object.
