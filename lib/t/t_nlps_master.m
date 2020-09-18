@@ -39,7 +39,7 @@ for k = 1:length(cfg)
     name  = cfg{k}{2};
     check = cfg{k}{3};
     opts  = cfg{k}{4};
-    if ~isempty(check) && ~have_fcn(check)
+    if ~isempty(check) && ~have_feature(check)
         t_skip(n, sprintf('%s not installed', name));
     else
         opt = struct('verbose', 0, 'alg', alg);

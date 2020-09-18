@@ -142,7 +142,7 @@ else
 end
 
 %% initialize
-lu_vec = have_fcn('lu_vec');
+lu_vec = have_feature('lu_vec');
 eflag = 0;
 i = 0;
 x = x0;

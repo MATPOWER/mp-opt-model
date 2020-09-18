@@ -17,7 +17,7 @@ algs = {'DEFAULT', 'CPLEX', 'MOSEK', 'GUROBI', 'GLPK', 'OT'};
 names = {'DEFAULT', 'CPLEX', 'MOSEK', 'Gurobi', 'glpk', 'intlin/lin/quadprog'};
 check = {[], 'cplex', 'mosek', 'gurobi', 'glpk', 'intlinprog'};
 does_qp = [0 1 1 1 0 0];
-if have_fcn('gurobi') || have_fcn('cplex') || have_fcn('mosek')
+if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_qp(1) = 1;
 end
 
@@ -26,13 +26,13 @@ nmiqp = 7;
 t_begin(28+n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
-if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
+if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
     s1 = warning('query', diff_alg_warn_id);
     warning('off', diff_alg_warn_id);
 end
 
 for k = 1:length(algs)
-    if ~isempty(check{k}) && ~have_fcn(check{k})
+    if ~isempty(check{k}) && ~have_feature(check{k})
         t_skip(n, sprintf('%s not installed', names{k}));
     else
         opt = struct('verbose', 0, 'alg', algs{k});
@@ -69,7 +69,7 @@ for k = 1:length(algs)
 %             mpopt.mosek.opts.MSK_DPAR_INTPNT_TOL_DFEAS = 1e-10;
 %             mpopt.mosek.opts.MSK_DPAR_INTPNT_TOL_INFEAS = 1e-10;
 %             mpopt.mosek.opts.MSK_DPAR_INTPNT_TOL_REL_GAP = 1e-10;
-            vnum = have_fcn('mosek', 'vnum');
+            vnum = have_feature('mosek', 'vnum');
             if vnum >= 8
 %                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_PFEAS = 1e-10;
 %                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_DFEAS = 1e-10;
@@ -201,7 +201,7 @@ t_is(om.soln.var.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
 t_is(om.soln.lin.mu_l.Ax, om.get_soln('lin', 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
 t_is(om.soln.lin.mu_u.Ax, om.get_soln('lin', 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
 
-if have_fcn('quadprog') && have_fcn('quadprog', 'vnum') == 7.005
+if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);
 end
 

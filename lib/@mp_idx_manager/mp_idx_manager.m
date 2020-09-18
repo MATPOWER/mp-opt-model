@@ -123,12 +123,12 @@ classdef mp_idx_manager < handle
                     %% this copy constructor will not be inheritable under
                     %% Octave until the fix has been included for:
                     %%      https://savannah.gnu.org/bugs/?52614
-                    if have_fcn('octave')
+                    if have_feature('octave')
                         s1 = warning('query', 'Octave:classdef-to-struct');
                         warning('off', 'Octave:classdef-to-struct');
                     end
                     props = fieldnames(s);
-                    if have_fcn('octave')
+                    if have_feature('octave')
                         warning(s1.state, 'Octave:classdef-to-struct');
                     end
                     for k = 1:length(props)
@@ -181,12 +181,12 @@ classdef mp_idx_manager < handle
         function new_obj = copy(obj)
             %% make shallow copy of object
             new_obj = eval(class(obj));  %% create new object
-            if have_fcn('octave')
+            if have_feature('octave')
                 s1 = warning('query', 'Octave:classdef-to-struct');
                 warning('off', 'Octave:classdef-to-struct');
             end
             props = fieldnames(obj);
-            if have_fcn('octave')
+            if have_feature('octave')
                 warning(s1.state, 'Octave:classdef-to-struct');
             end
             for k = 1:length(props)

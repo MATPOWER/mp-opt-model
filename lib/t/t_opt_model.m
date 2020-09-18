@@ -1234,7 +1234,7 @@ t_is(f, 239, 14, [t 'f']);
 
 t = 'om.set_params';
 %% turn object to struct warnings off
-if have_fcn('octave')
+if have_feature('octave')
     warn_id = 'Octave:classdef-to-struct';
 else
     warn_id = 'MATLAB:structOnObject';
@@ -1639,7 +1639,7 @@ warning(s1.state, warn_id);
 
 %%-----  copy  -----
 t = 'copy constructor';
-if have_fcn('octave') && have_fcn('octave', 'vnum') < 5.003
+if have_feature('octave') && have_feature('octave', 'vnum') < 5.003
     t_skip(1, [t ' - https://savannah.gnu.org/bugs/?52614']);
 else
     om1 = opt_model(om);

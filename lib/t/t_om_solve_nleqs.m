@@ -26,7 +26,7 @@ core_sp_gs = struct( ...
     'need_jac',         0, ...
     'update_fcn',       @(x, f)x_update_fcn2(x, f)  );
 
-if have_fcn('matlab')
+if have_feature('matlab')
     %%  alg         name        check       opts
     cfg = {
         {'DEFAULT', 'default',  []          []  },
@@ -62,7 +62,7 @@ for k = 1:length(cfg)
     name  = cfg{k}{2};
     check = cfg{k}{3};
     opts  = cfg{k}{4};
-    if ~isempty(check) && ~have_fcn(check)
+    if ~isempty(check) && ~have_feature(check)
         t_skip(n, sprintf('%s not installed', name));
     else
         opt = struct('verbose', 0, 'alg', alg, 'tol', 1e-11);

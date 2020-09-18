@@ -193,19 +193,19 @@ else
     verbose = 0;
 end
 if strcmp(alg, 'DEFAULT')
-    if have_fcn('gurobi')       %% use Gurobi by default, if available
+    if have_feature('gurobi')       %% use Gurobi by default, if available
         alg = 'GUROBI';
-    elseif have_fcn('cplex')    %% if not, then CPLEX, if available
+    elseif have_feature('cplex')    %% if not, then CPLEX, if available
         alg = 'CPLEX';
-    elseif have_fcn('mosek')    %% if not, then MOSEK, if available
+    elseif have_feature('mosek')    %% if not, then MOSEK, if available
         alg = 'MOSEK';
-    elseif have_fcn('quadprog') && have_fcn('matlab')   %% if not, then Opt Tbx, if available in MATLAB
+    elseif have_feature('quadprog') && have_feature('matlab')   %% if not, then Opt Tbx, if available in MATLAB
         alg = 'OT';
-    elseif (isempty(H) || ~any(any(H))) && have_fcn('glpk') %% if not, and
-        alg = 'GLPK';           %% prob is LP (not QP), then GLPK, if available
-    elseif have_fcn('bpmpd')    %% if not, then BPMPD_MEX, if available
+    elseif (isempty(H) || ~any(any(H))) && have_feature('glpk') %% if not, and
+        alg = 'GLPK';               %% prob is LP (not QP), then GLPK, if available
+    elseif have_feature('bpmpd')    %% if not, then BPMPD_MEX, if available
         alg = 'BPMPD';
-    else                        %% otherwise MIPS
+    else                            %% otherwise MIPS
         alg = 'MIPS';
     end
 end

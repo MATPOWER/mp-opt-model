@@ -102,7 +102,7 @@ function [x, f, eflag, output, lambda] = qps_mosek(H, c, A, l, u, xmin, xmax, x0
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% check for MOSEK
-% if ~have_fcn('mosek')
+% if ~have_feature('mosek')
 %     error('qps_mosek: requires MOSEK');
 % end
 
@@ -205,7 +205,7 @@ end
 
 %%-----  run optimization  -----
 if verbose
-    s = have_fcn('mosek', 'all');
+    s = have_feature('mosek', 'all');
     if s.vnum < 7
         alg_names = {           %% version 6.x
             'default',              %%  0 : MSK_OPTIMIZER_FREE
@@ -251,7 +251,7 @@ if verbose
     else
         lpqp = 'LP';
     end
-    vn = have_fcn('mosek', 'vstr');
+    vn = have_feature('mosek', 'vstr');
     if isempty(vn)
         vn = '<unknown>';
     end

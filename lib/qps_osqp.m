@@ -103,7 +103,7 @@ function [x, f, eflag, output, lambda] = qps_osqp(H, c, A, l, u, xmin, xmax, x0,
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% check for OSQP
-% if ~have_fcn('osqp')
+% if ~have_feature('osqp')
 %     error('qps_osqp: requires OSQP (https://osqp.org)');
 % end
 

@@ -16,7 +16,7 @@ function rv = osqpver(varargin)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
-o = have_fcn('osqp', 'all');
+o = have_feature('osqp', 'all');
 if ~o.av
     o.vstr = '<unknown>';
 end

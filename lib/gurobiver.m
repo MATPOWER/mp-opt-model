@@ -16,7 +16,7 @@ function rv = gurobiver(varargin)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
-g = have_fcn('gurobi', 'all');
+g = have_feature('gurobi', 'all');
 if ~g.av
     g.vstr = '<unknown>';
 end
