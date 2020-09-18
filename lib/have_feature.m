@@ -170,17 +170,6 @@ elseif action == 'D'        %% detect availability
         rdate = '';
 
         %% check for feature
-% switch tag
-%     case {'bpmpd', 'cplex', 'clp', 'opti_clp', 'e4st', 'fmincon', 'fmincon_ipm', ...
-%         'fsolve', 'glpk', 'gurobi', 'intlinprog', 'ipopt', 'ipopt_auxdata', ...
-%         'knitro', 'knitromatlab', 'ktrlink', 'linprog', ...
-%         'linprog_ds', 'matlab', 'minopf', 'mosek', 'most', 'octave', 'optim', ...
-%         'optimoptions', 'osqp', 'pardiso', 'pardiso_object', 'pardiso_legacy', ...
-%         'quadprog', 'quadprog_ls', 'rithmaticker', ...
-%         'smartmarket', 'syngrid', 'pdipmopf', 'scpdipmopf', 'tralmopf', ...
-%         'sdp_pf', 'sdpt3', 'sedumi', 'yalmip', ...
-%         'catchme', 'evalc', 'lu_vec', 'regexp_split'}
-% fprintf('+++++ %s\n', tag);
         fcn = ['have_feature_' tag];
         if isempty(which(fcn))
             warning('have_feature: unknown functionality ''%s''', tag);
@@ -188,12 +177,6 @@ elseif action == 'D'        %% detect availability
         else
             [TorF, vstr, rdate] = feval(fcn);
         end
-%     otherwise
-% fprintf('----- %s\n', tag);
-%         have_fcn_legacy('all', 'clear_cache');
-%         v = have_fcn_legacy(tag, 'all');
-%         [TorF, vstr, rdate] = deal(v.av, v.vstr, v.date);
-% end
 
         %% assign values to cache
         h_f_cache.(tag).av   = TorF;
