@@ -5,6 +5,30 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 9/23/20
+  - Move `have_feature()` to [MP-Test][8] and respective feature detection
+    functions to [MP-Test][8], [MIPS][9], and [MATPOWER][1].
+    - MP-Test
+      - `have_feature()`
+      - `have_feature_matlab()`
+      - `have_feature_octave()`
+    - MIPS
+      - `have_feature_lu_vec()`
+      - `have_feature_pardiso_legacy()`
+      - `have_feature_pardiso_object()`
+      - `have_feature_pardiso()`
+    - MATPOWER
+      - `have_feature_e4st()`
+      - `have_feature_minopf()`
+      - `have_feature_most()`
+      - `have_feature_pdipmopf()`
+      - `have_feature_regexp_split()`
+      - `have_feature_scpdipmopf()`
+      - `have_feature_sdp_pf()`
+      - `have_feature_smartmarket()`
+      - `have_feature_syngrid()`
+      - `have_feature_tralmopf()`
+
 #### 9/18/20
   - Add `have_feature()` as a modular, extensible alternative
     to `have_fcn()`, where the detection of a feature named
@@ -273,3 +297,5 @@ Version 0.7.0 - *Jun 20, 2019*
 [5]: https://github.com/MATPOWER/matpower/issues/79
 [6]: https://github.com/MATPOWER/matpower/issues/90
 [7]: https://osqp.org
+[8]: https://github.com/MATPOWER/mptest
+[9]: https://github.com/MATPOWER/mips

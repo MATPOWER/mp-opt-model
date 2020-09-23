@@ -87,9 +87,10 @@ jobs:
       run: echo "::set-env name=OSQP_PATH::${GITHUB_WORKSPACE}/.github/osqp:${HOME}/build/osqp-matlab"
     - name: Set MP_OPT_MODEL_PATH
       run: echo "::set-env name=MP_OPT_MODEL_PATH::${GITHUB_WORKSPACE}/lib:${GITHUB_WORKSPACE}/lib/t:${MIPS_PATH}:${OSQP_PATH}"
-    - name: Print GLPK/OSQP/IPOPT/MIPS/MP-Opt-Model version numbers
+    - name: Print MP-Test/MIPS/MP-Opt-Model/GLPK/OSQP/IPOPT version numbers
       run: |
         octave-cli --no-gui --eval ver
+        octave-cli --no-gui -p $MPTEST_PATH --eval mptestver
         octave-cli --no-gui -p $MIPS_PATH --eval mipsver
         octave-cli --no-gui -p $MP_OPT_MODEL_PATH --eval osqpver
         octave-cli --no-gui -p $MP_OPT_MODEL_PATH --eval mpomver
