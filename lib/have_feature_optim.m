@@ -1,7 +1,10 @@
 function [TorF, vstr, rdate] = have_feature_optim()
 %HAVE_FEATURE_OPTIM  Detect availability/version info for Optimization Toolbox
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'optim' tag for HAVE_FEATURE
+%   to detect availability/version of the Optimization Toolbox.
+%
+%   See also HAVE_FEATURE.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

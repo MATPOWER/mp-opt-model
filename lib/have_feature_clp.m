@@ -1,7 +1,11 @@
 function [TorF, vstr, rdate] = have_feature_clp()
 %HAVE_FEATURE_CLP  Detect availability/version info for CLP
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'clp' tag for HAVE_FEATURE
+%   to detect availability/version of CLP (COIN-OR Linear Programming solver,
+%   (https://github.com/coin-or/Clp).
+%
+%   See also HAVE_FEATURE, QPS_MASTER, CLP.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

@@ -1,7 +1,11 @@
 function [TorF, vstr, rdate] = have_feature_gurobi()
 %HAVE_FEATURE_GUROBI  Detect availability/version info for Gurobi
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'gurobi' tag for HAVE_FEATURE
+%   to detect availability/version of Gurobi optimizer
+%   (https://www.gurobi.com).
+%
+%   See also HAVE_FEATURE, QPS_MASTER, MIQPS_MASTER, GUROBI.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

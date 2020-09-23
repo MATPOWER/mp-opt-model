@@ -1,7 +1,10 @@
 function [TorF, vstr, rdate] = have_feature_quadprog()
 %HAVE_FEATURE_QUADPROG  Detect availability/version info for QUADPROG
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'quadprog' tag for HAVE_FEATURE
+%   to detect availability/version of QUADPROG the MATLAB Optimization Toolbox.
+%
+%   See also HAVE_FEATURE, HAVE_FEATURE_QUADPROG_LS, QPS_MASTER, QUADPROG.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

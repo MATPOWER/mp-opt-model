@@ -1,7 +1,10 @@
 function [TorF, vstr, rdate] = have_feature_ipopt_auxdata()
 %HAVE_FEATURE_IPOPT_AUXDATA  Detect availability/version info for IPOPT_AUXDATA
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'ipopt_auxdata' tag for HAVE_FEATURE
+%   to detect support for IPOPT_AUXDATA, required by IPOPT 3.11 and later.
+%
+%   See also HAVE_FEATURE, NLPS_MASTER, QPS_MASTER, IPOPT, IPOPT_AUXDATA.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

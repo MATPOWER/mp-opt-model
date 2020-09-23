@@ -1,7 +1,11 @@
 function [TorF, vstr, rdate] = have_feature_ipopt()
 %HAVE_FEATURE_IPOPT  Detect availability/version info for IPOPT
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'ipopt' tag for HAVE_FEATURE
+%   to detect availability/version of IPOPT, a nonlinear programming
+%   solver from COIN-OR (https://github.com/coin-or/Ipopt).
+%
+%   See also HAVE_FEATURE, NLPS_MASTER, QPS_MASTER, IPOPT.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

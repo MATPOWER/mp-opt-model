@@ -1,7 +1,12 @@
 function [TorF, vstr, rdate] = have_feature_quadprog_ls()
 %HAVE_FEATURE_QUADPROG_LS  Detect availability/version info for QUADPROG w/large scale
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'quadprog_ls' tag for HAVE_FEATURE
+%   to detect availability/version of QUADPROG with support for the
+%   large-scale interior point convex solver, from the MATLAB Optimization
+%   Toolbox 6.x and later.
+%
+%   See also HAVE_FEATURE, HAVE_FEATURE_QUADPROG, QPS_MASTER, QUADPROG.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

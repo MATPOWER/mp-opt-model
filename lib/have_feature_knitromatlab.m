@@ -1,7 +1,10 @@
 function [TorF, vstr, rdate] = have_feature_knitromatlab()
 %HAVE_FEATURE_KNITROMATLAB  Detect availability/version info for KNITROMATLAB
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'knitromatlab' tag for HAVE_FEATURE
+%   to detect availability/version of Artelys Knitro 9.0.0 and later.
+%
+%   See also HAVE_FEATURE, HAVE_FEATURE_KNITRO, KNITROMATLAB.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

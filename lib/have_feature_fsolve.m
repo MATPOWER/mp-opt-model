@@ -1,7 +1,11 @@
 function [TorF, vstr, rdate] = have_feature_fsolve()
 %HAVE_FEATURE_FSOLVE  Detect availability/version info for FSOLVE
 %
-%   Used by HAVE_FEATURE.
+%   Feature detection function implementing 'fsolve' tag for HAVE_FEATURE
+%   to detect availability/version of FSOLVE, from the MATLAB Optimization
+%   Toolbox or GNU Octave.
+%
+%   See also HAVE_FEATURE, NLEQS_MASTER, FSOLVE.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)
