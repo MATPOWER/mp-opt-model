@@ -361,12 +361,16 @@ The \mpom{} GitHub project hosts the public Git code repository as well as a pub
 \clearpage
 \section{Getting Started}
 
+% Note: MATLAB 7.5 is the first version to support including prototypes
+% for external methods in classdef, used by @mp_idx_manager.
+% Octave 3.8.2 does not support some of the OO syntax we use.
+
 \subsection{System Requirements}
 \label{sec:sysreq}
 To use \mpom{} \mpomver{} you will need:
 \begin{itemize}
-\item \matlab{}\textsuperscript{\tiny \textregistered} version 8.6 (R2015b) or later\footnote{\matlab{} is available from The MathWorks, Inc. (\url{https://www.mathworks.com/}). \matlab{} is a registered trademark of The MathWorks, Inc.}, or
-\item GNU Octave version 4.2 or later\footnote{GNU Octave \cite{octave} is free software, available online at \url{https://www.gnu.org/software/octave/}.}
+\item \matlab{}\textsuperscript{\tiny \textregistered} version 7.5 (R2007b) or later\footnote{\matlab{} is available from The MathWorks, Inc. (\url{https://www.mathworks.com/}). \matlab{} is a registered trademark of The MathWorks, Inc.}, or
+\item GNU Octave version 4.0 or later\footnote{GNU Octave \cite{octave} is free software, available online at \url{https://www.gnu.org/software/octave/}.}
 \item \mipslink{}, \mipsname{}~\cite{wang2007a, mips_manual}\footnote{\mips{} is available at \url{\mipsurl}.}
 \item \mptestlink{}, for running the \mpom{} test suite.\footnote{\mptest{} is available at \url{\mptesturl}.}
 \end{itemize}
