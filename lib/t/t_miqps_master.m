@@ -15,7 +15,7 @@ end
 
 algs = {'DEFAULT', 'CPLEX', 'MOSEK', 'GUROBI', 'GLPK', 'OT'};
 names = {'DEFAULT', 'CPLEX', 'MOSEK', 'Gurobi', 'glpk', 'intlin/lin/quadprog'};
-check = {[], 'cplex', 'mosek', 'gurobi', 'glpk', 'intlinprog'};
+check = {@have_miqp_solver, 'cplex', 'mosek', 'gurobi', 'glpk', 'intlinprog'};
 does_qp = [0 1 1 1 0 0];
 if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_qp(1) = 1;
@@ -33,7 +33,9 @@ if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
 end
 
 for k = 1:length(algs)
-    if ~isempty(check{k}) && ~have_feature(check{k})
+    if ~isempty(check{k}) && ...
+            (ischar(check{k}) && ~have_feature(check{k}) || ...
+             isa(check{k}, 'function_handle') && ~check{k}())
         t_skip(n, sprintf('%s not installed', names{k}));
     else
         opt = struct('verbose', 0, 'alg', algs{k});
@@ -109,7 +111,7 @@ for k = 1:length(algs)
             x0 = [0; 0; 0];
             [x, f, s, out, lam] = miqps_master(H, c, [], [], [], [], [], [], [], opt);
             t_is(s, 1, 12, [t 'success']);
-            t_is(x, [3; 5; 7], 8, [t 'x']);
+            t_is(x, [3; 5; 7], 7, [t 'x']);
             t_is(f, -249, 13, [t 'f']);
             t_ok(isempty(lam.mu_l), [t 'lam.mu_l']);
             t_ok(isempty(lam.mu_u), [t 'lam.mu_u']);
@@ -235,3 +237,9 @@ if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
 end
 
 t_end;
+
+function TorF = have_miqp_solver()
+TorF = have_feature('cplex') || have_feature('glpk') || ...
+    have_feature('gurobi') || have_feature('intlinprog') || ...
+    have_feature('mosek');
+

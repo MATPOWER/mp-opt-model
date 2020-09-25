@@ -40,6 +40,9 @@ if have_feature('matlab')
         {'CORE-N',  'Newton-CORE',   [],    core_sp_newton  },
         {'CORE-GS', 'Gauss-Seidel-CORE',[], core_sp_gs  },
     };
+    if have_feature('matlab', 'vnum') <= 7.010
+        cfg([6]) = [];  %% MATLAB 7.10 does not work w/ fsolve alg 3
+    end
 else    %% octave
     %%  alg         name        check       opts
     cfg = {

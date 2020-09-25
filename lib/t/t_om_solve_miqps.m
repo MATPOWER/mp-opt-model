@@ -15,7 +15,7 @@ end
 
 algs = {'DEFAULT', 'CPLEX', 'MOSEK', 'GUROBI', 'GLPK', 'OT'};
 names = {'DEFAULT', 'CPLEX', 'MOSEK', 'Gurobi', 'glpk', 'intlin/lin/quadprog'};
-check = {[], 'cplex', 'mosek', 'gurobi', 'glpk', 'intlinprog'};
+check = {@have_miqp_solver, 'cplex', 'mosek', 'gurobi', 'glpk', 'intlinprog'};
 does_qp = [0 1 1 1 0 0];
 if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_qp(1) = 1;
@@ -32,7 +32,9 @@ if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
 end
 
 for k = 1:length(algs)
-    if ~isempty(check{k}) && ~have_feature(check{k})
+    if ~isempty(check{k}) && ...
+            (ischar(check{k}) && ~have_feature(check{k}) || ...
+             isa(check{k}, 'function_handle') && ~check{k}())
         t_skip(n, sprintf('%s not installed', names{k}));
     else
         opt = struct('verbose', 0, 'alg', algs{k});
@@ -141,68 +143,78 @@ for k = 1:length(algs)
     end
 end
 
-t = 'om.soln.';
-c = [-2; -3];
-A = sparse([195 273; 4 40]);
-u = [1365; 140];
-xmax = [4; Inf];
-vtype = 'I';
-om = opt_model;
-om.add_var('x', 2, [], [], xmax, vtype);
-om.add_quad_cost('c', [], c);
-om.add_lin_constraint('Ax', A, [], u);
-opt.parse_soln = 1;
-[x, f, s, out, lam] = om.solve(opt);
-t_is(om.soln.x, x, 14, [t 'x']);
-t_is(om.soln.f, f, 14, [t 'f']);
-t_is(om.soln.eflag, s, 14, [t 'eflag']);
-t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
-t_is(om.soln.lambda.lower, lam.lower, 14, [t 'om.soln.lambda.lower']);
-t_is(om.soln.lambda.upper, lam.upper, 14, [t 'om.soln.lambda.upper']);
-t_is(om.soln.lambda.mu_l, lam.mu_l, 14, [t 'om.soln.lambda.mu_l']);
-t_is(om.soln.lambda.mu_u, lam.mu_u, 14, [t 'om.soln.lambda.mu_u']);
+if have_miqp_solver()
+    t = 'om.soln.';
+    c = [-2; -3];
+    A = sparse([195 273; 4 40]);
+    u = [1365; 140];
+    xmax = [4; Inf];
+    vtype = 'I';
+    om = opt_model;
+    om.add_var('x', 2, [], [], xmax, vtype);
+    om.add_quad_cost('c', [], c);
+    om.add_lin_constraint('Ax', A, [], u);
+    opt.parse_soln = 1;
+    [x, f, s, out, lam] = om.solve(opt);
+    t_is(om.soln.x, x, 14, [t 'x']);
+    t_is(om.soln.f, f, 14, [t 'f']);
+    t_is(om.soln.eflag, s, 14, [t 'eflag']);
+    t_ok(strcmp(om.soln.output.alg, out.alg), [t 'output.alg']);
+    t_is(om.soln.lambda.lower, lam.lower, 14, [t 'om.soln.lambda.lower']);
+    t_is(om.soln.lambda.upper, lam.upper, 14, [t 'om.soln.lambda.upper']);
+    t_is(om.soln.lambda.mu_l, lam.mu_l, 14, [t 'om.soln.lambda.mu_l']);
+    t_is(om.soln.lambda.mu_u, lam.mu_u, 14, [t 'om.soln.lambda.mu_u']);
 
-t = 'om.get_soln(''var'', ''x'') : ';
-[x1, mu_l, mu_u] = om.get_soln('var', 'x');
-t_is(x1, x, 14, [t 'x']);
-t_is(mu_l, lam.lower, 14, [t 'mu_l']);
-t_is(mu_u, lam.upper, 14, [t 'mu_u']);
+    t = 'om.get_soln(''var'', ''x'') : ';
+    [x1, mu_l, mu_u] = om.get_soln('var', 'x');
+    t_is(x1, x, 14, [t 'x']);
+    t_is(mu_l, lam.lower, 14, [t 'mu_l']);
+    t_is(mu_u, lam.upper, 14, [t 'mu_u']);
 
-t = 'om.get_soln(''var'', ''mu_u'', ''x'') : ';
-t_is(om.get_soln('var', 'mu_u', 'x'), lam.upper, 14, [t 'mu_l']);
+    t = 'om.get_soln(''var'', ''mu_u'', ''x'') : ';
+    t_is(om.get_soln('var', 'mu_u', 'x'), lam.upper, 14, [t 'mu_l']);
 
-t = 'om.get_soln(''lin'', ''Ax'') : ';
-[g, mu_u] = om.get_soln('lin', 'Ax');
-t_is(g{1}, A*x-u, 14, [t 'A * x - u']);
-t_ok(all(isinf(g{2}) & g{2} < 0), [t 'l - A * x']);
-t_is(mu_u, lam.mu_u, 14, [t 'mu_u']);
+    t = 'om.get_soln(''lin'', ''Ax'') : ';
+    [g, mu_u] = om.get_soln('lin', 'Ax');
+    t_is(g{1}, A*x-u, 14, [t 'A * x - u']);
+    t_ok(all(isinf(g{2}) & g{2} < 0), [t 'l - A * x']);
+    t_is(mu_u, lam.mu_u, 14, [t 'mu_u']);
 
-t = 'om.get_soln(''lin'', {''mu_u'', ''mu_l'', ''g''}, ''Ax'') : ';
-[mu_u, mu_l, g] = om.get_soln('lin', {'mu_u', 'mu_l', 'g'}, 'Ax');
-t_is(g{1}, A*x-u, 14, [t 'A * x - u']);
-t_ok(all(isinf(g{2}) & g{2} < 0), [t 'l - A * x']);
-t_is(mu_l, lam.mu_l, 14, [t 'mu_l']);
-t_is(mu_u, lam.mu_u, 14, [t 'mu_u']);
+    t = 'om.get_soln(''lin'', {''mu_u'', ''mu_l'', ''g''}, ''Ax'') : ';
+    [mu_u, mu_l, g] = om.get_soln('lin', {'mu_u', 'mu_l', 'g'}, 'Ax');
+    t_is(g{1}, A*x-u, 14, [t 'A * x - u']);
+    t_ok(all(isinf(g{2}) & g{2} < 0), [t 'l - A * x']);
+    t_is(mu_l, lam.mu_l, 14, [t 'mu_l']);
+    t_is(mu_u, lam.mu_u, 14, [t 'mu_u']);
 
-t = 'om.get_soln(''qdc'', ''c'') : ';
-[f1, df, d2f] = om.get_soln('qdc', 'c');
-t_is(sum(f1), f, 14, [t 'f']);
-t_is(df, c, 14, [t 'df']);
-t_is(d2f, zeros(2,1), 14, [t 'd2f']);
+    t = 'om.get_soln(''qdc'', ''c'') : ';
+    [f1, df, d2f] = om.get_soln('qdc', 'c');
+    t_is(sum(f1), f, 14, [t 'f']);
+    t_is(df, c, 14, [t 'df']);
+    t_is(d2f, zeros(2,1), 14, [t 'd2f']);
 
-t = 'om.get_soln(''qdc'', ''df'', ''c'') : ';
-df = om.get_soln('qdc', 'df', 'c');
-t_is(df, c, 14, [t 'df']);
+    t = 'om.get_soln(''qdc'', ''df'', ''c'') : ';
+    df = om.get_soln('qdc', 'df', 'c');
+    t_is(df, c, 14, [t 'df']);
 
-t = 'parse_soln : ';
-t_is(om.soln.var.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
-t_is(om.soln.var.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
-t_is(om.soln.var.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
-t_is(om.soln.lin.mu_l.Ax, om.get_soln('lin', 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
-t_is(om.soln.lin.mu_u.Ax, om.get_soln('lin', 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
+    t = 'parse_soln : ';
+    t_is(om.soln.var.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
+    t_is(om.soln.var.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
+    t_is(om.soln.var.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
+    t_is(om.soln.lin.mu_l.Ax, om.get_soln('lin', 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
+    t_is(om.soln.lin.mu_u.Ax, om.get_soln('lin', 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
+else
+    t_skip(28, 'no MILP/MIQP solver installed');
+end
 
 if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);
 end
 
 t_end;
+
+function TorF = have_miqp_solver()
+TorF = have_feature('cplex') || have_feature('glpk') || ...
+    have_feature('gurobi') || have_feature('intlinprog') || ...
+    have_feature('mosek');
+

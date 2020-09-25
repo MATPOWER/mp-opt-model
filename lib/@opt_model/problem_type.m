@@ -50,7 +50,7 @@ if isempty(om.prob_type) || nargin > 1 && recheck
             prob = 'NLP';           %% nonlinear program
         else                    %% linear constraints, no general nonlinear costs
             %% get quadratic cost coefficients
-            [H, ~] = om.params_quad_cost();
+            H = om.params_quad_cost();
             if isempty(H) || ~any(any(H))
                 prob = 'LP';        %% linear program
             else
@@ -64,7 +64,7 @@ if isempty(om.prob_type) || nargin > 1 && recheck
         if nleN + linN == varN  %% square system
             if linN > 0
                 %% get lower & upper bounds
-                [~, l, u] = om.params_lin_constraint();
+                [A, l, u] = om.params_lin_constraint();
                 if any(l ~= u)
                     error('@opt_model/problem_type: invalid problem - linear inequality constraints with no costs');
                 end

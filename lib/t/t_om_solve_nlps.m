@@ -26,6 +26,9 @@ cfg = {
     {'IPOPT',   'IPOPT',    'ipopt',        []                          },
     {'KNITRO',  'Knitro',   'knitro',       []                          },
 };
+if have_feature('matlab') && have_feature('matlab', 'vnum') <= 8.003
+    cfg([5;8]) = [];    %% Mac MATLAB 7.14-8.2 crash w/ fmincon alg 3, fails w/6
+end
 % cfg = {
 %     {'KNITRO',  'Knitro',   'knitro',       []                          },
 % };

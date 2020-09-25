@@ -140,7 +140,7 @@ switch pt
         else
             leq_opt = struct();
         end
-        [A, b, ~] = om.params_lin_constraint();
+        [A, b] = om.params_lin_constraint();
         x = mplinsolve(A, b, leq_solver, leq_opt);
         f = A*x - b;
         eflag = 1;
@@ -153,7 +153,7 @@ switch pt
         end
 
         if om.getN('lin')
-            [A, b, ~] = om.params_lin_constraint();
+            [A, b] = om.params_lin_constraint();
             fcn = @(x)nleq_fcn_(om, x, A, b);
         else
             fcn = @(x)om.eval_nln_constraint(x, 1);
