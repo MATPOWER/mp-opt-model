@@ -138,6 +138,10 @@ classdef opt_model < mp_idx_manager
 %                     blocks in the order they appear in ghl(x)
 %               .name   - name of the block, e.g. Pmis
 %               .idx    - indices for name, {2,3} => Pmis(2,3)
+%           .params - cache for previously assembled aggregate parameters
+%               .A  - aggregate sparse linear constraint matrix
+%               .l  - aggregate left hand side vector, bounding A*x below
+%               .u  - aggregate right hand side vector, bounding A*x above
 %       .qdc       - quadratic costs
 %           .idx
 %               .i1 - starting row index within quadratic costs
@@ -155,6 +159,10 @@ classdef opt_model < mp_idx_manager
 %                     in the order the were added
 %               .name   - name of the block, e.g. R
 %               .idx    - indices for name, {2,3} => R(2,3)
+%           .params - cache for previously assembled aggregate parameters
+%               .Q  - aggregate sparse matrix of quadratic cost coefficients
+%               .c  - aggregate column vector of linear cost coefficients
+%               .k  - aggregate constant term
 %       .nlc       - general nonlinear costs
 %           .idx
 %               .i1 - starting row index within nonlinear costs
