@@ -167,6 +167,8 @@
 \newcommand{\powerweb}[0]{{\sc PowerWeb}}
 \newcommand{\pserc}[0]{{\sc PSerc}}
 \newcommand{\PSERC}[0]{{Power Systems Engineering Research Center (\pserc{})}}
+\newcommand{\certs}[0]{{\sc Certs}}
+\newcommand{\CERTS}[0]{{Consortium for Electric Reliability Technology Solutions (\certs{})}}
 \newcommand{\ipopt}[0]{{\sc Ipopt}}
 \newcommand{\knitro}[0]{{Artelys Knitro}}
 \newcommand{\clp}[0]{{CLP}}
@@ -3082,6 +3084,12 @@ When the solver is set to \codeq{DEFAULT}, this function currently defaults to  
 The \code{mpopt2qpopt} function returns an options struct suitable for \code{qps\_master}, \code{miqps\_master} or one of the solver specific equivalents. It is constructed from the relevant portions of \code{mpopt}, a \matpower{} options struct. The \code{model} argument specifies whether the problem to be solved is an LP, QP, MILP or MIQP problem to allow for the selection of a suitable default solver. The final \code{alg} argument allows the solver to be set explicitly (in \code{qpopt.alg}). By default this value is taken from \code{mpopt.opf.dc.solver}.
 
 When the solver is set to \codeq{DEFAULT}, this function also selects the best available solver that is applicable\footnote{\glpk{} is not available for problems with quadratic costs (QP and MIQP), BPMPD and \mips{} are not available for mixed-integer problems (MILP and MIQP), and the \ot{} is not an option for problems that combine the two (MIQP).} to the specific problem class, based on the following precedence: \gurobi{}, \cplex{}, \mosek{}, \ot{}, \glpk{}, BPMPD, \mips{}.
+
+
+%%------------------------------------------
+\clearpage
+\section{Acknowledgments}
+The authors would like to acknowledge the support of the research grants and contracts that have contributed directly and indirectly to the development of \mpom{}. This includes funding from the \PSERC{}, the U.S. Department of Energy,\footnote{Supported in part by the \CERTS{} and the Office of Electricity Delivery and Energy Reliability, Transmission Reliability Program of the U.S. Department of Energy under the National Energy Technology Laboratory Cooperative Agreement No.~DE-FC26-09NT43321.} and the National Science Foundation.\footnote{This material is based upon work supported in part by the National Science Foundation under Grant Nos. 0532744, 1642341 and 1931421. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.}
 
 
 \begin{appendices}
