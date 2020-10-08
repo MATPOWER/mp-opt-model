@@ -129,7 +129,7 @@
 
 %\hyphenation{matpower_manual}
 
-\newcommand{\mpver}[0]{7.0}
+\newcommand{\mpver}[0]{7.1}
 %\newcommand{\matlab}[0]{{Matlab}}
 %\newcommand{\matlab}[0]{{\sc Matlab}\textsuperscript{\tiny \textregistered}}
 \newcommand{\matlab}[0]{{\sc Matlab}}
@@ -140,21 +140,22 @@
 \newcommand{\mptest}[0]{{MP-Test}}
 \newcommand{\mptesturl}[0]{https://github.com/MATPOWER/mptest}
 \newcommand{\mptestlink}[0]{\href{\mptesturl}{\mptest{}}}
+\newcommand{\mptestver}[0]{7.1}
 \newcommand{\mips}[0]{{MIPS}}
 \newcommand{\mipsurl}[0]{https://github.com/MATPOWER/mips}
 \newcommand{\mipslink}[0]{\href{\mipsurl}{\mips{}}}
 \newcommand{\mipsname}[0]{{{\bf M}{\sc atpower} \textbf{I}nterior \textbf{P}oint \textbf{S}olver}}
-\newcommand{\mipsver}[0]{1.3.1}
+\newcommand{\mipsver}[0]{1.4}
 \newcommand{\mpom}[0]{\mbox{MP-Opt-Model}}
 \newcommand{\mpomurl}[0]{https://github.com/MATPOWER/mp-opt-model}
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{3.0-dev}
+\newcommand{\mpomver}[0]{3.0}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
-\newcommand{\mostver}[0]{1.0.2}
+\newcommand{\mostver}[0]{1.1}
 \newcommand{\syngrid}[0]{{SynGrid}}
 \newcommand{\syngridver}[0]{1.0.1}
 \newcommand{\syngridurl}[0]{https://github.com/MATPOWER/mx-syngrid}
@@ -177,10 +178,11 @@
 \newcommand{\gurobi}[0]{{Gurobi}}
 \newcommand{\mosek}[0]{{MOSEK}}
 \newcommand{\osqp}[0]{{OSQP}}
+\newcommand{\osqplink}[0]{{\href{https://osqp.org}{\osqp}}}
 \newcommand{\ot}[0]{{Optimization Toolbox}}
 \newcommand{\pardiso}[0]{{PARDISO}}
 \newcommand{\sdppf}[0]{\texttt{SDP\_PF}}
-\newcommand{\sdppfver}[0]{1.0.1}
+\newcommand{\sdppfver}[0]{1.0.2}
 \newcommand{\sdpopf}[0]{SDPOPF}
 \newcommand{\code}[1]{{\relsize{-0.5}{\tt{{#1}}}}}  % requires package relsize
 % Note: to get straight single quotes in \code you have to use one of the
@@ -240,7 +242,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-%\date{August 25, 2020} % comment this line to display the current date
+\date{October 8, 2020} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -325,12 +327,12 @@ POSSIBILITY OF SUCH DAMAGE.
 \subsection{Citing \mpom{}}
 
 We request that publications derived from the use of \mpom{} explicitly acknowledge that fact by citing the \mpomname{} User's Manual~\cite{mpom_manual}.
-The citation and DOI can be version-specific or general, as appropriate. For version 2.1, use:
+The citation and DOI can be version-specific or general, as appropriate. For version 3.0, use:
 
 \begin{quote}
 \footnotesize
-R.~D. Zimmerman. \mpomname{} User's Manual, Verision 2.1. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}\\
-\doi{10.5281/zenodo.4001106}
+R.~D. Zimmerman. \mpomname{} User's Manual, Verision 3.0. 2020. [Online]. Available: \url{https://matpower.org/docs/MP-Opt-Model-manual-3.0.pdf}\\
+\doi{10.5281/zenodo.4073361}
 \end{quote}
 For a version non-specific citation, use the following citation and DOI,
 with \emph{\textless{}YEAR\textgreater{}} replaced by the year of the most recent release:
@@ -406,20 +408,20 @@ We will use \mpompath{} to denote the path to this directory.
 %\\\hl{re-do before release (run on fastest machine available)}
 \begin{Code}
 >> test_mp_opt_model
-t_nested_struct_copy....ok
 t_have_fcn..............ok
+t_nested_struct_copy....ok
 t_nleqs_master..........ok (30 of 150 skipped)
-t_qps_master............ok (100 of 396 skipped)
+t_qps_master............ok (100 of 432 skipped)
 t_miqps_master..........ok (68 of 288 skipped)
 t_nlps_master...........ok
 t_opt_model.............ok
 t_om_solve_leqs.........ok
-t_om_solve_nleqs........ok (36 of 170 skipped)
-t_om_solve_qps..........ok (79 of 319 skipped)
-t_om_solve_miqps........ok (12 of 72 skipped)
+t_om_solve_nleqs........ok (36 of 194 skipped)
+t_om_solve_qps..........ok (81 of 387 skipped)
+t_om_solve_miqps........ok (14 of 118 skipped)
 t_om_solve_nlps.........ok
-All tests successful (2713 passed, 325 skipped of 3038)
-Elapsed time 3.29 seconds.
+All tests successful (3032 passed, 329 skipped of 3361)
+Elapsed time 3.11 seconds.
 \end{Code}
 \end{enumerate}
 
@@ -1132,7 +1134,7 @@ fprintf('   %g\n', lambda.ineqnonlin);
 \end{Code}
 \begin{Code}
 >> nlps_master_ex2
-MATPOWER Interior Point Solver -- MIPS, Version 1.3.1, 20-Jun-2019
+MATPOWER Interior Point Solver -- MIPS, Version 1.4, 08-Oct-2020
  (using built-in linear solver)
  it    objective   step size   feascond     gradcond     compcond     costcond  
 ----  ------------ --------- ------------ ------------ ------------ ------------
@@ -3598,6 +3600,7 @@ There is no User's Manual yet.
 
 \subsubsection*{Incompatible Changes}
 \begin{itemize}
+\item Modify order of default output arguments of \code{opt\_model/get\_idx()} (again), removing the one related to legacy costs.
 \item \mpom{} has renamed the following functions and modified the order of their input args so that the \mpom{} object appears first. Ideally, these would be defined as methods of the \code{opt\_model} class, but Octave 4.2 and earlier is not able to find them via a function handle (as used in the \code{solve()} method) if they are inherited by a sub-class.
     \begin{itemize}
     \item \code{opf\_consfcn()} $\rightarrow$ \code{nlp\_consfcn()}
@@ -3651,7 +3654,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.0.pdf}{\mpom{} 2.0 Use
 \item Skip evaluation of gradient if \code{eval\_nln\_constraint()} is called with a single output argument.
 \item Remove redundant MIPS tests from \code{test\_mp\_opt\_model.m}.
 \item Add tests for solving LP/QP, MILP/MIQP, NLP and NLEQ problems via \code{opt\_model/solve()}.
-\item Add Table~\ref{tab:have_feature_tags} of valid \code{have\_fcn()} input tags to User's Manual.
+\item Add Table~6.1 of valid \code{have\_fcn()} input tags to User's Manual.
 
 \end{itemize}
 
@@ -3682,16 +3685,16 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-2.1.pdf}{\mpom{} 2.1 Use
 
 
 \clearpage
-\subsection{Version 3.0 -- released ??? ?, 202?}
+\subsection{Version 3.0 -- released Oct 8, 2020}
 \label{app:v30}
 
 The \href{https://matpower.org/docs/MP-Opt-Model-manual-3.0.pdf}{\mpom{} 3.0 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-3.0.pdf}}
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item Support for \osqp{} solver from \url{https://osqp.org} for LP and QP problems.
+\item Support for \osqplink{} solver for LP and QP problems (\url{https://osqp.org}).
 \item Support for modifying parameters of an existing \mpom{} object.
-\item Support for extracting specific named/indexed variables, costs, constraint values and shadow prices, etc. from a solved  \mpom{} object.
+\item Support for extracting specific named/indexed variables, costs, constraint values and shadow prices, etc. from a solved \mpom{} object.
 \item Results of the \code{solve()} method saved to the \code{soln} field of the \mpom{} object.
 \item Allow \code{v0}, \code{vl}, and \code{vu} inputs to \code{opt\_model/add\_var()} method, and \code{l} and \code{u} inputs to \code{opt\_model/add\_lin\_constraint()} to be scalars that get expanded automatically to the appropriate vector dimension.
 \item New functions:
@@ -3700,10 +3703,10 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-3.0.pdf}{\mpom{} 3.0 Use
     \item \code{opt\_model/get\_soln()} method extracts solved results for a given named set of variables, constraints or costs.
     \item \code{opt\_model/parse\_soln()} method returns a complete set of solution vector and shadow price values for a solved model.
     \item \code{opt\_model/eval\_lin\_constraint()} method computes the constraint values for the full set or an individual named subset of linear constraints.
-    \item \code{qps\_osqp()} provides standardized interface for using \osqp{} to solve LP/QP problems
-    \item \code{osqp\_options()} initializes options for \osqp{} solver
-    \item \code{osqpver()} returns/displays version information for \osqp{}
-    \item \dots plus 28 individual feature detection functions for \code{have\_feature()}, see Table~\ref{tab:have_feature_fcns} for details.
+    \item \code{qps\_osqp()} provides standardized interface for using \osqplink{} to solve LP/QP problems
+    \item \code{osqp\_options()} initializes options for \osqplink{} solver
+    \item \code{osqpver()} returns/displays version information for \osqplink{}
+    \item \dots plus 29 individual feature detection functions for \code{have\_feature()}, see Table~\ref{tab:have_feature_fcns} for details.
     \end{itemize}
 \end{itemize}
 
@@ -3711,13 +3714,13 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-3.0.pdf}{\mpom{} 3.0 Use
 \begin{itemize}
 \item Starting point supplied to \code{solve()} via \code{opt.x0} is no longer ignored for nonlinear equations.
 \item Calling \code{params\_var()} method with empty \code{idx} no longer results in fatal error.
-\item For \code{opt\_model}, fixed incorrect evaluation of constant term in vector valued quadratic costs with constant term supplied as a vector.
+\item For \code{opt\_model}, incorrect evaluation of constant term has been fixed for vector valued quadratic costs with constant term supplied as a vector.
 \end{itemize}
 
 \subsubsection*{Other Changes}
 \begin{itemize}
 \item Simplified logic to determine whether a quadratic cost for an \mpom{} object is vector vs. scalar valued. If the quadratic coefficient is supplied as a matrix, the cost is scalar varied, otherwise it is vector valued.
-\item Deprecate \code{have\_fcn()} and make it a simple wrapper around the new modular and extensible \code{have\_feature()}, which has now been moved to \mptestlink{}.
+\item Deprecated \code{have\_fcn()} and made it a simple wrapper around the new modular and extensible \code{have\_feature()}, which has now been moved to \mptestlink{}.\footnote{\mptestlink{} is available at \url{\mptesturl}.}
 \end{itemize}
 
 
@@ -3781,7 +3784,7 @@ Systems, IEEE Transactions on}, vol.~22, no.~3, pp. 1185--1193, August 2007.
 \doi{10.1109/TPWRS.2007.901301}
 
 \bibitem{mips_manual}
-R.~D. Zimmerman, H.~Wang. \mipsname{} (\mips{}) User's Manual. 2019.
+R.~D. Zimmerman, H.~Wang. \mipsname{} (\mips{}) User's Manual. 2020.
 [Online]. Available: \url{https://matpower.org/docs/MIPS-manual.pdf}\\
 \doi{10.5281/zenodo.3236506}
 

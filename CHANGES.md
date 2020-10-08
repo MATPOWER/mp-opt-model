@@ -2,8 +2,11 @@ Change history for MP-Opt-Model
 ===============================
 
 
-since last release
-------------------
+Version 3.0 - *Oct 8, 2020*
+---------------------------
+
+#### 10/8/20
+  - Release 3.0.
 
 #### 9/23/20
   - Move `have_feature()` to [MP-Test][8] and respective feature detection
@@ -83,7 +86,7 @@ since last release
 
 
 Version 2.1 - *Aug 25, 2020*
----------------------------
+----------------------------
 
 #### 8/25/20
   - Release 2.1.
