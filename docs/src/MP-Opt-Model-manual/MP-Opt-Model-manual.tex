@@ -2872,104 +2872,8 @@ name & description \\
 
 \subsection{\tt have\_fcn}
 
-This function is deprecated. Please use \code{have\_feature} (see below) instead, which has identical calling syntax. It is simply a drop-in replacement that has been reimplemented with an extensible, modular design, where the detection of a feature named \code{<tag>} is implemented by the function named \code{have\_feature\_<tag>}. The current \code{have\_fcn} is a simple wrapper around \code{have\_feature}.
+This function is deprecated. Instead, please use \code{have\_feature}, now included as part of \mptestlink{} and described in the \mptest{} \href{\mptesturl/blob/master/README.md}{\code{README}} file. It is simply a drop-in replacement that has been reimplemented with an extensible, modular design, where the detection of a feature named \code{<tag>} is implemented by the function named \code{have\_feature\_<tag>}. The current \code{have\_fcn} is a simple wrapper around \code{have\_feature}.
 
-\subsection{\tt have\_feature}
-\begin{Code}
-  TorF = have_feature(tag)
-  TorF = have_feature(tag, toggle)
-  ver_str = have_feature(tag, 'vstr')
-  ver_num = have_feature(tag, 'vnum')
-  rdate   = have_feature(tag, 'date')
-  info    = have_feature(tag, 'all')
-  have_feature(tag, 'clear_cache')
-  have_feature('all', 'clear_cache')
-\end{Code}
-
-The \code{have\_feature} function provides a unified mechanism for testing for optional functionality, such as the presence of certain solvers, or to detect whether the code is running under \matlab{} or Octave. Since its results are cached they allow for a very quick way to check frequently for functionality that may initially be a bit more costly to determine. For installed functionality, \code{have\_feature} also determines the installed version and
-release date, if possible. The optional second argument, when it is a string, defines which value
-is returned, as follows:
-\begin{itemize}
-\item{\em{empty}} -- 1 if optional functionality is available, 0 if not available
-\item{\codeq{vstr}} -- version number as a string (e.g. \codeq{3.11.4})
-\item{\codeq{vnum}} -- version number as numeric value (e.g. 3.011004)
-\item{\codeq{date}} -- release date as a string (e.g. \codeq{20-Jan-2015})
-\item{\codeq{all}} -- struct with fields named \code{av} (for ``availability''), \code{vstr}, \code{vnum} and \code{date}, and values corresponding to each of the above, respectively.
-\end{itemize}
-
-Alternatively, the optional functionality specified by \code{tag} can be toggled OFF or ON by calling \code{have\_feature} with a numeric second argument \code{toggle} with one of the following values:
-\begin{itemize}
-\item{0} -- turn OFF the optional functionality
-\item{1} -- turn ON the optional functionality (if available)
-\item{$-1$} -- toggle the ON/OFF state of the optional functionality
-\end{itemize}
-The valid values of the \code{tag} string input argument are listed in Table~\ref{tab:have_feature_tags}.
-
-Finally, calling \code{have\_feature} with the string \codeq{clear\_cache} as the second argument, and either \codeq{all} or a tag name as the first, clears any corresponding cached information about the feature(s), forcing a re-detection. This can be useful, for example, to get it to recognize a feature whose availability has changed as a result of adding or removing entries from \matlab{}'s search path.
-
-\begin{table}[!ht]
-%\renewcommand{\arraystretch}{1.2}
-\centering
-\begin{threeparttable}
-\caption{Valid Tag Values for \code{have\_feature}}
-\label{tab:have_feature_tags}
-\footnotesize
-% \begin{tabular}{p{0.17\textwidth}p{0.76\textwidth}}
-\begin{tabular}{ll}
-\toprule
-tag value & description \\
-\midrule
-\code{~~bpmpd}	& \code{bp}, BPMPD interior point LP/QP solver	\\
-\code{~~clp}	& \clp{}, LP/QP solver, \url{https://github.com/coin-or/Clp}	\\
-\code{~~~~opti\_clp}	& version of \clp{} distributed with OPTI Toolbox,	\\
-& ~~~~\url{https://www.inverseproblem.co.nz/OPTI/}	\\
-\code{~~cplex}	& \cplex{}, IBM ILOG CPLEX Optimizer	\\
-\code{~~fmincon}	& \code{fmincon}, solver from \ot{}	\\
-\code{~~~~fmincon\_ipm}	& \code{fmincon} with interior point solver from \ot{} 4.x+	\\
-\code{~~fsolve}	& \code{fsolve}, nonlinear equation solver from \ot{}	\\
-\code{~~glpk}	& \code{glpk}, GNU Linear Programming Kit, LP/MILP solver	\\
-\code{~~gurobi}	& \code{gurobi}, Gurobi solver, \url{https://www.gurobi.com/}	\\
-\code{~~intlinprog}	& \code{intlinprog}, MILP solver from \ot{} 7.0 (R2014a)+	\\
-\code{~~ipopt}	& \ipopt{}, NLP solver, \url{https://github.com/coin-or/Ipopt}	\\
-\code{~~knitro}	& \knitro{}, NLP solver, \url{https://www.artelys.com/solvers/knitro/}	\\
-\code{~~~~knitromatlab}	& \knitro{}, version 9.0.0+ 	\\
-\code{~~~~ktrlink}	& Knitro, version prior to 9.0.0 (requires \ot{})	\\
-\code{~~linprog}	& \code{linprog}, LP solver from \ot{}
-	\\
-\code{~~~~linprog\_ds}	& \code{linprog} w/dual-simplex solver from \ot{} 7.1 (R2014b)+	\\
-\code{~~matlab}	& \matlab{}, as opposed to Octave	\\
-\code{~~mosek}	& \mosek{}, LP/QP solver, \url{https://www.mosek.com/}	\\
-\code{~~octave}	& GNU Octave, as opposed to \matlab{}	\\
-\code{~~optim}	& \ot{}	\\
-\code{~~optimoptions}	& \code{optimoptions}, option setting funciton for \ot{} 6.3+	\\
-\code{~~osqp}	& \osqp{}, {\bf O}perator {\bf S}plitting {\bf Q}uadratic {\bf P}rogram solver, \url{https://osqp.org}	\\
-\code{~~pardiso}	& \pardiso{}, {\bf Par}allel Sparse {\bf D}irect \& {\bf I}terative Linear {\bf So}lver,	\\
-& ~~~~\url{https://pardiso-project.org}	\\
-\code{~~quadprog}	& \code{quadprog}, QP solver from \ot{}	\\
-\code{~~~~quadprog\_ls}	& \code{quadprog} with large-scale interior point convex solver from	\\
-& ~~~~\ot{} 6.x+	\\
-\code{~~sdpt3}	& SDPT3 SDP solver, \url{https://github.com/sqlp/sdpt3}	\\
-\code{~~sedumi}	& SeDuMi SDP solver, \url{http://sedumi.ie.lehigh.edu}	\\
-\code{~~yalmip}	& YALMIP modeling platform, \url{https://yalmip.github.io}	\\
-	\\
-\multicolumn{2}{l}{\emph{Functionality related to \matpowerlink{}}}	\\
-\code{~~e4st}	& \eastlink{}, \url{\easturl}	\\
-\code{~~minopf}	& \code{minopf}, MINOPF, MINOS-based optimal power flow (OPF) solver	\\
-\code{~~most}	& \most{}, \mostname{}	\\
-\code{~~pdipmopf}	& PDIPMOPF, primal-dual interior point method OPF solver	\\
-\code{~~scpdipmopf}	& SCPDIPMOPF, step-controlled PDIPM OPF solver	\\
-\code{~~sdp\_pf}	& SDP\_PF, applications of SDP relaxation of power flow equations	\\
-\code{~~smartmarket}	& \code{runmarket} and friends, for running an energy auction	\\
-\code{~~syngrid}	& \syngridlink{}, Synthetic Grid Creation for \matpower{}	\\
-\code{~~tralmopf}	& TRALMOPF, trust region based augmented Langrangian OPF solver	\\
-\bottomrule
-\end{tabular}
-% \begin{tablenotes}
-%  \scriptsize
-%  \item [\dag] {Related specifically to \matpowerlink{}.}
-% \end{tablenotes}
-\end{threeparttable}
-\end{table}
 
 \subsection{\tt mpomver}
 \begin{Code}
@@ -2989,7 +2893,159 @@ Prints or returns \mpom{} version information for the current installation. When
 
 The \code{nested\_struct\_copy} function copies values from a source struct \code{s} to a destination struct \code{d} in a nested, recursive manner. That is, the value of each field in \code{s} is copied directly to the corresponding field in \code{d}, unless that value is itself a struct, in which case the copy is done via a recursive call to \code{nested\_struct\_copy}. Certain aspects of the copy behavior can be controled via the optional options struct \code{opt}, including the possible checking of valid field names.
 
-\clearpage
+\subsection{Private Feature Detection Functions}
+\label{sec:featuredetection}
+
+The following are private functions that implement detection of specific optional functionality. They are not intended to be called directly, but rather are used to extend the capabilities of \code{have\_feature}, a function included in \mptestlink{} and described in the \mptest{} \href{\mptesturl/blob/master/README.md}{\code{README}} file.
+
+\subsubsection{\tt have\_feature\_bpmpd}
+\label{sec:have_feature_bpmpd}
+
+This function implements the \codeq{bpmpd} tag for \code{have\_feature} to detect availability/version of BPMPD\_MEX (interior point LP/QP solver). See also Appendix~\ref{app:bpmpd}.
+
+\subsubsection{\tt have\_feature\_catchme}
+\label{sec:have_feature_catchme}
+
+This function implements the \codeq{catchme} tag for \code{have\_feature} to detect support for \code{catch me} syntax in \code{try/catch} constructs.
+
+\subsubsection{\tt have\_feature\_clp}
+\label{sec:have_feature_clp}
+
+This function implements the \codeq{clp} tag for \code{have\_feature} to detect availability/version of \clp{} (COIN-OR Linear Programming solver, LP/QP solver. See also Appendix~\ref{app:clp}.
+
+\subsubsection{\tt have\_feature\_opti\_clp}
+\label{sec:have_feature_opti_clp}
+
+This function implements the \codeq{opti\_clp} tag for \code{have\_feature} to detect the version of \clp{} distributed with OPTI Toolbox\footnote{The OPTI Toolbox is available from 
+\url{https://www.inverseproblem.co.nz/OPTI/}.}~\cite{opti}. See also Appendix~\ref{app:clp}.
+
+\subsubsection{\tt have\_feature\_cplex}
+\label{sec:have_feature_cplex}
+
+This function implements the \codeq{cplex} tag for \code{have\_feature} to detect availability/version of \cplex{}, IBM ILOG CPLEX Optimizer. See also Appendix~\ref{app:cplex}.
+
+\subsubsection{\tt have\_feature\_evalc}
+\label{sec:have_feature_evalc}
+
+This function implements the \codeq{evalc} tag for \code{have\_feature} to detect support for \code{evalc()} function.
+
+\subsubsection{\tt have\_feature\_fmincon}
+\label{sec:have_feature_fmincon}
+
+This function implements the \codeq{fmincon} tag for \code{have\_feature} to detect availability/version of \code{fmincon}, solver from the \matlab{} \ot{}. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_fmincon\_ipm}
+\label{sec:have_feature_fmincon_ipm}
+
+This function implements the \codeq{fmincon\_ipm} tag for \code{have\_feature} to detect availability/version of \code{fmincon} with interior point solver from the \matlab{} \ot{} 4.x and later. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_fsolve}
+\label{sec:have_feature_fsolve}
+
+This function implements the \codeq{fsolve} tag for \code{have\_feature} to detect availability/version of \code{fsolve}, nonlinear equation solver from the \matlab{} \ot{} or GNU Octave. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_glpk}
+\label{sec:have_feature_glpk}
+
+This function implements the \codeq{glpk} tag for \code{have\_feature} to detect availability/version of \code{glpk}, GNU Linear Programming Kit, LP/MILP solver. See also Appendix~\ref{app:glpk}.
+
+\subsubsection{\tt have\_feature\_gurobi}
+\label{sec:have_feature_gurobi}
+
+This function implements the \codeq{gurobi} tag for \code{have\_feature} to detect availability/version of \code{gurobi}, Gurobi optimizer. See also Appendix~\ref{app:gurobi}.
+
+\subsubsection{\tt have\_feature\_intlinprog}
+\label{sec:have_feature_intlinprog}
+
+This function implements the \codeq{intlinprog} tag for \code{have\_feature} to detect availability/version of \code{intlinprog}, MILP solver from the \matlab{} \ot{} 7.0 (R2014a) and later.
+
+\subsubsection{\tt have\_feature\_ipopt}
+\label{sec:have_feature_ipopt}
+
+This function implements the \codeq{ipopt} tag for \code{have\_feature} to detect availability/version of \ipopt{}, a nonlinear programming solver from COIN-OR. See also Appendix~\ref{app:ipopt}.
+
+\subsubsection{\tt have\_feature\_ipopt\_auxdata}
+\label{sec:have_feature_ipopt_auxdata}
+
+This function implements the \codeq{ipopt\_auxdata} tag for \code{have\_feature} to detect support for \code{ipopt\_auxdata()}, required by \ipopt{} 3.11 and later. See also Appendix~\ref{app:ipopt}.
+
+\subsubsection{\tt have\_feature\_isequaln}
+\label{sec:have_feature_isequaln}
+
+This function implements the \codeq{isequaln} tag for \code{have\_feature} to detect support for \code{isequaln} function.
+
+\subsubsection{\tt have\_feature\_knitro}
+\label{sec:have_feature_knitro}
+
+This function implements the \codeq{knitro} tag for \code{have\_feature} to detect availability/version of \knitro{}, a nonlinear programming solver. See also Appendix~\ref{app:knitro}.
+
+\subsubsection{\tt have\_feature\_knitromatlab}
+\label{sec:have_feature_knitromatlab}
+
+This function implements the \codeq{knitromatlab} tag for \code{have\_feature} to detect availability/version of \knitro{} 9.0.0 and later. See also Appendix~\ref{app:knitro}.
+
+\subsubsection{\tt have\_feature\_ktrlink}
+\label{sec:have_feature_ktrlink}
+
+This function implements the \codeq{ktrlink} tag for \code{have\_feature} to detect availability/version of \knitro{} prior to version 9.0.0, which required the \matlab{} \ot{}. See also Appendix~\ref{app:knitro}.
+
+\subsubsection{\tt have\_feature\_linprog}
+\label{sec:have_feature_linprog}
+
+This function implements the \codeq{linprog} tag for \code{have\_feature} to detect availability/version of \code{linprog}, LP solver from the \matlab{} \ot{}. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_linprog\_ds}
+\label{sec:have_feature_linprog_ds}
+
+This function implements the \codeq{linprog\_ds} tag for \code{have\_feature} to detect availability/version of \code{linprog} with support for the dual simplex method, from the \matlab{} \ot{} 7.1 (R2014b) and later. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_mosek}
+\label{sec:have_feature_mosek}
+
+This function implements the \codeq{mosek} tag for \code{have\_feature} to detect availability/version of \mosek{}, LP/QP/MILP/MIQP solver. See also Appendix~\ref{app:mosek}.
+
+\subsubsection{\tt have\_feature\_optim}
+\label{sec:have_feature_optim}
+
+This function implements the \codeq{optim} tag for \code{have\_feature} to detect availability/version of the \ot{}. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_optimoptions}
+\label{sec:have_feature_optimoptions}
+
+This function implements the \codeq{optimoptions} tag for \code{have\_feature} to detect support for \code{optimoptions}, option setting funciton for the \matlab{} \ot{} 6.3 and later. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_osqp}
+\label{sec:have_feature_osqp}
+
+This function implements the \codeq{osqp} tag for \code{have\_feature} to detect availability/version of \osqp{}, {\bf O}perator {\bf S}plitting {\bf Q}uadratic {\bf P}rogram solver. See also Appendix~\ref{app:osqp}.
+
+\subsubsection{\tt have\_feature\_quadprog}
+\label{sec:have_feature_quadprog}
+
+This function implements the \codeq{quadprog} tag for \code{have\_feature} to detect detect availability/version of \code{quadprog}, QP solver from the \matlab{} \ot{}. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_quadprog\_ls}
+\label{sec:have_feature_quadprog_ls}
+
+This function implements the \codeq{quadprog\_ls} tag for \code{have\_feature} to detect availability/version of \code{quadprog} with support for the large-scale interior point convex solver, from the \matlab{} \ot{} 6.x and later. See also Appendix~\ref{app:ot}.
+
+\subsubsection{\tt have\_feature\_sdpt3}
+\label{sec:have_feature_sdpt3}
+
+This function implements the \codeq{sdpt3} tag for \code{have\_feature} to detect availability/version of SDPT3 SDP solver, \url{https://github.com/sqlp/sdpt3}.
+
+\subsubsection{\tt have\_feature\_sedumi}
+\label{sec:have_feature_sedumi}
+
+This function implements the \codeq{sedumi} tag for \code{have\_feature} to detect availability/version of SeDuMi SDP solver, \url{http://sedumi.ie.lehigh.edu}.
+
+\subsubsection{\tt have\_feature\_yalmip}
+\label{sec:have_feature_yalmip}
+
+This function implements the \codeq{yalmip} tag for \code{have\_feature} to detect availability/version of YALMIP modeling platform, \url{https://yalmip.github.io}.
+
+
+% \clearpage
 \subsection{\matpower{}-related Functions}
 
 The following three functions are related specifically to \matpowerlink{}, and are used for extracting relevant solver options from a \matpower{} options struct.
