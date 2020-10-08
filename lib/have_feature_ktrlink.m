@@ -2,7 +2,7 @@ function [TorF, vstr, rdate] = have_feature_ktrlink()
 %HAVE_FEATURE_KTRLINK  Detect availability/version info for KTRLINK
 %
 %   Feature detection function implementing 'ktrlink' tag for HAVE_FEATURE
-%   to detect availability/version of Artelys Knitro earlier than 9.0.0,
+%   to detect availability/version of Artelys Knitro prior to version 9.0.0,
 %   which required the MATLAB Optimization Toolbox.
 %
 %   See also HAVE_FEATURE, HAVE_FEATURE_KNITRO, KTRLINK.

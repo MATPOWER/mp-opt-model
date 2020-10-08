@@ -2,7 +2,8 @@ function [TorF, vstr, rdate] = have_feature_mosek()
 %HAVE_FEATURE_MOSEK  Detect availability/version info for MOSEK
 %
 %   Feature detection function implementing 'mosek' tag for HAVE_FEATURE
-%   to detect availability/version of MOSEK (https://www.mosek.com/).
+%   to detect availability/version of MOSEK, LP/QP/MILP/MIQP solver
+%   (https://www.mosek.com/).
 %
 %   See also HAVE_FEATURE, QPS_MASTER, MIQPS_MASTER, MOSEKOPT.
 

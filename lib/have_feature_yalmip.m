@@ -2,7 +2,8 @@ function [TorF, vstr, rdate] = have_feature_yalmip()
 %HAVE_FEATURE_YALMIP  Detect availability/version info for YALMIP
 %
 %   Feature detection function implementing 'yalmip' tag for HAVE_FEATURE
-%   to detect availability/version of YALMIP (https://yalmip.github.io).
+%   to detect availability/version of YALMIP modeling platform
+%   (https://yalmip.github.io).
 %
 %   See also HAVE_FEATURE, YALMIP.
 

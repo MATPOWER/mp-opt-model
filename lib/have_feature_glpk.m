@@ -2,7 +2,8 @@ function [TorF, vstr, rdate] = have_feature_glpk()
 %HAVE_FEATURE_GLPK  Detect availability/version info for GLPK
 %
 %   Feature detection function implementing 'glpk' tag for HAVE_FEATURE
-%   to detect availability/version of GLPK (GNU Linear Programming Kit).
+%   to detect availability/version of GLPK (GNU Linear Programming Kit),
+%   LP/MILP solver.
 %
 %   See also HAVE_FEATURE, QPS_MASTER, MIQPS_MASTER, GLPK.
 

@@ -4,7 +4,7 @@ function [TorF, vstr, rdate] = have_feature_evalc()
 %   Feature detection function implementing 'evalc' tag for HAVE_FEATURE
 %   to detect support for EVALC function.
 %
-%   See also HAVE_FEATURE.
+%   See also HAVE_FEATURE, EVALC.
 
 %   MP-Opt-Model
 %   Copyright (c) 2004-2020, Power Systems Engineering Research Center (PSERC)

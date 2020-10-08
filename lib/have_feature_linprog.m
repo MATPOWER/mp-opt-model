@@ -2,7 +2,8 @@ function [TorF, vstr, rdate] = have_feature_linprog()
 %HAVE_FEATURE_LINPROG  Detect availability/version info for LINPROG
 %
 %   Feature detection function implementing 'linprog' tag for HAVE_FEATURE
-%   to detect availability/version of LINPROG the MATLAB Optimization Toolbox.
+%   to detect availability/version of LINPROG, LP solver from the MATLAB
+%   Optimization Toolbox.
 %
 %   See also HAVE_FEATURE, HAVE_FEATURE_LINPROG_DS, QPS_MASTER, LINPROG.
 

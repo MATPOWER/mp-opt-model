@@ -2,8 +2,8 @@ function [TorF, vstr, rdate] = have_feature_intlinprog()
 %HAVE_FEATURE_INTLINPROG  Detect availability/version info for INTLINPROG
 %
 %   Feature detection function implementing 'intlinprog' tag for HAVE_FEATURE
-%   to detect availability/version of INTLINPROG from the MATLAB Optimization
-%   Toolbox.
+%   to detect availability/version of INTLINPROG, MILP solver from MATLAB
+%   Optimization Toolbox 7.0 (R2014a) and later.
 %
 %   See also HAVE_FEATURE, MIQPS_MASTER, INTLINPROG.
 
