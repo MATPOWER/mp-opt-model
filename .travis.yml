@@ -15,7 +15,7 @@ addons:
     packages:
     - bash
     - gcc
-    - octave        # octave 5.1.0
+    - octave        # octave 5.2.0
     - wget
     update: true
 os:
