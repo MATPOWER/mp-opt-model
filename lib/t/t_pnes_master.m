@@ -18,7 +18,7 @@ cfg = {
     {'DEFAULT', 'default',  []          []  },
 };
 
-n = 44;
+n = 77;
 
 t_begin(n*length(cfg), quiet);
 
@@ -30,40 +30,43 @@ for k = 1:length(cfg)
     if ~isempty(check) && ~have_feature(check)
         t_skip(n, sprintf('%s not installed', name));
     else
-        t = sprintf('%s - FULL : ', name);
+        %% default start point
         x0 = [-1;0;0];
         opt = struct( ...
             'verbose', 0, ...
             'alg', alg, ...
-            'stop_at', 'FULL', ...
+            'stop_at', 0.7, ...
+            'parameterization', 1, ...
             'nleqs_opt', struct('tol', 1e-8), ...
-            'adapt_step', 1, ...
+            'adapt_step', 0, ...
             'step_max', 10, ...
             'target_lam_tol', 1e-6, ...
             'nose_tol', 1e-6, ...
             'adapt_step_tol', 1e-2 );
 %         opt.plot = struct('level', 2, 'idx', 2);
-        [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
-        t_is(e, 1, 12, [t 'exitflag']);
-        t_is(x, [2;-1;0], 10, [t 'x - final']);
-        t_is(f, [0;0], 10, [t 'f']);
-        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1) : x - initial']);
-        t_is(out.cont.max_lam, 1.04127275, 8, [t 'out.cont.max_lam']);
-        t_is(out.cont.iterations, 34, 12, [t 'out.cont.iterations']);
-        t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
-        t_is(out.cont.events.k, 34, 12, [t 'out.cont.events.k']);
-        t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
-        t_ok(strcmp(out.cont.events.name, 'TARGET_LAM'), [t 'out.cont.events.name']);
-        t_ok(strcmp(out.cont.done_msg, 'Traced full continuation curve in 34 continuation steps'), [t 'out.cont.done_msg']);
 
-        t = sprintf('%s - TARGET_LAM : ', name);
-        opt.stop_at = 0.7;
-        p = struct('fcn', @f1p, 'x0', x0, 'opt', opt);
-        [x, f, e, out, jac] = pnes_master(p);
+        t = sprintf('%s - TARGET_LAM = 0.7 (natural) : ', name);
+        [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-1.931782106; -1.268217894; 0.7], 6, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);
-        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1) : x - initial']);
+        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
+        t_is(out.cont.max_lam, 0.7, 10, [t 'out.cont.max_lam']);
+        t_is(out.cont.iterations, 14, 12, [t 'out.cont.iterations']);
+        t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
+        t_is(out.cont.events.k, 14, 12, [t 'out.cont.events.k']);
+        t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
+        t_ok(strcmp(out.cont.events.name, 'TARGET_LAM'), [t 'out.cont.events.name']);
+        t_ok(strcmp(out.cont.done_msg, 'Reached desired lambda 0.7 in 14 continuation steps'), [t 'out.cont.done_msg']);
+
+        t = sprintf('%s - TARGET_LAM = 0.7 (arc len) : ', name);
+        opt.adapt_step = 1;
+        opt.parameterization = 2;
+        [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
+        t_is(e, 1, 12, [t 'exitflag']);
+        t_is(x, [-1.931782106; -1.268217894; 0.7], 6, [t 'x - final']);
+        t_is(f, [0;0], 10, [t 'f']);
+        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 0.7, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, 10, 12, [t 'out.cont.iterations']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
@@ -72,13 +75,60 @@ for k = 1:length(cfg)
         t_ok(strcmp(out.cont.events.name, 'TARGET_LAM'), [t 'out.cont.events.name']);
         t_ok(strcmp(out.cont.done_msg, 'Reached desired lambda 0.7 in 10 continuation steps'), [t 'out.cont.done_msg']);
 
-        t = sprintf('%s - NOSE : ', name);
+        t = sprintf('%s - TARGET_LAM = 0.7 (pseudo arc len) : ', name);
+        opt.parameterization = 3;
+        [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
+        t_is(e, 1, 12, [t 'exitflag']);
+        t_is(x, [-1.931782106; -1.268217894; 0.7], 6, [t 'x - final']);
+        t_is(f, [0;0], 10, [t 'f']);
+        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
+        t_is(out.cont.max_lam, 0.7, 10, [t 'out.cont.max_lam']);
+        t_is(out.cont.iterations, 10, 12, [t 'out.cont.iterations']);
+        t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
+        t_is(out.cont.events.k, 10, 12, [t 'out.cont.events.k']);
+        t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
+        t_ok(strcmp(out.cont.events.name, 'TARGET_LAM'), [t 'out.cont.events.name']);
+        t_ok(strcmp(out.cont.done_msg, 'Reached desired lambda 0.7 in 10 continuation steps'), [t 'out.cont.done_msg']);
+
+        t = sprintf('%s - FULL : ', name);
+        opt.stop_at = 'FULL';
+        p = struct('fcn', @f1p, 'x0', x0, 'opt', opt);
+        [x, f, e, out, jac] = pnes_master(p);
+        t_is(e, 1, 12, [t 'exitflag']);
+        t_is(x, [2;-1;0], 10, [t 'x - final']);
+        t_is(f, [0;0], 10, [t 'f']);
+        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
+        t_is(out.cont.max_lam, 1.04127275, 8, [t 'out.cont.max_lam']);
+        t_is(out.cont.iterations, 34, 12, [t 'out.cont.iterations']);
+        t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
+        t_is(out.cont.events.k, 34, 12, [t 'out.cont.events.k']);
+        t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
+        t_ok(strcmp(out.cont.events.name, 'TARGET_LAM'), [t 'out.cont.events.name']);
+        t_ok(strcmp(out.cont.done_msg, 'Traced full continuation curve in 34 continuation steps'), [t 'out.cont.done_msg']);
+
+        t = sprintf('%s - NOSE (arc len): ', name);
         p.opt.stop_at = 'NOSE';
+        p.opt.parameterization = 2;
         [x, f, e, out, jac] = pnes_master(p);
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-0.5; -4.75; 1.04166667], 6, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);
-        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1) : x - initial']);
+        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
+        t_is(out.cont.max_lam, 1.04166666667, 10, [t 'out.cont.max_lam']);
+        t_is(out.cont.iterations, 18, 12, [t 'out.cont.iterations']);
+        t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
+        t_is(out.cont.events.k, 18, 12, [t 'out.cont.events.k']);
+        t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
+        t_ok(strcmp(out.cont.events.name, 'NOSE'), [t 'out.cont.events.name']);
+        t_ok(strcmp(out.cont.done_msg, 'Reached limit in 18 continuation steps, lambda = 1.042.'), [t 'out.cont.done_msg']);
+
+        t = sprintf('%s - NOSE (pseudo arc len) : ', name);
+        p.opt.parameterization = 3;
+        [x, f, e, out, jac] = pnes_master(p);
+        t_is(e, 1, 12, [t 'exitflag']);
+        t_is(x, [-0.5; -4.75; 1.04166667], 6, [t 'x - final']);
+        t_is(f, [0;0], 10, [t 'f']);
+        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 1.04166666667, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, 18, 12, [t 'out.cont.iterations']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
@@ -93,7 +143,7 @@ for k = 1:length(cfg)
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-0.5; -4.75; 1.04166667], 5, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);
-        t_is(out.cont.x(:,1), [2;-1;0], 8, [t 'out.cont.x(:,1) : x - initial']);
+        t_is(out.cont.x(:,1), [2;-1;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 1.04166666667, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, 20, 12, [t 'out.cont.iterations']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
