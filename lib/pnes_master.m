@@ -197,7 +197,7 @@ if opt.solve_base
     [x, f, exitflag, out] = nleqs_master(@(xx)pne_corrector_fcn(xx, fcn, pfcn), x0, opt.nleqs_opt);
     if exitflag
         if opt.verbose > 1
-            fprintf('step %3d  :                      lambda = %6.3f, %2d corrector steps\n', 0, 0, out.iterations);
+            fprintf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', 0, 0, out.iterations);
         end
     else
         done.flag = 1;
@@ -223,11 +223,11 @@ if ~done.flag
     %% initialize parameterization function
     switch opt.parameterization
         case 1
-            parm = @pne_pfcn_natural;
+            parm = @pne_pfcn_natural;           %% NAT
         case 2
-            parm = @pne_pfcn_arc_len;
+            parm = @pne_pfcn_arc_len;           %% ARC
         case 3
-            parm = @pne_pfcn_pseudo_arc_len;
+            parm = @pne_pfcn_pseudo_arc_len;    %% PAL
         otherwise
             error('pnes_master: OPT.parameterization (= %d) must be 1, 2, or 3', parm);
     end
@@ -290,7 +290,7 @@ while ~done.flag
         done.flag = 1;
         done.msg = sprintf('Corrector did not converge in %d iterations.', out.iterations);
         if opt.verbose
-            fprintf('step %3d  : stepsize = %-9.3g lambda = %6.3f  corrector did not converge in %d iterations\n', cont_steps, cx.step, nx.x(end), out.iterations);
+            fprintf('step %3d  : %s stepsize = %-9.3g lambda = %6.3f  corrector did not converge in %d iterations\n', cont_steps, pne_ptag(cx.parm), cx.step, nx.x(end), out.iterations);
         end
         cont_steps = max(cont_steps - 1, 1);    %% go back to last step, but not to 0
         break;
@@ -390,10 +390,10 @@ while ~done.flag
         else
             sub_step = ' ';
         end
-        if opt.verbose > 4
-            fprintf('step %3d%s : stepsize = %-9.3g lambda = %6.3f', cont_steps, sub_step, cx.step, nx.x(end));
-        else
-            fprintf('step %3d%s : stepsize = %-9.3g lambda = %6.3f  %2d corrector steps', cont_steps, sub_step, cx.step, nx.x(end), out.iterations);
+
+        fprintf('step %3d%s : %s stepsize = %-9.3g lambda = %6.3f', cont_steps, sub_step, pne_ptag(cx.parm), cx.step, nx.x(end));
+        if opt.verbose < 5
+            fprintf('  %2d corrector steps', out.iterations);
         end
         if rollback
             fprintf(' ^ ROLLBACK\n');
@@ -539,3 +539,13 @@ xx = x(end, :);
 
 function yy = pne_plot_yfcn(x, idx)
 yy = x(idx, :);
+
+function ptag = pne_ptag(parm)
+switch func2str(parm)
+    case 'pne_pfcn_natural'
+        ptag = 'NAT';
+    case 'pne_pfcn_arc_len'
+        ptag = 'ARC';
+    case 'pne_pfcn_pseudo_arc_len'
+        ptag = 'PAL';
+end
