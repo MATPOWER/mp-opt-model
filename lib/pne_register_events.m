@@ -1,24 +1,34 @@
-function event_list = pne_register_event(event_list, name, fcn, tol, locate)
+function reg_ev = pne_register_events(my_events, opt, reg_ev)
 %PNE_REGISTER_EVENT  Register event functions=
-%   EVENT_LIST = PNE_REGISTER_EVENT(EVENT_LIST, NAME, FCN, TOL, LOCATE)
+%   REG_EV = PNE_REGISTER_EVENTS(MY_EVENTS, OPT)
+%   REG_EV = PNE_REGISTER_EVENTS(MY_EVENTS, OPT, REG_EV)
 %
-%   Registers an event function to be called by PNES_MASTER.
+%   Registers event functions to be called by PNES_MASTER.
 %
 %   Inputs:
-%       EVENT_LIST : struct array containing info about registered event fcns
-%           with fields name, fcn, tol, and locate corresponding to the
-%           respective inputs below
-%       NAME : string containing event name
-%       FCN : string containing name of event function, returning numerical
-%             scalar or vector value that changes sign at location of the event
-%       TOL : scalar or vector of same dimension as event function return value
-%             of tolerance for detecting the event, i.e. abs(val) <= tol
-%       LOCATE : flag indicating whether the event requests a rollback step
-%                to locate the event function zero
+%       MY_EVENTS : a cell array of the form {NAME, FCN, TOL, LOCATE}, or
+%           a cell array of such cell arrays, TOL and LOCATE are optional:
+%           NAME - char array with a unique event name
+%           FCN - function handle to the event detection function
+%           TOL (OPT.default_even_tol) - optional, scalar or vector of same
+%               dimension as event function return value of tolerance for
+%               detecting the event, i.e. abs(val) <= tol
+%           LOCATE (1) - optional, flag indicating whether the event requests
+%               a rollback step to locate the event function zero
+%       OPT - PNES_MASTER options struct
+%       REG_EV : (optional) struct array containing existing registered event
+%           functions
 %
 %   Outputs:
-%       EVENT_LIST : updated struct containing info about registered event fcns
-%                    with new entry appended at end
+%       REG_EV : updated struct containing registered event functions
+%
+%   User Defined PNES_MASTER Event Functions:
+%       The user can define their own event detection functions which take
+%       the same form as PNE_TARGET_LAM_EVENT. These are specified via the
+%       'events' option to PNES_MASTER, which takes the same form as
+%       MY_EVENTS above.
+%
+%   See also PNES_MASTER, PNE_TARGET_LAM_EVENT.
 
 %   MP-Opt-Model
 %   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
@@ -29,28 +39,44 @@ function event_list = pne_register_event(event_list, name, fcn, tol, locate)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
-%% the event function data to be registered
-e = struct( ...
-        'name', name, ...
-        'fcn', fcn, ...
-        'tol', tol, ...
-        'locate', locate ...
-    );
-
-%% convert function names to function handles, as necessary
-if ~isa(e.fcn, 'function_handle')
-    e.fcn = str2func(e.fcn);
+%% initialize registered event function struct
+if nargin < 3
+    reg_ev = [];
 end
 
-%% register to list of event functions
-if isempty(event_list)
-    event_list = e;
-else
-    nef = length(event_list);
-    for k = 1:nef
-        if strcmp(event_list(k).name, name)
-            error('cpf_register_event: duplicate event name: ''%s''', name);
+%% convert input to cell array of cell arrays, if necessary
+if ~iscell(my_events{1})
+    my_events = {my_events};
+end
+
+for k = 1:length(my_events)
+    params = my_events{k};      %% event function parameters
+    name = params{1};
+    if length(params) > 2
+        tol = params{3};
+        if length(params) > 3
+            locate = params{4};
+        else
+            locate = 1;
         end
+    else
+        tol = opt.default_event_tol;
     end
-    event_list(nef+1) = e;
+    e = struct( ...
+            'name', name, ...
+            'fcn', params{2}, ...
+            'tol', tol, ...
+            'locate', locate ...
+        );
+    if isempty(reg_ev)
+        reg_ev = e;
+    else
+        nef = length(reg_ev);
+        for k = 1:nef
+            if strcmp(reg_ev(k).name, name)
+                error('pne_register_events: duplicate event name: ''%s''', name);
+            end
+        end
+        reg_ev(nef+1) = e;
+    end
 end

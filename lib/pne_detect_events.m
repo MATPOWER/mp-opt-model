@@ -1,9 +1,9 @@
-function [rollback, evnts, cef] = pne_detect_events(event_list, cef, pef, step)
+function [rollback, evnts, cef] = pne_detect_events(reg_ev, cef, pef, step)
 %CPF_DETECT_EVENTS  Detect events from event function values
-%   [ROLLBACK, CRITICAL_EVENTS, CEF] = CPF_DETECT_EVENTS(EVENT_LIST, CEF, PEF, STEP)
+%   [ROLLBACK, CRITICAL_EVENTS, CEF] = CPF_DETECT_EVENTS(REG_EV, CEF, PEF, STEP)
 %   
 %   Inputs:
-%       EVENT_LIST : struct containing info about registered CPF event fcns
+%       REG_EV : struct containing info about registered event fcns
 %       CEF : cell array of Current Event Function values
 %       PEF : cell array of Previous Event Function values
 %       STEP : current step size
@@ -57,7 +57,7 @@ nef = length(cef);  %% number of event functions
 
 %% detect events, first look for event intervals for events requesting rollback
 for eidx = 1:nef
-    if ~event_list(eidx).locate %% if event doesn't request rollback to locate zero
+    if ~reg_ev(eidx).locate     %% if event doesn't request rollback to locate zero
         continue;               %%   skip to next event
     end
 
@@ -67,12 +67,12 @@ for eidx = 1:nef
 
     %% if there's been a sign change and we aren't within event tolerance ...
     idx = find( abs(c_sign) == 1 & c_sign == -p_sign & ...
-                abs(cef{eidx}) > event_list(eidx).tol  );
+                abs(cef{eidx}) > reg_ev(eidx).tol  );
     if ~isempty(idx)
         if step == 0    %% if it's a "repeat" step (e.g. after fcn change)
             %% ... make this one the critical one and call it a ZERO event
             evnts.eidx = eidx;
-            evnts.name = event_list(eidx).name;
+            evnts.name = reg_ev(eidx).name;
             evnts.zero = 1;
             evnts.idx = idx;
             evnts.step_scale = 1;
@@ -89,7 +89,7 @@ for eidx = 1:nef
             if step_scale < evnts.step_scale
                 %% ... make this one the critical one
                 evnts.eidx = eidx;
-                evnts.name = event_list(eidx).name;
+                evnts.name = reg_ev(eidx).name;
                 evnts.zero = 0;
                 evnts.idx = idx(j);
                 evnts.step_scale = step_scale;
@@ -106,7 +106,7 @@ if rollback == 0
     %% search for event zeros
     for eidx = 1:nef
         %% if there's an event zero ...
-        idx = find( abs(cef{eidx}) <= event_list(eidx).tol );
+        idx = find( abs(cef{eidx}) <= reg_ev(eidx).tol );
         if ~isempty(idx)
             %% set event function to exactly zero
             %% (to prevent possible INTERVAL detection again on next step)
@@ -114,7 +114,7 @@ if rollback == 0
 
             %% ... make this one the critical one
             evnts(i).eidx = eidx;
-            evnts(i).name = event_list(eidx).name;
+            evnts(i).name = reg_ev(eidx).name;
             evnts(i).zero = 1;
             evnts(i).idx = idx;
             evnts(i).step_scale = 1;
@@ -140,7 +140,7 @@ if rollback == 0
 
                 %% ... and save the info as an interval detection
                 evnts(i).eidx = eidx;
-                evnts(i).name = event_list(eidx).name;
+                evnts(i).name = reg_ev(eidx).name;
                 evnts(i).zero = 0;
                 evnts(i).idx = idx;
                 evnts(i).step_scale = step_scale;

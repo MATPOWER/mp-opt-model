@@ -1,13 +1,13 @@
-function ef = pne_target_lam_event(cb_data, cx)
+function ef = pne_target_lam_event(cx, opt)
 %PNE_TARGET_LAM_EVENT  Event function to detect a target lambda value
-%   EF = PNE_TARGET_LAM_EVENT(CB_DATA, CX)
+%   EF = PNE_TARGET_LAM_EVENT(CX, OPT)
 %
 %   PNES_MASTER event function to detect the completion of the continuation
 %   curve or another target value of lambda.
 %
 %   Inputs:
-%       CB_DATA : struct of data for callback functions
 %       CX : struct containing info about current point (continuation soln)
+%       OPT - PNES_MASTER options struct
 %
 %   Outputs:
 %       EF : event function value
@@ -22,7 +22,7 @@ function ef = pne_target_lam_event(cb_data, cx)
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% event function value is a scalar equal to: current lambda - target lambda
-target = cb_data.opt.stop_at;
+target = opt.stop_at;
 if ischar(target)       %% 'FULL' trace requested
     if cx.z(end) >= 0   %% before the nose point ...
         target = -1;    %% prevent early termination (e.g. itr 1 rollback to 0)

@@ -1,10 +1,9 @@
-function [nx, cx, done, rollback, evnts, cb_data, results] = ...
+function [nx, cx, done, rollback, evnts, opt, results] = ...
     pne_default_callback(k, nx, cx, px, done, rollback, evnts, ...
-                            cb_data, cb_args, results)
+                            opt, results)
 %PNE_DEFAULT_CALLBACK   Default callback function for PNES_MASTER
-%   [NX, CX, DONE, ROLLBACK, EVNTS, CB_DATA, RESULTS] = 
-%       PNE_DEFAULT_CALLBACK(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
-%                               CB_DATA, CB_ARGS, RESULTS)
+%   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
+%       PNE_DEFAULT_CALLBACK(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, OPT, RESULTS)
 %
 %   Default callback function used by PNES_MASTER that collects the resulst and
 %   optionally, plots the nose curve. Inputs and outputs are defined below,
@@ -24,11 +23,11 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %           step - current step size
 %           parm - current parameterization
 %           events - struct array, event log
-%           cb - user state, for callbacks (replaces CB_STATE), the user may
-%               add fields containing any information the callback function
-%               would like to pass from one invokation to the next, taking
-%               care not to step on fields being used by other callbacks,
-%               such as the 'default' field used by this default callback
+%           cb - user state, for callbacks, the user may add fields containing
+%               any information the callback function would like to pass from
+%               one invokation to the next, taking care not to step on fields
+%               being used by other callbacks, such as the 'default' field
+%               used by this default callback
 %           ef - cell array of event function values
 %       CX - current state (corresponding to most recent successful step)
 %            (same structure as NX)
@@ -41,9 +40,7 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %           rolled back and retried with a different step size, etc.
 %       EVNTS - struct array listing any events detected for this step,
 %           see CPF_DETECT_EVENTS for details
-%       CB_DATA - struct containing potentially useful "static" data,
-%           with the following fields (all based on internal indexing):
-%       CB_ARGS - arbitrary data structure containing callback arguments
+%       OPT - PNES_MASTER options struct
 %       RESULTS - initial value of output struct to be assigned to
 %           CONT field of OUTPUT struct returned by PNES_MASTER
 %
@@ -57,11 +54,12 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %       ROLLBACK - callback can request a rollback step, even if it was not
 %           indicated by an event function
 %       EVNTS - msg field for a given event may be updated
-%       CB_DATA - this data should only be modified if the underlying problem
+%       OPT - PNES_MASTER options struct, (UNFINISHED)
+%           should only be modified if the underlying problem
 %           has been changed (e.g. fcn has been altered) and should always
 %           be followed by a step of zero length, i.e. set NX.this_step to 0
-%           It is the job of any callback modifying CB_DATA to ensure that
-%           all data in CB_DATA is kept consistent.
+%           It is the job of any callback modifying OPT to ensure that
+%           all data in OPT is kept consistent.
 %       RESULTS - updated version of RESULTS input arg
 %
 %   This function is called in three different contexts, distinguished by
@@ -77,15 +75,13 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %   User Defined PNE Callback Functions:
 %       The user can define their own callback functions which take
 %       the same form and are called in the same contexts as
-%       PNE_DEFAULT_CALLBACK. These are specified via the MATPOWER
-%       option 'pne.user_callback'. This option can be a string containing
+%       PNE_DEFAULT_CALLBACK. These are specified via the 'callbacks' option
+%       'pne.user_callback'. This option can be a string containing
 %       the name of the callback function, or a struct with the following
 %       fields, where all but the first are optional:
 %           'fcn'       - string with name of callback function
 %           'priority'  - numerical value specifying callback priority
 %                (default = 20, see CPF_REGISTER_CALLBACK for details)
-%           'args'      - arbitrary value (any type) passed to the callback
-%                         as CB_ARGS each time it is invoked
 %       Multiple user callbacks can be registered by assigning a cell array
 %       of such strings and/or structs to the 'pne.user_callback' option.
 %
@@ -140,7 +136,7 @@ end
 
 %%-----  plot continuation curve  -----
 %% initialize plotting options
-plt = cb_data.opt.plot;
+plt = opt.plot;
 plot_idx_default = 0;
 if plt.level
     xf = plt.xfcn;
@@ -175,8 +171,8 @@ if plt.level
     xmax = max([max(xf(nxx.x_hat)); max(xf(nxx.x))]);
     ymin = min([min(min(yf(nxx.x_hat, idx))); min(min(yf(nxx.x, idx)))]);
     ymax = max([max(max(yf(nxx.x_hat, idx))); max(max(yf(nxx.x, idx)))]);
-    if xmax < xmin + cb_data.opt.step / 100;
-        xmax = xmin + cb_data.opt.step / 100;
+    if xmax < xmin + opt.step / 100;
+        xmax = xmin + opt.step / 100;
     end
     if ymax - ymin < 2e-5;
         ymax = ymax + 1e-5;

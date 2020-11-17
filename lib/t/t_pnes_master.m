@@ -56,9 +56,10 @@ for k = 1:length(cfg)
         t_ok(strcmp(out.cont.events.name, 'TARGET_LAM'), [t 'out.cont.events.name']);
         t_ok(strcmp(out.cont.done_msg, 'Traced full continuation curve in 34 continuation steps'), [t 'out.cont.done_msg']);
 
-        t = sprintf('%s - NOSE : ', name);
+        t = sprintf('%s - TARGET_LAM : ', name);
         opt.stop_at = 0.7;
-        [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
+        p = struct('fcn', @f1p, 'x0', x0, 'opt', opt);
+        [x, f, e, out, jac] = pnes_master(p);
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-1.931782106; -1.268217894; 0.7], 6, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);
@@ -72,8 +73,8 @@ for k = 1:length(cfg)
         t_ok(strcmp(out.cont.done_msg, 'Reached desired lambda 0.7 in 10 continuation steps'), [t 'out.cont.done_msg']);
 
         t = sprintf('%s - NOSE : ', name);
-        opt.stop_at = 'NOSE';
-        [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
+        p.opt.stop_at = 'NOSE';
+        [x, f, e, out, jac] = pnes_master(p);
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-0.5; -4.75; 1.04166667], 6, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);
@@ -87,8 +88,8 @@ for k = 1:length(cfg)
         t_ok(strcmp(out.cont.done_msg, 'Reached limit in 18 continuation steps, lambda = 1.042.'), [t 'out.cont.done_msg']);
 
         t = sprintf('%s - NOSE (opp dir) : ', name);
-        x0 = [1;-1;0];
-        [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
+        p.x0 = [1;-1;0];
+        [x, f, e, out, jac] = pnes_master(p);
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-0.5; -4.75; 1.04166667], 5, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);

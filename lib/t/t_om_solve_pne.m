@@ -59,7 +59,7 @@ for k = 1:length(cfg)
         t_ok(strcmp(out.cont.events.name, 'TARGET_LAM'), [t 'out.cont.events.name']);
         t_ok(strcmp(out.cont.done_msg, 'Traced full continuation curve in 34 continuation steps'), [t 'out.cont.done_msg']);
 
-        t = sprintf('%s - NOSE : ', name);
+        t = sprintf('%s - TARGET_LAM : ', name);
         opt.stop_at = 0.7;
         [x, f, e, out, jac] = om.solve(opt);
         t_is(e, 1, 12, [t 'exitflag']);

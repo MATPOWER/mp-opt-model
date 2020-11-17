@@ -1,9 +1,9 @@
-function [nx, cx, done, rollback, evnts, cb_data, results] = pne_target_lam_event_cb(...
-        k, nx, cx, px, done, rollback, evnts, cb_data, cb_args, results)
+function [nx, cx, done, rollback, evnts, opt, results] = pne_target_lam_event_cb(...
+        k, nx, cx, px, done, rollback, evnts, opt, results)
 %PNE_TARGET_LAM_EVENT_CB  Callback to handle TARGET_LAM events
-%   [NX, CX, DONE, ROLLBACK, EVNTS, CB_DATA, RESULTS] = 
+%   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
 %       PNE_TARGET_LAM_EVENT_CB(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
-%                               CB_DATA, CB_ARGS, RESULTS)
+%                               OPT, RESULTS)
 %
 %   Callback to handle TARGET_LAM events, triggered by event function
 %   PNE_TARGET_LAM_EVENT to indicate that a target lambda value has been
@@ -32,13 +32,12 @@ if k <= 0 || done.flag
 end
 
 %% make stop_at numerical, 0 = FULL, -Inf = NOSE
-stop_at = cb_data.opt.stop_at;
-verbose = cb_data.opt.verbose;
-if ischar(stop_at)
-    if strcmp(stop_at, 'FULL')
-        stop_at = 0;
+target = opt.stop_at;
+if ischar(target)
+    if strcmp(target, 'FULL')
+        target = 0;
     else                %% NOSE
-        stop_at = -Inf;
+        target = -Inf;
     end
 end
 
@@ -49,20 +48,20 @@ for i = 1:length(evnts)
         event_detected = 1;
         if evnts(i).zero     %% prepare to terminate
             done.flag = 1;
-            if stop_at == 0     %% FULL
+            if target == 0      %% FULL
                 done.msg = sprintf('Traced full continuation curve in %d continuation steps', k);
             else                %% target lambda value
                 done.msg = sprintf('Reached desired lambda %g in %d continuation steps', ...
-                    stop_at, k);
+                    target, k);
             end
         else                    %% set step-size & parameterization to terminate next time
             cx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             evnts(i).log = 1;
-            if stop_at == 0     %% FULL
+            if target == 0      %% FULL
                 cx.this_step = cx.x(end);
                 evnts(i).msg = sprintf('%s\n  step %d expected to overshoot full trace, reduce step size and set natural param', evnts(i).msg, k);
             else                %% target lambda value
-                cx.this_step = stop_at - cx.x(end);
+                cx.this_step = target - cx.x(end);
                 evnts(i).msg = sprintf('%s\n  step %d expected to overshoot target lambda, reduce step size and set natural param', evnts(i).msg, k);
             end
         end
@@ -82,19 +81,19 @@ if ~event_detected && ~rollback
     %% predictor step
     x_hat = nx.x + step * nx.z;
 
-    if stop_at == 0         %% FULL
+    if target == 0          %% FULL
         if x_hat(end) < -nx.x_hat(end)
             nx.this_step = nx.x_hat(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
-            if verbose > 2
+            if opt.verbose > 2
                 fprintf('  step %d expected to overshoot full trace, reduce step size and set natural param\n', k+1);
             end
         end
-    elseif stop_at > 0      %% target lambda value
-        if x_hat(end) > stop_at + (stop_at - nx.x_hat(end))
-            nx.this_step = stop_at - nx.x_hat(end);
+    elseif target > 0       %% target lambda value
+        if x_hat(end) > target + (target - nx.x_hat(end))
+            nx.this_step = target - nx.x_hat(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
-            if verbose > 2
+            if opt.verbose > 2
                 fprintf('  step %d expected to overshoot target lambda, reduce step size and set natural param\n', k+1);
             end
         end

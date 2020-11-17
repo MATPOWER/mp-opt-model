@@ -131,9 +131,6 @@ dopts = struct( ...
     'verbose',          0, ...
     'nleqs_opt',        struct('verbose', 0), ...
     'solve_base',       1, ...          %% UNFINISHED
-    'event_list',       [], ...         %% UNFINISHED: does this belong in opts? (was cpf_events)
-    'cb_list',          [], ...         %% UNFINISHED: does this belong in opts? (was cpf_callbacks)
-    'cb_data',          [], ...         %% callback data
     'parameterization', 3, ...          %% 1 - natural, 2 - arc len, 3 - pseudo arc len
     'stop_at',          'NOSE', ...     %% 'NOSE', 'FULL', <lam_stop>
     'step',             0.05, ...       %% UNFINISHED
@@ -142,8 +139,11 @@ dopts = struct( ...
     'adapt_step',       0, ...          %% UNFINISHED
     'adapt_step_damping', 0.7, ...      %% UNFINISHED
     'adapt_step_tol',   1e-3, ...       %% UNFINISHED
-    'target_lam_tol',   1e-3, ...       %% UNFINISHED
-    'nose_tol',         1e-3, ...       %% UNFINISHED
+    'default_event_tol',1e-3, ...       %% UNFINISHED
+    'target_lam_tol',   0, ...          %% UNFINISHED
+    'nose_tol',         0, ...          %% UNFINISHED
+    'events',           {{}}, ...       %% UNFINISHED
+    'callbacks',        {{}}, ...       %% UNFINISHED
     'plot',             struct( ...     %% used by pne_default_callback() for plotting
         'level',        0, ...          %% UNFINISHED
         'idx',          [], ...         %% UNFINISHED
@@ -157,28 +157,31 @@ dopts = struct( ...
     ) ...
 );
 opt = nested_struct_copy(dopts, opt);
+%% use opt.default_event_tol for NOSE and TARGET_LAM events, unless specified
+if opt.target_lam_tol == 0
+    opt.target_lam_tol = opt.default_event_tol;
+end
+if opt.nose_tol == 0
+    opt.nose_tol = opt.default_event_tol;
+end
 
 %% initialize
 done = struct('flag', 0, 'msg', '');
 z0 = zeros(length(x0), 1);      %% (n+1) x 1, zeros
 
-%% register standard event functions (for event detection) and callback
-%% functions (for event handling) for continuation termination
+%% register event and callback functions
 if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');
-    opt.event_list  = pne_register_event(opt.event_list, 'NOSE', 'pne_nose_event', opt.nose_tol, 1);
-    opt.cb_list     = pne_register_callback(opt.cb_list, 'pne_nose_event_cb', 51);
+    my_events = {{'NOSE', @pne_nose_event, opt.nose_tol}, opt.events{:}};
+    my_cbacks = {{@pne_nose_event_cb, 51}, opt.callbacks{:}};
 else        %% FULL or target lambda
-    opt.event_list  = pne_register_event(opt.event_list, 'TARGET_LAM', 'pne_target_lam_event', opt.target_lam_tol, 1);
-    opt.cb_list     = pne_register_callback(opt.cb_list, 'pne_target_lam_event_cb', 50);
+    my_events = {{'TARGET_LAM', @pne_target_lam_event, opt.target_lam_tol}, opt.events{:}};
+    my_cbacks = {{@pne_target_lam_event_cb, 50}, opt.callbacks{:}};
 end
-opt.cb_list = pne_register_callback(opt.cb_list, 'pne_default_callback', 0);
-nef = length(opt.event_list);   %% number of event functions registered
-ncb = length(opt.cb_list);      %% number of callback functions registered
-
-%% UNFINISHED - cb_data probably needs to be initialized FROM opt
-%% pass opt everywhere *instead* of cb_data?
-%% search for places cb_data.opt is used
-cb_data = struct('opt', opt);
+my_cbacks{end+1} = {@pne_default_callback, 0};
+reg_ev = pne_register_events(my_events, opt);   %% registered event functions
+reg_cb = pne_register_callbacks(my_cbacks);     %% registered callback functions
+nef = length(reg_ev);   %% number of registered event functions
+ncb = length(reg_cb);   %% number of registered callback functions
 
 t0 = tic;                       %% start timing
 
@@ -246,19 +249,19 @@ if ~done.flag
         'step', step, ...           %% current step size
         'parm', parm, ...           %% current parameterization
         'events', [], ...           %% event log
-        'cb', struct(), ...         %% user state, for callbacks (replaces cb_state)
+        'cb', struct(), ...         %% user state, for callbacks
         'ef', {cell(nef, 1)} ...    %% event function values
     );
 
     %% initialize event function values
     for k = 1:nef
-        cx.ef{k} = opt.event_list(k).fcn(cb_data, cx);
+        cx.ef{k} = reg_ev(k).fcn(cx, opt);
     end
 
     %% invoke callbacks - "initialize" context
     for k = 1:ncb
-        [nx, cx, done, rollback, evnts, cb_data] = opt.cb_list(k).fcn( ...
-            cont_steps, cx, cx, cx, done, 0, [], cb_data, opt.cb_list(k).args);
+        [nx, cx, done, rollback, evnts, opt] = reg_cb(k).fcn( ...
+            cont_steps, cx, cx, cx, done, 0, [], opt);
     end
     
     %% check for case with base and target the same
@@ -305,9 +308,9 @@ while ~done.flag
 
     %% detect events
     for k = 1:nef
-        nx.ef{k} = opt.event_list(k).fcn(cb_data, nx);  %% update event functions
+        nx.ef{k} = reg_ev(k).fcn(nx, opt);  %% update event functions
     end
-    [rollback, evnts, nx.ef] = pne_detect_events(opt.event_list, nx.ef, cx.ef, nx.step);
+    [rollback, evnts, nx.ef] = pne_detect_events(reg_ev, nx.ef, cx.ef, nx.step);
 
     %% adjust step-size to locate event function zero, if necessary
     if rollback                 %% current step overshot
@@ -357,8 +360,8 @@ while ~done.flag
     %% invoke callbacks - "iterations" context
     rb = rollback;
     for k = 1:ncb
-        [nx, cx, done, rollback, evnts, cb_data] = opt.cb_list(k).fcn( ...
-            cont_steps, nx, cx, px, done, rollback, evnts, cb_data, opt.cb_list(k).args);
+        [nx, cx, done, rollback, evnts, opt] = reg_cb(k).fcn( ...
+            cont_steps, nx, cx, px, done, rollback, evnts, opt);
     end
     if ~rb && rollback      %% rollback triggered by callback (vs event function interval)
         rb_cnt_cb = rb_cnt_cb + 1;  %% increment rollback counter for callbacks
@@ -474,9 +477,9 @@ end     %% while ~done.flag
 %% invoke callbacks - "final" context
 results = struct();     %% initialize results struct
 for k = 1:ncb
-    [nx, cx, done, rollback, evnts, cb_data, results] = ...
-        opt.cb_list(k).fcn(-cont_steps, nx, cx, px, ...
-            done, rollback, evnts, cb_data, opt.cb_list(k).args, results);
+    [nx, cx, done, rollback, evnts, opt, results] = ...
+        reg_cb(k).fcn(-cont_steps, nx, cx, px, ...
+            done, rollback, evnts, opt, results);
 end
 results.events = cx.events;     %% copy eventlog to results
 results.done_msg = done.msg;

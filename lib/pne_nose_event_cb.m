@@ -1,9 +1,9 @@
-function [nx, cx, done, rollback, evnts, cb_data, results] = pne_nose_event_cb(...
-        k, nx, cx, px, done, rollback, evnts, cb_data, cb_args, results)
+function [nx, cx, done, rollback, evnts, opt, results] = pne_nose_event_cb(...
+        k, nx, cx, px, done, rollback, evnts, opt, results)
 %PNE_NOSE_EVENT_CB  Callback to handle NOSE events
-%   [NX, CX, DONE, ROLLBACK, EVNTS, CB_DATA, RESULTS] = 
+%   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
 %       PNE_NOSE_EVENT_CB(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
-%                               CB_DATA, CB_ARGS, RESULTS)
+%                               OPT, CB_ARGS, RESULTS)
 %
 %   Callback to handle NOSE events, triggered by event function
 %   PNE_NOSE_EVENT to indicate the nose point of the continuation curve.
@@ -27,9 +27,6 @@ if k <= 0 || done.flag
     return;
 end
 
-%% initialize return value
-stop_at = cb_data.opt.stop_at;
-
 %% handle event
 if ~rollback || nx.step == 0
     for i = 1:length(evnts)
@@ -44,7 +41,7 @@ if ~rollback || nx.step == 0
 
             %% the following conditional is only necessary if we also allow
             %% finding the location of the nose-point without terminating
-            if ischar(stop_at) && strcmp(stop_at, 'NOSE');
+            if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');
                 done.flag = 1;
                 done.msg = evnts(i).msg;
             end
