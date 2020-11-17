@@ -1,13 +1,12 @@
-function [rollback, evnts, cef] = cpf_detect_events(cpf_events, cef, pef, step, verbose)
+function [rollback, evnts, cef] = pne_detect_events(event_list, cef, pef, step)
 %CPF_DETECT_EVENTS  Detect events from event function values
-%   [ROLLBACK, CRITICAL_EVENTS, CEF] = CPF_DETECT_EVENTS(CPF_EVENTS, CEF, PEF, STEP, VERBOSE)
+%   [ROLLBACK, CRITICAL_EVENTS, CEF] = CPF_DETECT_EVENTS(EVENT_LIST, CEF, PEF, STEP)
 %   
 %   Inputs:
-%       CPF_EVENTS : struct containing info about registered CPF event fcns
+%       EVENT_LIST : struct containing info about registered CPF event fcns
 %       CEF : cell array of Current Event Function values
 %       PEF : cell array of Previous Event Function values
 %       STEP : current step size
-%       VERBOSE : 0 = no output, otherwise level of verbose output
 %
 %   Outputs:
 %       ROLLBACK : flag indicating whether any event has requested a
@@ -31,14 +30,14 @@ function [rollback, evnts, cef] = cpf_detect_events(cpf_events, cef, pef, step, 
 %                         to be changed/updated by callbacks
 %       CEF : cell array of Current Event Function values
 
-%   MATPOWER
-%   Copyright (c) 2016-2017, Power Systems Engineering Research Center (PSERC)
+%   MP-Opt-Model
+%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% initialize result variables
 rollback = 0;
@@ -58,7 +57,7 @@ nef = length(cef);  %% number of event functions
 
 %% detect events, first look for event intervals for events requesting rollback
 for eidx = 1:nef
-    if ~cpf_events(eidx).locate %% if event doesn't request rollback to locate zero
+    if ~event_list(eidx).locate %% if event doesn't request rollback to locate zero
         continue;               %%   skip to next event
     end
 
@@ -68,12 +67,12 @@ for eidx = 1:nef
 
     %% if there's been a sign change and we aren't within event tolerance ...
     idx = find( abs(c_sign) == 1 & c_sign == -p_sign & ...
-                abs(cef{eidx}) > cpf_events(eidx).tol  );
+                abs(cef{eidx}) > event_list(eidx).tol  );
     if ~isempty(idx)
-        if step == 0    %% if it's a "repeat" step (e.g. after bus type changes)
+        if step == 0    %% if it's a "repeat" step (e.g. after fcn change)
             %% ... make this one the critical one and call it a ZERO event
             evnts.eidx = eidx;
-            evnts.name = cpf_events(eidx).name;
+            evnts.name = event_list(eidx).name;
             evnts.zero = 1;
             evnts.idx = idx;
             evnts.step_scale = 1;
@@ -90,7 +89,7 @@ for eidx = 1:nef
             if step_scale < evnts.step_scale
                 %% ... make this one the critical one
                 evnts.eidx = eidx;
-                evnts.name = cpf_events(eidx).name;
+                evnts.name = event_list(eidx).name;
                 evnts.zero = 0;
                 evnts.idx = idx(j);
                 evnts.step_scale = step_scale;
@@ -107,7 +106,7 @@ if rollback == 0
     %% search for event zeros
     for eidx = 1:nef
         %% if there's an event zero ...
-        idx = find( abs(cef{eidx}) <= cpf_events(eidx).tol );
+        idx = find( abs(cef{eidx}) <= event_list(eidx).tol );
         if ~isempty(idx)
             %% set event function to exactly zero
             %% (to prevent possible INTERVAL detection again on next step)
@@ -115,7 +114,7 @@ if rollback == 0
 
             %% ... make this one the critical one
             evnts(i).eidx = eidx;
-            evnts(i).name = cpf_events(eidx).name;
+            evnts(i).name = event_list(eidx).name;
             evnts(i).zero = 1;
             evnts(i).idx = idx;
             evnts(i).step_scale = 1;
@@ -141,7 +140,7 @@ if rollback == 0
 
                 %% ... and save the info as an interval detection
                 evnts(i).eidx = eidx;
-                evnts(i).name = cpf_events(eidx).name;
+                evnts(i).name = event_list(eidx).name;
                 evnts(i).zero = 0;
                 evnts(i).idx = idx;
                 evnts(i).step_scale = step_scale;

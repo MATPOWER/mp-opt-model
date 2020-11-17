@@ -1,12 +1,12 @@
 function [nx, cx, done, rollback, evnts, cb_data, results] = ...
-    cpf_default_callback(k, nx, cx, px, done, rollback, evnts, ...
+    pne_default_callback(k, nx, cx, px, done, rollback, evnts, ...
                             cb_data, cb_args, results)
-%CPF_DEFAULT_CALLBACK   Default callback function for CPF
+%PNE_DEFAULT_CALLBACK   Default callback function for PNES_MASTER
 %   [NX, CX, DONE, ROLLBACK, EVNTS, CB_DATA, RESULTS] = 
-%       CPF_DEFAULT_CALLBACK(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
+%       PNE_DEFAULT_CALLBACK(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
 %                               CB_DATA, CB_ARGS, RESULTS)
 %
-%   Default callback function used by RUNCPF that collects the resulst and
+%   Default callback function used by PNES_MASTER that collects the resulst and
 %   optionally, plots the nose curve. Inputs and outputs are defined below,
 %   with the RESULTS argument being optional, used only for the final call
 %   when K is negative.
@@ -15,11 +15,8 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %       K - continuation step iteration count
 %       NX - next state (corresponding to proposed next step), struct with
 %            the following fields:
-%           lam_hat - value of LAMBDA from predictor
-%           V_hat - vector of complex bus voltages from predictor
-%           lam - value of LAMBDA from corrector
-%           V - vector of complex bus voltages from corrector
-%           z - normalized tangent predictor
+%           x_hat - solution vector from predictor
+%           x - solution vector from corrector
 %           default_step - default step size
 %           default_parm - default parameterization
 %           this_step - step size for this step only
@@ -36,8 +33,8 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %       CX - current state (corresponding to most recent successful step)
 %            (same structure as NX)
 %       PX - previous state (corresponding to last successful step prior to CX)
-%       DONE - struct, with flag to indicate CPF termination and reason,
-%           with fields:
+%       DONE - struct, with flag to indicate termination of numerical
+%           continuation and reason, with fields:
 %           flag - termination flag, 1 => terminate, 0 => continue
 %           msg - string containing reason for termination
 %       ROLLBACK - scalar flag to indicate that the current step should be
@@ -46,24 +43,9 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %           see CPF_DETECT_EVENTS for details
 %       CB_DATA - struct containing potentially useful "static" data,
 %           with the following fields (all based on internal indexing):
-%           mpc_base - MATPOWER case struct of base state
-%           mpc_target - MATPOWER case struct of target state
-%           Sbusb - handle of function returning nb x 1 vector of complex
-%               base case injections in p.u. and derivatives w.r.t. |V|
-%           Sbust - handle of function returning nb x 1 vector of complex
-%               target case injections in p.u. and derivatives w.r.t. |V|
-%           Ybus - bus admittance matrix
-%           Yf - branch admittance matrix, "from" end of branches
-%           Yt - branch admittance matrix, "to" end of branches
-%           pv - vector of indices of PV buses
-%           pq - vector of indices of PQ buses
-%           ref - vector of indices of REF buses
-%           idx_pmax - vector of generator indices for generators fixed
-%               at their PMAX limits
-%           mpopt - MATPOWER options struct
 %       CB_ARGS - arbitrary data structure containing callback arguments
 %       RESULTS - initial value of output struct to be assigned to
-%           CPF field of results struct returned by RUNCPF
+%           CONT field of OUTPUT struct returned by PNES_MASTER
 %
 %   Outputs:
 %       (all are updated versions of the corresponding input arguments)
@@ -76,7 +58,7 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %           indicated by an event function
 %       EVNTS - msg field for a given event may be updated
 %       CB_DATA - this data should only be modified if the underlying problem
-%           has been changed (e.g. generator limit reached) and should always
+%           has been changed (e.g. fcn has been altered) and should always
 %           be followed by a step of zero length, i.e. set NX.this_step to 0
 %           It is the job of any callback modifying CB_DATA to ensure that
 %           all data in CB_DATA is kept consistent.
@@ -85,18 +67,18 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %   This function is called in three different contexts, distinguished by
 %   the value of K, as follows:
 %   (1) initial - called with K = 0, without RESULTS input/output args,
-%           after base power flow, before 1st CPF step.
+%           after base power flow, before 1st continuation step.
 %   (2) iterations - called with K > 0, without RESULTS input/output args,
 %           at each iteration, after predictor-corrector step
 %   (3) final - called with K < 0, with RESULTS input/output args, after
 %           exiting predictor-corrector loop, inputs identical to last
 %           iteration call, except K which is negated
 %
-%   User Defined CPF Callback Functions:
+%   User Defined PNE Callback Functions:
 %       The user can define their own callback functions which take
 %       the same form and are called in the same contexts as
-%       CPF_DEFAULT_CALLBACK. These are specified via the MATPOWER
-%       option 'cpf.user_callback'. This option can be a string containing
+%       PNE_DEFAULT_CALLBACK. These are specified via the MATPOWER
+%       option 'pne.user_callback'. This option can be a string containing
 %       the name of the callback function, or a struct with the following
 %       fields, where all but the first are optional:
 %           'fcn'       - string with name of callback function
@@ -105,17 +87,17 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = ...
 %           'args'      - arbitrary value (any type) passed to the callback
 %                         as CB_ARGS each time it is invoked
 %       Multiple user callbacks can be registered by assigning a cell array
-%       of such strings and/or structs to the 'cpf.user_callback' option.
+%       of such strings and/or structs to the 'pne.user_callback' option.
 %
-%   See also RUNCPF, CPF_REGISTER_CALLBACK.
+%   See also PNES_MASTER, CPF_REGISTER_CALLBACK.
 
-%   MATPOWER
-%   Copyright (c) 2013-2016, Power Systems Engineering Research Center (PSERC)
+%   MP-Opt-Model
+%   Copyright (c) 2013-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% skip if rollback, except if it is a FINAL call
 if rollback && k > 0
@@ -124,18 +106,14 @@ end
 
 %% initialize variables
 step    = nx.step;
-V       = nx.V;
-lam     = nx.lam;
-V_hat   = nx.V_hat;
-lam_hat = nx.lam_hat;
+x       = nx.x;
+x_hat   = nx.x_hat;
 
 %%-----  initialize/update state/results  -----
 if k == 0       %% INITIAL call
     %% initialize state
-    cxx = struct(   'V_hat',    V_hat, ...
-                    'lam_hat',  lam_hat, ...
-                    'V',        V, ...
-                    'lam',      lam, ...
+    cxx = struct(   'x_hat',    x_hat, ...
+                    'x',        x, ...
                     'steps',    step, ...
                     'iterations', 0     );
     nxx = cxx;
@@ -145,69 +123,60 @@ else
     nxx = nx.cb.default;    %% get next callback state
     if k > 0    %% ITERATION call
         %% update state
-        nxx.V_hat   = [nxx.V_hat    V_hat];
-        nxx.lam_hat = [nxx.lam_hat  lam_hat];
-        nxx.V       = [nxx.V        V];
-        nxx.lam     = [nxx.lam      lam];
+        nxx.x_hat   = [nxx.x_hat    x_hat];
+        nxx.x       = [nxx.x        x];
         nxx.steps   = [nxx.steps    step];
         nxx.iterations = k;
         nx.cb.default = nxx;    %% update next callback state
     else            %% FINAL call
         %% assemble results struct
-        results.V_hat       = nxx.V_hat;
-        results.lam_hat     = nxx.lam_hat;
-        results.V           = nxx.V;
-        results.lam         = nxx.lam;
+        results.x_hat       = nxx.x_hat;
+        results.x           = nxx.x;
         results.steps       = nxx.steps;
         results.iterations  = -k;
-        results.max_lam     = max(nxx.lam);
+        results.max_lam     = max(results.x(end, :));
     end
 end
 
 %%-----  plot continuation curve  -----
 %% initialize plotting options
-plot_level  = cb_data.mpopt.cpf.plot.level;
-plot_bus    = cb_data.mpopt.cpf.plot.bus;
-plot_bus_default = 0;
-if plot_level
-    if isempty(plot_bus) && ~isfield(nxx, 'plot_bus_default')   %% no bus specified
-        %% pick PQ bus with largest transfer
-        Sxfr = cb_data.Sbust(abs(V)) - cb_data.Sbusb(abs(V));
-        [junk, idx] = max(Sxfr(cb_data.pq));
-        if isempty(idx) %% or bus 1 if there are none
-            idx = 1;
-        else
-            idx = cb_data.pq(idx(1));
-        end
-        idx_e = cb_data.mpc_target.order.bus.i2e(idx);
+plt = cb_data.opt.plot;
+plot_idx_default = 0;
+if plt.level
+    xf = plt.xfcn;
+    yf = plt.yfcn;
+
+    if isempty(plt.idx) && ~isfield(nxx, 'plot_idx_default')   %% no index specified
+        idx = length(x) - 1;    %% last one before lambda
+        idx_e = idx;            %% an external index
         
         %% save it to keep it from changing in subsequent calls
-        plot_bus_default = idx_e;
+        plot_idx_default = idx_e;
     else
-        if isempty(plot_bus)
-            idx_e = nxx.plot_bus_default;   %% external bus number, saved
+        if isempty(plt.idx)
+            idx_e = nxx.plot_idx_default;   %% external index, saved
         else
-            idx_e = plot_bus;               %% external bus number, provided
+            idx_e = plt.idx;                %% external index, provided
         end
-        if any(idx_e > length(cb_data.mpc_target.order.bus.e2i))
-            kk = find(idx_e > length(cb_data.mpc_target.order.bus.e2i));
-            error('cpf_default_callback: %d is not a valid bus number for MPOPT.cpf.plot.bus', idx_e(kk(1)));
+        if 0%idx_e are all valid
+            %kk = first invalid entry in idx_e
+            error('pne_default_callback: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
         end
-        idx = full(cb_data.mpc_target.order.bus.e2i(idx_e));
+        idx = idx_e;    %%convert from idx_e;
         if any(idx == 0)
             kk = find(idx == 0);
-            error('cpf_default_callback: %d is not a valid bus number for MPOPT.cpf.plot.bus', idx_e(kk(1)));
+            error('pne_default_callback: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
         end
     end
     nplots = length(idx_e);
 
     %% set bounds for plot axes
     xmin = 0;
-    xmax = max([max(nxx.lam_hat); max(nxx.lam)]);
-    ymin = min([min(min(abs(nxx.V_hat(idx, :)))); min(min(abs(nxx.V(idx, :))))]);
-    ymax = max([max(max(abs(nxx.V_hat(idx, :)))); max(max(abs(nxx.V(idx, :))))]);
-    if xmax < xmin + cb_data.mpopt.cpf.step / 100;
-        xmax = xmin + cb_data.mpopt.cpf.step / 100;
+    xmax = max([max(xf(nxx.x_hat)); max(xf(nxx.x))]);
+    ymin = min([min(min(yf(nxx.x_hat, idx))); min(min(yf(nxx.x, idx)))]);
+    ymax = max([max(max(yf(nxx.x_hat, idx))); max(max(yf(nxx.x, idx)))]);
+    if xmax < xmin + cb_data.opt.step / 100;
+        xmax = xmin + cb_data.opt.step / 100;
     end
     if ymax - ymin < 2e-5;
         ymax = ymax + 1e-5;
@@ -219,46 +188,47 @@ if plot_level
 
     %%-----  INITIAL call  -----
     if k == 0
-        %% save default plot bus in the state so we don't have to detect it
+        %% save default plot idx in the state so we don't have to detect it
         %% each time, since we don't want it to change in the middle of the run
-        if plot_bus_default
-            cx.cb.default.plot_bus_default = plot_bus_default;
+        if plot_idx_default
+            cx.cb.default.plot_idx_default = plot_idx_default;
         end
         
-        %% initialize lambda-V nose curve plot
+        %% initialize continuation curve plot
         axis([xmin xmax ymin ymax]);
-        plot(cxx.lam_hat(1), abs(cxx.V_hat(idx,1)), '-', 'Color', [0.25 0.25 1]);
+        plot(xf(cxx.x_hat(:,1)), yf(cxx.x_hat(:,1), idx), '-', 'Color', [0.25 0.25 1]);
         if nplots > 1
-            title('Voltage at Multiple Buses');
+            plot_title = plt.title2;
         else
-            title(sprintf('Voltage at Bus %d', idx_e));
+            plot_title = plt.title;
         end
-        xlabel('\lambda');
-        ylabel('Voltage Magnitude');
+        title(sprintf(plot_title, idx_e));
+        xlabel(plt.xlabel);
+        ylabel(plt.ylabel);
         hold on;
     %%-----  ITERATION call  -----
     elseif k > 0
-        %% plot single step of the lambda-V nose curve
-        if plot_level > 1
+        %% plot single step of the continuation curve
+        if plt.level > 1
             axis([xmin xmax ymin ymax]);
             for kk = 1:nplots
                 %% prediction line
-                plot([nxx.lam(k); nxx.lam_hat(k+1)], ...
-                    [abs(nxx.V(idx(kk),k)); abs(nxx.V_hat(idx(kk),k+1))], '-', ...
+                plot([xf(nxx.x(:,k)); xf(nxx.x_hat(:,k+1))], ...
+                    [yf(nxx.x(:, k), idx(kk)); yf(nxx.x_hat(:,k+1), idx(kk))], '-', ...
                     'Color', 0.85*[1 0.75 0.75]);
                 %% correction line
-                plot([nxx.lam_hat(k+1); nxx.lam(k+1)], ...
-                    [abs(nxx.V_hat(idx(kk),k+1)); abs(nxx.V(idx(kk),k+1))], '-', ...
+                plot([xf(nxx.x_hat(:,k+1)); xf(nxx.x(:,k+1))], ...
+                    [yf(nxx.x_hat(:,k+1),idx(kk)); yf(nxx.x(:,k+1),idx(kk))], '-', ...
                     'Color', 0.85*[0.75 1 0.75]);
                 %% prediciton point
-                plot(nxx.lam_hat(k+1), abs(nxx.V_hat(idx(kk),k+1)), 'x', ...
+                plot(xf(nxx.x_hat(:,k+1)), yf(nxx.x_hat(:,k+1),idx(kk)), 'x', ...
                     'Color', 0.85*[1 0.75 0.75]);
                 %% correction point
-                plot(nxx.lam(k+1)', abs(nxx.V(idx(kk),k+1))', '-o', ...
+                plot(xf(nxx.x(:,k+1))', yf(nxx.x(:,k+1),idx(kk))', '-o', ...
                     'Color', [0.25 0.25 1]);
                 drawnow;
             end
-            if plot_level > 2
+            if plt.level > 2
                 pause;
             end
         end
@@ -270,11 +240,11 @@ if plot_level
         if isprop(gca, 'ColorOrderIndex')
             set(gca, 'ColorOrderIndex', 1); %% start over with color 1
         end
-        hp = plot(nxx.lam', abs(nxx.V(idx,:))',  '-');
+        hp = plot(xf(nxx.x)', yf(nxx.x, idx)',  '-');
         if nplots > 1
             leg = cell(nplots, 1);
             for kk = 1:nplots
-                leg{kk} = sprintf('Bus %d', idx_e(kk));
+                leg{kk} = sprintf(plt.legend, idx_e(kk));
             end
             legend(hp, leg);
         end

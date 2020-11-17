@@ -1,11 +1,13 @@
-function cpf_events = cpf_register_event(cpf_events, name, fcn, tol, locate)
-%CPF_REGISTER_EVENT  Register event functions=
-%   CPF_EVENTS = CPF_REGISTER_EVENT(CPF_EVENTS, NAME, FCN, TOL, LOCATE)
+function event_list = pne_register_event(event_list, name, fcn, tol, locate)
+%PNE_REGISTER_EVENT  Register event functions=
+%   EVENT_LIST = PNE_REGISTER_EVENT(EVENT_LIST, NAME, FCN, TOL, LOCATE)
 %
-%   Registers a CPF event function to be called by RUNCPF.
+%   Registers an event function to be called by PNES_MASTER.
 %
 %   Inputs:
-%       CPF_EVENTS : struct containing info about registered CPF event fcns
+%       EVENT_LIST : struct array containing info about registered event fcns
+%           with fields name, fcn, tol, and locate corresponding to the
+%           respective inputs below
 %       NAME : string containing event name
 %       FCN : string containing name of event function, returning numerical
 %             scalar or vector value that changes sign at location of the event
@@ -15,16 +17,17 @@ function cpf_events = cpf_register_event(cpf_events, name, fcn, tol, locate)
 %                to locate the event function zero
 %
 %   Outputs:
-%       CPF_EVENTS : updated struct containing info about registered CPF event fcns
+%       EVENT_LIST : updated struct containing info about registered event fcns
+%                    with new entry appended at end
 
-%   MATPOWER
-%   Copyright (c) 2016, Power Systems Engineering Research Center (PSERC)
+%   MP-Opt-Model
+%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% the event function data to be registered
 e = struct( ...
@@ -40,14 +43,14 @@ if ~isa(e.fcn, 'function_handle')
 end
 
 %% register to list of event functions
-if isempty(cpf_events)
-    cpf_events = e;
+if isempty(event_list)
+    event_list = e;
 else
-    nef = length(cpf_events);
+    nef = length(event_list);
     for k = 1:nef
-        if strcmp(cpf_events(k).name, name)
+        if strcmp(event_list(k).name, name)
             error('cpf_register_event: duplicate event name: ''%s''', name);
         end
     end
-    cpf_events(nef+1) = e;
+    event_list(nef+1) = e;
 end

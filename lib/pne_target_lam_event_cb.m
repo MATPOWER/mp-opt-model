@@ -1,12 +1,12 @@
-function [nx, cx, done, rollback, evnts, cb_data, results] = cpf_target_lam_event_cb(...
+function [nx, cx, done, rollback, evnts, cb_data, results] = pne_target_lam_event_cb(...
         k, nx, cx, px, done, rollback, evnts, cb_data, cb_args, results)
-%CPF_TARGET_LAM_EVENT_CB  Callback to handle TARGET_LAM events
+%PNE_TARGET_LAM_EVENT_CB  Callback to handle TARGET_LAM events
 %   [NX, CX, DONE, ROLLBACK, EVNTS, CB_DATA, RESULTS] = 
-%       CPF_TARGET_LAM_EVENT_CB(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
+%       PNE_TARGET_LAM_EVENT_CB(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
 %                               CB_DATA, CB_ARGS, RESULTS)
 %
 %   Callback to handle TARGET_LAM events, triggered by event function
-%   CPF_TARGET_LAM_EVENT to indicate that a target lambda value has been
+%   PNE_TARGET_LAM_EVENT to indicate that a target lambda value has been
 %   reached or that the full continuation curve has been traced.
 %
 %   This function sets the msg field of the event when the target lambda has
@@ -15,16 +15,16 @@ function [nx, cx, done, rollback, evnts, cb_data, results] = cpf_target_lam_even
 %   size to be exactly what is needed to reach the target, and sets the
 %   parameterization for that step to be the natural parameterization.
 %
-%   See CPF_DEFAULT_CALLBACK for details of the input and output arguments.
+%   See PNE_DEFAULT_CALLBACK for details of the input and output arguments.
 
-%   MATPOWER
-%   Copyright (c) 2016, Power Systems Engineering Research Center (PSERC)
+%   MP-Opt-Model
+%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% skip if initialize, finalize or done
 if k <= 0 || done.flag
@@ -32,8 +32,8 @@ if k <= 0 || done.flag
 end
 
 %% make stop_at numerical, 0 = FULL, -Inf = NOSE
-stop_at = cb_data.mpopt.cpf.stop_at;
-verbose = cb_data.mpopt.verbose;
+stop_at = cb_data.opt.stop_at;
+verbose = cb_data.opt.verbose;
 if ischar(stop_at)
     if strcmp(stop_at, 'FULL')
         stop_at = 0;
@@ -56,18 +56,15 @@ for i = 1:length(evnts)
                     stop_at, k);
             end
         else                    %% set step-size & parameterization to terminate next time
-            if stop_at == 0     %% FULL
-                evnts(i).msg = sprintf('%s\n  step %d expected to overshoot full trace, reduce step size and set natural param', evnts(i).msg, k);
-            else                %% target lambda value
-                evnts(i).msg = sprintf('%s\n  step %d expected to overshoot target lambda, reduce step size and set natural param', evnts(i).msg, k);
-            end
+            cx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             evnts(i).log = 1;
             if stop_at == 0     %% FULL
-                cx.this_step = cx.lam;
+                cx.this_step = cx.x(end);
+                evnts(i).msg = sprintf('%s\n  step %d expected to overshoot full trace, reduce step size and set natural param', evnts(i).msg, k);
             else                %% target lambda value
-                cx.this_step = stop_at - cx.lam;
+                cx.this_step = stop_at - cx.x(end);
+                evnts(i).msg = sprintf('%s\n  step %d expected to overshoot target lambda, reduce step size and set natural param', evnts(i).msg, k);
             end
-            cx.this_parm = 1;   %% change to natural parameterization
         end
         break;
     end
@@ -81,19 +78,22 @@ if ~event_detected && ~rollback
     else
         step = nx.this_step;
     end
-    [V_hat, lam_hat] = cpf_predictor(nx.V, nx.lam, nx.z, step, cb_data.pv, cb_data.pq);
+
+    %% predictor step
+    x_hat = nx.x + step * nx.z;
+
     if stop_at == 0         %% FULL
-        if lam_hat < -nx.lam
-            nx.this_step = nx.lam;
-            nx.this_parm = 1;       %% change to natural parameterization
+        if x_hat(end) < -nx.x_hat(end)
+            nx.this_step = nx.x_hat(end);
+            nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             if verbose > 2
                 fprintf('  step %d expected to overshoot full trace, reduce step size and set natural param\n', k+1);
             end
         end
     elseif stop_at > 0      %% target lambda value
-        if lam_hat > stop_at + (stop_at - nx.lam)
-            nx.this_step = stop_at - nx.lam;
-            nx.this_parm = 1;       %% change to natural parameterization
+        if x_hat(end) > stop_at + (stop_at - nx.x_hat(end))
+            nx.this_step = stop_at - nx.x_hat(end);
+            nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             if verbose > 2
                 fprintf('  step %d expected to overshoot target lambda, reduce step size and set natural param\n', k+1);
             end
