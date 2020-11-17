@@ -2484,9 +2484,9 @@ The \code{set\_params} method, inputs summarized in Table~\ref{tab:set_params}, 
 
 \subsubsection*{Examples:}
 \begin{Code}
-om.set_params('var', 'v0', v0, 'Pg');
-om.set_params('lin', {'l', 'u'}, {l, u}, 'y', {2,3});
-om.set_params('nle', 'all', {N, @fcn, @hess, vs}, 'Pmis');
+om.set_params('var', 'Pg', 'v0', Pg0);
+om.set_params('lin', 'y', {2,3}, {'l', 'u'}, {l, u});
+om.set_params('nle', 'Pmis', 'all', {N, @fcn, @hess, vs});
 \end{Code}
 
 
@@ -2523,7 +2523,7 @@ name & description \\
 \end{tabular}
 \begin{tablenotes}
  \scriptsize
- \item [\ddag] {Optional when \code{params} = \codeq{all}.}
+ \item [\dag] {Optional when \code{params} = \codeq{all}.}
  \item [\ddag] {The \code{idx} argument is optional.}
 \end{tablenotes}
 \end{threeparttable}

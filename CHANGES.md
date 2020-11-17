@@ -2,6 +2,13 @@ Change history for MP-Opt-Model
 ===============================
 
 
+since last release
+------------------
+
+#### 11/17/20
+  - Fix examples of `om.set_params()` usage in manual and help text.
+
+
 Version 3.0 - *Oct 8, 2020*
 ---------------------------
 
