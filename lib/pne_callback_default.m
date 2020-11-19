@@ -1,9 +1,6 @@
-function [nx, cx, done, rollback, evnts, opt, results] = ...
-    pne_callback_default(k, nx, cx, px, done, rollback, evnts, ...
-                            opt, results)
+function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %PNE_CALLBACK_DEFAULT   Default callback function for PNES_MASTER
-%   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
-%       PNE_CALLBACK_DEFAULT(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, OPT, RESULTS)
+%   [NX, CX, S] = PNE_CALLBACK_DEFAULT(K, NX, CX, PX, S, OPT)
 %
 %   Default callback function used by PNES_MASTER that collects the resulst and
 %   optionally, plots the nose curve. Inputs and outputs are defined below,
@@ -23,7 +20,7 @@ function [nx, cx, done, rollback, evnts, opt, results] = ...
 %           step - current step size
 %           parm - current parameterization
 %           events - struct array, event log
-%           cb - user state, for callbacks, the user may add fields containing
+%           cb - user state for callbacks, the user may add fields containing
 %               any information the callback function would like to pass from
 %               one invokation to the next, taking care not to step on fields
 %               being used by other callbacks, such as the 'default' field
@@ -32,58 +29,49 @@ function [nx, cx, done, rollback, evnts, opt, results] = ...
 %       CX - current state (corresponding to most recent successful step)
 %            (same structure as NX)
 %       PX - previous state (corresponding to last successful step prior to CX)
-%       DONE - struct, with flag to indicate termination of numerical
-%           continuation and reason, with fields:
-%           flag - termination flag, 1 => terminate, 0 => continue
-%           msg - string containing reason for termination
-%       ROLLBACK - scalar flag to indicate that the current step should be
-%           rolled back and retried with a different step size, etc.
-%       EVNTS - struct array listing any events detected for this step,
-%           see PNE_DETECT_EVENTS for details
+%       S - struct for various flags, etc., with fields:
+%           done - termination flag, 1 => terminate, 0 => continue
+%           done_msg - char array with reason for termination
+%           rollback - flag to indicate that the current step should be
+%               rolled back and retried with a different step size, etc.
+%           evnts - struct array listing events detected for this step,
+%               see PNE_DETECT_EVENTS for details
+%           results - output struct to be assigned to 'cont' field of
+%               OUTPUT struct returned by PNES_MASTER
 %       OPT - PNES_MASTER options struct
-%       RESULTS - initial value of output struct to be assigned to
-%           CONT field of OUTPUT struct returned by PNES_MASTER
 %
 %   Outputs:
 %       (all are updated versions of the corresponding input arguments)
-%       NX - user state ('cb' field ) should be updated here if ROLLBACK
-%           is false
-%       CX - may contain updated 'this_step' or 'this_parm' values to be used
-%           if ROLLBACK is true
-%       DONE - callback may have requested termination and set the msg field
-%       ROLLBACK - callback can request a rollback step, even if it was not
-%           indicated by an event function
-%       EVNTS - msg field for a given event may be updated
-%       OPT - PNES_MASTER options struct, (UNFINISHED)
-%           should only be modified if the underlying problem
-%           has been changed (e.g. fcn has been altered) and should always
-%           be followed by a step of zero length, i.e. set NX.this_step to 0
-%           It is the job of any callback modifying OPT to ensure that
-%           all data in OPT is kept consistent.
-%       RESULTS - updated version of RESULTS input arg
+%       NX - update this state if S.rollback is false,
+%           e.g. user state ('cb' field ), etc.
+%           Note: 'step' should be set to 0 if the underlying problem has
+%               been modified (i.e. 'fcn' has been altered)
+%       CX - update this state if S.rollback is true,
+%           e.g. 'this_step' or 'this_parm'
+%       S - struct for various flags, etc.
+%           done - can request termination by setting to 1
+%           done_msg - can set termination reason here
+%           rollback - can request a rollback step, even if it was not
+%               indicated by an event function
+%           evnts - msg field for a given event may be updated
+%           results - updated output struct to be assigned to 'cont' field
+%               of OUTPUT struct returned by PNES_MASTER
 %
 %   This function is called in three different contexts, distinguished by
 %   the value of K, as follows:
-%   (1) initial - called with K = 0, without RESULTS input/output args,
-%           after base power flow, before 1st continuation step.
-%   (2) iterations - called with K > 0, without RESULTS input/output args,
-%           at each iteration, after predictor-corrector step
-%   (3) final - called with K < 0, with RESULTS input/output args, after
-%           exiting predictor-corrector loop, inputs identical to last
-%           iteration call, except K which is negated
+%   (1) initial - called with K = 0, after initial corrector step,
+%           before 1st continuation step.
+%   (2) iterations - called with K > 0, at each iteration, after
+%           predictor-corrector step
+%   (3) final - called with K < 0, after exiting predictor-corrector loop,
+%           same as last iteration call, with negated K and updated PX, CX
 %
 %   User Defined PNE Callback Functions:
 %       The user can define their own callback functions which take
 %       the same form and are called in the same contexts as
-%       PNE_CALLBACK_DEFAULT. These are specified via the 'callbacks' option
-%       'pne.user_callback'. This option can be a string containing
-%       the name of the callback function, or a struct with the following
-%       fields, where all but the first are optional:
-%           'fcn'       - string with name of callback function
-%           'priority'  - numerical value specifying callback priority
-%                (default = 20, see PNE_REGISTER_CALLBACKS for details)
-%       Multiple user callbacks can be registered by assigning a cell array
-%       of such strings and/or structs to the 'pne.user_callback' option.
+%       PNE_CALLBACK_DEFAULT. These are specified via OPT.callbacks.
+%       OPT.callbacks takes the same form as the MY_CBACKS input to
+%       PNE_REGISTER_CALLBACKS.
 %
 %   See also PNES_MASTER, PNE_REGISTER_CALLBACKS.
 
@@ -96,7 +84,7 @@ function [nx, cx, done, rollback, evnts, opt, results] = ...
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% skip if rollback, except if it is a FINAL call
-if rollback && k > 0
+if s.rollback && k > 0
     return;
 end
 
@@ -126,11 +114,11 @@ else
         nx.cb.default = nxx;    %% update next callback state
     else            %% FINAL call
         %% assemble results struct
-        results.x_hat       = nxx.x_hat;
-        results.x           = nxx.x;
-        results.steps       = nxx.steps;
-        results.iterations  = -k;
-        results.max_lam     = max(results.x(end, :));
+        s.results.x_hat       = nxx.x_hat;
+        s.results.x           = nxx.x;
+        s.results.steps       = nxx.steps;
+        s.results.iterations  = -k;
+        s.results.max_lam     = max(s.results.x(end, :));
     end
 end
 

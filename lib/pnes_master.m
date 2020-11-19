@@ -166,7 +166,12 @@ if opt.nose_tol == 0
 end
 
 %% initialize
-done = struct('flag', 0, 'msg', '');
+s = struct( ...         %% container struct for various variables, flags
+    'done',     0, ...      %% flag indicating continuation has terminated
+    'done_msg', '', ...     %% termination message
+    'rollback', 0, ...      %% flag to indicate a step must be rolled back
+    'evnts',    [], ...     %% struct array for detected events
+    'results',  []  );      %% results struct
 z0 = zeros(length(x0), 1);      %% (n+1) x 1, zeros
 
 %% register event and callback functions
@@ -200,10 +205,10 @@ if opt.solve_base
             fprintf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', 0, 0, out.iterations);
         end
     else
-        done.flag = 1;
-        done.msg = sprintf('base solution did not converge in %d iterations', out.iterations);
+        s.done = 1;
+        s.done_msg = sprintf('base solution did not converge in %d iterations', out.iterations);
         if opt.verbose
-            fprintf('%s\n', done.msg);
+            fprintf('%s\n', s.done_msg);
         end
     end
 else
@@ -211,10 +216,9 @@ else
 end
 
 %% initialize numerical continuation
-if ~done.flag
+if ~s.done
     step = opt.step;
     cont_steps = 0; %% continuation step counter
-    rollback = 0;   %% flag to indicate that a step must be rolled back
     locating = 0;   %% flag to indicate that an event interval was detected,
                     %% but the event has not yet been located
     rb_cnt_ef = 0;  %% counter for rollback steps triggered by event function intervals
@@ -260,8 +264,7 @@ if ~done.flag
 
     %% invoke callbacks - "initialize" context
     for k = 1:ncb
-        [nx, cx, done, rollback, evnts, opt] = reg_cb(k).fcn( ...
-            cont_steps, cx, cx, cx, done, 0, [], opt);
+        [nx, cx, s] = reg_cb(k).fcn(cont_steps, cx, cx, cx, s, opt);
     end
     
     %% check for case with base and target the same
@@ -275,8 +278,8 @@ if ~done.flag
     xt(end) = 1;
     ft = fcn(xt);
     if norm(fb - ft, Inf) < 1e-12
-        done.flag = 1;
-        done.msg = 'base and target functions are identical';
+        s.done = 1;
+        s.done_msg = 'base and target functions are identical';
     end
     
     cont_steps = cont_steps + 1;
@@ -284,7 +287,7 @@ if ~done.flag
 end
 
 %%-----  run numerical continuation  -----
-while ~done.flag
+while ~s.done
     %% initialize next candidate with current state
     nx = cx;
 
@@ -296,8 +299,8 @@ while ~done.flag
     pfcn = @(xx)cx.parm(xx, cx.x, cx.step, cx.z);
     [nx.x, f, exitflag, out] = nleqs_master(@(xx)pne_corrector_fcn(xx, fcn, pfcn), nx.x_hat, opt.nleqs_opt);
     if ~exitflag    %% corrector failed
-        done.flag = 1;
-        done.msg = sprintf('Corrector did not converge in %d iterations.', out.iterations);
+        s.done = 1;
+        s.done_msg = sprintf('Corrector did not converge in %d iterations.', out.iterations);
         if opt.verbose
             fprintf('step %3d  : %s stepsize = %-9.3g lambda = %6.3f  corrector did not converge in %d iterations\n', cont_steps, pne_ptag(cx.parm), cx.step, nx.x(end), out.iterations);
         end
@@ -319,28 +322,28 @@ while ~done.flag
     for k = 1:nef
         nx.ef{k} = reg_ev(k).fcn(nx, opt);  %% update event functions
     end
-    [rollback, evnts, nx.ef] = pne_detect_events(reg_ev, nx.ef, cx.ef, nx.step);
+    [s.rollback, s.evnts, nx.ef] = pne_detect_events(reg_ev, nx.ef, cx.ef, nx.step);
 
     %% adjust step-size to locate event function zero, if necessary
-    if rollback                 %% current step overshot
+    if s.rollback               %% current step overshot
         %% rollback and initialize next step size based on rollback and previous
         rx = nx;                    %% save state we're rolling back from
-        rx_evnts = evnts;           %% and critical event info
-        cx.this_step = evnts.step_scale * rx.step;
+        rx_evnts = s.evnts;         %% and critical event info
+        cx.this_step = s.evnts.step_scale * rx.step;
         cx.this_parm = rx.parm;     %% keep same parameterization as last step
         locating = 1;               %% enter "locating" mode (or stay in it)
         rb_cnt_ef = rb_cnt_ef + 1;  %% increment rollback counter for ef intervals
         if rb_cnt_ef > 26
-            done.flag = 1;
-            done.msg = sprintf('Could not locate %s event!', evnts.name);
+            s.done = 1;
+            s.done_msg = sprintf('Could not locate %s event!', s.evnts.name);
         end
         if opt.verbose > 3
             loc_msg = sprintf('OVERSHOOT  : f = [%g, <<%g>>], step <-- %.4g', ...
-                        cx.ef{evnts.eidx}(evnts.idx(1)), ...
-                        rx.ef{evnts.eidx}(evnts.idx(1)), cx.this_step);
+                        cx.ef{s.evnts.eidx}(s.evnts.idx(1)), ...
+                        rx.ef{s.evnts.eidx}(s.evnts.idx(1)), cx.this_step);
         end
     elseif locating
-        if evnts(1).zero        %% found the zero!
+        if s.evnts(1).zero      %% found the zero!
             %% step size will be reset to previously used default step size
             locating = 0;           %% exit "locating" mode
             rb_cnt_ef = 0;          %% reset rollback counter for ef intervals
@@ -367,19 +370,18 @@ while ~done.flag
     end
 
     %% invoke callbacks - "iterations" context
-    rb = rollback;
+    rb = s.rollback;
     for k = 1:ncb
-        [nx, cx, done, rollback, evnts, opt] = reg_cb(k).fcn( ...
-            cont_steps, nx, cx, px, done, rollback, evnts, opt);
+        [nx, cx, s] = reg_cb(k).fcn(cont_steps, nx, cx, px, s, opt);
     end
-    if ~rb && rollback      %% rollback triggered by callback (vs event function interval)
+    if ~rb && s.rollback    %% rollback triggered by callback (vs event function interval)
         rb_cnt_cb = rb_cnt_cb + 1;  %% increment rollback counter for callbacks
         if rb_cnt_cb > 26
-            done.flag = 1;
-            done.msg = 'Too many rollback steps triggered by callbacks!';
+            s.done = 1;
+            s.done_msg = 'Too many rollback steps triggered by callbacks!';
         end
     else
-        if ~done.flag && evnts(1).zero
+        if ~s.done && s.evnts(1).zero
             %% decide whether to switch directions
             reply = input('Switch directions? Y/N [N]:','s');
             if strcmp(upper(reply), 'Y')
@@ -404,7 +406,7 @@ while ~done.flag
         if opt.verbose < 5
             fprintf('  %2d corrector steps', out.iterations);
         end
-        if rollback
+        if s.rollback
             fprintf(' ^ ROLLBACK\n');
         else
             fprintf('\n');
@@ -415,27 +417,27 @@ while ~done.flag
     end
 
     %% log events
-    for k = 1:length(evnts)
-        if evnts(k).log
+    for k = 1:length(s.evnts)
+        if s.evnts(k).log
             e = struct( 'k', cont_steps, ...
-                        'name', evnts(k).name, ...
-                        'idx', evnts(k).idx, ...
-                        'msg', evnts(k).msg   );
+                        'name', s.evnts(k).name, ...
+                        'idx', s.evnts(k).idx, ...
+                        'msg', s.evnts(k).msg   );
             if isempty(nx.events)
                 nx.events = e;
             else
                 nx.events(end+1) = e;
             end
         end
-        if (opt.verbose > 2 && evnts(k).log) || ...
-                (opt.verbose > 3 && evnts(k).eidx)
-            fprintf('    %s\n', evnts(k).msg);
+        if (opt.verbose > 2 && s.evnts(k).log) || ...
+                (opt.verbose > 3 && s.evnts(k).eidx)
+            fprintf('    %s\n', s.evnts(k).msg);
         end
     end
 
     %% adapt stepsize if requested and not terminating, locating a zero
     %% or re-doing a step after changing the problem data
-    if opt.adapt_step && ~done.flag && ~locating && ~evnts(1).zero && nx.step ~= 0
+    if opt.adapt_step && ~s.done && ~locating && ~s.evnts(1).zero && nx.step ~= 0
         pred_error = norm(nx.x - nx.x_hat, inf);
 
         %% new nominal step size is current size * tol/err, but we reduce
@@ -455,14 +457,14 @@ while ~done.flag
     end
 
     %% if this is a normal step
-    if ~rollback
+    if ~s.rollback
         px = cx;    %% save current state before update
         cx = nx;    %% update current state to next candidate
 %         if cont_steps > 1000
-%             done.flag = 1;
-%             done.msg = 'RUNAWAY!';
+%             s.done = 1;
+%             s.done_msg = 'RUNAWAY!';
 %         end
-        if ~done.flag
+        if ~s.done
             cont_steps = cont_steps + 1;
         end
     end
@@ -480,21 +482,20 @@ while ~done.flag
         cx.parm = cx.this_parm;
         cx.this_parm = [];      %% disable for next time
     end
-end     %% while ~done.flag
+end     %% while ~s.done
 
 
 %% invoke callbacks - "final" context
-results = struct();     %% initialize results struct
+s.results = struct();   %% initialize results struct
 for k = 1:ncb
-    [nx, cx, done, rollback, evnts, opt, results] = ...
-        reg_cb(k).fcn(-cont_steps, nx, cx, px, ...
-            done, rollback, evnts, opt, results);
+    [nx, cx, s] = reg_cb(k).fcn(-cont_steps, nx, cx, px, s, opt);
 end
-results.events = cx.events;     %% copy eventlog to results
-results.done_msg = done.msg;
-out.cont = results;
+out.cont = s.results;
+out.cont.done_msg = s.done_msg;
+out.cont.events = cx.events;    %% copy eventlog to results
+
 if opt.verbose
-    fprintf('CONTINATION TERMINATION: %s\n', done.msg);
+    fprintf('CONTINATION TERMINATION: %s\n', s.done_msg);
 end
 
 %% output arguments

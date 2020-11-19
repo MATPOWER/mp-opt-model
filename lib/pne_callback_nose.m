@@ -1,15 +1,12 @@
-function [nx, cx, done, rollback, evnts, opt, results] = pne_callback_nose(...
-        k, nx, cx, px, done, rollback, evnts, opt, results)
+function [nx, cx, s] = pne_callback_nose(k, nx, cx, px, s, opt)
 %PNE_CALLBACK_NOSE  Callback to handle NOSE events
-%   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
-%       PNE_CALLBACK_NOSE(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
-%                               OPT, CB_ARGS, RESULTS)
+%   [NX, CX, S] = PNE_CALLBACK_NOSE(K, NX, CX, PX, S, OPT)
 %
 %   Callback to handle NOSE events, triggered by event function
 %   PNE_EVENT_NOSE to indicate the nose point of the continuation curve.
 %
 %   This function sets the msg field of the event when the nose point has
-%   been found, raises the DONE.flag and sets the DONE.msg.
+%   been found, raises the S.done flag and sets S.done_msg.
 %
 %   See PNE_CALLBACK_DEFAULT for details of the input and output arguments.
 
@@ -23,27 +20,27 @@ function [nx, cx, done, rollback, evnts, opt, results] = pne_callback_nose(...
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% skip if initialize, finalize or done
-if k <= 0 || done.flag
+if k <= 0 || s.done
     return;
 end
 
 %% handle event
-if ~rollback || nx.step == 0
-    for i = 1:length(evnts)
-        if strcmp(evnts(i).name, 'NOSE') && evnts(i).zero
+if ~s.rollback || nx.step == 0
+    for i = 1:length(s.evnts)
+        if strcmp(s.evnts(i).name, 'NOSE') && s.evnts(i).zero
             if nx.step == 0
-                evnts(i).msg = ...
+                s.evnts(i).msg = ...
                     sprintf('Nose point eliminated by limit induced bifurcation at %d continuation steps, lambda = %.4g.', k, nx.x(end));
             else
-                evnts(i).msg = ...
+                s.evnts(i).msg = ...
                     sprintf('Reached limit in %d continuation steps, lambda = %.4g.', k, nx.x(end));
             end
 
             %% the following conditional is only necessary if we also allow
             %% finding the location of the nose-point without terminating
             if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');
-                done.flag = 1;
-                done.msg = evnts(i).msg;
+                s.done = 1;
+                s.done_msg = s.evnts(i).msg;
             end
             break;
         end

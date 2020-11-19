@@ -43,11 +43,11 @@ function [rollback, evnts, cef] = pne_detect_events(reg_ev, cef, pef, step)
 rollback = 0;
 evnts = struct( ...
     'eidx', 0, ...
-    'name', '', ...
     'zero', 0, ...
-    'idx', 0, ...
     'step_scale', 1, ...
     'log', 0, ...
+    'name', '', ...
+    'idx', 0, ...
     'msg', '' ...
 );
 
@@ -72,11 +72,11 @@ for eidx = 1:nef
         if step == 0    %% if it's a "repeat" step (e.g. after fcn change)
             %% ... make this one the critical one and call it a ZERO event
             evnts.eidx = eidx;
-            evnts.name = reg_ev(eidx).name;
             evnts.zero = 1;
-            evnts.idx = idx;
             evnts.step_scale = 1;
             evnts.log = 1;
+            evnts.name = reg_ev(eidx).name;
+            evnts.idx = idx;
             evnts.msg = 'ZERO (BIFURCATION)';
             i = i + 1;
             break;
@@ -89,11 +89,11 @@ for eidx = 1:nef
             if step_scale < evnts.step_scale
                 %% ... make this one the critical one
                 evnts.eidx = eidx;
-                evnts.name = reg_ev(eidx).name;
                 evnts.zero = 0;
-                evnts.idx = idx(j);
                 evnts.step_scale = step_scale;
                 evnts.log = 0;
+                evnts.name = reg_ev(eidx).name;
+                evnts.idx = idx(j);
                 evnts.msg = 'INTERVAL';
                 rollback = 1;   %% signal that a rollback event has been detected
             end
@@ -114,11 +114,11 @@ if rollback == 0
 
             %% ... make this one the critical one
             evnts(i).eidx = eidx;
-            evnts(i).name = reg_ev(eidx).name;
             evnts(i).zero = 1;
-            evnts(i).idx = idx;
             evnts(i).step_scale = 1;
             evnts(i).log = 1;
+            evnts(i).name = reg_ev(eidx).name;
+            evnts(i).idx = idx;
             evnts(i).msg = 'ZERO';
             i = i + 1;
         end
@@ -140,11 +140,11 @@ if rollback == 0
 
                 %% ... and save the info as an interval detection
                 evnts(i).eidx = eidx;
-                evnts(i).name = reg_ev(eidx).name;
                 evnts(i).zero = 0;
-                evnts(i).idx = idx;
                 evnts(i).step_scale = step_scale;
                 evnts(i).log = 0;
+                evnts(i).name = reg_ev(eidx).name;
+                evnts(i).idx = idx;
                 evnts(i).msg = 'INTERVAL';
                 i = i + 1;
             end
