@@ -59,10 +59,10 @@ for i = 1:length(evnts)
             evnts(i).log = 1;
             if target == 0      %% FULL
                 cx.this_step = cx.x(end);
-                evnts(i).msg = sprintf('%s\n  step %d expected to overshoot full trace, reduce step size and set natural param', evnts(i).msg, k);
+                evnts(i).msg = sprintf('%s\n  step %d to overshoot full trace, reduce step size and set natural param', evnts(i).msg, k);
             else                %% target lambda value
                 cx.this_step = target - cx.x(end);
-                evnts(i).msg = sprintf('%s\n  step %d expected to overshoot target lambda, reduce step size and set natural param', evnts(i).msg, k);
+                evnts(i).msg = sprintf('%s\n  step %d to overshoot target lambda, reduce step size and set natural param', evnts(i).msg, k);
             end
         end
         break;
@@ -82,19 +82,19 @@ if ~event_detected && ~rollback
     x_hat = nx.x + step * nx.z;
 
     if target == 0          %% FULL
-        if x_hat(end) < -nx.x_hat(end)
-            nx.this_step = nx.x_hat(end);
+        if x_hat(end) < -nx.x(end)
+            nx.this_step = nx.x(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             if opt.verbose > 2
-                fprintf('  step %d expected to overshoot full trace, reduce step size and set natural param\n', k+1);
+                fprintf('  step %d prediction to overshoot full trace, set next step to natural param w/reduced size\n', k+1);
             end
         end
     elseif target > 0       %% target lambda value
-        if x_hat(end) > target + (target - nx.x_hat(end))
-            nx.this_step = target - nx.x_hat(end);
+        if x_hat(end) > target + (target - nx.x(end))
+            nx.this_step = target - nx.x(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             if opt.verbose > 2
-                fprintf('  step %d expected to overshoot target lambda, reduce step size and set natural param\n', k+1);
+                fprintf('  step %d prediction to overshoot target lambda, set next step to natural param w/reduced size\n', k+1);
             end
         end
     end
