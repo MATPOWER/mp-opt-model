@@ -265,9 +265,18 @@ if ~done.flag
     end
     
     %% check for case with base and target the same
-    if 0
+    if opt.solve_base
+        fb = f(1:end-1);
+    else
+        fb = fcn(x0);
+        exitflag = 0;
+    end
+    xt = x0;
+    xt(end) = 1;
+    ft = fcn(xt);
+    if norm(fb - ft, Inf) < 1e-12
         done.flag = 1;
-        done.msg = 'no difference between base and target';
+        done.msg = 'base and target functions are identical';
     end
     
     cont_steps = cont_steps + 1;
