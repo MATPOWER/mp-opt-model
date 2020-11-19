@@ -1,12 +1,12 @@
-function [nx, cx, done, rollback, evnts, opt, results] = pne_target_lam_event_cb(...
+function [nx, cx, done, rollback, evnts, opt, results] = pne_callback_target_lam(...
         k, nx, cx, px, done, rollback, evnts, opt, results)
-%PNE_TARGET_LAM_EVENT_CB  Callback to handle TARGET_LAM events
+%PNE_CALLBACK_TARGET_LAM  Callback to handle TARGET_LAM events
 %   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
-%       PNE_TARGET_LAM_EVENT_CB(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
+%       PNE_CALLBACK_TARGET_LAM(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
 %                               OPT, RESULTS)
 %
 %   Callback to handle TARGET_LAM events, triggered by event function
-%   PNE_TARGET_LAM_EVENT to indicate that a target lambda value has been
+%   PNE_EVENT_TARGET_LAM to indicate that a target lambda value has been
 %   reached or that the full continuation curve has been traced.
 %
 %   This function sets the msg field of the event when the target lambda has
@@ -15,7 +15,7 @@ function [nx, cx, done, rollback, evnts, opt, results] = pne_target_lam_event_cb
 %   size to be exactly what is needed to reach the target, and sets the
 %   parameterization for that step to be the natural parameterization.
 %
-%   See PNE_DEFAULT_CALLBACK for details of the input and output arguments.
+%   See PNE_CALLBACK_DEFAULT for details of the input and output arguments.
 
 %   MP-Opt-Model
 %   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)

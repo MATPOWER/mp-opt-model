@@ -1,17 +1,17 @@
-function [nx, cx, done, rollback, evnts, opt, results] = pne_nose_event_cb(...
+function [nx, cx, done, rollback, evnts, opt, results] = pne_callback_nose(...
         k, nx, cx, px, done, rollback, evnts, opt, results)
-%PNE_NOSE_EVENT_CB  Callback to handle NOSE events
+%PNE_CALLBACK_NOSE  Callback to handle NOSE events
 %   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
-%       PNE_NOSE_EVENT_CB(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
+%       PNE_CALLBACK_NOSE(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, ...
 %                               OPT, CB_ARGS, RESULTS)
 %
 %   Callback to handle NOSE events, triggered by event function
-%   PNE_NOSE_EVENT to indicate the nose point of the continuation curve.
+%   PNE_EVENT_NOSE to indicate the nose point of the continuation curve.
 %
 %   This function sets the msg field of the event when the nose point has
 %   been found, raises the DONE.flag and sets the DONE.msg.
 %
-%   See PNE_DEFAULT_CALLBACK for details of the input and output arguments.
+%   See PNE_CALLBACK_DEFAULT for details of the input and output arguments.
 
 %   MP-Opt-Model
 %   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)

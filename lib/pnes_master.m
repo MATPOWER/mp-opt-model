@@ -171,13 +171,13 @@ z0 = zeros(length(x0), 1);      %% (n+1) x 1, zeros
 
 %% register event and callback functions
 if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');
-    my_events = {{'NOSE', @pne_nose_event, opt.nose_tol}, opt.events{:}};
-    my_cbacks = {{@pne_nose_event_cb, 51}, opt.callbacks{:}};
+    my_events = {{'NOSE', @pne_event_nose, opt.nose_tol}, opt.events{:}};
+    my_cbacks = {{@pne_callback_nose, 51}, opt.callbacks{:}};
 else        %% FULL or target lambda
-    my_events = {{'TARGET_LAM', @pne_target_lam_event, opt.target_lam_tol}, opt.events{:}};
-    my_cbacks = {{@pne_target_lam_event_cb, 50}, opt.callbacks{:}};
+    my_events = {{'TARGET_LAM', @pne_event_target_lam, opt.target_lam_tol}, opt.events{:}};
+    my_cbacks = {{@pne_callback_target_lam, 50}, opt.callbacks{:}};
 end
-my_cbacks{end+1} = {@pne_default_callback, 0};
+my_cbacks{end+1} = {@pne_callback_default, 0};
 reg_ev = pne_register_events(my_events, opt);   %% registered event functions
 reg_cb = pne_register_callbacks(my_cbacks);     %% registered callback functions
 nef = length(reg_ev);   %% number of registered event functions

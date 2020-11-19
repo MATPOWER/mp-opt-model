@@ -1,6 +1,6 @@
-function ef = pne_nose_event(cx, opt)
-%PNE_NOSE_EVENT  Event function to detect the nose point
-%   EF = PNE_NOSE_EVENT(CX, OPT)
+function ef = pne_event_nose(cx, opt)
+%PNE_EVENT_NOSE  Event function to detect the nose point
+%   EF = PNE_EVENT_NOSE(CX, OPT)
 %
 %   PNE_MASTER event function to detect the nose point of the continuation
 %   curve, based on the sign of the lambda component of the tangent vector.

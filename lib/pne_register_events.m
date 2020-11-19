@@ -1,5 +1,5 @@
 function reg_ev = pne_register_events(my_events, opt, reg_ev)
-%PNE_REGISTER_EVENT  Register event functions=
+%PNE_REGISTER_EVENTS  Register event functions=
 %   REG_EV = PNE_REGISTER_EVENTS(MY_EVENTS, OPT)
 %   REG_EV = PNE_REGISTER_EVENTS(MY_EVENTS, OPT, REG_EV)
 %
@@ -24,11 +24,11 @@ function reg_ev = pne_register_events(my_events, opt, reg_ev)
 %
 %   User Defined PNES_MASTER Event Functions:
 %       The user can define their own event detection functions which take
-%       the same form as PNE_TARGET_LAM_EVENT. These are specified via the
+%       the same form as PNE_EVENT_TARGET_LAM. These are specified via the
 %       'events' option to PNES_MASTER, which takes the same form as
 %       MY_EVENTS above.
 %
-%   See also PNES_MASTER, PNE_TARGET_LAM_EVENT.
+%   See also PNES_MASTER, PNE_EVENT_TARGET_LAM.
 
 %   MP-Opt-Model
 %   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)

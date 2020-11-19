@@ -1,6 +1,6 @@
-function ef = pne_target_lam_event(cx, opt)
-%PNE_TARGET_LAM_EVENT  Event function to detect a target lambda value
-%   EF = PNE_TARGET_LAM_EVENT(CX, OPT)
+function ef = pne_event_target_lam(cx, opt)
+%PNE_EVENT_TARGET_LAM  Event function to detect a target lambda value
+%   EF = PNE_EVENT_TARGET_LAM(CX, OPT)
 %
 %   PNES_MASTER event function to detect the completion of the continuation
 %   curve or another target value of lambda.

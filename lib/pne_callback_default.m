@@ -1,9 +1,9 @@
 function [nx, cx, done, rollback, evnts, opt, results] = ...
-    pne_default_callback(k, nx, cx, px, done, rollback, evnts, ...
+    pne_callback_default(k, nx, cx, px, done, rollback, evnts, ...
                             opt, results)
-%PNE_DEFAULT_CALLBACK   Default callback function for PNES_MASTER
+%PNE_CALLBACK_DEFAULT   Default callback function for PNES_MASTER
 %   [NX, CX, DONE, ROLLBACK, EVNTS, OPT, RESULTS] = 
-%       PNE_DEFAULT_CALLBACK(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, OPT, RESULTS)
+%       PNE_CALLBACK_DEFAULT(K, NX, CX, PX, DONE, ROLLBACK, EVNTS, OPT, RESULTS)
 %
 %   Default callback function used by PNES_MASTER that collects the resulst and
 %   optionally, plots the nose curve. Inputs and outputs are defined below,
@@ -75,7 +75,7 @@ function [nx, cx, done, rollback, evnts, opt, results] = ...
 %   User Defined PNE Callback Functions:
 %       The user can define their own callback functions which take
 %       the same form and are called in the same contexts as
-%       PNE_DEFAULT_CALLBACK. These are specified via the 'callbacks' option
+%       PNE_CALLBACK_DEFAULT. These are specified via the 'callbacks' option
 %       'pne.user_callback'. This option can be a string containing
 %       the name of the callback function, or a struct with the following
 %       fields, where all but the first are optional:
@@ -156,12 +156,12 @@ if plt.level
         end
         if 0%idx_e are all valid
             %kk = first invalid entry in idx_e
-            error('pne_default_callback: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
+            error('pne_callback_default: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
         end
         idx = idx_e;    %%convert from idx_e;
         if any(idx == 0)
             kk = find(idx == 0);
-            error('pne_default_callback: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
+            error('pne_callback_default: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
         end
     end
     nplots = length(idx_e);

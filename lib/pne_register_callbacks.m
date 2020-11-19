@@ -10,15 +10,15 @@ function reg_cb = pne_register_callbacks(my_cbacks, reg_cb)
 %           where a single callback spec is of the form FCN, {FCN} or
 %           {FCN, PRIORITY}, where FCN and PRIORITY are:
 %           FCN : function handle to the callback function, see
-%               PNE_DEFAULT_CALLBACK for details on calling syntax of
+%               PNE_CALLBACK_DEFAULT for details on calling syntax of
 %               callback functions
 %           PRIORITY : number that determines order of execution for multiple
 %                  callback functions, where higher numbers run first,
 %                  default priority is 20, where the standard callbacks
 %                  are called with the following priority:
-%                       pne_nose_event_cb       51
-%                       pne_target_lam_event_cb 50
-%                       pne_default_callback    0
+%                       pne_callback_nose       51
+%                       pne_callback_target_lam 50
+%                       pne_callback_default    0
 %       REG_CB : (optional) struct array containing existing registered
 %           callback functions
 %
@@ -28,10 +28,10 @@ function reg_cb = pne_register_callbacks(my_cbacks, reg_cb)
 %   User Defined PNES_MASTER Callback Functions:
 %       The user can define their own callback functions which take
 %       the same form and are called in the same contexts as
-%       PNE_DEFAULT_CALLBACK. These are specified via the 'callbacks' option
+%       PNE_CALLBACK_DEFAULT. These are specified via the 'callbacks' option
 %       to PNES_MASTER, which takes the same form as MY_CBACKS above.
 %
-%   See also PNES_MASTER, PNE_DEFAULT_CALLBACK.
+%   See also PNES_MASTER, PNE_CALLBACK_DEFAULT.
 
 %   MP-Opt-Model
 %   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
