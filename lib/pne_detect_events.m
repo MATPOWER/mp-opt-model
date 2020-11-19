@@ -1,6 +1,6 @@
 function [rollback, evnts, cef] = pne_detect_events(reg_ev, cef, pef, step)
-%CPF_DETECT_EVENTS  Detect events from event function values
-%   [ROLLBACK, CRITICAL_EVENTS, CEF] = CPF_DETECT_EVENTS(REG_EV, CEF, PEF, STEP)
+%PNE_DETECT_EVENTS  Detect events from event function values
+%   [ROLLBACK, CRITICAL_EVENTS, CEF] = PNE_DETECT_EVENTS(REG_EV, CEF, PEF, STEP)
 %   
 %   Inputs:
 %       REG_EV : struct containing info about registered event fcns

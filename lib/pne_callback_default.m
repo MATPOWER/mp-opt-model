@@ -39,7 +39,7 @@ function [nx, cx, done, rollback, evnts, opt, results] = ...
 %       ROLLBACK - scalar flag to indicate that the current step should be
 %           rolled back and retried with a different step size, etc.
 %       EVNTS - struct array listing any events detected for this step,
-%           see CPF_DETECT_EVENTS for details
+%           see PNE_DETECT_EVENTS for details
 %       OPT - PNES_MASTER options struct
 %       RESULTS - initial value of output struct to be assigned to
 %           CONT field of OUTPUT struct returned by PNES_MASTER
@@ -81,11 +81,11 @@ function [nx, cx, done, rollback, evnts, opt, results] = ...
 %       fields, where all but the first are optional:
 %           'fcn'       - string with name of callback function
 %           'priority'  - numerical value specifying callback priority
-%                (default = 20, see CPF_REGISTER_CALLBACK for details)
+%                (default = 20, see PNE_REGISTER_CALLBACKS for details)
 %       Multiple user callbacks can be registered by assigning a cell array
 %       of such strings and/or structs to the 'pne.user_callback' option.
 %
-%   See also PNES_MASTER, CPF_REGISTER_CALLBACK.
+%   See also PNES_MASTER, PNE_REGISTER_CALLBACKS.
 
 %   MP-Opt-Model
 %   Copyright (c) 2013-2020, Power Systems Engineering Research Center (PSERC)
