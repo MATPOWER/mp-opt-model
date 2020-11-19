@@ -325,7 +325,7 @@ while ~done.flag
     if rollback                 %% current step overshot
         %% rollback and initialize next step size based on rollback and previous
         rx = nx;                    %% save state we're rolling back from
-        rx.evnts = evnts;           %% and critical event info
+        rx_evnts = evnts;           %% and critical event info
         cx.this_step = evnts.step_scale * rx.step;
         cx.this_parm = rx.parm;     %% keep same parameterization as last step
         locating = 1;               %% enter "locating" mode (or stay in it)
@@ -346,13 +346,13 @@ while ~done.flag
             rb_cnt_ef = 0;          %% reset rollback counter for ef intervals
             if opt.verbose > 3
                 loc_msg = sprintf('ZERO!      : f = %g, step <-- %.4g', ...
-                    nx.ef{rx.evnts.eidx}(rx.evnts.idx(1)), nx.default_step);
+                    nx.ef{rx_evnts.eidx}(rx_evnts.idx(1)), nx.default_step);
             end
         else                    %% prev rollback undershot
             %% initialize next step size based on critical event function
             %% values from prev rollback step and current step
-            rx_ef = rx.ef{rx.evnts.eidx}(rx.evnts.idx(1));
-            cx_ef = nx.ef{rx.evnts.eidx}(rx.evnts.idx(1));
+            rx_ef = rx.ef{rx_evnts.eidx}(rx_evnts.idx(1));
+            cx_ef = nx.ef{rx_evnts.eidx}(rx_evnts.idx(1));
             step_scale = cx_ef / (cx_ef - rx_ef);
             nx.this_step = step_scale * (rx.step - nx.step);
             rb_cnt_ef = 0;          %% reset rollback counter for ef intervals
