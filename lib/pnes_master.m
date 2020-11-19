@@ -144,11 +144,11 @@ dopts = struct( ...
     'nose_tol',         0, ...          %% UNFINISHED
     'events',           {{}}, ...       %% UNFINISHED
     'callbacks',        {{}}, ...       %% UNFINISHED
-    'plot',             struct( ...     %% used by pne_default_callback() for plotting
-        'level',        0, ...          %% UNFINISHED
-        'idx',          [], ...         %% UNFINISHED
-        'xfcn',         @pne_plot_xfcn, ...         %% UNFINISHED
-        'yfcn',         @pne_plot_yfcn, ...         %% UNFINISHED
+    'plot',             struct( ...     %% used by pne_callback_default() for plotting
+        'level',        0, ...          %% 0 - no plot, 1 - final, 2 - steps, 3 - steps w/pause
+        'idx',          [], ...         %% index of quantity to plot, passed to yfcn()
+        'xfcn',         @(x)x(end, :), ...          %% UNFINISHED
+        'yfcn',         @(x,idx)x(idx, :), ...      %% UNFINISHED
         'title',        'Value of Variable %d', ... %% UNFINISHED
         'title2',       'Value of Multiple Variables', ...  %% UNFINISHED
         'xlabel',       '\lambda', ...              %% UNFINISHED
@@ -508,14 +508,6 @@ if nargout > 1
     end
 end
 
-% function [f, J] = non_param_fcn(x, fcn)
-% if nargout < 2
-%     f = fcn([x; 0]);
-% else
-%     [f, J] = fcn([x; 0]);
-%     J(:, end) = [];     %% delete last col
-% end
-
 function [fp, dfp] = pne_corrector_fcn(x, fcn, pfcn)
 if nargout < 2
     fp = [ fcn(x); pfcn(x) ];
@@ -533,12 +525,6 @@ pfcn = @(xx)parm(xx, xp, 0, zp);
 rhs = [ zeros(length(f), 1); direction ];
 z = [df; dp] \ rhs;
 z = z / norm(z);    %% normalize it
-
-function xx = pne_plot_xfcn(x)
-xx = x(end, :);
-
-function yy = pne_plot_yfcn(x, idx)
-yy = x(idx, :);
 
 function ptag = pne_ptag(parm)
 switch func2str(parm)
