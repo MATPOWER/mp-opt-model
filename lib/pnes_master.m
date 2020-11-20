@@ -147,8 +147,9 @@ dopts = struct( ...
     'plot',             struct( ...     %% used by pne_callback_default() for plotting
         'level',        0, ...          %% 0 - no plot, 1 - final, 2 - steps, 3 - steps w/pause
         'idx',          [], ...         %% index of quantity to plot, passed to yfcn()
-        'xfcn',         @(x)x(end, :), ...          %% UNFINISHED
-        'yfcn',         @(x,idx)x(idx, :), ...      %% UNFINISHED
+        'idx_default',  [], ...         %% fcn to provide default value for idx, if none provided
+        'xfcn',         [], ...         %% UNFINISHED
+        'yfcn',         [], ...         %% UNFINISHED
         'title',        'Value of Variable %d', ... %% UNFINISHED
         'title2',       'Value of Multiple Variables', ...  %% UNFINISHED
         'xlabel',       '\lambda', ...              %% UNFINISHED

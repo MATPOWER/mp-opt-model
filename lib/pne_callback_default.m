@@ -127,32 +127,38 @@ end
 plt = opt.plot;
 plot_idx_default = 0;
 if plt.level
-    xf = plt.xfcn;
-    yf = plt.yfcn;
-
-    if isempty(plt.idx) && ~isfield(nxx, 'plot_idx_default')   %% no index specified
-        idx = length(x) - 1;    %% last one before lambda
-        idx_e = idx;            %% an external index
-        
-        %% save it to keep it from changing in subsequent calls
-        plot_idx_default = idx_e;
+    %% set functions to use for horizontal and vertical coordinates
+    if isempty(plt.xfcn)        %% default horizontal coord is last
+        xf = @(x)x(end, :);     %% element of x (i.e. lambda)
     else
-        if isempty(plt.idx)
-            idx_e = nxx.plot_idx_default;   %% external index, saved
-        else
-            idx_e = plt.idx;                %% external index, provided
-        end
-        if 0%idx_e are all valid
-            %kk = first invalid entry in idx_e
-            error('pne_callback_default: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
-        end
-        idx = idx_e;    %%convert from idx_e;
-        if any(idx == 0)
-            kk = find(idx == 0);
-            error('pne_callback_default: %d is not a valid index for OPT.plot.idx', idx_e(kk(1)));
+        xf = plt.xfcn;
+    end
+    if isempty(plt.yfcn)        %% default vertical coord simply uses
+        yf = @(x,idx)x(idx, :); %% element idx of x
+    else
+        yf = plt.yfcn;
+        if isempty(plt.idx) && isempty(plt.idx_default)
+            error('pne_callback_default: PNE plotting options require specifying either ''idx'' or ''idx_default'' when supplying custom ''yfcn''');
         end
     end
-    nplots = length(idx_e);
+
+    if isempty(plt.idx) && ~isfield(nxx, 'plot_idx_default')   %% no index specified
+        if isempty(plt.idx_default)
+            idx = length(x) - 1;        %% last one before lambda
+        else
+            idx = plt.idx_default();    %% get default from provided function
+        end
+        
+        %% save it to keep it from changing in subsequent calls
+        plot_idx_default = idx;
+    else
+        if isempty(plt.idx)
+            idx = nxx.plot_idx_default; %% index, saved
+        else
+            idx = plt.idx;              %% index, provided
+        end
+    end
+    nplots = length(idx);
 
     %% set bounds for plot axes
     xmin = 0;
@@ -186,7 +192,7 @@ if plt.level
         else
             plot_title = plt.title;
         end
-        title(sprintf(plot_title, idx_e));
+        title(sprintf(plot_title, idx));
         xlabel(plt.xlabel);
         ylabel(plt.ylabel);
         hold on;
@@ -228,7 +234,7 @@ if plt.level
         if nplots > 1
             leg = cell(nplots, 1);
             for kk = 1:nplots
-                leg{kk} = sprintf(plt.legend, idx_e(kk));
+                leg{kk} = sprintf(plt.legend, idx(kk));
             end
             legend(hp, leg);
         end
