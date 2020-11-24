@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 11/24/20
+  - Add optional threshold for detecting failure of LEQ solve, by setting
+    the `leq_opt.thresh` option. If the absolute value of any element of
+    the solution vector exceeds the threshold, `exitflag` is set to 0,
+    indicating failure.
+
 #### 11/17/20
   - Fix examples of `om.set_params()` usage in manual and help text.
 
