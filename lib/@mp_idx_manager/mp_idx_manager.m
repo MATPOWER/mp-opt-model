@@ -152,7 +152,10 @@ classdef mp_idx_manager < handle
 %                                     %% be called from the sub-class
 %                                     %% constructor, since it alters fields of
 %                                     %% an object not yet fully constructed.
-%                                     %% Since been fixed:
+%                                     %% This bug also prevents construction
+%                                     %% from existing objects due to issues
+%                                     %% with inheritance in copy constructors.
+%                                     %% Fixed in v6.x:
 %                                     %%   https://savannah.gnu.org/bugs/?52614
 %             end
         end

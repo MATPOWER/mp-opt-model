@@ -225,11 +225,15 @@ classdef opt_model < mp_idx_manager
             %% call parent constructor
             om@mp_idx_manager(varargin{:});
 
+            %% The following should be (1) called from the base class
+            %% (mp_idx_manager) constructor and skipped if (2) constructed
+            %% from an existing object, neither of which work in Octave 5.2
+            %% and earlier due to:
+            %%   https://savannah.gnu.org/bugs/?52614
+
+            %% skip if it's a sub-class or being constructed from existing object
             if isempty(om.var) && strcmp(class(om), 'opt_model')
-                %% skip if it's a sub-class or being constructed from existing object
-                om.init_set_types();    %% Should be called in mp_idx_manager
-                                        %% constructor, if not for:
-                                        %% https://savannah.gnu.org/bugs/?52614
+                om.init_set_types();
             end
         end
 
