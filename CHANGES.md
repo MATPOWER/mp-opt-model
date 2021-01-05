@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 1/5/21
+  - Calling the `problem_type()` or `is_mixed_integer()` method on an
+    empty model no longer cause a fatal error.
+
 #### 12/16/20
   - Update to use labels from `set_types` property as headers for
     `opt_model/display()` to simplify things and facilitate use by
