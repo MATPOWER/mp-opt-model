@@ -2159,6 +2159,22 @@ An optional 4th output argument \code{vs} indicates the variable sets used by th
 
 And, for constraint sets whose functions compute the constraints for another set, an optional 5th output argument returns a struct with a cell array of set names in the \codeq{name} field and an array of corresponding dimensions in the \codeq{N} field.
 
+\subsubsection*{\code{eval\_lin\_constraint}}
+\label{sec:eval_lin_constraint}
+\begin{Code}
+Ax_u = om.eval_lin_constraint(x)
+Ax_u = om.eval_lin_constraint(x, name)
+Ax_u = om.eval_lin_constraint(x, name, idx_list)
+[Ax_u, l_Ax] = om.eval_lin_constraint(...)
+[Ax_u, l_Ax, A] = om.eval_lin_constraint(...)
+\end{Code}
+Builds and evaluates the linear constraints $Ax - u$ and, optionally $l - Ax$ for the full set of constraints or an individual named subset for a given value of the optimization vector $x$, based on constraints added by \code{add\_lin\_constraint}.
+
+\noindent \\Examples:
+\begin{Code}
+[Ax_u, l_Ax, A] = om.eval_lin_constraint(x);
+\end{Code}
+
 \subsubsection*{\code{eval\_nln\_constraint}}
 \label{sec:eval_nln_constraint}
 \begin{Code}
@@ -2842,7 +2858,8 @@ name & description \\
 \code{~~init\_indexed\_name}\tnote{\dag}	& initializes dimensions for a particular indexed named set	\\
 \code{~~is\_mixed\_integer}	& returns 1 if any of the variables are binary or integer, 0 otherwise	\\
 \code{~~params\_lin\_constraint}	& assembles and returns parameters for linear constraints\tnote{\ddag}	\\
-% \code{~~params\_nln\_cost}	& returns parameters for general nonlinear costs\tnote{\ddag}	\\
+\code{~~params\_nln\_constraint}	& assembles and returns parameters for nonlinear constraints\tnote{\ddag}	\\
+\code{~~params\_nln\_cost}	& assembles and returns parameters for general nonlinear costs\tnote{\ddag}	\\
 \code{~~params\_quad\_cost}	& assembles and returns parameters for quadratic costs\tnote{\ddag}		\\
 \code{~~params\_var}	& assembles and returns inital values, bounds, types for variables\tnote{\ddag}	\\
 \code{~~parse\_soln}	& returns struct of all named solution vectors and shadow prices	\\
