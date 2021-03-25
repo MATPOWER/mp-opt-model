@@ -96,27 +96,26 @@ x_hat   = nx.x_hat;
 %%-----  initialize/update state/results  -----
 if k == 0       %% INITIAL call
     %% initialize state
-    cxx = struct(   'x_hat',    x_hat, ...
+    cbx = struct(   'x_hat',    x_hat, ...
                     'x',        x, ...
                     'steps',    step, ...
                     'iterations', 0     );
-    nxx = cxx;
-    cx.cb.default = cxx;    %% update current callback state
-    nx.cb.default = nxx;    %% update next callback state
+    cx.cb.default = cbx;    %% update current callback state
+    nx.cb.default = cbx;    %% update next callback state
 else
-    nxx = nx.cb.default;    %% get next callback state
+    cbx = nx.cb.default;    %% get next callback state
     if k > 0    %% ITERATION call
         %% update state
-        nxx.x_hat   = [nxx.x_hat    x_hat];
-        nxx.x       = [nxx.x        x];
-        nxx.steps   = [nxx.steps    step];
-        nxx.iterations = k;
-        nx.cb.default = nxx;    %% update next callback state
+        cbx.x_hat   = [cbx.x_hat    x_hat];
+        cbx.x       = [cbx.x        x];
+        cbx.steps   = [cbx.steps    step];
+        cbx.iterations = k;
+        nx.cb.default = cbx;    %% update next callback state
     else            %% FINAL call
         %% assemble results struct
-        s.results.x_hat       = nxx.x_hat;
-        s.results.x           = nxx.x;
-        s.results.steps       = nxx.steps;
+        s.results.x_hat       = cbx.x_hat;
+        s.results.x           = cbx.x;
+        s.results.steps       = cbx.steps;
         s.results.iterations  = -k;
         s.results.max_lam     = max(s.results.x(end, :));
     end
@@ -142,7 +141,7 @@ if plt.level
         end
     end
 
-    if isempty(plt.idx) && ~isfield(nxx, 'plot_idx_default')   %% no index specified
+    if isempty(plt.idx) && ~isfield(cbx, 'plot_idx_default')   %% no index specified
         if isempty(plt.idx_default)
             idx = length(x) - 1;        %% last one before lambda
         else
@@ -153,7 +152,7 @@ if plt.level
         plot_idx_default = idx;
     else
         if isempty(plt.idx)
-            idx = nxx.plot_idx_default; %% index, saved
+            idx = cbx.plot_idx_default; %% index, saved
         else
             idx = plt.idx;              %% index, provided
         end
@@ -162,9 +161,9 @@ if plt.level
 
     %% set bounds for plot axes
     xmin = 0;
-    xmax = max([max(xf(nxx.x_hat)); max(xf(nxx.x))]);
-    ymin = min([min(min(yf(nxx.x_hat, idx))); min(min(yf(nxx.x, idx)))]);
-    ymax = max([max(max(yf(nxx.x_hat, idx))); max(max(yf(nxx.x, idx)))]);
+    xmax = max([max(xf(cbx.x_hat)); max(xf(cbx.x))]);
+    ymin = min([min(min(yf(cbx.x_hat, idx))); min(min(yf(cbx.x, idx)))]);
+    ymax = max([max(max(yf(cbx.x_hat, idx))); max(max(yf(cbx.x, idx)))]);
     if xmax < xmin + opt.step / 100;
         xmax = xmin + opt.step / 100;
     end
@@ -186,7 +185,7 @@ if plt.level
         
         %% initialize continuation curve plot
         axis([xmin xmax ymin ymax]);
-        plot(xf(cxx.x_hat(:,1)), yf(cxx.x_hat(:,1), idx), '-', 'Color', [0.25 0.25 1]);
+        plot(xf(cbx.x_hat(:,1)), yf(cbx.x_hat(:,1), idx), '-', 'Color', [0.25 0.25 1]);
         if nplots > 1
             plot_title = plt.title2;
         else
@@ -203,18 +202,18 @@ if plt.level
             axis([xmin xmax ymin ymax]);
             for kk = 1:nplots
                 %% prediction line
-                plot([xf(nxx.x(:,k)); xf(nxx.x_hat(:,k+1))], ...
-                    [yf(nxx.x(:, k), idx(kk)); yf(nxx.x_hat(:,k+1), idx(kk))], '-', ...
+                plot([xf(cbx.x(:,k)); xf(cbx.x_hat(:,k+1))], ...
+                    [yf(cbx.x(:, k), idx(kk)); yf(cbx.x_hat(:,k+1), idx(kk))], '-', ...
                     'Color', 0.85*[1 0.75 0.75]);
                 %% correction line
-                plot([xf(nxx.x_hat(:,k+1)); xf(nxx.x(:,k+1))], ...
-                    [yf(nxx.x_hat(:,k+1),idx(kk)); yf(nxx.x(:,k+1),idx(kk))], '-', ...
+                plot([xf(cbx.x_hat(:,k+1)); xf(cbx.x(:,k+1))], ...
+                    [yf(cbx.x_hat(:,k+1),idx(kk)); yf(cbx.x(:,k+1),idx(kk))], '-', ...
                     'Color', 0.85*[0.75 1 0.75]);
                 %% prediciton point
-                plot(xf(nxx.x_hat(:,k+1)), yf(nxx.x_hat(:,k+1),idx(kk)), 'x', ...
+                plot(xf(cbx.x_hat(:,k+1)), yf(cbx.x_hat(:,k+1),idx(kk)), 'x', ...
                     'Color', 0.85*[1 0.75 0.75]);
                 %% correction point
-                plot(xf(nxx.x(:,k+1))', yf(nxx.x(:,k+1),idx(kk))', '-o', ...
+                plot(xf(cbx.x(:,k+1))', yf(cbx.x(:,k+1),idx(kk))', '-o', ...
                     'Color', [0.25 0.25 1]);
                 drawnow;
             end
@@ -230,7 +229,7 @@ if plt.level
         if isprop(gca, 'ColorOrderIndex')
             set(gca, 'ColorOrderIndex', 1); %% start over with color 1
         end
-        hp = plot(xf(nxx.x)', yf(nxx.x, idx)',  '-');
+        hp = plot(xf(cbx.x)', yf(cbx.x, idx)',  '-');
         if nplots > 1
             leg = cell(nplots, 1);
             for kk = 1:nplots
