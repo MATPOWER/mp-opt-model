@@ -131,7 +131,7 @@ plot_idx_default = 0;
 if plt.level
     %% set functions to use for horizontal and vertical coordinates
     if isempty(plt.xfcn)        %% default horizontal coord is last
-        xf = @(x)x(end, :);     %% element of x (i.e. lambda)
+        xf = @(x)x;             %% element of x (i.e. lambda)
     else
         xf = plt.xfcn;
     end
@@ -162,11 +162,25 @@ if plt.level
     end
     nplots = length(idx);
 
-    %% set bounds for plot axes
+    %% get plot data, initialize bounds for plot axes
+    xx  = xf(cbx.(plt.xname));
+    yy  = yf(cbx.(plt.yname), idx);
     xmin = 0;
-    xmax = max([max(xf(cbx.x_hat)); max(xf(cbx.x))]);
-    ymin = min([min(min(yf(cbx.x_hat, idx))); min(min(yf(cbx.x, idx)))]);
-    ymax = max([max(max(yf(cbx.x_hat, idx))); max(max(yf(cbx.x, idx)))]);
+    xmax = max(xx);
+    ymin = min(min(yy));
+    ymax = max(max(yy));
+    if plt.level > 1
+        xxh = xf(cbx.([plt.xname '_hat']));
+        yyh = yf(cbx.([plt.yname '_hat']), idx);
+        xmax = max(xmax, max(xxh));
+        ymin = min(ymin, min(min(yyh)));
+        ymax = max(ymax, max(max(yyh)));
+    else
+        xxh = [];
+        yyh = [];
+    end
+
+    %% adjust bounds for plot axes
     if xmax < xmin + opt.step / 100;
         xmax = xmin + opt.step / 100;
     end
@@ -188,7 +202,7 @@ if plt.level
         
         %% initialize continuation curve plot
         axis([xmin xmax ymin ymax]);
-        plot(xf(cbx.x_hat(:,1)), yf(cbx.x_hat(:,1), idx), '-', 'Color', [0.25 0.25 1]);
+        plot(xx(:,1), yy(:,1), '-', 'Color', [0.25 0.25 1]);
         if nplots > 1
             plot_title = plt.title2;
         else
@@ -205,18 +219,18 @@ if plt.level
             axis([xmin xmax ymin ymax]);
             for kk = 1:nplots
                 %% prediction line
-                plot([xf(cbx.x(:,k)); xf(cbx.x_hat(:,k+1))], ...
-                    [yf(cbx.x(:, k), idx(kk)); yf(cbx.x_hat(:,k+1), idx(kk))], '-', ...
+                plot([xx(:,k); xxh(:,k+1)], ...
+                    [yy(kk, k); yyh(kk, k+1)], '-', ...
                     'Color', 0.85*[1 0.75 0.75]);
                 %% correction line
-                plot([xf(cbx.x_hat(:,k+1)); xf(cbx.x(:,k+1))], ...
-                    [yf(cbx.x_hat(:,k+1),idx(kk)); yf(cbx.x(:,k+1),idx(kk))], '-', ...
+                plot([xxh(:,k+1); xx(:,k+1)], ...
+                    [yyh(kk, k+1); yy(kk, k+1)], '-', ...
                     'Color', 0.85*[0.75 1 0.75]);
                 %% prediciton point
-                plot(xf(cbx.x_hat(:,k+1)), yf(cbx.x_hat(:,k+1),idx(kk)), 'x', ...
+                plot(xxh(:,k+1), yyh(kk, k+1), 'x', ...
                     'Color', 0.85*[1 0.75 0.75]);
                 %% correction point
-                plot(xf(cbx.x(:,k+1))', yf(cbx.x(:,k+1),idx(kk))', '-o', ...
+                plot(xx(:,k+1), yy(kk, k+1), '-o', ...
                     'Color', [0.25 0.25 1]);
                 drawnow;
             end
@@ -232,7 +246,7 @@ if plt.level
         if isprop(gca, 'ColorOrderIndex')
             set(gca, 'ColorOrderIndex', 1); %% start over with color 1
         end
-        hp = plot(xf(cbx.x)', yf(cbx.x, idx)',  '-');
+        hp = plot(xx', yy',  '-');
         if nplots > 1
             leg = cell(nplots, 1);
             for kk = 1:nplots
