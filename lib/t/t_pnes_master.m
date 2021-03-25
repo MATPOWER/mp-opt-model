@@ -18,7 +18,7 @@ cfg = {
     {'DEFAULT', 'default',  []          []  },
 };
 
-n = 77;
+n = 98;
 
 t_begin(n*length(cfg), quiet);
 
@@ -54,6 +54,9 @@ for k = 1:length(cfg)
         t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 0.7, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
+        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
+        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events.k, it, 12, [t 'out.cont.events.k']);
         t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
@@ -71,6 +74,9 @@ for k = 1:length(cfg)
         t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 0.7, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
+        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
+        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events.k, it, 12, [t 'out.cont.events.k']);
         t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
@@ -87,6 +93,9 @@ for k = 1:length(cfg)
         t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 0.7, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
+        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
+        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events.k, it, 12, [t 'out.cont.events.k']);
         t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
@@ -104,6 +113,9 @@ for k = 1:length(cfg)
         t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 1.04127275, 8, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
+        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
+        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events.k, it, 12, [t 'out.cont.events.k']);
         t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
@@ -121,6 +133,9 @@ for k = 1:length(cfg)
         t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 1.04166666667, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
+        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
+        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events.k, it, 12, [t 'out.cont.events.k']);
         t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
@@ -137,6 +152,9 @@ for k = 1:length(cfg)
         t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 1.04166666667, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
+        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
+        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events.k, it, 12, [t 'out.cont.events.k']);
         t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
@@ -153,6 +171,9 @@ for k = 1:length(cfg)
         t_is(out.cont.x(:,1), [2;-1;0], 8, [t 'out.cont.x(:,1)']);
         t_is(out.cont.max_lam, 1.04166666667, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
+        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
+        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 1, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events.k, it, 12, [t 'out.cont.events.k']);
         t_is(out.cont.events.idx, 1, 12, [t 'out.cont.events.idx']);
