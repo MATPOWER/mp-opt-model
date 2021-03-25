@@ -144,6 +144,7 @@ dopts = struct( ...
     'nose_tol',         0, ...          %% UNFINISHED
     'events',           {{}}, ...       %% UNFINISHED
     'callbacks',        {{}}, ...       %% UNFINISHED
+    'output_fcn',       [], ...         %% custom output fcn, default callback
     'plot',             struct( ...     %% used by pne_callback_default() for plotting
         'level',        0, ...          %% 0 - no plot, 1 - final, 2 - steps, 3 - steps w/pause
         'idx',          [], ...         %% index of quantity to plot, passed to yfcn()
@@ -152,6 +153,8 @@ dopts = struct( ...
         'yfcn',         [], ...         %% UNFINISHED
         'title',        'Value of Variable %d', ... %% UNFINISHED
         'title2',       'Value of Multiple Variables', ...  %% UNFINISHED
+        'xname',        'lam', ...      %% name of output field holding x vals
+        'yname',        'x', ...        %% name of output field holding y vals
         'xlabel',       '\lambda', ...              %% UNFINISHED
         'ylabel',       'Variable Value', ...       %% UNFINISHED
         'legend',       'Variable %d' ...           %% UNFINISHED
@@ -203,7 +206,7 @@ if opt.solve_base
     [x, f, exitflag, out] = nleqs_master(@(xx)pne_corrector_fcn(xx, fcn, pfcn), x0, opt.nleqs_opt);
     if exitflag
         if opt.verbose > 1
-            fprintf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', 0, 0, out.iterations);
+            fprintf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', 0, x0(end), out.iterations);
         end
     else
         s.done = 1;
@@ -308,7 +311,6 @@ while ~s.done
         cont_steps = max(cont_steps - 1, 1);    %% go back to last step, but not to 0
         break;
     end
-
 %x = nx.x
 
     %% compute new tangent direction, based on a previous state: tx
@@ -484,7 +486,6 @@ while ~s.done
         cx.this_parm = [];      %% disable for next time
     end
 end     %% while ~s.done
-
 
 %% invoke callbacks - "final" context
 s.results = struct();   %% initialize results struct

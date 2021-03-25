@@ -20,7 +20,8 @@ function reg_ev = pne_register_events(my_events, opt, reg_ev)
 %           functions
 %
 %   Outputs:
-%       REG_EV : updated struct containing registered event functions
+%       REG_EV : updated struct containing registered event functions, with
+%           fields name, fcn, tol, locate, corresponding to respective inputs
 %
 %   User Defined PNES_MASTER Event Functions:
 %       The user can define their own event detection functions which take

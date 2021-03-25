@@ -93,31 +93,34 @@ step    = nx.step;
 x       = nx.x;
 x_hat   = nx.x_hat;
 
+%% get output function
+if isempty(opt.output_fcn)
+    output_fcn = @pne_output_fcn_default;
+else
+    output_fcn = opt.output_fcn;
+end
+
 %%-----  initialize/update state/results  -----
 if k == 0       %% INITIAL call
     %% initialize state
-    cbx = struct(   'x_hat',    x_hat, ...
-                    'x',        x, ...
-                    'steps',    step, ...
-                    'iterations', 0     );
+    cbx = struct(   'steps',    step, ...
+                    'iterations', k     );
+    cbx = output_fcn(cbx, x, x_hat);
     cx.cb.default = cbx;    %% update current callback state
     nx.cb.default = cbx;    %% update next callback state
 else
     cbx = nx.cb.default;    %% get next callback state
     if k > 0    %% ITERATION call
         %% update state
-        cbx.x_hat   = [cbx.x_hat    x_hat];
-        cbx.x       = [cbx.x        x];
+        cbx = output_fcn(cbx, x, x_hat);
         cbx.steps   = [cbx.steps    step];
         cbx.iterations = k;
         nx.cb.default = cbx;    %% update next callback state
     else            %% FINAL call
         %% assemble results struct
-        s.results.x_hat       = cbx.x_hat;
-        s.results.x           = cbx.x;
+        s.results = output_fcn(cbx, s.results);
         s.results.steps       = cbx.steps;
         s.results.iterations  = -k;
-        s.results.max_lam     = max(s.results.x(end, :));
     end
 end
 
@@ -147,7 +150,7 @@ if plt.level
         else
             idx = plt.idx_default();    %% get default from provided function
         end
-        
+
         %% save it to keep it from changing in subsequent calls
         plot_idx_default = idx;
     else
@@ -239,4 +242,29 @@ if plt.level
         end
         hold off;
     end
+end
+
+function rv = pne_output_fcn_default(cbx, x, x_hat)
+%% cbx     = pne_output_fcn_default(cbx, x, x_hat)
+%% results = pne_output_fcn_default(cbx, results)
+if nargin == 3      %% store values in callback state
+    rv = cbx;
+    if isfield(cbx, 'x')    %% append values (ITERATION)
+        rv.lam_hat = [ rv.lam_hat x_hat(end) ];
+        rv.lam     = [ rv.lam     x(end)     ];
+        rv.x_hat   = [ rv.x_hat   x_hat ];
+        rv.x       = [ rv.x       x     ];
+    else                    %% initialize values (INITIAL)
+        rv.lam_hat = x_hat(end);
+        rv.lam     = x(end);
+        rv.x_hat   = x_hat;
+        rv.x       = x;
+    end
+else                        %% copy fields to results (FINAL)
+    rv = x;
+    rv.lam_hat = cbx.lam_hat;
+    rv.lam     = cbx.lam;
+    rv.max_lam = max(cbx.lam);
+    rv.x_hat   = cbx.x_hat;
+    rv.x       = cbx.x;
 end
