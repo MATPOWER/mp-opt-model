@@ -29,10 +29,10 @@ if ~s.rollback || nx.step == 0
     for i = 1:length(s.evnts)
         if strcmp(s.evnts(i).name, 'NOSE') && s.evnts(i).zero
             if nx.step == 0
-                s.evnts(i).msg = ...
+                msg = ...
                     sprintf('Nose point eliminated by limit induced bifurcation at %d continuation steps, lambda = %.4g.', k, nx.x(end));
             else
-                s.evnts(i).msg = ...
+                msg = ...
                     sprintf('Reached limit in %d continuation steps, lambda = %.4g.', k, nx.x(end));
             end
 
@@ -40,7 +40,7 @@ if ~s.rollback || nx.step == 0
             %% finding the location of the nose-point without terminating
             if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');
                 s.done = 1;
-                s.done_msg = s.evnts(i).msg;
+                s.done_msg = msg;
             end
             break;
         end

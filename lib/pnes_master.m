@@ -176,7 +176,6 @@ s = struct( ...         %% container struct for various variables, flags
     'rollback', 0, ...      %% flag to indicate a step must be rolled back
     'evnts',    [], ...     %% struct array for detected events
     'results',  []  );      %% results struct
-z0 = zeros(length(x0), 1);      %% (n+1) x 1, zeros
 
 %% register event and callback functions
 if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');

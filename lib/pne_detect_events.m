@@ -161,11 +161,11 @@ if evnts(1).eidx
             s1 = '';
         end
         if rollback
-            s2 = sprintf('ROLLBACK by %g', evnts(i).step_scale);
+            s2 = sprintf(' : ROLLBACK by %g', evnts(i).step_scale);
         else
-            s2 = 'CONTINUE';
+            s2 = '';
         end
-        evnts(i).msg = sprintf('%s detected for %s%s event : %s', ...
+        evnts(i).msg = sprintf('%s detected for %s%s event%s', ...
             evnts(i).msg, evnts(i).name, s1, s2);
     end
 end

@@ -53,7 +53,6 @@ for i = 1:length(s.evnts)
             end
         else                    %% set step-size & parameterization to terminate next time
             cx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
-            s.evnts(i).log = 1;
             if target == 0      %% FULL
                 cx.this_step = cx.x(end);
                 s.evnts(i).msg = sprintf('%s\n  step %d to overshoot full trace, reduce step size and set natural param', s.evnts(i).msg, k);
@@ -82,7 +81,7 @@ if ~event_detected && ~s.rollback
         if x_hat(end) < -nx.x(end)
             nx.this_step = nx.x(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
-            if opt.verbose > 2
+            if opt.verbose > 3
                 fprintf('  step %d prediction to overshoot full trace, set next step to natural param w/reduced size\n', k+1);
             end
         end
@@ -90,7 +89,7 @@ if ~event_detected && ~s.rollback
         if x_hat(end) > target + (target - nx.x(end))
             nx.this_step = target - nx.x(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
-            if opt.verbose > 2
+            if opt.verbose > 3
                 fprintf('  step %d prediction to overshoot target lambda, set next step to natural param w/reduced size\n', k+1);
             end
         end

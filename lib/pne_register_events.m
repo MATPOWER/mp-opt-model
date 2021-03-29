@@ -10,7 +10,7 @@ function reg_ev = pne_register_events(my_events, opt, reg_ev)
 %           a cell array of such cell arrays, TOL and LOCATE are optional:
 %           NAME - char array with a unique event name
 %           FCN - function handle to the event detection function
-%           TOL (OPT.default_even_tol) - optional, scalar or vector of same
+%           TOL (OPT.default_event_tol) - optional, scalar or vector of same
 %               dimension as event function return value of tolerance for
 %               detecting the event, i.e. abs(val) <= tol
 %           LOCATE (1) - optional, flag indicating whether the event requests
