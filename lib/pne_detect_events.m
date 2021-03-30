@@ -69,7 +69,8 @@ for eidx = 1:nef
     idx = find( abs(c_sign) == 1 & c_sign == -p_sign & ...
                 abs(cef{eidx}) > reg_ev(eidx).tol  );
     if ~isempty(idx)
-        if step == 0    %% if it's a "repeat" step (e.g. after fcn change)
+        if step == 0    %% if it's a "repeat" step
+            %% (e.g. after warmstart with possible fcn change)
             %% ... make this one the critical one and call it a ZERO event
             evnts.eidx = eidx;
             evnts.zero = 1;

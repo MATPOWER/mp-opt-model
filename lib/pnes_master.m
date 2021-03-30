@@ -145,6 +145,7 @@ dopts = struct( ...
     'events',           {{}}, ...       %% UNFINISHED
     'callbacks',        {{}}, ...       %% UNFINISHED
     'output_fcn',       [], ...         %% custom output fcn, default callback
+    'warmstart',        [], ...         %% default warm start state
     'plot',             struct( ...     %% used by pne_callback_default() for plotting
         'level',        0, ...          %% 0 - no plot, 1 - final, 2 - steps, 3 - steps w/pause
         'idx',          [], ...         %% index of quantity to plot, passed to yfcn()
@@ -170,8 +171,11 @@ if opt.nose_tol == 0
 end
 
 %% initialize
+warmstarted = ~isempty(opt.warmstart);
 s = struct( ...         %% container struct for various variables, flags
     'done',     0, ...      %% flag indicating continuation has terminated
+    'warmstart',[], ...     %% warm start state to return when done (to pass
+                            ...%% to subsequent warm-started call to PNES_MASTER)
     'done_msg', '', ...     %% termination message
     'rollback', 0, ...      %% flag to indicate a step must be rolled back
     'evnts',    [], ...     %% struct array for detected events
@@ -193,19 +197,28 @@ ncb = length(reg_cb);   %% number of registered callback functions
 
 t0 = tic;                       %% start timing
 
-if opt.verbose
-    v = mpomver('all');
-    fprintf('\nMP-Opt-Model Version %s, %s', v.Version, v.Date);
-    fprintf(' -- Predictor/Corrector Continuation Method\n');
+%% initialize continuation step counter
+if warmstarted
+    cont_steps = opt.warmstart.cont_steps + 1;
+    if opt.verbose
+        fprintf('... CONTINUATION RESUMED\n');
+    end
+else
+    cont_steps = 0;
+    if opt.verbose
+        v = mpomver('all');
+        fprintf('\nMP-Opt-Model Version %s, %s', v.Version, v.Date);
+        fprintf(' -- Predictor/Corrector Continuation Method\n');
+    end
 end
 
 %% solve corrector step for base point
-if opt.solve_base
+if opt.solve_base && ~warmstarted
     pfcn = @(xx)pne_pfcn_natural(xx, x0, 0);
     [x, f, exitflag, out] = nleqs_master(@(xx)pne_corrector_fcn(xx, fcn, pfcn), x0, opt.nleqs_opt);
     if exitflag
         if opt.verbose > 1
-            fprintf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', 0, x0(end), out.iterations);
+            fprintf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', cont_steps, x0(end), out.iterations);
         end
     else
         s.done = 1;
@@ -220,73 +233,88 @@ end
 
 %% initialize numerical continuation
 if ~s.done
-    step = opt.step;
-    cont_steps = 0; %% continuation step counter
     locating = 0;   %% flag to indicate that an event interval was detected,
                     %% but the event has not yet been located
     rb_cnt_ef = 0;  %% counter for rollback steps triggered by event function intervals
     rb_cnt_cb = 0;  %% counter for rollback steps triggered directly by callbacks
+    direction = 1;  %% increasing lambda
 
-    %% initialize parameterization function
-    switch opt.parameterization
-        case 1
-            parm = @pne_pfcn_natural;           %% NAT
-        case 2
-            parm = @pne_pfcn_arc_len;           %% ARC
-        case 3
-            parm = @pne_pfcn_pseudo_arc_len;    %% PAL
-        otherwise
-            error('pnes_master: OPT.parameterization (= %d) must be 1, 2, or 3', parm);
+    if warmstarted
+        ws = opt.warmstart;
+        cx = ws.cx;
+        cx.step = 0;
+        s.evnts = ws.evnts;
+
+        if opt.adapt_step
+            cx.default_step = cx.default_step/4;    %% slow down, things may have changed
+        end
+    else
+        %% initialize parameterization function
+        switch opt.parameterization
+            case 1
+                parm = @pne_pfcn_natural;           %% NAT
+            case 2
+                parm = @pne_pfcn_arc_len;           %% ARC
+            case 3
+                parm = @pne_pfcn_pseudo_arc_len;    %% PAL
+            otherwise
+                error('pnes_master: OPT.parameterization (= %d) must be 1, 2, or 3', parm);
+        end
+
+        z = zeros(length(x0), 1); z(end) = direction;   %% direction of positive lambda
+
+        %% initialize state for current continuation step
+        step = opt.step;
+        cx = struct( ...        %% current state
+            'x_hat',        x, ...      %% predicted solution value
+            'x',            x, ...      %% corrected solution value
+            'z',            z, ...      %% normalized tangent vector
+            'default_step', step, ...   %% default step size
+            'default_parm', parm, ...   %% default parameterization
+            'this_step', [], ...        %% step size for this step only
+            'this_parm', [], ...        %% parameterization for this step only
+            'step', step, ...           %% current step size
+            'parm', parm, ...           %% current parameterization
+            'events', [], ...           %% event log
+            'cb', struct(), ...         %% user state, for callbacks
+            'ef', [] ...                %% event function values
+        );
     end
 
-    %% initialize tangent: z = dx
-    direction = 1;
-    z = zeros(length(x0), 1); z(end) = direction;   %% direction of positive lambda
-    z = pne_tangent(x, x, z, fcn, parm, direction);
-
-    %% initialize state for current continuation step
-    cx = struct( ...        %% current state
-        'x_hat',        x, ...      %% predicted solution value
-        'x',            x, ...      %% corrected solution value
-        'z',            z, ...      %% normalized tangent vector
-        'default_step', step, ...   %% default step size
-        'default_parm', parm, ...   %% default parameterization
-        'this_step', [], ...        %% step size for this step only
-        'this_parm', [], ...        %% parameterization for this step only
-        'step', step, ...           %% current step size
-        'parm', parm, ...           %% current parameterization
-        'events', [], ...           %% event log
-        'cb', struct(), ...         %% user state, for callbacks
-        'ef', {cell(nef, 1)} ...    %% event function values
-    );
+    %% finish initializing tangent vector
+    cx.z = pne_tangent(cx.x, cx.x, cx.z, fcn, cx.parm, direction);
 
     %% initialize event function values
+    cx.ef = cell(nef, 1);
     for k = 1:nef
         cx.ef{k} = reg_ev(k).fcn(cx, opt);
     end
 
-    %% invoke callbacks - "initialize" context
-    for k = 1:ncb
-        [nx, cx, s] = reg_cb(k).fcn(cont_steps, cx, cx, cx, s, opt);
+    if ~warmstarted
+        %% invoke callbacks - "initialize" context
+        for k = 1:ncb
+            [nx, cx, s] = reg_cb(k).fcn(cont_steps, cx, cx, cx, s, opt);
+        end
+        cont_steps = cont_steps + 1;
+
+        %% check for case with base and target the same
+        if opt.solve_base
+            fb = f(1:end-1);
+        else
+            fb = fcn(x0);
+            exitflag = 0;
+        end
+        xt = x0;
+        xt(end) = 1;
+        ft = fcn(xt);
+        if norm(fb - ft, Inf) < 1e-12
+            s.done = 1;
+            s.done_msg = 'base and target functions are identical';
+        end
     end
-    
-    %% check for case with base and target the same
-    if opt.solve_base
-        fb = f(1:end-1);
-    else
-        fb = fcn(x0);
-        exitflag = 0;
-    end
-    xt = x0;
-    xt(end) = 1;
-    ft = fcn(xt);
-    if norm(fb - ft, Inf) < 1e-12
-        s.done = 1;
-        s.done_msg = 'base and target functions are identical';
-    end
-    
-    cont_steps = cont_steps + 1;
-    px = cx;    %% initialize state for previous continuation step
+
+    %% initialize state for previous continuation step
+    px = cx;
 end
 
 %%-----  run numerical continuation  -----
@@ -296,7 +324,6 @@ while ~s.done
 
     %% predictor step
     nx.x_hat = cx.x + cx.step * cx.z;
-%x_hat = nx.x_hat
 
     %% corrector step
     pfcn = @(xx)cx.parm(xx, cx.x, cx.step, cx.z);
@@ -310,15 +337,9 @@ while ~s.done
         cont_steps = max(cont_steps - 1, 1);    %% go back to last step, but not to 0
         break;
     end
-%x = nx.x
 
-    %% compute new tangent direction, based on a previous state: tx
-    if nx.step == 0     %% if this is a re-do step, cx and nx are the same
-        tx = px;            %% so use px as the previous state
-    else                %% otherwise
-        tx = cx;            %% use cx as the previous state
-    end
-    nx.z = pne_tangent(nx.x, tx.x, tx.z, fcn, nx.parm, direction);
+    %% compute new tangent direction, based on current state
+    nx.z = pne_tangent(nx.x, cx.x, cx.z, fcn, nx.parm, direction);
 
     %% detect events
     for k = 1:nef
@@ -383,13 +404,14 @@ while ~s.done
             s.done_msg = 'Too many rollback steps triggered by callbacks!';
         end
     else
-        if ~s.done && s.evnts(1).zero
-            %% decide whether to switch directions
-            reply = input('Switch directions? Y/N [N]:','s');
-            if strcmp(upper(reply), 'Y')
-                direction = -direction;
-            end
-        end
+%--- no need to set it if we're DONE done, but if it's to-be-contd, maybe
+%         if ~s.done && s.evnts(1).zero
+%             %% decide whether to switch directions
+%             reply = input('Switch directions? Y/N [N]:','s');
+%             if strcmp(upper(reply), 'Y')
+%                 direction = -direction;
+%             end
+%         end
         rb_cnt_cb = 0;              %% reset rollback counter for callbacks
     end
 
@@ -486,17 +508,30 @@ while ~s.done
     end
 end     %% while ~s.done
 
-%% invoke callbacks - "final" context
-s.results = struct();   %% initialize results struct
-for k = 1:ncb
-    [nx, cx, s] = reg_cb(k).fcn(-cont_steps, nx, cx, px, s, opt);
-end
-out.cont = s.results;
-out.cont.done_msg = s.done_msg;
-out.cont.events = cx.events;    %% copy eventlog to results
+%% prepare to exit
+if isempty(s.warmstart)
+    %% invoke callbacks - "final" context
+    s.results = struct();   %% initialize results struct
+    for k = 1:ncb
+        [nx, cx, s] = reg_cb(k).fcn(-cont_steps, nx, cx, px, s, opt);
+    end
+    out.cont = s.results;
+    out.cont.done_msg = s.done_msg;
+    out.cont.events = cx.events;    %% copy eventlog to results
 
-if opt.verbose
-    fprintf('CONTINATION TERMINATION: %s\n', s.done_msg);
+    if opt.verbose
+        fprintf('CONTINUATION TERMINATION: %s\n', s.done_msg);
+    end
+else
+    ws = s.warmstart;
+    ws.cx = cx;
+    ws.cont_steps = cont_steps;
+    ws.evnts = s.evnts;
+    out.warmstart = ws;
+
+    if opt.verbose
+        fprintf('%s : CONTINUATION SUSPENDED ...\n', s.done_msg);
+    end
 end
 
 %% output arguments

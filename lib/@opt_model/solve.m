@@ -179,9 +179,10 @@ switch pt
         output = struct('alg', leq_solver);
         lambda = A;     %% jac
     case {'NLEQ', 'PNE'}    %% NLEQ, PNE - nonlinear equations
-        x0 = om.params_var();
         if isfield(opt, 'x0')
             x0 = opt.x0;
+        else
+            x0 = om.params_var();
         end
 
         if om.getN('lin')
