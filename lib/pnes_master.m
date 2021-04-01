@@ -238,15 +238,19 @@ if ~s.done
     rb_cnt_ef = 0;  %% counter for rollback steps triggered by event function intervals
     rb_cnt_cb = 0;  %% counter for rollback steps triggered directly by callbacks
     direction = 1;  %% increasing lambda
+    z = zeros(length(x0), 1); z(end) = direction;   %% direction of positive lambda
 
     if warmstarted
         ws = opt.warmstart;
-        cx = ws.cx;
-        cx.step = 0;
-        s.evnts = ws.evnts;
+        step = 0;
+        parm = ws.parm;
+        default_parm = ws.default_parm;
+        default_step = ws.default_step;
+        cbx = ws.cbx;
+        evnts = ws.events;
 
         if opt.adapt_step
-            cx.default_step = cx.default_step/4;    %% slow down, things may have changed
+            default_step = default_step/4;  %% slow down, things may have changed
         end
     else
         %% initialize parameterization function
@@ -261,25 +265,28 @@ if ~s.done
                 error('pnes_master: OPT.parameterization (= %d) must be 1, 2, or 3', parm);
         end
 
-        z = zeros(length(x0), 1); z(end) = direction;   %% direction of positive lambda
-
-        %% initialize state for current continuation step
         step = opt.step;
-        cx = struct( ...        %% current state
-            'x_hat',        x, ...      %% predicted solution value
-            'x',            x, ...      %% corrected solution value
-            'z',            z, ...      %% normalized tangent vector
-            'default_step', step, ...   %% default step size
-            'default_parm', parm, ...   %% default parameterization
-            'this_step', [], ...        %% step size for this step only
-            'this_parm', [], ...        %% parameterization for this step only
-            'step', step, ...           %% current step size
-            'parm', parm, ...           %% current parameterization
-            'events', [], ...           %% event log
-            'cb', struct(), ...         %% user state, for callbacks
-            'ef', [] ...                %% event function values
-        );
+        default_step = step;
+        default_parm = parm;
+        cbx = [];
+        evnts = [];
     end
+
+    %% initialize state for current continuation step
+    cx = struct( ...        %% current state
+        'x_hat',        x, ...      %% predicted solution value
+        'x',            x, ...      %% corrected solution value
+        'z',            z, ...      %% normalized tangent vector
+        'default_step', default_step, ...   %% default step size
+        'default_parm', default_parm, ...   %% default parameterization
+        'this_step', [], ...        %% step size for this step only
+        'this_parm', [], ...        %% parameterization for this step only
+        'step', step, ...           %% current step size
+        'parm', parm, ...           %% current parameterization
+        'events', evnts, ...        %% event log
+        'cb', cbx, ...              %% user state, for callbacks
+        'ef', [] ...                %% event function values
+    );
 
     %% finish initializing tangent vector
     cx.z = pne_tangent(cx.x, cx.x, cx.z, fcn, cx.parm, direction);
@@ -524,9 +531,12 @@ if isempty(s.warmstart)
     end
 else
     ws = s.warmstart;
-    ws.cx = cx;
+    ws.parm = cx.parm;
+    ws.default_parm = cx.default_parm;
+    ws.default_step = cx.default_step;
+    ws.events = cx.events;
     ws.cont_steps = cont_steps;
-    ws.evnts = s.evnts;
+    ws.cbx = cx.cb;
     out.warmstart = ws;
 
     if opt.verbose

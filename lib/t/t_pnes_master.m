@@ -18,7 +18,7 @@ cfg = {
     {'DEFAULT', 'default',  []          []  },
 };
 
-n = 153;
+n = 154;
 
 t_begin(n*length(cfg), quiet);
 
@@ -201,8 +201,9 @@ for k = 1:length(cfg)
         opt.adapt_step_tol = 5e-3;
         opt.callbacks = {@pne_callback_test1};
         opt.events = {{'SWITCH!', @pne_event_test1, 1e-6}};
+        opt.output_fcn = @pne_output_fcn_test1;
         % opt.verbose = 4;
-        % opt.plot = struct('level', 2, 'idx', [1;2]);
+        % opt.plot = struct('level', 2, 'yname', 'y', 'idx', [1;2]);
         x0 = [-1;0;0];
         [x, f, e, out, jac] = pnes_master(@f1p, x0, opt);
         it = 10;
@@ -210,36 +211,37 @@ for k = 1:length(cfg)
         t_is(x, [-2; -1; 2/3], 6, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);
         t_ok(isfield(out, 'warmstart') && ~isempty(out.warmstart), [t 'out.warmstart exists']);
-        t_ok(isfield(out.warmstart, 'cx') && ~isempty(out.warmstart.cx), [t 'out.warmstart.cx exists']);
-        t_is(out.warmstart.cx.step, 0.64432407, 8, [t 'out.warmstart.cx.step']);
         t_is(out.warmstart.cont_steps, it, 12, [t 'out.warmstart.cont_steps']);
-        t_ok(isfield(out.warmstart, 'evnts') && ~isempty(out.warmstart.evnts), [t 'out.warmstart.evnts exists']);
-        t_is(out.warmstart.evnts.zero, 1, 12, [t 'out.warmstart.evnts.zero']);
-        t_is(out.warmstart.evnts.eidx, 2, 12, [t 'out.warmstart.evnts.eidx']);
-        t_is(out.warmstart.evnts.idx, 1, 12, [t 'out.warmstart.evnts.idx']);
-        t_is(out.warmstart.evnts.log, 1, 12, [t 'out.warmstart.evnts.log']);
-        t_is(out.warmstart.evnts.step_scale, 1, 12, [t 'out.warmstart.evnts.step_scale']);
-        t_ok(strcmp(out.warmstart.evnts.name, 'SWITCH!'), [t 'out.warmstart.evnts.name']);
-        t_ok(strcmp(out.warmstart.evnts.msg, 'ZERO detected for SWITCH! event'), [t 'out.warmstart.evnts.msg']);
+        t_is(out.warmstart.default_step, 0.64432407, 8, [t 'out.warmstart.default_step']);
+        t_ok(isa(out.warmstart.parm, 'function_handle'), [t 'out.warmstart.parm is function']);
+        t_ok(isa(out.warmstart.default_parm, 'function_handle'), [t 'out.warmstart.default_parm is function']);
+        t_ok(isstruct(out.warmstart.cbx), [t 'out.warmstart.cbx is struct']);
+        t_ok(isstruct(out.warmstart.cbx.default), [t 'out.warmstart.cbx.default is struct']);
+        t_is(out.warmstart.cbx.default.iterations, it, 12, [t 'out.warmstart.cbx.default.iterations']);
+        t_ok(isstruct(out.warmstart.events), [t 'out.warmstart.events is struct']);
+        t_is(out.warmstart.events.k, 10, 12, [t 'out.warmstart.events.k']);
+        t_is(out.warmstart.events.idx, 1, 12, [t 'out.warmstart.events.idx']);
+        t_ok(strcmp(out.warmstart.events.name, 'SWITCH!'), [t 'out.warmstart.events.name']);
+        t_ok(strcmp(out.warmstart.events.msg, 'ZERO detected for SWITCH! event'), [t 'out.warmstart.events.msg']);
         t_ok(~isfield(out, 'cont'), [t 'out.cont does not exist']);
 
         t = sprintf('%s - FULL warmstart, after SWITCH : ', name);
-        x0 = x;
+        x0 = [x(end)/2; x];
         opt.warmstart = out.warmstart;
         opt.events = {{'SNOUT!', @pne_event_test2, 1e-6}};
         opt.callbacks = {};
         [x, f, e, out, jac] = pnes_master(@f2p, x0, opt);
         it = 49;
         t_is(e, 1, 12, [t 'exitflag']);
-        t_is(x, [6; -5; 0], 6, [t 'x - final']);
-        t_is(f, [0;0], 10, [t 'f']);
-        t_is(out.cont.x(:,1), [-3;4;0], 8, [t 'out.cont.x(:,1)']);
+        t_is(x, [0; 6; -5; 0], 6, [t 'x - final']);
+        t_is(f, [0;0;0], 10, [t 'f']);
+        t_is(out.cont.y(:,1), [-3;4], 8, [t 'out.cont.y(:,1)']);
         t_is(out.cont.max_lam, 1.04166666667, 10, [t 'out.cont.max_lam']);
         t_is(out.cont.iterations, it, 12, [t 'out.cont.iterations']);
         t_is(size(out.cont.lam), [1,it+1], 12, [t 'size(out.cont.lam)']);
         t_is(size(out.cont.lam_hat), [1,it+1], 12, [t 'size(out.cont.lam_hat)']);
-        t_is(size(out.cont.x), [3,it+1], 12, [t 'size(out.cont.x)']);
-        t_is(size(out.cont.x_hat), [3,it+1], 12, [t 'size(out.cont.x_hat)']);
+        t_is(size(out.cont.y), [2,it+1], 12, [t 'size(out.cont.y)']);
+        t_is(size(out.cont.y_hat), [2,it+1], 12, [t 'size(out.cont.y_hat)']);
         t_is(size(out.cont.steps), [1,it+1], 12, [t 'size(out.cont.steps)']);
         t_is(length(out.cont.events), 3, 12, [t 'length(out.cont.events)']);
         t_is(out.cont.events(1).k, 10, 12, [t 'out.cont.events(1).k']);
@@ -303,15 +305,17 @@ else
 end
 f = f + [6*x(3); 0];
 
-%% another parameterized 2-d problem, based on f1p
+%% parameterized 3-d problem, based on f1p
 function [f, J] = f2p(x)
-x = [x(2)+2; x(1)-2; x(3)];
+x1 = [x(3)+2; x(2)-2; x(4)];
 if nargout < 2
-    f = f1p(x);
+    f = [2*x(1)-x(4); f1p(x1)];
 else
-    [f, JJ] = f1p(x);
-    J = [JJ(:, 2) JJ(:, 1) JJ(:, 3)];
+    [f, JJ] = f1p(x1);
+    J = [  2      0        0       -1;
+          [0; 0] JJ(:, 2) JJ(:, 1) JJ(:, 3) ];
 end
+f = [ 2*x(1)-x(4); f ];
 
 %% example custom event function 1 (target lambda == 2/3)
 function ef = pne_event_test1(cx, opt)
@@ -339,6 +343,36 @@ for i = 1:length(s.evnts)
         end
         break;
     end
+end
+
+function rv = pne_output_fcn_test1(cbx, x, x_hat)
+%% cbx     = pne_output_fcn_test1(cbx, x, x_hat)
+%% results = pne_output_fcn_test1(cbx, results)
+if nargin == 3      %% store values in callback state
+    if length(x) == 3
+        k = [1;2];
+    else %% == 3
+        k = [2;3];
+    end
+    rv = cbx;
+    if isfield(cbx, 'y')    %% append values (ITERATION)
+        rv.lam_hat = [ rv.lam_hat   x_hat(end)  ];
+        rv.lam     = [ rv.lam       x(end)      ];
+        rv.y_hat   = [ rv.y_hat     x_hat(k)    ];
+        rv.y       = [ rv.y         x(k)        ];
+    else                    %% initialize values (INITIAL)
+        rv.lam_hat = x_hat(end);
+        rv.lam     = x(end);
+        rv.y_hat   = x_hat(k);
+        rv.y       = x(k);
+    end
+else                        %% copy fields to results (FINAL)
+    rv = x;
+    rv.lam_hat = cbx.lam_hat;
+    rv.lam     = cbx.lam;
+    rv.max_lam = max(cbx.lam);
+    rv.y_hat   = cbx.y_hat;
+    rv.y       = cbx.y;
 end
 
 
