@@ -137,6 +137,7 @@ dopts = struct( ...
     'step_min',         1e-4, ...       %% UNFINISHED
     'step_max',         0.2, ...        %% UNFINISHED
     'adapt_step',       0, ...          %% UNFINISHED
+    'adapt_step_ws',    1, ...          %% UNFINISHED
     'adapt_step_damping', 0.7, ...      %% UNFINISHED
     'adapt_step_tol',   1e-3, ...       %% UNFINISHED
     'default_event_tol',1e-3, ...       %% UNFINISHED
@@ -249,8 +250,8 @@ if ~s.done
         cbx = ws.cbx;
         evnts = ws.events;
 
-        if opt.adapt_step
-            default_step = default_step/4;  %% slow down, things may have changed
+        if opt.adapt_step   %% hey, maybe slow down, things may have changed
+            default_step = default_step * opt.adapt_step_ws;
         end
     else
         %% initialize parameterization function

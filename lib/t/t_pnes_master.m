@@ -197,6 +197,7 @@ for k = 1:length(cfg)
         t = sprintf('%s - FULL warmstart, before SWITCH : ', name);
         opt.parameterization = 3;
         opt.adapt_step = 1;
+        opt.adapt_step_ws = 0.25;
         opt.stop_at = 'FULL';
         opt.adapt_step_tol = 5e-3;
         opt.callbacks = {@pne_callback_test1};
