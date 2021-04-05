@@ -229,7 +229,7 @@ if opt.solve_base && ~warmstarted
         end
     end
 else
-    x = x0;
+    x = x0;     %% ignored for warmstart, overwritten by warmstart.cx
 end
 
 %% initialize numerical continuation
@@ -239,7 +239,6 @@ if ~s.done
     rb_cnt_ef = 0;  %% counter for rollback steps triggered by event function intervals
     rb_cnt_cb = 0;  %% counter for rollback steps triggered directly by callbacks
     direction = 1;  %% increasing lambda
-    z = zeros(length(x0), 1); z(end) = direction;   %% direction of positive lambda
 
     if warmstarted
         ws = opt.warmstart;
@@ -249,6 +248,8 @@ if ~s.done
         default_step = ws.default_step;
         cbx = ws.cbx;
         evnts = ws.events;
+        x = ws.x;
+        z = ws.z;
 
         if opt.adapt_step   %% hey, maybe slow down, things may have changed
             default_step = default_step * opt.adapt_step_ws;
@@ -265,6 +266,10 @@ if ~s.done
             otherwise
                 error('pnes_master: OPT.parameterization (= %d) must be 1, 2, or 3', parm);
         end
+
+        %% finish initializing tangent vector
+        z0 = zeros(length(x0), 1); z0(end) = direction; %% direction of positive lambda
+        z = pne_tangent(x, x, z0, fcn, parm, direction);
 
         step = opt.step;
         default_step = step;
@@ -289,16 +294,18 @@ if ~s.done
         'ef', [] ...                %% event function values
     );
 
-    %% finish initializing tangent vector
-    cx.z = pne_tangent(cx.x, cx.x, cx.z, fcn, cx.parm, direction);
-
     %% initialize event function values
     cx.ef = cell(nef, 1);
     for k = 1:nef
         cx.ef{k} = reg_ev(k).fcn(cx, opt);
     end
 
-    if ~warmstarted
+    if warmstarted
+        %% initialize state for previous continuation step
+        px = cx;
+        px.x = ws.xp;   %% use warm start value for solution value
+        px.z = ws.zp;   %% use warm start value for tangent
+    else
         %% invoke callbacks - "initialize" context
         for k = 1:ncb
             [nx, cx, s] = reg_cb(k).fcn(cont_steps, cx, cx, cx, s, opt);
@@ -319,10 +326,10 @@ if ~s.done
             s.done = 1;
             s.done_msg = 'base and target functions are identical';
         end
-    end
 
-    %% initialize state for previous continuation step
-    px = cx;
+        %% initialize state for previous continuation step
+        px = cx;
+    end
 end
 
 %%-----  run numerical continuation  -----
@@ -346,8 +353,13 @@ while ~s.done
         break;
     end
 
-    %% compute new tangent direction, based on current state
-    nx.z = pne_tangent(nx.x, cx.x, cx.z, fcn, nx.parm, direction);
+    %% compute new tangent direction, based on current or prev state: tx
+    if nx.step == 0     %% if this is a re-do step, cx and nx are the same
+        tx = px;            %% so use px as the previous state
+    else                %% otherwise
+        tx = cx;            %% use cx as the previous state
+    end
+    nx.z = pne_tangent(nx.x, tx.x, tx.z, fcn, nx.parm, direction);
 
     %% detect events
     for k = 1:nef
@@ -470,7 +482,7 @@ while ~s.done
     %% adapt stepsize if requested and not terminating, locating a zero
     %% or re-doing a step after changing the problem data
     if opt.adapt_step && ~s.done && ~locating && ~s.evnts(1).zero && nx.step ~= 0
-        pred_error = norm(nx.x - nx.x_hat, inf);
+        pred_error = norm(nx.x - nx.x_hat, Inf);
 
         %% new nominal step size is current size * tol/err, but we reduce
         %% the change from the current size by a damping factor and limit
@@ -531,15 +543,24 @@ if isempty(s.warmstart)
         fprintf('CONTINUATION TERMINATION: %s\n', s.done_msg);
     end
 else
+    %% save warmstart values
     ws = s.warmstart;
+    ws.cont_steps = cont_steps;
+
+    %% from state at current step
+    ws.x = cx.x;            %% state from current step
+    ws.z = cx.z;            %% tangent vector from current step
     ws.parm = cx.parm;
     ws.default_parm = cx.default_parm;
     ws.default_step = cx.default_step;
     ws.events = cx.events;
-    ws.cont_steps = cont_steps;
     ws.cbx = cx.cb;
-    out.warmstart = ws;
 
+    %% from state at previous step
+    ws.xp = px.x;           %% state from previous step
+    ws.zp = px.z;           %% tangent vector from previous step
+
+    out.warmstart = ws;
     if opt.verbose
         fprintf('%s : CONTINUATION SUSPENDED ...\n', s.done_msg);
     end

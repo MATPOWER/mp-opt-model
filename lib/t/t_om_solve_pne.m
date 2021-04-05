@@ -239,8 +239,13 @@ for k = 1:length(cfg)
         om.add_var('lam', 1, 0);
         om.add_nln_constraint('f', 2, 1, @f2p, [], {'y', 'lam'});
         om.add_nln_constraint('g', 1, 1, @g2p, [], {'z', 'lam'});
-        opt.x0 = [x(end)/2; x];
-        opt.warmstart = out.warmstart;
+        ws = out.warmstart;
+        ws.x  = [ws.x(end)/2;  ws.x];
+        ws.xp = [ws.xp(end)/2; ws.xp];
+        ws.z = [0; ws.z];
+        ws.zp = [0; ws.zp];
+        x0 = ws.x;      %% ignored for warm start
+        opt.warmstart = ws;
         opt.events = {{'SNOUT!', @pne_event_test2, 1e-6}};
         opt.callbacks = {};
         [x, f, e, out, jac] = om.solve(opt);

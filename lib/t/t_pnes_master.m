@@ -227,8 +227,13 @@ for k = 1:length(cfg)
         t_ok(~isfield(out, 'cont'), [t 'out.cont does not exist']);
 
         t = sprintf('%s - FULL warmstart, after SWITCH : ', name);
-        x0 = [x(end)/2; x];
-        opt.warmstart = out.warmstart;
+        ws = out.warmstart;
+        ws.x  = [ws.x(end)/2;  ws.x];
+        ws.xp = [ws.xp(end)/2; ws.xp];
+        ws.z = [0; ws.z];
+        ws.zp = [0; ws.zp];
+        x0 = ws.x;      %% ignored for warm start
+        opt.warmstart = ws;
         opt.events = {{'SNOUT!', @pne_event_test2, 1e-6}};
         opt.callbacks = {};
         [x, f, e, out, jac] = pnes_master(@f2p, x0, opt);
