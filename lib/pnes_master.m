@@ -317,7 +317,7 @@ if ~s.done
             fb = f(1:end-1);
         else
             fb = fcn(x0);
-            exitflag = 0;
+            exitflag = 1;
         end
         xt = x0;
         xt(end) = 1;
