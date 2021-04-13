@@ -38,7 +38,8 @@ if ~s.rollback || nx.step == 0
 
             %% the following conditional is only necessary if we also allow
             %% finding the location of the nose-point without terminating
-            if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');
+            if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE') || ...
+                ~ischar(opt.stop_at) && nx.x(end) < opt.stop_at
                 s.done = 1;
                 s.done_msg = msg;
             end

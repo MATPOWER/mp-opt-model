@@ -183,12 +183,20 @@ s = struct( ...         %% container struct for various variables, flags
     'results',  []  );      %% results struct
 
 %% register event and callback functions
-if ischar(opt.stop_at) && strcmp(opt.stop_at, 'NOSE');
-    my_events = {{'NOSE', @pne_event_nose, opt.nose_tol}, opt.events{:}};
-    my_cbacks = {{@pne_callback_nose, 51}, opt.callbacks{:}};
-else        %% FULL or target lambda
-    my_events = {{'TARGET_LAM', @pne_event_target_lam, opt.target_lam_tol}, opt.events{:}};
-    my_cbacks = {{@pne_callback_target_lam, 50}, opt.callbacks{:}};
+switch opt.stop_at
+    case 'NOSE'
+        my_events = {{'NOSE', @pne_event_nose, opt.nose_tol}, opt.events{:}};
+        my_cbacks = {{@pne_callback_nose, 51}, opt.callbacks{:}};
+    case 'FULL'
+        my_events = {{'TARGET_LAM', @pne_event_target_lam, opt.target_lam_tol}, opt.events{:}};
+        my_cbacks = {{@pne_callback_target_lam, 50}, opt.callbacks{:}};
+    otherwise   %% numeric, stop at target lam or nose point, whichever is 1st
+        my_events = {{'TARGET_LAM', @pne_event_target_lam, opt.target_lam_tol}, ...
+                     {'NOSE', @pne_event_nose, opt.nose_tol}, ...
+                        opt.events{:}};
+        my_cbacks = {{@pne_callback_target_lam, 50}, ...
+                     {@pne_callback_nose, 51}, ...
+                        opt.callbacks{:}};
 end
 my_cbacks{end+1} = {@pne_callback_default, 0};
 reg_ev = pne_register_events(my_events, opt);   %% registered event functions
