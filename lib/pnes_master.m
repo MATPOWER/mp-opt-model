@@ -246,18 +246,32 @@ if ~s.done
                     %% but the event has not yet been located
     rb_cnt_ef = 0;  %% counter for rollback steps triggered by event function intervals
     rb_cnt_cb = 0;  %% counter for rollback steps triggered directly by callbacks
-    direction = 1;  %% increasing lambda
 
     if warmstarted
+        manual_direction_switch = 0;
         ws = opt.warmstart;
         step = 0;
         parm = ws.parm;
+        direction = ws.direction;
         default_parm = ws.default_parm;
         default_step = ws.default_step;
         cbx = ws.cbx;
         evnts = ws.events;
         x = ws.x;
         z = ws.z;
+        if manual_direction_switch
+            %% decide whether to switch directions
+            reply = input('Switch directions? Y/N [N]:','s');
+            if strcmp(upper(reply), 'Y')
+                direction = -direction;
+            end
+        elseif isfield(ws, 'dir_from_jac_eigs') && ws.dir_from_jac_eigs
+            [~, J] = fcn(x);
+            eigs_opt.tol = 1e-3;
+            eigs_opt.maxit = 2*length(x);
+            direction = sign(z(end) * ...
+                        min(real(eigs(J(:,1:end-1), 1, 'SR', eigs_opt))));
+        end
 
         if opt.adapt_step   %% hey, maybe slow down, things may have changed
             default_step = default_step * opt.adapt_step_ws;
@@ -276,6 +290,7 @@ if ~s.done
         end
 
         %% finish initializing tangent vector
+        direction = 1;  %% increasing lambda
         z0 = zeros(length(x0), 1); z0(end) = direction; %% direction of positive lambda
         z = pne_tangent(x, x, z0, fcn, parm, direction);
 
@@ -432,14 +447,6 @@ while ~s.done
             s.done_msg = 'Too many rollback steps triggered by callbacks!';
         end
     else
-%--- no need to set it if we're DONE done, but if it's to-be-contd, maybe
-%         if ~s.done && s.evnts(1).zero
-%             %% decide whether to switch directions
-%             reply = input('Switch directions? Y/N [N]:','s');
-%             if strcmp(upper(reply), 'Y')
-%                 direction = -direction;
-%             end
-%         end
         rb_cnt_cb = 0;              %% reset rollback counter for callbacks
     end
 
@@ -554,6 +561,7 @@ else
     %% save warmstart values
     ws = s.warmstart;
     ws.cont_steps = cont_steps;
+    ws.direction = direction;
 
     %% from state at current step
     ws.x = cx.x;            %% state from current step
