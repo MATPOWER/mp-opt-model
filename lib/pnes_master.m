@@ -550,9 +550,10 @@ if isempty(s.warmstart)
     for k = 1:ncb
         [nx, cx, s] = reg_cb(k).fcn(-cont_steps, nx, cx, px, s, opt);
     end
-    out.cont = s.results;
-    out.cont.done_msg = s.done_msg;
-    out.cont.events = cx.events;    %% copy eventlog to results
+    output = s.results;
+    output.done_msg = s.done_msg;
+    output.events = cx.events;  %% copy eventlog to results
+    output.corrector = out;     %% output from last corrector run
 
     if opt.verbose
         fprintf('CONTINUATION TERMINATION: %s\n', s.done_msg);
@@ -576,7 +577,7 @@ else
     ws.xp = px.x;           %% state from previous step
     ws.zp = px.z;           %% tangent vector from previous step
 
-    out.warmstart = ws;
+    output.warmstart = ws;
     if opt.verbose
         fprintf('%s : CONTINUATION SUSPENDED ...\n', s.done_msg);
     end
@@ -594,7 +595,7 @@ if nargout > 1
     if nargout > 2
         varargout{3} = exitflag;
         if nargout > 3
-            varargout{4} = out;
+            varargout{4} = output;
             if nargout > 4
                 varargout{5} = J;
             end
