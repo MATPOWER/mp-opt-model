@@ -126,10 +126,15 @@ else                            %% individual args
 end
 
 %% default options
+if isfield(opt, 'verbose') && opt.verbose > 4
+    nleqs_opt_verbose = 2;
+else
+    nleqs_opt_verbose = 0;
+end
 dopts = struct( ...
     'alg',              'DEFAULT', ...  %% algorithm
     'verbose',          0, ...
-    'nleqs_opt',        struct('verbose', 0), ...
+    'nleqs_opt',        struct('verbose', nleqs_opt_verbose), ...
     'solve_base',       1, ...          %% UNFINISHED
     'parameterization', 3, ...          %% 1 - natural, 2 - arc len, 3 - pseudo arc len
     'stop_at',          'NOSE', ...     %% 'NOSE', 'FULL', <lam_stop>
