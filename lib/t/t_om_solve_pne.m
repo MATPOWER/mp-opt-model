@@ -18,7 +18,7 @@ cfg = {
     {'DEFAULT', 'default',  []          []  },
 };
 
-n = 154;
+n = 161;
 
 t_begin(n*length(cfg), quiet);
 
@@ -217,6 +217,13 @@ for k = 1:length(cfg)
         t_is(x, [-2; -1; 2/3], 6, [t 'x - final']);
         t_is(f, [0;0], 10, [t 'f']);
         t_ok(isfield(out, 'warmstart') && ~isempty(out.warmstart), [t 'out.warmstart exists']);
+        t_is(out.max_lam, 2/3, 10, [t 'out.max_lam']);
+        t_is(out.iterations, it, 12, [t 'out.iterations']);
+        t_ok(isstruct(out.events), [t 'out.events is struct']);
+        t_is(out.events.k, it, 12, [t 'out.events.k']);
+        t_is(out.events.idx, 1, 12, [t 'out.events.idx']);
+        t_ok(strcmp(out.events.name, 'SWITCH!'), [t 'out.events.name']);
+        t_ok(strcmp(out.events.msg, 'ZERO detected for SWITCH! event'), [t 'out.events.msg']);
         t_is(out.warmstart.cont_steps, it, 12, [t 'out.warmstart.cont_steps']);
         t_is(out.warmstart.default_step, 0.64432407, 8, [t 'out.warmstart.default_step']);
         t_ok(isa(out.warmstart.parm, 'function_handle'), [t 'out.warmstart.parm is function']);
@@ -225,7 +232,7 @@ for k = 1:length(cfg)
         t_ok(isstruct(out.warmstart.cbx.default), [t 'out.warmstart.cbx.default is struct']);
         t_is(out.warmstart.cbx.default.iterations, it, 12, [t 'out.warmstart.cbx.default.iterations']);
         t_ok(isstruct(out.warmstart.events), [t 'out.warmstart.events is struct']);
-        t_is(out.warmstart.events.k, 10, 12, [t 'out.warmstart.events.k']);
+        t_is(out.warmstart.events.k, it, 12, [t 'out.warmstart.events.k']);
         t_is(out.warmstart.events.idx, 1, 12, [t 'out.warmstart.events.idx']);
         t_ok(strcmp(out.warmstart.events.name, 'SWITCH!'), [t 'out.warmstart.events.name']);
         t_ok(strcmp(out.warmstart.events.msg, 'ZERO detected for SWITCH! event'), [t 'out.warmstart.events.msg']);

@@ -583,6 +583,9 @@ else
     ws.zp = px.z;           %% tangent vector from previous step
 
     output.warmstart = ws;
+    output.iterations = max(ws.cbx.default.iterations);
+    output.max_lam = max(ws.cbx.default.lam);
+    output.events = ws.events;
     if opt.verbose
         fprintf('%s : CONTINUATION SUSPENDED ...\n', s.done_msg);
     end
