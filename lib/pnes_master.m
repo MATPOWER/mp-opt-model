@@ -548,18 +548,18 @@ while ~s.done
     end
 end     %% while ~s.done
 
+%% invoke callbacks - "final" context
+s.results = struct();   %% initialize results struct
+for k = 1:ncb
+    [nx, cx, s] = reg_cb(k).fcn(-cont_steps, nx, cx, px, s, opt);
+end
+output = s.results;
+output.done_msg = s.done_msg;
+output.events = cx.events;  %% copy eventlog to results
+output.corrector = out;     %% output from last corrector run
+
 %% prepare to exit
 if isempty(s.warmstart)
-    %% invoke callbacks - "final" context
-    s.results = struct();   %% initialize results struct
-    for k = 1:ncb
-        [nx, cx, s] = reg_cb(k).fcn(-cont_steps, nx, cx, px, s, opt);
-    end
-    output = s.results;
-    output.done_msg = s.done_msg;
-    output.events = cx.events;  %% copy eventlog to results
-    output.corrector = out;     %% output from last corrector run
-
     if opt.verbose
         fprintf('CONTINUATION TERMINATION: %s\n', s.done_msg);
     end
@@ -583,9 +583,7 @@ else
     ws.zp = px.z;           %% tangent vector from previous step
 
     output.warmstart = ws;
-    output.iterations = max(ws.cbx.default.iterations);
-    output.max_lam = max(ws.cbx.default.lam);
-    output.events = ws.events;
+
     if opt.verbose
         fprintf('%s : CONTINUATION SUSPENDED ...\n', s.done_msg);
     end

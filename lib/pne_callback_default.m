@@ -146,7 +146,7 @@ end
 %% initialize plotting options
 plt = opt.plot;
 plot_idx_default = 0;
-if plt.level
+if plt.level && (k >= 0 || isempty(s.warmstart))
     %% set functions to use for horizontal and vertical coordinates
     if isempty(plt.xfcn)        %% default horizontal coord is last
         xf = @(x)x;             %% element of x (i.e. lambda)
