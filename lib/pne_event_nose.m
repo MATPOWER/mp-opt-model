@@ -4,7 +4,7 @@ function ef = pne_event_nose(cx, opt)
 %
 %   PNE_MASTER event function to detect the nose point of the continuation
 %   curve, based on the sign of the lambda component of the tangent vector.
-%   
+%
 %   Inputs:
 %       CX : struct containing info about current point (continuation soln)
 %       OPT - PNES_MASTER options struct

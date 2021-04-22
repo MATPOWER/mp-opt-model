@@ -27,7 +27,7 @@ if ischar(target)       %% 'FULL' trace requested
     if cx.z(end) >= 0   %% before the nose point ...
         target = -1;    %% prevent early termination (e.g. itr 1 rollback to 0)
     else                %% after the nose point ...
-        target = 0;     %% terminate at lam = 0
+        target = 0;     %% terminate at lambda = 0
     end
 end
 ef = cx.x(end) - target;

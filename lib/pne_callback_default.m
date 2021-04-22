@@ -20,7 +20,7 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %           step - current step size
 %           parm - current parameterization
 %           events - struct array, event log
-%           cb - user state for callbacks, the user may add fields containing
+%           cbs - callback state, the user may add fields containing
 %               any information the callback function would like to pass from
 %               one invokation to the next, taking care not to step on fields
 %               being used by other callbacks, such as the 'default' field
@@ -43,9 +43,7 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %   Outputs:
 %       (all are updated versions of the corresponding input arguments)
 %       NX - update this state if S.rollback is false,
-%           e.g. user state ('cb' field ), etc.
-%           Note: 'step' should be set to 0 if the underlying problem has
-%               been modified (i.e. 'fcn' has been altered)
+%           e.g. user callback state ('cbs' field ), etc.
 %       CX - update this state if S.rollback is true,
 %           e.g. 'this_step' or 'this_parm'
 %       S - struct for various flags, etc.
@@ -104,39 +102,39 @@ end
 if k == 0       %% INITIAL call
     %% initialize state
     [names, vals] = output_fcn(x, x_hat);
-    cbx = struct(   'iterations',   k, ...
+    cbs = struct(   'iterations',   k, ...
                     'steps',        step, ...
                     'lam_hat',      x_hat(end), ...
                     'lam',          x(end)  );
     for j = 1:length(names)
-        cbx.(names{j}) = vals{j};
+        cbs.(names{j}) = vals{j};
     end
-    cx.cb.default = cbx;    %% update current callback state
-    nx.cb.default = cbx;    %% update next callback state
+    cx.cbs.default = cbs;   %% update current callback state
+    nx.cbs.default = cbs;   %% update next callback state
 else
-    cbx = nx.cb.default;    %% get next callback state
+    cbs = nx.cbs.default;   %% get next callback state
     if k > 0    %% ITERATION call
         %% update state
         [names, vals] = output_fcn(x, x_hat);
-        cbx.iterations = k;
-        cbx.steps   = [ cbx.steps    step       ];
-        cbx.lam_hat = [ cbx.lam_hat x_hat(end)  ];
-        cbx.lam     = [ cbx.lam     x(end)      ];
+        cbs.iterations = k;
+        cbs.steps   = [ cbs.steps    step       ];
+        cbs.lam_hat = [ cbs.lam_hat x_hat(end)  ];
+        cbs.lam     = [ cbs.lam     x(end)      ];
         for j = 1:length(names)
-            cbx.(names{j}) = [ cbx.(names{j})   vals{j} ];
+            cbs.(names{j}) = [ cbs.(names{j})   vals{j} ];
         end
-        nx.cb.default = cbx;    %% update next callback state
+        nx.cbs.default = cbs;   %% update next callback state
     else            %% FINAL call
         %% assemble results struct
         names = output_fcn();
         r = s.results;
-        r.steps         = cbx.steps;
+        r.steps         = cbs.steps;
         r.iterations    = -k;
-        r.lam_hat       = cbx.lam_hat;
-        r.lam           = cbx.lam;
-        r.max_lam       = max(cbx.lam);
+        r.lam_hat       = cbs.lam_hat;
+        r.lam           = cbs.lam;
+        r.max_lam       = max(cbs.lam);
         for j = 1:length(names)
-            r.(names{j}) = cbx.(names{j});
+            r.(names{j}) = cbs.(names{j});
         end
         s.results = r;
     end
@@ -149,7 +147,7 @@ plot_idx_default = 0;
 if plt.level && (k >= 0 || isempty(s.warmstart))
     %% set functions to use for horizontal and vertical coordinates
     if isempty(plt.xfcn)        %% default horizontal coord is last
-        xf = @(x)x;             %% element of x (i.e. lambda)
+        xf = @(x)x;             %% element of x (i.e. parameter lambda)
     else
         xf = plt.xfcn;
     end
@@ -162,9 +160,9 @@ if plt.level && (k >= 0 || isempty(s.warmstart))
         end
     end
 
-    if isempty(plt.idx) && ~isfield(cbx, 'plot_idx_default')   %% no index specified
+    if isempty(plt.idx) && ~isfield(cbs, 'plot_idx_default')   %% no index specified
         if isempty(plt.idx_default)
-            idx = length(x) - 1;        %% last one before lambda
+            idx = length(x) - 1;        %% last one before parameter lambda
         else
             idx = plt.idx_default();    %% get default from provided function
         end
@@ -173,7 +171,7 @@ if plt.level && (k >= 0 || isempty(s.warmstart))
         plot_idx_default = idx;
     else
         if isempty(plt.idx)
-            idx = cbx.plot_idx_default; %% index, saved
+            idx = cbs.plot_idx_default; %% index, saved
         else
             idx = plt.idx;              %% index, provided
         end
@@ -181,15 +179,15 @@ if plt.level && (k >= 0 || isempty(s.warmstart))
     nplots = length(idx);
 
     %% get plot data, initialize bounds for plot axes
-    xx  = xf(cbx.(plt.xname));
-    yy  = yf(cbx.(plt.yname), idx);
+    xx  = xf(cbs.(plt.xname));
+    yy  = yf(cbs.(plt.yname), idx);
     xmin = 0;
     xmax = max(xx);
     ymin = min(min(yy));
     ymax = max(max(yy));
     if plt.level > 1
-        xxh = xf(cbx.([plt.xname '_hat']));
-        yyh = yf(cbx.([plt.yname '_hat']), idx);
+        xxh = xf(cbs.([plt.xname '_hat']));
+        yyh = yf(cbs.([plt.yname '_hat']), idx);
         xmax = max(xmax, max(xxh));
         ymin = min(ymin, min(min(yyh)));
         ymax = max(ymax, max(max(yyh)));
@@ -215,7 +213,7 @@ if plt.level && (k >= 0 || isempty(s.warmstart))
         %% save default plot idx in the state so we don't have to detect it
         %% each time, since we don't want it to change in the middle of the run
         if plot_idx_default
-            cx.cb.default.plot_idx_default = plot_idx_default;
+            cx.cbs.default.plot_idx_default = plot_idx_default;
         end
         
         %% initialize continuation curve plot
@@ -258,7 +256,7 @@ if plt.level && (k >= 0 || isempty(s.warmstart))
         end
     %%-----  FINAL call  -----
     else    % k < 0
-        %% finish final lambda-V nose curve plot
+        %% finish final continuation curve plot
         axis([xmin xmax ymin ymax]);
         %% curve of corrected points
         if isprop(gca, 'ColorOrderIndex')

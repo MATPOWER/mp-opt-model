@@ -236,9 +236,9 @@ for k = 1:length(cfg)
         t_is(out.warmstart.default_step, 0.64432407, 8, [t 'out.warmstart.default_step']);
         t_ok(isa(out.warmstart.parm, 'function_handle'), [t 'out.warmstart.parm is function']);
         t_ok(isa(out.warmstart.default_parm, 'function_handle'), [t 'out.warmstart.default_parm is function']);
-        t_ok(isstruct(out.warmstart.cbx), [t 'out.warmstart.cbx is struct']);
-        t_ok(isstruct(out.warmstart.cbx.default), [t 'out.warmstart.cbx.default is struct']);
-        t_is(out.warmstart.cbx.default.iterations, it, 12, [t 'out.warmstart.cbx.default.iterations']);
+        t_ok(isstruct(out.warmstart.cbs), [t 'out.warmstart.cbs is struct']);
+        t_ok(isstruct(out.warmstart.cbs.default), [t 'out.warmstart.cbs.default is struct']);
+        t_is(out.warmstart.cbs.default.iterations, it, 12, [t 'out.warmstart.cbs.default.iterations']);
         t_ok(isstruct(out.warmstart.events), [t 'out.warmstart.events is struct']);
         t_is(out.warmstart.events.k, it, 12, [t 'out.warmstart.events.k']);
         t_is(out.warmstart.events.idx, 1, 12, [t 'out.warmstart.events.idx']);

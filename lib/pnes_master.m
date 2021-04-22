@@ -260,7 +260,7 @@ if ~s.done
         direction = ws.direction;
         default_parm = ws.default_parm;
         default_step = ws.default_step;
-        cbx = ws.cbx;
+        cbs = ws.cbs;
         evnts = ws.events;
         x = ws.x;
         z = ws.z;
@@ -302,7 +302,7 @@ if ~s.done
         step = opt.step;
         default_step = step;
         default_parm = parm;
-        cbx = [];
+        cbs = [];
         evnts = [];
     end
 
@@ -318,7 +318,7 @@ if ~s.done
         'step', step, ...           %% current step size
         'parm', parm, ...           %% current parameterization
         'events', evnts, ...        %% event log
-        'cb', cbx, ...              %% user state, for callbacks
+        'cbs', cbs, ...             %% user state, for callbacks
         'ef', [] ...                %% event function values
     );
 
@@ -576,7 +576,7 @@ else
     ws.default_parm = cx.default_parm;
     ws.default_step = cx.default_step;
     ws.events = cx.events;
-    ws.cbx = cx.cb;
+    ws.cbs = cx.cbs;
 
     %% from state at previous step
     ws.xp = px.x;           %% state from previous step
