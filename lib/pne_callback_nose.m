@@ -26,8 +26,8 @@ end
 
 %% handle event
 if ~s.rollback || nx.step == 0
-    for i = 1:length(s.evnts)
-        if strcmp(s.evnts(i).name, 'NOSE') && s.evnts(i).zero
+    for i = 1:length(s.events)
+        if strcmp(s.events(i).name, 'NOSE') && s.events(i).zero
             if nx.step == 0
                 msg = ...
                     sprintf('Nose point eliminated by limit induced bifurcation at %d continuation steps, lambda = %.4g.', k, nx.x(end));

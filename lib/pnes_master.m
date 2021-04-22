@@ -184,7 +184,7 @@ s = struct( ...         %% container struct for various variables, flags
                             ...%% to subsequent warm-started call to PNES_MASTER)
     'done_msg', '', ...     %% termination message
     'rollback', 0, ...      %% flag to indicate a step must be rolled back
-    'evnts',    [], ...     %% struct array for detected events
+    'events',    [], ...    %% struct array for detected events
     'results',  []  );      %% results struct
 
 %% register event and callback functions
@@ -261,7 +261,7 @@ if ~s.done
         default_parm = ws.default_parm;
         default_step = ws.default_step;
         cbs = ws.cbs;
-        evnts = ws.events;
+        event_log = ws.events;
         x = ws.x;
         z = ws.z;
         if manual_direction_switch
@@ -303,7 +303,7 @@ if ~s.done
         default_step = step;
         default_parm = parm;
         cbs = [];
-        evnts = [];
+        event_log = [];
     end
 
     %% initialize state for current continuation step
@@ -317,7 +317,7 @@ if ~s.done
         'this_parm', [], ...        %% parameterization for this step only
         'step', step, ...           %% current step size
         'parm', parm, ...           %% current parameterization
-        'events', evnts, ...        %% event log
+        'events', event_log, ...    %% event log
         'cbs', cbs, ...             %% user state, for callbacks
         'ef', [] ...                %% event function values
     );
@@ -393,28 +393,29 @@ while ~s.done
     for k = 1:nef
         nx.ef{k} = reg_ev(k).fcn(nx, opt);  %% update event functions
     end
-    [s.rollback, s.evnts, nx.ef] = pne_detect_events(reg_ev, nx.ef, cx.ef, nx.step);
+    [s.rollback, s.events, nx.ef] = ...
+        pne_detect_events(reg_ev, nx.ef, cx.ef, nx.step);
 
     %% adjust step-size to locate event function zero, if necessary
     if s.rollback               %% current step overshot
         %% rollback and initialize next step size based on rollback and previous
         rx = nx;                    %% save state we're rolling back from
-        rx_evnts = s.evnts;         %% and critical event info
-        cx.this_step = s.evnts.step_scale * rx.step;
+        rx_evnts = s.events;        %% and critical event info
+        cx.this_step = s.events.step_scale * rx.step;
         cx.this_parm = rx.parm;     %% keep same parameterization as last step
         locating = 1;               %% enter "locating" mode (or stay in it)
         rb_cnt_ef = rb_cnt_ef + 1;  %% increment rollback counter for ef intervals
         if rb_cnt_ef > 26
             s.done = 1;
-            s.done_msg = sprintf('Could not locate %s event!', s.evnts.name);
+            s.done_msg = sprintf('Could not locate %s event!', s.events.name);
         end
         if opt.verbose > 3
             loc_msg = sprintf('OVERSHOOT  : f = [%g, <<%g>>], step <-- %.4g', ...
-                        cx.ef{s.evnts.eidx}(s.evnts.idx(1)), ...
-                        rx.ef{s.evnts.eidx}(s.evnts.idx(1)), cx.this_step);
+                        cx.ef{s.events.eidx}(s.events.idx(1)), ...
+                        rx.ef{s.events.eidx}(s.events.idx(1)), cx.this_step);
         end
     elseif locating
-        if s.evnts(1).zero      %% found the zero!
+        if s.events(1).zero      %% found the zero!
             %% step size will be reset to previously used default step size
             locating = 0;           %% exit "locating" mode
             rb_cnt_ef = 0;          %% reset rollback counter for ef intervals
@@ -481,27 +482,27 @@ while ~s.done
     end
 
     %% log events
-    for k = 1:length(s.evnts)
-        if s.evnts(k).log
+    for k = 1:length(s.events)
+        if s.events(k).log
             e = struct( 'k', cont_steps, ...
-                        'name', s.evnts(k).name, ...
-                        'idx', s.evnts(k).idx, ...
-                        'msg', s.evnts(k).msg   );
+                        'name', s.events(k).name, ...
+                        'idx', s.events(k).idx, ...
+                        'msg', s.events(k).msg   );
             if isempty(nx.events)
                 nx.events = e;
             else
                 nx.events(end+1) = e;
             end
         end
-        if (opt.verbose > 2 && s.evnts(k).log) || ...
-                (opt.verbose > 3 && s.evnts(k).eidx)
-            fprintf('    %s\n', s.evnts(k).msg);
+        if (opt.verbose > 2 && s.events(k).log) || ...
+                (opt.verbose > 3 && s.events(k).eidx)
+            fprintf('    %s\n', s.events(k).msg);
         end
     end
 
     %% adapt stepsize if requested and not terminating, locating a zero
     %% or re-doing a step after changing the problem data
-    if opt.adapt_step && ~s.done && ~locating && ~s.evnts(1).zero && nx.step ~= 0
+    if opt.adapt_step && ~s.done && ~locating && ~s.events(1).zero && nx.step ~= 0
         pred_error = norm(nx.x - nx.x_hat, Inf);
 
         %% new nominal step size is current size * tol/err, but we reduce

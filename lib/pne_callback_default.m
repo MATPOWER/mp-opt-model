@@ -34,7 +34,7 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %           done_msg - char array with reason for termination
 %           rollback - flag to indicate that the current step should be
 %               rolled back and retried with a different step size, etc.
-%           evnts - struct array listing events detected for this step,
+%           events - struct array listing events detected for this step,
 %               see PNE_DETECT_EVENTS for details
 %           results - output struct to be assigned to 'cont' field of
 %               OUTPUT struct returned by PNES_MASTER
@@ -51,7 +51,7 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %           done_msg - can set termination reason here
 %           rollback - can request a rollback step, even if it was not
 %               indicated by an event function
-%           evnts - msg field for a given event may be updated
+%           events - msg field for a given event may be updated
 %           results - updated output struct to be assigned to 'cont' field
 %               of OUTPUT struct returned by PNES_MASTER
 %

@@ -1,4 +1,4 @@
-function [rollback, evnts, cef] = pne_detect_events(reg_ev, cef, pef, step)
+function [rollback, ev, cef] = pne_detect_events(reg_ev, cef, pef, step)
 %PNE_DETECT_EVENTS  Detect events from event function values
 %   [ROLLBACK, CRITICAL_EVENTS, CEF] = PNE_DETECT_EVENTS(REG_EV, CEF, PEF, STEP)
 %   
@@ -41,7 +41,7 @@ function [rollback, evnts, cef] = pne_detect_events(reg_ev, cef, pef, step)
 
 %% initialize result variables
 rollback = 0;
-evnts = struct( ...
+ev = struct( ...            %% critical events
     'eidx', 0, ...
     'zero', 0, ...
     'step_scale', 1, ...
@@ -52,7 +52,7 @@ evnts = struct( ...
 );
 
 %% other initialization
-i = 1;              %% index into evnts struct
+i = 1;              %% index into ev struct
 nef = length(cef);  %% number of event functions
 
 %% detect events, first look for event intervals for events requesting rollback
@@ -72,13 +72,13 @@ for eidx = 1:nef
         if step == 0    %% if it's a "repeat" step
             %% (e.g. after warmstart with possible fcn change)
             %% ... make this one the critical one and call it a ZERO event
-            evnts.eidx = eidx;
-            evnts.zero = 1;
-            evnts.step_scale = 1;
-            evnts.log = 1;
-            evnts.name = reg_ev(eidx).name;
-            evnts.idx = idx;
-            evnts.msg = 'ZERO (BIFURCATION)';
+            ev.eidx = eidx;
+            ev.zero = 1;
+            ev.step_scale = 1;
+            ev.log = 1;
+            ev.name = reg_ev(eidx).name;
+            ev.idx = idx;
+            ev.msg = 'ZERO (BIFURCATION)';
             i = i + 1;
             break;
         else
@@ -87,15 +87,15 @@ for eidx = 1:nef
                 min(pef{eidx}(idx) ./ (pef{eidx}(idx) - cef{eidx}(idx)) );
 
             %% if it's smaller than the current critical one ...
-            if step_scale < evnts.step_scale
+            if step_scale < ev.step_scale
                 %% ... make this one the critical one
-                evnts.eidx = eidx;
-                evnts.zero = 0;
-                evnts.step_scale = step_scale;
-                evnts.log = 0;
-                evnts.name = reg_ev(eidx).name;
-                evnts.idx = idx(j);
-                evnts.msg = 'INTERVAL';
+                ev.eidx = eidx;
+                ev.zero = 0;
+                ev.step_scale = step_scale;
+                ev.log = 0;
+                ev.name = reg_ev(eidx).name;
+                ev.idx = idx(j);
+                ev.msg = 'INTERVAL';
                 rollback = 1;   %% signal that a rollback event has been detected
             end
         end
@@ -114,13 +114,13 @@ if rollback == 0
             cef{eidx}(idx) = 0;
 
             %% ... make this one the critical one
-            evnts(i).eidx = eidx;
-            evnts(i).zero = 1;
-            evnts(i).step_scale = 1;
-            evnts(i).log = 1;
-            evnts(i).name = reg_ev(eidx).name;
-            evnts(i).idx = idx;
-            evnts(i).msg = 'ZERO';
+            ev(i).eidx = eidx;
+            ev(i).zero = 1;
+            ev(i).step_scale = 1;
+            ev(i).log = 1;
+            ev(i).name = reg_ev(eidx).name;
+            ev(i).idx = idx;
+            ev(i).msg = 'ZERO';
             i = i + 1;
         end
     end
@@ -140,13 +140,13 @@ if rollback == 0
                 step_scale = pef{eidx}(idx) ./ (pef{eidx}(idx) - cef{eidx}(idx));
 
                 %% ... and save the info as an interval detection
-                evnts(i).eidx = eidx;
-                evnts(i).zero = 0;
-                evnts(i).step_scale = step_scale;
-                evnts(i).log = 0;
-                evnts(i).name = reg_ev(eidx).name;
-                evnts(i).idx = idx;
-                evnts(i).msg = 'INTERVAL';
+                ev(i).eidx = eidx;
+                ev(i).zero = 0;
+                ev(i).step_scale = step_scale;
+                ev(i).log = 0;
+                ev(i).name = reg_ev(eidx).name;
+                ev(i).idx = idx;
+                ev(i).msg = 'INTERVAL';
                 i = i + 1;
             end
         end
@@ -154,19 +154,19 @@ if rollback == 0
 end
 
 %% update msgs
-if evnts(1).eidx
-    for i = 1:length(evnts)
-        if length(cef{evnts(i).eidx}) > 1
-            s1 = sprintf('(%d)', evnts(i).idx);
+if ev(1).eidx
+    for i = 1:length(ev)
+        if length(cef{ev(i).eidx}) > 1
+            s1 = sprintf('(%d)', ev(i).idx);
         else
             s1 = '';
         end
         if rollback
-            s2 = sprintf(' : ROLLBACK by %g', evnts(i).step_scale);
+            s2 = sprintf(' : ROLLBACK by %g', ev(i).step_scale);
         else
             s2 = '';
         end
-        evnts(i).msg = sprintf('%s detected for %s%s event%s', ...
-            evnts(i).msg, evnts(i).name, s1, s2);
+        ev(i).msg = sprintf('%s detected for %s%s event%s', ...
+            ev(i).msg, ev(i).name, s1, s2);
     end
 end

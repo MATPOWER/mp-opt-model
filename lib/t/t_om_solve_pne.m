@@ -355,16 +355,16 @@ ef = cx.z(end);
 function [nx, cx, s] = pne_callback_test1(k, nx, cx, px, s, opt)
 if k <= 0 || s.done, return; end    %% skip if initialize, finalize or done
 tlam = 2/3;
-for i = 1:length(s.evnts)
-    if strcmp(s.evnts(i).name, 'SWITCH!')
-        if s.evnts(i).zero  %% prepare to terminate
+for i = 1:length(s.events)
+    if strcmp(s.events(i).name, 'SWITCH!')
+        if s.events(i).zero  %% prepare to terminate
             s.done = 1;
             s.done_msg = sprintf('Reached switching point in %d continuation steps', k);
             s.warmstart = struct(); %% signal that we want to exit, then resume
         else                    %% set step-size & parameterization to terminate next time
             cx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             cx.this_step = tlam - cx.x(end);
-            s.evnts(i).msg = sprintf('%s\n  step %d to overshoot lambda = %g, reduce step size and set natural param', s.evnts(i).msg, k, tlam);
+            s.events(i).msg = sprintf('%s\n  step %d to overshoot lambda = %g, reduce step size and set natural param', s.events(i).msg, k, tlam);
         end
         break;
     end

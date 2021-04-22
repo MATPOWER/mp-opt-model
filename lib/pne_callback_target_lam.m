@@ -40,10 +40,10 @@ end
 
 %% handle event
 event_detected = 0;
-for i = 1:length(s.evnts)
-    if strcmp(s.evnts(i).name, 'TARGET_LAM')
+for i = 1:length(s.events)
+    if strcmp(s.events(i).name, 'TARGET_LAM')
         event_detected = 1;
-        if s.evnts(i).zero  %% prepare to terminate
+        if s.events(i).zero  %% prepare to terminate
             s.done = 1;
             if target == 0      %% FULL
                 s.done_msg = sprintf('Traced full continuation curve in %d continuation steps', k);
@@ -55,10 +55,10 @@ for i = 1:length(s.evnts)
             cx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             if target == 0      %% FULL
                 cx.this_step = cx.x(end);
-                s.evnts(i).msg = sprintf('%s\n  step %d to overshoot full trace, reduce step size and set natural param', s.evnts(i).msg, k);
+                s.events(i).msg = sprintf('%s\n  step %d to overshoot full trace, reduce step size and set natural param', s.events(i).msg, k);
             else                %% target lambda value
                 cx.this_step = target - cx.x(end);
-                s.evnts(i).msg = sprintf('%s\n  step %d to overshoot target lambda, reduce step size and set natural param', s.evnts(i).msg, k);
+                s.events(i).msg = sprintf('%s\n  step %d to overshoot target lambda, reduce step size and set natural param', s.events(i).msg, k);
             end
         end
         break;
