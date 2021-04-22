@@ -351,34 +351,17 @@ for i = 1:length(s.evnts)
     end
 end
 
-function rv = pne_output_fcn_test1(cbx, x, x_hat)
-%% cbx     = pne_output_fcn_test1(cbx, x, x_hat)
-%% results = pne_output_fcn_test1(cbx, results)
-if nargin == 3      %% store values in callback state
+function [names, vals] = pne_output_fcn_test1(x, x_hat)
+%% [names, vals] = pne_output_fcn_default(x, x_hat)
+%% names = pne_output_fcn_default()
+names = {'y_hat', 'y'};
+if nargin
     if length(x) == 3
         k = [1;2];
     else %% == 3
         k = [2;3];
     end
-    rv = cbx;
-    if isfield(cbx, 'y')    %% append values (ITERATION)
-        rv.lam_hat = [ rv.lam_hat   x_hat(end)  ];
-        rv.lam     = [ rv.lam       x(end)      ];
-        rv.y_hat   = [ rv.y_hat     x_hat(k)    ];
-        rv.y       = [ rv.y         x(k)        ];
-    else                    %% initialize values (INITIAL)
-        rv.lam_hat = x_hat(end);
-        rv.lam     = x(end);
-        rv.y_hat   = x_hat(k);
-        rv.y       = x(k);
-    end
-else                        %% copy fields to results (FINAL)
-    rv = x;
-    rv.lam_hat = cbx.lam_hat;
-    rv.lam     = cbx.lam;
-    rv.max_lam = max(cbx.lam);
-    rv.y_hat   = cbx.y_hat;
-    rv.y       = cbx.y;
+    vals = {x_hat(k), x(k)};
 end
 
 

@@ -103,24 +103,42 @@ end
 %%-----  initialize/update state/results  -----
 if k == 0       %% INITIAL call
     %% initialize state
-    cbx = struct(   'steps',    step, ...
-                    'iterations', k     );
-    cbx = output_fcn(cbx, x, x_hat);
+    [names, vals] = output_fcn(x, x_hat);
+    cbx = struct(   'iterations',   k, ...
+                    'steps',        step, ...
+                    'lam_hat',      x_hat(end), ...
+                    'lam',          x(end)  );
+    for j = 1:length(names)
+        cbx.(names{j}) = vals{j};
+    end
     cx.cb.default = cbx;    %% update current callback state
     nx.cb.default = cbx;    %% update next callback state
 else
     cbx = nx.cb.default;    %% get next callback state
     if k > 0    %% ITERATION call
         %% update state
-        cbx = output_fcn(cbx, x, x_hat);
-        cbx.steps   = [cbx.steps    step];
+        [names, vals] = output_fcn(x, x_hat);
         cbx.iterations = k;
+        cbx.steps   = [ cbx.steps    step       ];
+        cbx.lam_hat = [ cbx.lam_hat x_hat(end)  ];
+        cbx.lam     = [ cbx.lam     x(end)      ];
+        for j = 1:length(names)
+            cbx.(names{j}) = [ cbx.(names{j})   vals{j} ];
+        end
         nx.cb.default = cbx;    %% update next callback state
     else            %% FINAL call
         %% assemble results struct
-        s.results = output_fcn(cbx, s.results);
-        s.results.steps       = cbx.steps;
-        s.results.iterations  = -k;
+        names = output_fcn();
+        r = s.results;
+        r.steps         = cbx.steps;
+        r.iterations    = -k;
+        r.lam_hat       = cbx.lam_hat;
+        r.lam           = cbx.lam;
+        r.max_lam       = max(cbx.lam);
+        for j = 1:length(names)
+            r.(names{j}) = cbx.(names{j});
+        end
+        s.results = r;
     end
 end
 
@@ -258,27 +276,11 @@ if plt.level
     end
 end
 
-function rv = pne_output_fcn_default(cbx, x, x_hat)
-%% cbx     = pne_output_fcn_default(cbx, x, x_hat)
-%% results = pne_output_fcn_default(cbx, results)
-if nargin == 3      %% store values in callback state
-    rv = cbx;
-    if isfield(cbx, 'x')    %% append values (ITERATION)
-        rv.lam_hat = [ rv.lam_hat x_hat(end) ];
-        rv.lam     = [ rv.lam     x(end)     ];
-        rv.x_hat   = [ rv.x_hat   x_hat ];
-        rv.x       = [ rv.x       x     ];
-    else                    %% initialize values (INITIAL)
-        rv.lam_hat = x_hat(end);
-        rv.lam     = x(end);
-        rv.x_hat   = x_hat;
-        rv.x       = x;
-    end
-else                        %% copy fields to results (FINAL)
-    rv = x;
-    rv.lam_hat = cbx.lam_hat;
-    rv.lam     = cbx.lam;
-    rv.max_lam = max(cbx.lam);
-    rv.x_hat   = cbx.x_hat;
-    rv.x       = cbx.x;
+
+function [names, vals] = pne_output_fcn_default(x, x_hat)
+%% [names, vals] = pne_output_fcn_default(x, x_hat)
+%% names = pne_output_fcn_default()
+names = {'x_hat', 'x'};
+if nargin
+    vals = {x_hat, x};
 end
