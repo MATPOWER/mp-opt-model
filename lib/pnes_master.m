@@ -1,9 +1,5 @@
 function varargout = pnes_master(fcn, x0, opt)
 %PNES_MASTER  Parameterized Nonlinear Equation Solver wrapper function.
-%
-%   UNFINISHED - need to update all of the help text
-%
-%   Inputs:
 %   [X, F, EXITFLAG, OUTPUT, JAC] = PNES_MASTER(FCN, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, JAC] = PNES_MASTER(PROBLEM)
 %   A common wrapper function for numerical continuation methods for
@@ -11,10 +7,14 @@ function varargout = pnes_master(fcn, x0, opt)
 %   a parameterized nonlinear equation f(x) = 0, beginning from a starting
 %   point x0, where f(x) has dimension n and x has dimension n+1.
 %
+%   In the current implementation, the last element of x is taken to be
+%   the continuation parameter lambda, where lambda = 0 corresponds to
+%   the base solution.
+%
 %   Inputs:
 %       FCN : handle to function that evaluates the function f(x) to
-%           be solved and its (optionally, depending on the selected
-%           solver) Jacobian, J(x). Calling syntax for this function is:
+%           be solved and its Jacobian, J(x). Calling syntax for this
+%           function is:
 %               f = FCN(x)
 %               [f, J] = FCN(x)
 %           For a parameterized function, f is n x 1, x is (n+1) x 1,
@@ -24,36 +24,80 @@ function varargout = pnes_master(fcn, x0, opt)
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           solve_base (1) : determines whether or not to run an
-%               initial corrector stage on the base solution
-%
-%           should I put all of the nleqs_master opts in a
-%               nleqs_opts field?
-%
-%           something_alg ('DEFAULT') : overall algorithm
-%               'DEFAULT' : automatic, current default is ...
-%
-%           alg ('DEFAULT') : determines which solver to use for corrector
-%               'DEFAULT' : automatic, current default is NEWTON
-%               'NEWTON'  : standard, full-Jacobian Newton's method
-%               'CORE'    : core algorithm, with arbitrary update function
-%               'FD'      : fast-decoupled Newton's method
-%               'FSOLVE'  : FSOLVE, MATLAB Optimization Toolbox
-%               'GS'      : Gauss-Seidel method
+%           alg ('DEFAULT') : determines which solver to use
+%               'DEFAULT' : automatic, currently there is only one
+%               solver implementation, a predictor/corrector method
 %           verbose (0) - controls level of progress output displayed
 %               0 = no progress output
-%               1 = some progress output
-%               2 = verbose progress output
-%           max_it (0) - maximum number of iterations
-%                       (0 means use solver's own default)
-%           tol (0) - termination tolerance on f(x)
-%                       (0 means use solver's own default)
-%           core_sp - solver parameters struct for NLEQS_CORE, required
-%               when alg = 'CORE' (see NLEQS_CORE for details)
-%           fd_opt - options struct for fast-decoupled Newton, NLEQS_FD_NEWTON
-%           fsolve_opt - options struct for FSOLVE
-%           gs_opt - options struct for Gauss-Seidel method, NLEQS_GAUSS_SEIDEL
-%           newton_opt - options struct for Newton's method, NLEQS_NEWTON
+%               1-5 = increasing levels of progress output
+%           nleqs_opt - options struct for NLEQS_MASTER used for
+%               corrector stage (see NLEQS_MASTER for details), default
+%               sets nleqs_opt.verbose to 0, otherwise to 2 if OPT.verbose > 4
+%           solve_base (1) : 0/1 flag that determines whether or not to
+%               run a corrector stage from initial solution point, x0
+%           parameterization (3) - choice of parameterization
+%               1 - natural
+%               2 - arc len
+%               3 - pseudo arc len
+%           stop_at ('NOSE') - determines stopping criterion
+%               'NOSE'     - stop when nose point is reached
+%               'FULL'     - trace full nose curve
+%               <lam_stop> - stop upon reaching specified target lambda value
+%           max_it (2000) - maximum number of continuation steps
+%           step (0.05) - continuation step size
+%           step_min (1e-4) - minimum allowed step size
+%           step_max (0.2) - maximum allowed step size
+%           adapt_step (0) - toggle adaptive step size feature
+%               0 - adaptive step size disabled
+%               1 - adaptive step size enabled
+%           adapt_step_ws (1) - scale factor for default initial step size
+%               when warm-starting with adaptive step size enabled
+%           adapt_step_damping (0.7) - damping factor for adaptive step sizing
+%           adapt_step_tol (1e-3) - tolerance for adaptive step sizing
+%           default_event_tol (1e-3) - default tolerance for event functions
+%           target_lam_tol (0) - tolerance for target lambda detection, 0 means
+%               use the value of default_event_tol
+%           nose_tol (0) - tolerance for nose point detection, 0 means use
+%               the value of default_event_tol
+%           events (<empty>) - cell array of specs for user-defined event
+%               functions, to be passed as MY_EVENTS arg to PNE_REGISTER_EVENTS
+%               (see PNE_REGISTER_EVENTS for details).
+%           callbacks (<empty>) - cell array of specs for user-defined callback
+%               functions, to be passed as MY_CBACKS arg to
+%               PNE_REGISTER_CALLBACKS (see PNE_REGISTER_CALLBACKS for details).
+%           output_fcn (<empty>) - custom output function, called by
+%               PNE_CALLBACK_DEFAULT
+%           warmstart (<empty>) - struct containing warm-start state, see
+%               warmstart field in OUTPUT below for details of expected
+%               fields
+%           plot - options for plotting of nose curve by PNE_CALLBACK_DEFAULT
+%               .level (0) - control plotting of nose curve
+%                   0 - do not plot nose curve
+%                   1 - plot when completed
+%                   2 - plot incrementally at each continuation step
+%                   3 - same as 2, with 'pause' at each continuation step
+%               .idx (<empty>) - index of quantity to plot, passed to yfcn()
+%               .idx_default (<empty>) - fcn to provide default value for idx,
+%                   if none provided
+%               .xfcn (<empty>) - handle to function that maps a value from
+%                   the field of the OUTPUT indicated by value of plot.xname
+%                   to a horizontal coordinate for plotting
+%               .yfcn (<empty>) - handle to function that maps a value from
+%                   the field of the OUTPUT indicated by value of plot.yname
+%                   and an index to be applied to that value into a vertical
+%                   coordinate for plotting
+%               .title ('Value of Variable %d') - plot title used for plot of
+%                   single variable, can use %d as placeholder for var index
+%               .title2 ('Value of Multiple Variables') - plot title used for
+%                   plot of multiple variables
+%               .xname ('lam') - name of output field holding values that
+%                   determine horizontal coordinates of plot
+%               .yname ('x') - name of output field holding values that
+%                   determine vertical coordinates of plot
+%               .xlabel ('\lambda') - label for horizontal axis
+%               .ylabel ('Variable Value') - label for vertical axis
+%               .legend ('Variable %d') - legend lable, %d can be used as
+%                   placeholder for variable index
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: fcn, x0, opt
@@ -62,48 +106,82 @@ function varargout = pnes_master(fcn, x0, opt)
 %       X : solution vector x
 %       F : final function value, f(x)
 %       EXITFLAG : exit flag
-%           1 = converged
-%           0 or negative values = solver specific failure codes
+%           1 = succeeded
+%           0 = failed
 %       OUTPUT : output struct with the following fields:
-%           alg - algorithm code of solver used
-%           (others) - algorithm specific fields
+%           corrector - output return value from NLEQS_MASTER from final
+%               corrector run (see NLEQS_MASTER for details)
+%           iterations - N, total number of continuation steps performed
+%           events - struct array of size NE of events detected with fields:
+%               k - continuation step at which event was located
+%               name - name of detected event
+%               idx - index(es) of critical elements in corresponding event
+%                   function
+%               msg - descriptive text detailing the event
+%           done_msg - string with message describing cause of continuation
+%               termination
+%           steps - (N+1) row vector of stepsizes taken at each continuation
+%               step
+%           lam_hat - (N+1) row vector of lambda values from prediction steps
+%           lam - (N+1) row vector of lambda values from correction steps
+%           max_lam - maximum value of parameter lambda (from OUTPUT.lam)
+%           warmstart - optional output with information useful for
+%               warm-starting an updated continuation problem, with fields:
+%               cont_steps - current value of continuation step counter
+%               direction - +1 or -1, for tracing of curve in same or
+%                   opposite direction, respectively
+%               dir_from_jac_eigs - 0/1 flag to indicate whether to use
+%                   the sign of the smallest eigenvalue of the Jacobian to
+%                   determine the initial direction
+%               x - current solution vector
+%               z - current tangent vector
+%               parm - function handle for current parameterization function
+%               default_parm - function handle for default parameterization fcn
+%               default_step - default step size
+%               events - 
+%               cbs - struct containing user state information for callbacks
+%                   see PNES_CALLBACK_DEFAULT for more details
+%               xp - previous step solution vector
+%               zp - previous step tangent vector
+%           (others) - depending on OPT.output_fcn, by default (i.e. with no
+%               explicitly provided output function) includes fields:
+%                   x_hat - NX x (N+1) matrix of solution values from
+%                       prediction steps
+%                   x - NX x (N+1) matrix of solution values from correction
+%                       steps
 %       JAC : final Jacobian matrix, J(x)
 %
-%   Note the calling syntax is almost identical to that of FSOLVE from
-%   MathWorks' Optimization Toolbox. The function for evaluating the
-%   nonlinear function and Jacobian is identical.
-%
 %   Calling syntax options:
-%       [x, f, exitflag, output, jac] = nleqs_master(fcn, x0);
-%       [x, f, exitflag, output, jac] = nleqs_master(fcn, x0, opt);
-%       x = nleqs_master(problem);
+%       [x, f, exitflag, output, jac] = pnes_master(fcn, x0);
+%       [x, f, exitflag, output, jac] = pnes_master(fcn, x0, opt);
+%       x = pnes_master(problem);
 %               where problem is a struct with fields: fcn, x0, opt
-%               and all fields except 'fcn' and 'x0' are optional
-%       x = nleqs_master(...);
-%       [x, f] = nleqs_master(...);
-%       [x, f, exitflag] = nleqs_master(...);
-%       [x, f, exitflag, output] = nleqs_master(...);
-%       [x, f, exitflag, output, jac] = nleqs_master(...);
+%               where opt is optional
+%       x = pnes_master(...);
+%       [x, f] = pnes_master(...);
+%       [x, f, exitflag] = pnes_master(...);
+%       [x, f, exitflag, output] = pnes_master(...);
+%       [x, f, exitflag, output, jac] = pnes_master(...);
 %
-%   Example: (problem from https://www.chilimath.com/lessons/advanced-algebra/systems-non-linear-equations/)
-%       function [f, J] = f1(x)
-%       f = [  x(1)   + x(2) - 1;
-%             -x(1)^2 + x(2) + 5    ];
-%       if nargout > 1
-%           J = [1 1; -2*x(1) 1];
+%   Example: (based on https://www.chilimath.com/lessons/advanced-algebra/systems-non-linear-equations/)
+%       function [f, J] = f1p(x)
+%           f = [  x(1)   + x(2) + 6*x(3) - 1;
+%                 -x(1)^2 + x(2)          + 5   ];
+%           if nargout > 1
+%               J = [1 1 6; -2*x(1) 1 0];
+%           end
 %       end
-%
 %       problem = struct( ...
-%           'fcn',    @(x)f1(x), ...
-%           'x0',       [0; 0], ...
-%           'opt',      struct('verbose', 2) ...
+%           'fcn',  @(x)f1p(x), ...
+%           'x0',   [-1; 0; 0], ...
+%           'opt',  struct('verbose', 2, 'adapt_step', 1, 'step_max', 10) ...
 %       );
-%       [x, f, exitflag, output, jac] = nleqs_master(problem);
+%       [x, f, exitflag, output, jac] = pnes_master(problem);
 %
-%   See also PNES_...
+%   See also PNE_CALLBACK_DEFAULT, PNE_REGISTER_CALLBACKS, PNE_REGISTER_EVENTS
 
 %   MP-Opt-Model
-%   Copyright (c) 2013-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2013-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell,
 %   Shrirang Abhyankar, Argonne National Laboratory,
 %   and Alexander Flueck, IIT
@@ -135,37 +213,37 @@ dopts = struct( ...
     'alg',              'DEFAULT', ...  %% algorithm
     'verbose',          0, ...
     'nleqs_opt',        struct('verbose', nleqs_opt_verbose), ...
-    'solve_base',       1, ...          %% UNFINISHED
+    'solve_base',       1, ...          %% run corrector for initial point
     'parameterization', 3, ...          %% 1 - natural, 2 - arc len, 3 - pseudo arc len
     'stop_at',          'NOSE', ...     %% 'NOSE', 'FULL', <lam_stop>
-    'step',             0.05, ...       %% UNFINISHED
-    'step_min',         1e-4, ...       %% UNFINISHED
-    'step_max',         0.2, ...        %% UNFINISHED
-    'adapt_step',       0, ...          %% UNFINISHED
-    'adapt_step_ws',    1, ...          %% UNFINISHED
-    'adapt_step_damping', 0.7, ...      %% UNFINISHED
-    'adapt_step_tol',   1e-3, ...       %% UNFINISHED
-    'default_event_tol',1e-3, ...       %% UNFINISHED
-    'target_lam_tol',   0, ...          %% UNFINISHED
-    'nose_tol',         0, ...          %% UNFINISHED
-    'events',           {{}}, ...       %% UNFINISHED
-    'callbacks',        {{}}, ...       %% UNFINISHED
     'max_it',           2000, ...       %% maximum number of continuation steps
+    'step',             0.05, ...       %% continuation step size
+    'step_min',         1e-4, ...       %% minimum allowed step size
+    'step_max',         0.2, ...        %% maximum allowed step size
+    'adapt_step',       0, ...          %% 0/1 toggle, adaptive step size
+    'adapt_step_ws',    1, ...          %% warm start inital step size scale factor
+    'adapt_step_damping', 0.7, ...      %% adaptive step sizing damping factor
+    'adapt_step_tol',   1e-3, ...       %% adaptive step sizing tolerance
+    'default_event_tol',1e-3, ...       %% default event function tolerance
+    'target_lam_tol',   0, ...          %% event function tolerance for TARGET_LAM event
+    'nose_tol',         0, ...          %% event function tolerance for NOSE event
+    'events',           {{}}, ...       %% user-defined event detection functions
+    'callbacks',        {{}}, ...       %% user-defined callback functions
     'output_fcn',       [], ...         %% custom output fcn, default callback
-    'warmstart',        [], ...         %% default warm start state
+    'warmstart',        [], ...         %% struct containing warm-start state
     'plot',             struct( ...     %% used by pne_callback_default() for plotting
         'level',        0, ...          %% 0 - no plot, 1 - final, 2 - steps, 3 - steps w/pause
         'idx',          [], ...         %% index of quantity to plot, passed to yfcn()
         'idx_default',  [], ...         %% fcn to provide default value for idx, if none provided
-        'xfcn',         [], ...         %% UNFINISHED
-        'yfcn',         [], ...         %% UNFINISHED
-        'title',        'Value of Variable %d', ... %% UNFINISHED
-        'title2',       'Value of Multiple Variables', ...  %% UNFINISHED
+        'xfcn',         [], ...         %% fcn to compute x-coord from data
+        'yfcn',         [], ...         %% fcn to compute x-coord from data, idx
+        'title',        'Value of Variable %d', ... %% plot title for single var plot
+        'title2',       'Value of Multiple Variables', ...  %% plot title for multiple var plot
         'xname',        'lam', ...      %% name of output field holding x vals
         'yname',        'x', ...        %% name of output field holding y vals
-        'xlabel',       '\lambda', ...              %% UNFINISHED
-        'ylabel',       'Variable Value', ...       %% UNFINISHED
-        'legend',       'Variable %d' ...           %% UNFINISHED
+        'xlabel',       '\lambda', ...              %% horizontal axis label
+        'ylabel',       'Variable Value', ...       %% vertical axis label
+        'legend',       'Variable %d' ...           %% legend label
     ) ...
 );
 opt = nested_struct_copy(dopts, opt);
@@ -181,9 +259,9 @@ end
 warmstarted = ~isempty(opt.warmstart);
 s = struct( ...         %% container struct for various variables, flags
     'done',     0, ...      %% flag indicating continuation has terminated
+    'done_msg', '', ...     %% termination message
     'warmstart',[], ...     %% warm start state to return when done (to pass
                             ...%% to subsequent warm-started call to PNES_MASTER)
-    'done_msg', '', ...     %% termination message
     'rollback', 0, ...      %% flag to indicate a step must be rolled back
     'events',    [], ...    %% struct array for detected events
     'results',  []  );      %% results struct
@@ -209,8 +287,6 @@ reg_ev = pne_register_events(my_events, opt);   %% registered event functions
 reg_cb = pne_register_callbacks(my_cbacks);     %% registered callback functions
 nef = length(reg_ev);   %% number of registered event functions
 ncb = length(reg_cb);   %% number of registered callback functions
-
-t0 = tic;                       %% start timing
 
 %% initialize continuation step counter
 if warmstarted
@@ -254,17 +330,18 @@ if ~s.done
     rb_cnt_cb = 0;  %% counter for rollback steps triggered directly by callbacks
 
     if warmstarted
-        manual_direction_switch = 0;
+        manual_direction_switch = 0;    %% set to 1 to manually prompt for
+                                        %% direction change upon warmstart
         ws = opt.warmstart;
-        step = 0;
+        x = ws.x;           %% starting value solution vector
+        z = ws.z;           %% starting value of tangent vector
+        step = 0;           %% re-solve current point
         parm = ws.parm;
         direction = ws.direction;
         default_parm = ws.default_parm;
         default_step = ws.default_step;
         cbs = ws.cbs;
         event_log = ws.events;
-        x = ws.x;
-        z = ws.z;
         if manual_direction_switch
             %% decide whether to switch directions
             reply = input('Switch directions? Y/N [N]:','s');
@@ -272,6 +349,7 @@ if ~s.done
                 direction = -direction;
             end
         elseif isfield(ws, 'dir_from_jac_eigs') && ws.dir_from_jac_eigs
+            %% attempt to determine direction from smalles Jacobian eigenvalue
             [~, J] = fcn(x);
             eigs_opt.tol = 1e-3;
             eigs_opt.maxit = 2*length(x);
@@ -279,7 +357,7 @@ if ~s.done
                         min(real(eigs(J(:,1:end-1), 1, 'SR', eigs_opt))));
         end
 
-        if opt.adapt_step   %% hey, maybe slow down, things may have changed
+        if opt.adapt_step   %% hey, maybe slow down, things might have changed
             default_step = default_step * opt.adapt_step_ws;
         end
     else
@@ -292,12 +370,12 @@ if ~s.done
             case 3
                 parm = @pne_pfcn_pseudo_arc_len;    %% PAL
             otherwise
-                error('pnes_master: OPT.parameterization (= %d) must be 1, 2, or 3', parm);
+                error('pnes_master: OPT.parameterization (= %d) must be 1, 2, or 3', opt.parameterization);
         end
 
         %% finish initializing tangent vector
-        direction = 1;  %% increasing lambda
-        z0 = zeros(length(x0), 1); z0(end) = direction; %% direction of positive lambda
+        direction = 1;
+        z0 = zeros(length(x), 1); z0(end) = direction;  %% +ve lambda direction
         z = pne_tangent(x, x, z0, fcn, parm, direction);
 
         step = opt.step;
@@ -307,7 +385,7 @@ if ~s.done
         event_log = [];
     end
 
-    %% initialize state for current continuation step
+    %% initialize state struct for current continuation step
     cx = struct( ...        %% current state
         'x_hat',        x, ...      %% predicted solution value
         'x',            x, ...      %% corrected solution value
@@ -319,7 +397,7 @@ if ~s.done
         'step', step, ...           %% current step size
         'parm', parm, ...           %% current parameterization
         'events', event_log, ...    %% event log
-        'cbs', cbs, ...             %% user state, for callbacks
+        'cbs', cbs, ...             %% user-defined callback state
         'ef', [] ...                %% event function values
     );
 
@@ -329,7 +407,7 @@ if ~s.done
         cx.ef{k} = reg_ev(k).fcn(cx, opt);
     end
 
-    if warmstarted
+    if warmstarted  %% no need to initialize callbacks
         %% initialize state for previous continuation step
         px = cx;
         px.x = ws.xp;   %% use warm start value for solution value
@@ -342,13 +420,16 @@ if ~s.done
         cont_steps = cont_steps + 1;
 
         %% check for case with base and target the same
+        %% evaluate function at lambda = 0 (base)
         if opt.solve_base
             fb = f(1:end-1);
         else
-            fb = fcn(x0);
+            fb = fcn(x);
             exitflag = 1;
         end
-        xt = x0;
+
+        %% evaluate function at lambda = 1 (target)
+        xt = x;
         xt(end) = 1;
         ft = fcn(xt);
         if norm(fb - ft, Inf) < 1e-12
@@ -372,7 +453,7 @@ while ~s.done
     %% corrector step
     pfcn = @(xx)cx.parm(xx, cx.x, cx.step, cx.z);
     [nx.x, f, exitflag, out] = nleqs_master(@(xx)pne_corrector_fcn(xx, fcn, pfcn), nx.x_hat, opt.nleqs_opt);
-    if ~exitflag    %% corrector failed
+    if ~exitflag        %% corrector failed
         s.done = 1;
         s.done_msg = sprintf('Corrector did not converge in %d iterations.', out.iterations);
         if opt.verbose
@@ -389,17 +470,18 @@ while ~s.done
         tx = cx;            %% use cx as the previous state
     end
     nx.z = pne_tangent(nx.x, tx.x, tx.z, fcn, nx.parm, direction);
+    direction = 1;      %% continue in same direction
 
     %% detect events
     for k = 1:nef
-        nx.ef{k} = reg_ev(k).fcn(nx, opt);  %% update event functions
+        nx.ef{k} = reg_ev(k).fcn(nx, opt);  %% update event function values
     end
     [s.rollback, s.events, nx.ef] = ...
         pne_detect_events(reg_ev, nx.ef, cx.ef, nx.step);
 
     %% adjust step-size to locate event function zero, if necessary
     if s.rollback               %% current step overshot
-        %% rollback and initialize next step size based on rollback and previous
+        %% roll back & initialize next step size based on rollback and previous
         rx = nx;                    %% save state we're rolling back from
         rx_evnts = s.events;        %% and critical event info
         cx.this_step = s.events.step_scale * rx.step;
@@ -437,9 +519,8 @@ while ~s.done
                     cx_ef, rx_ef, nx.this_step);
             end
         end
-    else
+    else                    %% normal step, not locating anything
         loc_msg = '';
-        direction = 1;
     end
 
     %% invoke callbacks - "iterations" context
@@ -502,7 +583,7 @@ while ~s.done
     end
 
     %% adapt stepsize if requested and not terminating, locating a zero
-    %% or re-doing a step after changing the problem data
+    %% or warm starting
     if opt.adapt_step && ~s.done && ~locating && ~s.events(1).zero && nx.step ~= 0
         pred_error = norm(nx.x - nx.x_hat, Inf);
 
@@ -612,6 +693,9 @@ if nargout > 1
     end
 end
 
+
+%%-----  pne_corrector_fcn  -----
+%% fcn(x) combined with parameterization constraint
 function [fp, dfp] = pne_corrector_fcn(x, fcn, pfcn)
 if nargout < 2
     fp = [ fcn(x); pfcn(x) ];
@@ -622,6 +706,9 @@ else
     dfp = [df; dp];
 end
 
+
+%%-----  pne_tangent  -----
+%% find normalized tangent vector
 function z = pne_tangent(x, xp, zp, fcn, parm, direction)
 pfcn = @(xx)parm(xx, xp, 0, zp);
 [f, df] = fcn(x);
@@ -630,6 +717,10 @@ rhs = [ zeros(length(f), 1); direction ];
 z = [df; dp] \ rhs;
 z = z / norm(z);    %% normalize it
 
+
+%%-----  pne_ptag  -----
+%% return 3-letter string to indicate parameterization scheme
+%% NAT - natural, ARC - arc length, PAL - pseudo arc length
 function ptag = pne_ptag(parm)
 switch func2str(parm)
     case 'pne_pfcn_natural'

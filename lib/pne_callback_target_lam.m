@@ -1,5 +1,5 @@
 function [nx, cx, s] = pne_callback_target_lam(k, nx, cx, px, s, opt)
-%PNE_CALLBACK_TARGET_LAM  Callback to handle TARGET_LAM events
+%PNE_CALLBACK_TARGET_LAM  Callback function to handle TARGET_LAM events
 %   [NX, CX, S] = PNE_CALLBACK_TARGET_LAM(K, NX, CX, PX, S, OPT)
 %
 %   Callback to handle TARGET_LAM events, triggered by event function
@@ -7,15 +7,15 @@ function [nx, cx, s] = pne_callback_target_lam(k, nx, cx, px, s, opt)
 %   reached or that the full continuation curve has been traced.
 %
 %   This function sets the msg field of the event when the target lambda has
-%   been found, raises the S.done flag and sets S.done_msg. If the current
-%   or predicted next step overshoot the target lambda, it adjusts the step
-%   size to be exactly what is needed to reach the target, and sets the
-%   parameterization for that step to be the natural parameterization.
+%   been found, raises the S.done flag and sets S.done_msg. If either the
+%   current or predicted next step overshoot the target lambda, it adjusts
+%   the step size to be exactly what is needed to reach the target, and sets
+%   that step to use natural parameterization.
 %
 %   See PNE_CALLBACK_DEFAULT for details of the input and output arguments.
 
 %   MP-Opt-Model
-%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2016-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
