@@ -39,35 +39,31 @@ if ischar(target)
 end
 
 %% handle event
-event_detected = 0;
-for i = 1:length(s.events)
-    if strcmp(s.events(i).name, 'TARGET_LAM')
-        event_detected = 1;
-        if s.events(i).zero  %% prepare to terminate
-            s.done = 1;
-            if target == 0      %% FULL
-                s.done_msg = sprintf('Traced full continuation curve in %d continuation steps', k);
-            else                %% target lambda value
-                s.done_msg = sprintf('Reached desired lambda %g in %d continuation steps', ...
-                    target, k);
-            end
-        else                    %% set step-size & parameterization to terminate next time
-            cx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
-            if target == 0      %% FULL
-                cx.this_step = cx.x(end);
-                s.events(i).msg = sprintf('%s\n  step %d to overshoot full trace, reduce step size and set natural param', s.events(i).msg, k);
-            else                %% target lambda value
-                cx.this_step = target - cx.x(end);
-                s.events(i).msg = sprintf('%s\n  step %d to overshoot target lambda, reduce step size and set natural param', s.events(i).msg, k);
-            end
+[ev, i] = pne_detected_event(s.events, 'TARGET_LAM');
+if ~isempty(ev)
+    if ev.zero              %% prepare to terminate
+        s.done = 1;
+        if target == 0      %% FULL
+            s.done_msg = sprintf('Traced full continuation curve in %d continuation steps', k);
+        else                %% target lambda value
+            s.done_msg = sprintf('Reached desired lambda %g in %d continuation steps', ...
+                target, k);
         end
-        break;
+    else                    %% set step-size & parameterization to terminate next time
+        cx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
+        if target == 0      %% FULL
+            cx.this_step = cx.x(end);
+            s.events(i).msg = sprintf('%s\n  step %d to overshoot full trace, reduce step size and set natural param', ev.msg, k);
+        else                %% target lambda value
+            cx.this_step = target - cx.x(end);
+            s.events(i).msg = sprintf('%s\n  step %d to overshoot target lambda, reduce step size and set natural param', ev.msg, k);
+        end
     end
 end
 
 %% otherwise, check if predicted lambda of next step will overshoot
 %% (by more than remaining distance, to play it safe)
-if ~event_detected && ~s.rollback
+if isempty(ev) && ~s.rollback
     if isempty(nx.this_step)
         step = nx.default_step;
     else
