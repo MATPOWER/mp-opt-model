@@ -1,23 +1,30 @@
-function [rollback, ev, cef] = pne_detect_events(reg_ev, cef, pef, step)
+function [rollback, ev, nefv] = pne_detect_events(reg_ev, nefv, cefv, step)
 %PNE_DETECT_EVENTS  Detect events from event function values
-%   [ROLLBACK, CRITICAL_EVENTS, CEF] = PNE_DETECT_EVENTS(REG_EV, CEF, PEF, STEP)
-%   
+%   [ROLLBACK, CRITICAL_EVENTS, NEFV] = ...
+%       PNE_DETECT_EVENTS(REG_EV, NEFV, CEFV, STEP)
+%
+%   Determines whether any events have been detected based on the
+%   corresponding "current" and "next" event function values. If any events
+%   are detected, the relevant information is returned in CRITICAL_EVENTS,
+%   along with a ROLLBACK flag indicating whether to roll back the proposed
+%   next step.
+%
 %   Inputs:
 %       REG_EV : struct containing info about registered event fcns
-%       CEF : cell array of Current Event Function values
-%       PEF : cell array of Previous Event Function values
+%       NEFV : cell array of Next Event Function Values
+%       CEFV : cell array of Current Event Function Values
 %       STEP : current step size
 %
 %   Outputs:
 %       ROLLBACK : flag indicating whether any event has requested a
-%           rollback step
+%           rollback step, if ROLLBACK is true, then CRITICAL_EVENTS will
+%           have length 1
 %       CRITICAL_EVENTS : struct array containing information about any
 %           detected events, with fields:
-%           eidx        : event index, in list of registered events
-%                           0 if no event detected
+%           eidx        : event index, index in REG_EV, 0 if no event detected
 %           name        : name of event function, empty if none detected
 %           zero        : 1 if zero has been detected, 0 otherwise
-%                           (interval detected or no event detected)
+%                           (i.e. interval detected or no event detected)
 %           idx         : index(es) of critical elements in event function
 %           step_scale  : linearly interpolated estimate of scaling factor
 %                         for current step size required to reach event zero
@@ -28,10 +35,12 @@ function [rollback, ev, cef] = pne_detect_events(reg_ev, cef, pef, step)
 %                           'ZERO detected for TARGET_LAM event' or
 %                           'INTERVAL detected for QLIM(3) event', but intended
 %                         to be changed/updated by callbacks
-%       CEF : cell array of Current Event Function values
+%       NEFV : cell array of Next Event Function Values
+%           (possibly updated to be exactly zero to avoid re-detection of
+%           an interval following a zero detection)
 
 %   MP-Opt-Model
-%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2016-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
@@ -41,7 +50,7 @@ function [rollback, ev, cef] = pne_detect_events(reg_ev, cef, pef, step)
 
 %% initialize result variables
 rollback = 0;
-ev = struct( ...            %% critical events
+ev = struct( ...            %% initialize struct for storing critical events
     'eidx', 0, ...
     'zero', 0, ...
     'step_scale', 1, ...
@@ -53,7 +62,7 @@ ev = struct( ...            %% critical events
 
 %% other initialization
 i = 1;              %% index into ev struct
-nef = length(cef);  %% number of event functions
+nef = length(nefv); %% number of event functions
 
 %% detect events, first look for event intervals for events requesting rollback
 for eidx = 1:nef
@@ -62,12 +71,12 @@ for eidx = 1:nef
     end
 
     %% current and previous event function signs
-    c_sign = sign(cef{eidx});
-    p_sign = sign(pef{eidx});
+    c_sign = sign(nefv{eidx});
+    p_sign = sign(cefv{eidx});
 
     %% if there's been a sign change and we aren't within event tolerance ...
     idx = find( abs(c_sign) == 1 & c_sign == -p_sign & ...
-                abs(cef{eidx}) > reg_ev(eidx).tol  );
+                abs(nefv{eidx}) > reg_ev(eidx).tol  );
     if ~isempty(idx)
         if step == 0    %% if it's a "repeat" step
             %% (e.g. after warmstart with possible fcn change)
@@ -84,7 +93,7 @@ for eidx = 1:nef
         else
             %% ... compute step size scaling factors and find index of smallest one
             [step_scale, j] = ...
-                min(pef{eidx}(idx) ./ (pef{eidx}(idx) - cef{eidx}(idx)) );
+                min(cefv{eidx}(idx) ./ (cefv{eidx}(idx) - nefv{eidx}(idx)) );
 
             %% if it's smaller than the current critical one ...
             if step_scale < ev.step_scale
@@ -107,11 +116,11 @@ if rollback == 0
     %% search for event zeros
     for eidx = 1:nef
         %% if there's an event zero ...
-        idx = find( abs(cef{eidx}) <= reg_ev(eidx).tol );
+        idx = find( abs(nefv{eidx}) <= reg_ev(eidx).tol );
         if ~isempty(idx)
             %% set event function to exactly zero
             %% (to prevent possible INTERVAL detection again on next step)
-            cef{eidx}(idx) = 0;
+            nefv{eidx}(idx) = 0;
 
             %% ... make this one the critical one
             ev(i).eidx = eidx;
@@ -130,14 +139,14 @@ if rollback == 0
         %% search for intervals for non-rollback events
         for eidx = 1:nef
             %% current and previous event function signs
-            c_sign = sign(cef{eidx});
-            p_sign = sign(pef{eidx});
+            c_sign = sign(nefv{eidx});
+            p_sign = sign(cefv{eidx});
 
             %% if there's been a sign change ...
             idx = find( abs(c_sign) == 1 & c_sign == -p_sign );
             if ~isempty(idx)
                 %% ... compute step size scaling factors ...
-                step_scale = pef{eidx}(idx) ./ (pef{eidx}(idx) - cef{eidx}(idx));
+                step_scale = cefv{eidx}(idx) ./ (cefv{eidx}(idx) - nefv{eidx}(idx));
 
                 %% ... and save the info as an interval detection
                 ev(i).eidx = eidx;
@@ -156,7 +165,7 @@ end
 %% update msgs
 if ev(1).eidx
     for i = 1:length(ev)
-        if length(cef{ev(i).eidx}) > 1
+        if length(nefv{ev(i).eidx}) > 1
             s1 = sprintf('(%d)', ev(i).idx);
         else
             s1 = '';
