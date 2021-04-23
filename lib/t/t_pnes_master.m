@@ -18,7 +18,7 @@ cfg = {
     {'DEFAULT', 'default',  []          []  },
 };
 
-n = 175;
+n = 188;
 
 t_begin(n*length(cfg), quiet);
 
@@ -132,6 +132,26 @@ for k = 1:length(cfg)
         t_is(out.events.idx, 1, 12, [t 'out.events.idx']);
         t_ok(strcmp(out.events.name, 'TARGET_LAM'), [t 'out.events.name']);
         t_ok(strcmp(out.done_msg, sprintf('Traced full continuation curve in %d continuation steps', it)), [t 'out.done_msg']);
+
+        t = sprintf('%s - FULL (max_it) : ', name);
+        opt.max_it = 25;
+        p = struct('fcn', @f1p, 'x0', x0, 'opt', opt);
+        [x, f, e, out, jac] = pnes_master(p);
+        opt.max_it = 2000;
+        it = 25;
+        t_is(e, 1, 12, [t 'exitflag']);
+        t_is(x, [0.64152370; -4.588447338; 0.82448727], 8, [t 'x - final']);
+        t_is(f, [0;0], 8, [t 'f']);
+        t_is(out.x(:,1), [-3;4;0], 8, [t 'out.x(:,1)']);
+        t_is(out.max_lam, 1.04127275, 8, [t 'out.max_lam']);
+        t_is(out.iterations, it, 12, [t 'out.iterations']);
+        t_is(size(out.lam), [1,it+1], 12, [t 'size(out.lam)']);
+        t_is(size(out.lam_hat), [1,it+1], 12, [t 'size(out.lam_hat)']);
+        t_is(size(out.x), [3,it+1], 12, [t 'size(out.x)']);
+        t_is(size(out.x_hat), [3,it+1], 12, [t 'size(out.x_hat)']);
+        t_is(size(out.steps), [1,it+1], 12, [t 'size(out.steps)']);
+        t_is(length(out.events), 0, 12, [t 'length(out.events)']);
+        t_ok(strcmp(out.done_msg, sprintf('Reached maximun number of continuation steps (opt.max_it = %d)', it)), [t 'out.done_msg']);
 
         t = sprintf('%s - NOSE (arc len): ', name);
         p.opt.stop_at = 'NOSE';

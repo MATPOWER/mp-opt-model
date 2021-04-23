@@ -150,6 +150,7 @@ dopts = struct( ...
     'nose_tol',         0, ...          %% UNFINISHED
     'events',           {{}}, ...       %% UNFINISHED
     'callbacks',        {{}}, ...       %% UNFINISHED
+    'max_it',           2000, ...       %% maximum number of continuation steps
     'output_fcn',       [], ...         %% custom output fcn, default callback
     'warmstart',        [], ...         %% default warm start state
     'plot',             struct( ...     %% used by pne_callback_default() for plotting
@@ -525,12 +526,13 @@ while ~s.done
     if ~s.rollback
         px = cx;    %% save current state before update
         cx = nx;    %% update current state to next candidate
-%         if cont_steps > 1000
-%             s.done = 1;
-%             s.done_msg = 'RUNAWAY!';
-%         end
         if ~s.done
-            cont_steps = cont_steps + 1;
+            if cont_steps >= opt.max_it
+                s.done = 1;
+                s.done_msg = sprintf('Reached maximun number of continuation steps (opt.max_it = %d)', opt.max_it);
+            else
+                cont_steps = cont_steps + 1;
+            end
         end
     end
 
