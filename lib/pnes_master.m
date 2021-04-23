@@ -398,13 +398,13 @@ if ~s.done
         'parm', parm, ...           %% current parameterization
         'events', event_log, ...    %% event log
         'cbs', cbs, ...             %% user-defined callback state
-        'ef', [] ...                %% event function values
+        'efv', [] ...               %% event function values
     );
 
     %% initialize event function values
-    cx.ef = cell(nef, 1);
+    cx.efv = cell(nef, 1);
     for k = 1:nef
-        cx.ef{k} = reg_ev(k).fcn(cx, opt);
+        cx.efv{k} = reg_ev(k).fcn(cx, opt);
     end
 
     if warmstarted  %% no need to initialize callbacks
@@ -474,10 +474,10 @@ while ~s.done
 
     %% detect events
     for k = 1:nef
-        nx.ef{k} = reg_ev(k).fcn(nx, opt);  %% update event function values
+        nx.efv{k} = reg_ev(k).fcn(nx, opt); %% update event function values
     end
-    [s.rollback, s.events, nx.ef] = ...
-        pne_detect_events(reg_ev, nx.ef, cx.ef, nx.step);
+    [s.rollback, s.events, nx.efv] = ...
+        pne_detect_events(reg_ev, nx.efv, cx.efv, nx.step);
 
     %% adjust step-size to locate event function zero, if necessary
     if s.rollback               %% current step overshot
@@ -494,8 +494,8 @@ while ~s.done
         end
         if opt.verbose > 3
             loc_msg = sprintf('OVERSHOOT  : f = [%g, <<%g>>], step <-- %.4g', ...
-                        cx.ef{s.events.eidx}(s.events.idx(1)), ...
-                        rx.ef{s.events.eidx}(s.events.idx(1)), cx.this_step);
+                        cx.efv{s.events.eidx}(s.events.idx(1)), ...
+                        rx.efv{s.events.eidx}(s.events.idx(1)), cx.this_step);
         end
     elseif locating
         if s.events(1).zero      %% found the zero!
@@ -504,19 +504,19 @@ while ~s.done
             rb_cnt_ef = 0;          %% reset rollback counter for ef intervals
             if opt.verbose > 3
                 loc_msg = sprintf('ZERO!      : f = %g, step <-- %.4g', ...
-                    nx.ef{rx_evnts.eidx}(rx_evnts.idx(1)), nx.default_step);
+                    nx.efv{rx_evnts.eidx}(rx_evnts.idx(1)), nx.default_step);
             end
         else                    %% prev rollback undershot
             %% initialize next step size based on critical event function
             %% values from prev rollback step and current step
-            rx_ef = rx.ef{rx_evnts.eidx}(rx_evnts.idx(1));
-            cx_ef = nx.ef{rx_evnts.eidx}(rx_evnts.idx(1));
-            step_scale = cx_ef / (cx_ef - rx_ef);
+            rx_efv = rx.efv{rx_evnts.eidx}(rx_evnts.idx(1));
+            cx_efv = nx.efv{rx_evnts.eidx}(rx_evnts.idx(1));
+            step_scale = cx_efv / (cx_efv - rx_efv);
             nx.this_step = step_scale * (rx.step - nx.step);
             rb_cnt_ef = 0;          %% reset rollback counter for ef intervals
             if opt.verbose > 3
                 loc_msg = sprintf('UNDERSHOOT : f [<<%g>>, %g], step <-- %.4g', ...
-                    cx_ef, rx_ef, nx.this_step);
+                    cx_efv, rx_efv, nx.this_step);
             end
         end
     else                    %% normal step, not locating anything

@@ -30,7 +30,7 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %               one invokation to the next, taking care not to step on fields
 %               being used by other callbacks, such as the 'default' field
 %               used by this default callback
-%           ef - cell array of event function values
+%           efv - cell array of event function values
 %       CX - current state, corresponding to most recent successful step
 %            (same structure as NX and PX)
 %       PX - previous state, corresponding to last successful step prior to CX

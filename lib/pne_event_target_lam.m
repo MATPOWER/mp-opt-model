@@ -1,6 +1,6 @@
-function ef = pne_event_target_lam(cx, opt)
+function efv = pne_event_target_lam(cx, opt)
 %PNE_EVENT_TARGET_LAM  Event function to detect a target lambda value
-%   EF = PNE_EVENT_TARGET_LAM(CX, OPT)
+%   EFV = PNE_EVENT_TARGET_LAM(CX, OPT)
 %
 %   PNES_MASTER event function to detect the completion of the continuation
 %   curve or another target value of lambda.
@@ -10,7 +10,7 @@ function ef = pne_event_target_lam(cx, opt)
 %       OPT - PNES_MASTER options struct
 %
 %   Outputs:
-%       EF : event function value
+%       EFV : event function value
 
 %   MP-Opt-Model
 %   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
@@ -30,4 +30,4 @@ if ischar(target)       %% 'FULL' trace requested
         target = 0;     %% terminate at lambda = 0
     end
 end
-ef = cx.x(end) - target;
+efv = cx.x(end) - target;

@@ -1,6 +1,6 @@
-function ef = pne_event_nose(cx, opt)
+function efv = pne_event_nose(cx, opt)
 %PNE_EVENT_NOSE  Event function to detect the nose point
-%   EF = PNE_EVENT_NOSE(CX, OPT)
+%   EFV = PNE_EVENT_NOSE(CX, OPT)
 %
 %   PNE_MASTER event function to detect the nose point of the continuation
 %   curve, based on the sign of the lambda component of the tangent vector.
@@ -10,7 +10,7 @@ function ef = pne_event_nose(cx, opt)
 %       OPT - PNES_MASTER options struct
 %
 %   Outputs:
-%       EF : event function value
+%       EFV : event function value
 
 %   MP-Opt-Model
 %   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
@@ -23,4 +23,4 @@ function ef = pne_event_nose(cx, opt)
 
 %% event function value is dlam, the last element of the
 %% normalized tangent vector at the current soln
-ef = cx.z(end);
+efv = cx.z(end);

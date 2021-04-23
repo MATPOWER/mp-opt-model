@@ -365,13 +365,13 @@ end
 f = [ 2*x(1)-x(4); f ];
 
 %% example custom event function 1 (target lambda == 2/3)
-function ef = pne_event_test1(cx, opt)
+function efv = pne_event_test1(cx, opt)
 tlam = 2/3;
-ef = cx.x(end) - tlam;
+efv = cx.x(end) - tlam;
 
 %% example custom event function 2 (nose point)
-function ef = pne_event_test2(cx, opt)
-ef = cx.z(end);
+function efv = pne_event_test2(cx, opt)
+efv = cx.z(end);
 
 %% example custom callback function (exit for warmstart on SWITCH! event)
 function [nx, cx, s] = pne_callback_test1(k, nx, cx, px, s, opt)
