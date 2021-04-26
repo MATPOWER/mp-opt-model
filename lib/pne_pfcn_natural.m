@@ -1,13 +1,18 @@
 function [p, dp] = pne_pfcn_natural(x, xp, step, zp)
-%PNE_PFCN_NATURAL  Parameterized Nonlinear EQ natural parameterization fcn
+%PNE_PFCN_NATURAL  Natural parameterization function for PNE
 %   [P, DP] = PNE_PFCN_NATURAL(X, XP, STEP)
 %   [P, DP] = PNE_PFCN_NATURAL(X, XP, STEP, ZP)
+%
+%   This function defines a "natural" parameterization for a PNE, where the
+%   step size is the difference between current and previous values of the
+%   continuation parameter lambda.
 %
 %   Inputs:
 %       X    : solution vector x (last element is continuation parameter lambda)
 %       XP   : previous solution vector
 %       STEP : continuation parameter step size
-%       ZP   : normalized tangent vector at XP
+%       ZP   : normalized tangent vector at XP (not used by this
+%              parameterization)
 %
 %   Outputs:
 %       P : value of parameterization function
@@ -16,7 +21,7 @@ function [p, dp] = pne_pfcn_natural(x, xp, step, zp)
 %   See also PNE_PFCN_ARC_LEN, PNE_PFCN_PSEUDO_ARC_LEN.
 
 %   MP-Opt-Model
-%   Copyright (c) 2013-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2013-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %

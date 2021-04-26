@@ -4,6 +4,10 @@ function [ev, i] = pne_detected_event(event_log, name, zero)
 %   EV = PNE_DETECTED_EVENT(EVENT_LOG, NAME, ZERO)
 %   [EV, I] = PNE_DETECTED_EVENT(...)
 %
+%   Searches through the log of detected events, returning the event with
+%   the specified name, if one exists, and optionally only if it is refers
+%   to a detected event zero (not an event interval).
+%
 %   Inputs:
 %       EVENT_LOG : struct array of detected events
 %       NAME : name of event of interest

@@ -29,12 +29,14 @@ function reg_cb = pne_register_callbacks(my_cbacks, reg_cb)
 %       The user can define their own callback functions which take
 %       the same form and are called in the same contexts as
 %       PNE_CALLBACK_DEFAULT. These are specified via the 'callbacks' option
-%       to PNES_MASTER, which takes the same form as MY_CBACKS above.
+%       (e.g. OPT.callbacks) to PNES_MASTER, which takes the same form as
+%       MY_CBACKS above.
 %
-%   See also PNES_MASTER, PNE_CALLBACK_DEFAULT.
+%   See also PNES_MASTER, PNE_CALLBACK_DEFAULT, PNE_CALLBACK_NOSE,
+%       PNE_CALLBACK_TARGET_LAM.
 
 %   MP-Opt-Model
-%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2016-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
@@ -76,5 +78,5 @@ end
 ncb = length(reg_cb);
 p = cell(ncb, 1);
 [p{:}] = deal(reg_cb.priority);
-[junk, i] = sort(cell2mat(p), 'descend');
+[~, i] = sort(cell2mat(p), 'descend');
 reg_cb = reg_cb(i);

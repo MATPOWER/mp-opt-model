@@ -1,9 +1,13 @@
 function efv = pne_event_nose(cx, opt)
-%PNE_EVENT_NOSE  Event function to detect the nose point
+%PNE_EVENT_NOSE  Event function to detect the limit or nose point
 %   EFV = PNE_EVENT_NOSE(CX, OPT)
 %
-%   PNE_MASTER event function to detect the nose point of the continuation
-%   curve, based on the sign of the lambda component of the tangent vector.
+%   PNE_MASTER event function to detect the limit or nose point of the
+%   continuation curve, based on the sign of the lambda component of the
+%   tangent vector.
+%
+%   Set OPT.stop_at to 'NOSE' to use this function to trigger termination
+%   of the continuation at the limit or nose point.
 %
 %   Inputs:
 %       CX : struct containing info about current point (continuation soln)
@@ -11,9 +15,11 @@ function efv = pne_event_nose(cx, opt)
 %
 %   Outputs:
 %       EFV : event function value
+%
+%   See also PNES_MASTER, PNE_REGISTER_EVENTS, PNE_EVENT_TARGET_LAM.
 
 %   MP-Opt-Model
-%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2016-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %

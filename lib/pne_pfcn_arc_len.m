@@ -1,5 +1,5 @@
 function [p, dp] = pne_pfcn_arc_len(x, xp, step, zp)
-%PNE_PFCN_ARC_LEN  Parameterized Nonlinear EQ natural parameterization fcn
+%PNE_PFCN_ARC_LEN  Arc length parameterization function for PNE
 %   [P, DP] = PNE_PFCN_ARC_LEN(X, XP, STEP)
 %   [P, DP] = PNE_PFCN_ARC_LEN(X, XP, STEP, ZP)
 %
@@ -7,7 +7,12 @@ function [p, dp] = pne_pfcn_arc_len(x, xp, step, zp)
 %       X    : solution vector x (last element is continuation parameter lambda)
 %       XP   : previous solution vector
 %       STEP : continuation parameter step size
-%       ZP   : normalized tangent vector at XP
+%       ZP   : normalized tangent vector at XP (not used by this
+%              parameterization)
+%
+%   This function defines an arc length parameterization for a PNE, where the
+%   step size is the 2-norm distance of the current solution from the previous
+%   solution.
 %
 %   Outputs:
 %       P : value of parameterization function
@@ -16,7 +21,7 @@ function [p, dp] = pne_pfcn_arc_len(x, xp, step, zp)
 %   See also PNE_PFCN_NATURAL, PNE_PFCN_PSEUDO_ARC_LEN.
 
 %   MP-Opt-Model
-%   Copyright (c) 2013-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2013-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %

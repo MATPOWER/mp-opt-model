@@ -3,7 +3,11 @@ function efv = pne_event_target_lam(cx, opt)
 %   EFV = PNE_EVENT_TARGET_LAM(CX, OPT)
 %
 %   PNES_MASTER event function to detect the completion of the continuation
-%   curve or another target value of lambda.
+%   curve or another target value of lambda provided in OPT.stop_at.
+%
+%   Set OPT.stop_at a positive numerical value or to 'FULL' to use this
+%   function to trigger termination of the continuation at the desired
+%   value, or to trace the full curve back to lambda = 0, respectively.
 %
 %   Inputs:
 %       CX : struct containing info about current point (continuation soln)
@@ -11,9 +15,11 @@ function efv = pne_event_target_lam(cx, opt)
 %
 %   Outputs:
 %       EFV : event function value
+%
+%   See also PNES_MASTER, PNE_REGISTER_EVENTS, PNE_EVENT_NOSE.
 
 %   MP-Opt-Model
-%   Copyright (c) 2016-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2016-2021, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
