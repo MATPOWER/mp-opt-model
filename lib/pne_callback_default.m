@@ -11,8 +11,8 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %
 %   Inputs:
 %       K - continuation step iteration count
-%       NX - next state (corresponding to proposed next step), struct with
-%            the following fields:
+%       CX - current state, corresponding to most recent successful step
+%            with the following fields:
 %           x_hat - solution vector from predictor
 %           x - solution vector from corrector
 %           z - normalized tangent vector
@@ -31,8 +31,8 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %               being used by other callbacks, such as the 'default' field
 %               used by this default callback
 %           efv - cell array of event function values
-%       CX - current state, corresponding to most recent successful step
-%            (same structure as NX and PX)
+%       NX - next state (corresponding to proposed next step), struct with
+%            (same structure as CX and PX)
 %       PX - previous state, corresponding to last successful step prior to CX
 %            (same structure as CX and NX)
 %       S - container struct for various flags, etc., with fields:
@@ -50,10 +50,10 @@ function [nx, cx, s] = pne_callback_default(k, nx, cx, px, s, opt)
 %
 %   Outputs:
 %       (all are updated versions of the corresponding input arguments)
-%       NX - update values in this state if S.rollback is false,
-%           e.g. user callback state ('cbs' field ), etc.
 %       CX - update values in this state if S.rollback is true,
 %           e.g. 'this_step' or 'this_parm'
+%       NX - update values in this state if S.rollback is false,
+%           e.g. user callback state ('cbs' field ), etc.
 %       S - struct for various flags, etc.
 %           done - can request termination by setting to 1
 %           done_msg - can set termination reason here
@@ -163,7 +163,7 @@ if plt.level && (k >= 0 || isempty(s.warmstart))
         xf = plt.xfcn;
     end
     if isempty(plt.yfcn)        %% default vertical coord is simply
-        yf = @(x,idx)x(idx, :); %% cbs.(plt.yname)(idx, :), etc.
+        yf = @(y,idx)y(idx, :); %% cbs.(plt.yname)(idx, :), etc.
     else
         yf = plt.yfcn;
         if isempty(plt.idx) && isempty(plt.idx_default)
@@ -241,6 +241,14 @@ if plt.level && (k >= 0 || isempty(s.warmstart))
         xlabel(plt.xlabel);
         ylabel(plt.ylabel);
         hold on;
+        if plt.level > 1
+            for kk = 1:nplots
+                %% correction point
+                plot(xx(:,k+1), yy(kk, k+1), '-o', ...
+                    'Color', [0.25 0.25 1]);
+                drawnow;
+            end
+        end
     %%-----  ITERATION call  -----
     elseif k > 0
         %% plot single step of the continuation curve
