@@ -1,5 +1,5 @@
 function reg_cb = pne_register_callbacks(my_cbacks, reg_cb)
-%PNE_REGISTER_CALLBACKS  Register event functions=
+%PNE_REGISTER_CALLBACKS  Register callback functions
 %   REG_CB = PNE_REGISTER_CALLBACKS(MY_CBACKS)
 %   REG_CB = PNE_REGISTER_CALLBACKS(MY_CBACKS, REG_CB)
 %

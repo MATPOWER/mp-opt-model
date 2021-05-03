@@ -1,5 +1,5 @@
 function reg_ev = pne_register_events(my_events, opt, reg_ev)
-%PNE_REGISTER_EVENTS  Register event functions=
+%PNE_REGISTER_EVENTS  Register event functions
 %   REG_EV = PNE_REGISTER_EVENTS(MY_EVENTS, OPT)
 %   REG_EV = PNE_REGISTER_EVENTS(MY_EVENTS, OPT, REG_EV)
 %
