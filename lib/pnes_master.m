@@ -34,51 +34,53 @@ function varargout = pnes_master(fcn, x0, opt)
 %               corrector stage (see NLEQS_MASTER for details), default
 %               sets nleqs_opt.verbose to 0, otherwise to 2 if OPT.verbose > 4
 %           solve_base (1) : 0/1 flag that determines whether or not to
-%               run a corrector stage from initial solution point, x0
+%               run a corrector stage for initial solution point, x0
 %           parameterization (3) - choice of parameterization
 %               1 - natural
 %               2 - arc len
 %               3 - pseudo arc len
 %           stop_at ('NOSE') - determines stopping criterion
-%               'NOSE'     - stop when nose point is reached
-%               'FULL'     - trace full nose curve
+%               'NOSE'     - stop when limit or nose point is reached
+%               'FULL'     - trace full continuation curve
 %               <lam_stop> - stop upon reaching specified target lambda value
 %           max_it (2000) - maximum number of continuation steps
 %           step (0.05) - continuation step size
-%           step_min (1e-4) - minimum allowed step size
-%           step_max (0.2) - maximum allowed step size
 %           adapt_step (0) - toggle adaptive step size feature
 %               0 - adaptive step size disabled
 %               1 - adaptive step size enabled
-%           adapt_step_ws (1) - scale factor for default initial step size
-%               when warm-starting with adaptive step size enabled
 %           adapt_step_damping (0.7) - damping factor for adaptive step sizing
 %           adapt_step_tol (1e-3) - tolerance for adaptive step sizing
+%           adapt_step_ws (1) - scale factor for default initial step size
+%               when warm-starting with adaptive step size enabled
+%           step_min (1e-4) - minimum allowed step size
+%           step_max (0.2) - maximum allowed step size
 %           default_event_tol (1e-3) - default tolerance for event functions
 %           target_lam_tol (0) - tolerance for target lambda detection, 0 means
 %               use the value of default_event_tol
 %           nose_tol (0) - tolerance for nose point detection, 0 means use
 %               the value of default_event_tol
 %           events (<empty>) - cell array of specs for user-defined event
-%               functions, to be passed as MY_EVENTS arg to PNE_REGISTER_EVENTS
+%               functions, passed as MY_EVENTS arg to PNE_REGISTER_EVENTS
 %               (see PNE_REGISTER_EVENTS for details).
 %           callbacks (<empty>) - cell array of specs for user-defined callback
 %               functions, to be passed as MY_CBACKS arg to
 %               PNE_REGISTER_CALLBACKS (see PNE_REGISTER_CALLBACKS for details).
-%           output_fcn (<empty>) - custom output function, called by
+%           output_fcn (<empty>) - handle to custom output function, called by
 %               PNE_CALLBACK_DEFAULT
-%           warmstart (<empty>) - struct containing warm-start state, see
-%               warmstart field in OUTPUT below for details of expected
-%               fields
-%           plot - options for plotting of nose curve by PNE_CALLBACK_DEFAULT
-%               .level (0) - control plotting of nose curve
-%                   0 - do not plot nose curve
+%           plot - options for plotting of continuation curve by
+%               PNE_CALLBACK_DEFAULT
+%               .level (0) - control plotting of continuation curve
+%                   0 - do not plot continuation curve
 %                   1 - plot when completed
 %                   2 - plot incrementally at each continuation step
 %                   3 - same as 2, with 'pause' at each continuation step
 %               .idx (<empty>) - index of quantity to plot, passed to yfcn()
-%               .idx_default (<empty>) - fcn to provide default value for idx,
-%                   if none provided
+%               .idx_default (<empty>) - function to provide default value
+%                   for idx, if none provided
+%               .xname ('lam') - name of output field holding values that
+%                   determine horizontal coordinates of plot
+%               .yname ('x') - name of output field holding values that
+%                   determine vertical coordinates of plot
 %               .xfcn (<empty>) - handle to function that maps a value from
 %                   the field of the OUTPUT indicated by value of plot.xname
 %                   to a horizontal coordinate for plotting
@@ -86,18 +88,17 @@ function varargout = pnes_master(fcn, x0, opt)
 %                   the field of the OUTPUT indicated by value of plot.yname
 %                   and an index to be applied to that value into a vertical
 %                   coordinate for plotting
+%               .xlabel ('\lambda') - label for horizontal axis
+%               .ylabel ('Variable Value') - label for vertical axis
 %               .title ('Value of Variable %d') - plot title used for plot of
 %                   single variable, can use %d as placeholder for var index
 %               .title2 ('Value of Multiple Variables') - plot title used for
 %                   plot of multiple variables
-%               .xname ('lam') - name of output field holding values that
-%                   determine horizontal coordinates of plot
-%               .yname ('x') - name of output field holding values that
-%                   determine vertical coordinates of plot
-%               .xlabel ('\lambda') - label for horizontal axis
-%               .ylabel ('Variable Value') - label for vertical axis
-%               .legend ('Variable %d') - legend lable, %d can be used as
+%               .legend ('Variable %d') - legend label, %d can be used as
 %                   placeholder for variable index
+%           warmstart (<empty>) - struct containing warm-start state, see
+%               warmstart field in OUTPUT below for details of expected
+%               fields
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: fcn, x0, opt
@@ -118,14 +119,13 @@ function varargout = pnes_master(fcn, x0, opt)
 %               idx - index(es) of critical elements in corresponding event
 %                   function
 %               msg - descriptive text detailing the event
-%           done_msg - string with message describing cause of continuation
-%               termination
+%           done_msg - message describing cause of continuation termination
 %           steps - (N+1) row vector of stepsizes taken at each continuation
 %               step
 %           lam_hat - (N+1) row vector of lambda values from prediction steps
 %           lam - (N+1) row vector of lambda values from correction steps
 %           max_lam - maximum value of parameter lambda (from OUTPUT.lam)
-%           warmstart - optional output with information useful for
+%           warmstart - optional output with information needed for
 %               warm-starting an updated continuation problem, with fields:
 %               cont_steps - current value of continuation step counter
 %               direction - +1 or -1, for tracing of curve in same or
@@ -135,15 +135,15 @@ function varargout = pnes_master(fcn, x0, opt)
 %                   determine the initial direction
 %               x - current solution vector
 %               z - current tangent vector
+%               xp - previous step solution vector
+%               zp - previous step tangent vector
 %               parm - function handle for current parameterization function
 %               default_parm - function handle for default parameterization fcn
 %               default_step - default step size
-%               events - 
+%               events - current event log, same as OUTPUT.events
 %               cbs - struct containing user state information for callbacks
 %                   see PNES_CALLBACK_DEFAULT for more details
-%               xp - previous step solution vector
-%               zp - previous step tangent vector
-%           (others) - depending on OPT.output_fcn, by default (i.e. with no
+%           (others) - depends on OPT.output_fcn, by default (i.e. with no
 %               explicitly provided output function) includes fields:
 %                   x_hat - NX x (N+1) matrix of solution values from
 %                       prediction steps
@@ -253,6 +253,9 @@ if opt.target_lam_tol == 0
 end
 if opt.nose_tol == 0
     opt.nose_tol = opt.default_event_tol;
+end
+if opt.max_it == 0      %% zero means use the default
+    opt.max_it == dopts.max_it; 
 end
 
 %% initialize
