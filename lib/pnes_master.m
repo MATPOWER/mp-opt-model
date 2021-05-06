@@ -8,8 +8,7 @@ function varargout = pnes_master(fcn, x0, opt)
 %   point x0, where f(x) has dimension n and x has dimension n+1.
 %
 %   In the current implementation, the last element of x is taken to be
-%   the continuation parameter lambda, where lambda = 0 corresponds to
-%   the base solution.
+%   the parameter lambda, where lambda = 0 corresponds to the base solution.
 %
 %   Inputs:
 %       FCN : handle to function that evaluates the function f(x) to
