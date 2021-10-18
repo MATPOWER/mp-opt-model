@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 since last release
 ------------------
 
+#### 5/8/21
+  - Add several enhancements to `mp_idx_manager/set_type_idx_map()`.
+    - Speed improvements
+    - Add idxs = [] option to specify "all"
+    - Add optional `group_by_name` input argument. 
+
 #### 5/3/21
   - Add support for new class of problems - parameterized nonlinear
     equations (PNE). Either create a model with only equality constraints
