@@ -2,8 +2,11 @@ Change history for MP-Opt-Model
 ===============================
 
 
-since last release
-------------------
+Version 4.0 - *Oct 18, 2021*
+----------------------------
+
+#### 10/18/21
+  - Release 4.0.
 
 #### 5/8/21
   - Add several enhancements to `mp_idx_manager/set_type_idx_map()`.
