@@ -2,6 +2,14 @@ Change history for MP-Opt-Model
 ===============================
 
 
+Changes since 4.0
+-----------------
+
+#### 2/14/22
+  - Skip some `fmincon` tests using interior point algorithm with finite
+    difference Hessian that began failing in MATLAB R2021b.
+
+
 Version 4.0 - *Oct 18, 2021*
 ----------------------------
 
