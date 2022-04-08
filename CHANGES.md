@@ -5,6 +5,9 @@ Change history for MP-Opt-Model
 Changes since 4.0
 -----------------
 
+#### 4/8/22
+- Relax some test tolerances to prevent failure with Gurobi 9.5.
+
 #### 3/3/22
   - Add elapsed time in seconds to results of the `solve()` method of
   `opt_model`, returned in `om.soln.output.et`.
