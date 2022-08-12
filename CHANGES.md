@@ -75,7 +75,7 @@ Version 4.0 - *Oct 18, 2021*
 #### 12/16/20
   - Update to use labels from `set_types` property as headers for
     `opt_model/display()` to simplify things and facilitate use by
-    sub-classes.
+    subclasses.
 
 #### 12/1/20
   - Move `init_set_types()` call out of `opt_model` constructor to avoid
@@ -281,7 +281,7 @@ Version 0.8 - *Apr 29, 2020*
     object appears first. Ideally, these would be defined as methods
     of the `opt_model` class, but Octave 4.2 and earlier is not
     able to find them via a function handle (as used in the `solve()`
-    method) if they are inherited by a sub-class.
+    method) if they are inherited by a subclass.
     - `opf_consfcn()` --> `nlp_consfcn()`
     - `opf_costfcn()` --> `nlp_costfcn()`
     - `opf_hessfcn()` --> `nlp_hessfcn()`
