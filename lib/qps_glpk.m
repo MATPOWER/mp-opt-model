@@ -41,7 +41,10 @@ function [x, f, eflag, output, lambda] = qps_glpk(H, c, A, l, u, xmin, xmax, x0,
 %       X : solution vector
 %       F : final objective function value
 %       EXITFLAG : exit flag, 1 - optimal, <= 0 - infeasible, unbounded or other
-%       OUTPUT : struct with errnum and status fields from GLPK output args
+%       OUTPUT : output struct with the following fields:
+%           errnum - GLPK errnum output arg
+%           status - GKPK status output arg
+%           runtime - solver run time in seconds
 %       LAMBDA : struct containing the Langrange and Kuhn-Tucker
 %           multipliers on the constraints, with fields:
 %           mu_l - lower (left-hand) limit on linear constraints
@@ -199,8 +202,10 @@ end
 glpk_opt.msglev = verbose;
 
 %% call the solver
+t0 = tic;
 [x, f, errnum, extra] = ...
     glpk(c, AA, bb, xmin, xmax, ctype, vtype, 1, glpk_opt);
+output.runtime = toc(t0);
 
 %% set exit flag
 if isfield(extra, 'status')             %% status found in extra.status
