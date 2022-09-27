@@ -8,6 +8,8 @@ Changes since 4.0
 #### 10/27/22
   - Add `runtime` field to `output` argument of `qps_glpk()` and
     `qps_mosek()`.
+  - Add support to `qps_master()` for calling `qps_<my_solver>()` by setting
+    `opt.alg` to `'<MY_SOLVER>'` to allow for custom solvers.
 
 #### 7/5/22
   - Update for compatibility with Artelys Knitro 13.1 and later.
