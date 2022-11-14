@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Changes since 4.0
 -----------------
 
+#### 11/14/22
+  - Allow for Gurobi's `Method` option to be set to 5, for
+    _deterministic concurrent simplex_.
+
 #### 10/27/22
   - Add `runtime` field to `output` argument of `qps_glpk()` and
     `qps_mosek()`.
