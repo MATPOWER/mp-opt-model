@@ -2,8 +2,11 @@ Change history for MP-Opt-Model
 ===============================
 
 
-Changes since 4.0
------------------
+Version 4.1 - *Dec 13, 2022*
+----------------------------
+
+#### 12/13/22
+  - Release 4.1.
 
 #### 11/14/22
   - Allow for Gurobi's `Method` option to be set to 5, for
