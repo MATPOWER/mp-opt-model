@@ -3230,7 +3230,15 @@ om
 \end{Code}
 The \code{display} method displays the variable, constraint and cost sets that make up the model, along with their indexing data.
 
-% \subsubsection*{\code{display\_set}}
+\subsubsection*{\code{display\_soln}}
+\label{sec:display_soln}
+\begin{Code}
+om.display_soln()
+om.display_soln(set_type)
+om.display_soln(set_type, name)
+om.display_soln(set_type, name, idx)
+\end{Code}
+The \code{display\_soln} method displays the model solution, including values, bounds and shadow prices for variables and linear constraints, values and shadow prices for nonlinear constraints, and individual cost components. Results are displayed for each \code{set\_type} or specified \code{set\_type} and for each named/indexed set or a specified \code{name}/\code{idx}.
 
 \subsubsection*{\code{get\_userdata}}
 \begin{Code}
@@ -3461,6 +3469,7 @@ name & description \\
 \code{~~add\_quad\_cost}	& add quadratic cost set, see Section~\ref{sec:add_quad_cost}	\\
 \code{~~add\_var}	& add variable set, see Section~\ref{sec:add_var}	\\
 \code{~~display}	& displays variable, constraint and cost sets, see Section~\ref{sec:display}	\\
+\code{~~display\_soln}	& displays model solution, see Section~\ref{sec:display_soln}	\\
 \code{~~eval\_lin\_constraint}	& computes linear constraint values, see Section~\ref{sec:eval_lin_constraint}	\\
 \code{~~eval\_nln\_constraint}	& builds full set of nonlinear equality or inequality constraints and their gradients, see Section~\ref{sec:eval_nln_constraint}	\\
 \code{~~eval\_nln\_constraint\_hess}	& builds Hessian for full set of nonlinear equality or inequality constraints, see Section~\ref{sec:eval_nln_constraint_hess}	\\
@@ -3918,6 +3927,7 @@ name & description \\
 \code{~~add\_quad\_cost}	& adds a named subset of quadratic costs to the model	\\
 \code{~~add\_var}	& adds a named subset of optimization variables to the model	\\
 \code{~~display}	& called to display object when statement not ended with semicolon	\\
+\code{~~display\_soln}	& displays model solution	\\
 \code{~~eval\_lin\_constraint}	& computes linear constraint values	\\
 \code{~~eval\_nln\_constraint}	& computes nonlinear equality or inequality constraints and their gradients	\\
 \code{~~eval\_nln\_constraint\_hess}	& returns Hessian for full set of nonlinear equality or inequality constraints	\\
@@ -4472,6 +4482,37 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.1.pdf}{\mpom{} 4.1 Use
 \item Update for compatibility with Artelys Knitro 13.1 and later.
 \item Add elapsed time in seconds to results of the \code{solve()} method of \code{opt\_model}, returned in \code{om.soln.output.et}.
 \item Add \code{runtime} field to \code{output} argument of \code{qps\_glpk()} and \code{qps\_mosek()}.
+
+\end{itemize}
+
+\subsection{Version 4.2 -- released ??? ?, 202?}
+\label{app:v42}
+
+The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}}
+
+\subsubsection*{New Features}
+\begin{itemize}
+\item 
+\item New functions:
+    \begin{itemize}
+    \item \code{foobar()} does whizbang.
+    \end{itemize}
+\item New \code{opt\_model} methods:
+    \begin{itemize}
+      \item \code{is\_solved()} determines whether the model has been solved.
+      \item \code{display\_soln()} display the results of a solved model, including values, bounds and shadow prices for variables and linear constraints, values and shadow prices for nonlinear constraints, and individual cost components.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection*{Bugs Fixed}
+\begin{itemize}
+\item 
+    \emph{Thanks to Fulano.}
+\end{itemize}
+
+\subsubsection*{Other Changes}
+\begin{itemize}
+\item 
 
 \end{itemize}
 
