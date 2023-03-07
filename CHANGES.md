@@ -2,6 +2,14 @@ Change history for MP-Opt-Model
 ===============================
 
 
+Since version 4.1
+-----------------
+
+#### 3/7/23
+  - Add `opt_model/is_solved()` method to determine if the model
+    has been solved and contains the solution.
+
+
 Version 4.1 - *Dec 13, 2022*
 ----------------------------
 

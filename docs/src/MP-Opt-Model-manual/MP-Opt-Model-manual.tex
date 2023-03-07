@@ -2943,6 +2943,14 @@ $\le 0$ & solver-specific failure code \\
 \end{threeparttable}
 \end{table}
 
+\subsubsection*{\code{is\_solved}}
+\label{sec:is_solved}
+\begin{Code}
+TorF = om.is_solved()
+\end{Code}
+
+The \code{is\_solved} method returns \code{1} if the model has been solved, \code{0} otherwise.
+
 \subsubsection*{\code{get\_soln}}
 \label{sec:get_soln}
 \begin{Code}
@@ -3460,6 +3468,7 @@ name & description \\
 \code{~~eval\_quad\_cost}	& evaluates quadratic cost function and its derivatives\tnote{\ddag}, see Section~\ref{sec:eval_quad_cost}	\\
 \code{~~get\_soln}	& returns named/indexed results for solved model	\\
 \code{~~is\_mixed\_integer}	& returns 1 if any of the variables are binary or integer, 0 otherwise	\\
+\code{~~is\_solved}	& returns 1 if model has been solved, 0 otherwise	\\
 \code{~~params\_lin\_constraint}	& assembles and returns parameters for linear constraints\tnote{\ddag}	\\
 \code{~~params\_nln\_constraint}	& assembles and returns parameters for nonlinear constraints\tnote{\ddag}	\\
 \code{~~params\_nln\_cost}	& assembles and returns parameters for general nonlinear costs\tnote{\ddag}	\\
