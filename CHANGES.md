@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 3/27/23
+  - Update for compatibility with MATLAB R2023a (Optimization Toolbox 9.5)
+    which removed `x0` as a valid input to `linprog`.
+
 #### 3/7/23
   - Add `opt_model/is_solved()` method to determine if the model
     has been solved and contains the solution.
