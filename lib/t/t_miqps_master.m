@@ -21,9 +21,9 @@ if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_qp(1) = 1;
 end
 
-n = 48;
+n = 50;
 nqp = 28;
-nmiqp = 6;
+nmiqp = 7;
 t_begin(n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
@@ -192,6 +192,7 @@ for k = 1:length(algs)
         [x, f, s, out, lam] = miqps_master(p);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4; 2], 12, [t 'x']);
+        t_is(f, -14, 12, [t 'f']);
         t_is(lam.mu_l, [0; 0], 12, [t 'lam.mu_l']);
         t_is(lam.mu_u, [0; 0], 12, [t 'lam.mu_u']);
         t_is(lam.lower, [0; 0], 12, [t 'lam.lower']);
@@ -221,6 +222,7 @@ for k = 1:length(algs)
             [x, f, s, out, lam] = miqps_master(p);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [7; 7; 0; 2], 7, [t 'x']);
+            t_is(f, 1618.5, 4, [t 'f']);
             t_is(lam.mu_l, [466; 0; 0], 6, [t 'lam.mu_l']);
             t_is(lam.mu_u, [0; 272; 0], 6, [t 'lam.mu_u']);
             t_is(lam.lower, [0; 0; 349.5; 4350], 5, [t 'lam.lower']);
