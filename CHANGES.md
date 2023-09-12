@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 9/12/23
+  - Tweak some MI/QPS solver tests to make them more robust for `'DEFAULT'`
+    solver under different environments.
+
 #### 3/27/23
   - Update for compatibility with MATLAB R2023a (Optimization Toolbox 9.5)
     which removed `x0` as a valid input to `linprog`.

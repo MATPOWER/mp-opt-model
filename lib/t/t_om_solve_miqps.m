@@ -2,7 +2,7 @@ function t_om_solve_miqps(quiet)
 %T_OM_SOLVE_MIQPS  Tests of MIQP solvers via OM.SOLVE().
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2020, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2023, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -54,14 +54,14 @@ for k = 1:length(algs)
                 'num_threads', 0, ...
                 'opt', 0 ) ...
         );
-        if strcmp(names{k}, 'CPLEX')
-%           alg = 0;        %% default uses barrier method with NaN bug in lower lim multipliers
+        if have_feature('cplex')
+            % alg = 0;        %% default uses barrier method with NaN bug in lower lim multipliers
             alg = 2;        %% use dual simplex
             mpopt.cplex.lpmethod = alg;
             mpopt.cplex.qpmethod = min([4 alg]);
             opt.cplex_opt = cplex_options([], mpopt);
         end
-        if strcmp(names{k}, 'MOSEK')
+        if have_feature('mosek')
 %             sc = mosek_symbcon;
 %             alg = sc.MSK_OPTIMIZER_DUAL_SIMPLEX;    %% use dual simplex
 %             alg = sc.MSK_OPTIMIZER_INTPNT;          %% use interior point
@@ -79,7 +79,6 @@ for k = 1:length(algs)
 %                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_MU_RED = 1e-10;
                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_REL_GAP = 1e-10;
             end
-%             opt.verbose = 3;
             opt.mosek_opt = mosek_options([], mpopt);
         end
 
