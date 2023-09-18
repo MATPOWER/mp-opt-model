@@ -1537,6 +1537,7 @@ if have_feature('isequaln')
 
     val = sparse(m, n);
     s.qdc.data.Q.qc1 = val;
+    s.qdc.params = [];
     om.set_params('qdc', 'qc1', 'Q', val);
     t_ok(isequaln(struct(om), s), [t 'qc1, Q']);
 

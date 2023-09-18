@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 9/13/23
+  - Clear cached parameters after updating quadratic costs via
+    `opt_model/set_params()`.
+
 #### 9/12/23
   - Tweak some MI/QPS solver tests to make them more robust for `'DEFAULT'`
     solver under different environments.

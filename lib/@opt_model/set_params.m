@@ -352,6 +352,9 @@ switch st
                 end
             end
         end
+
+        %% clear cached parameters
+        om.qdc.params = [];
     case {'nle', 'nli'}
         %% get current parameters
         if isempty(idx)
