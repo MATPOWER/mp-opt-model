@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 10/13/23
+  - Update `opt_model/display_soln()` to avoid displaying an infinite
+    average for quadratic costs when corresponding quantity is zero.
+
 #### 9/13/23
   - Clear cached parameters after updating quadratic costs via
     `opt_model/set_params()`.
