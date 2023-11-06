@@ -5,6 +5,13 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 11/6/23
+  - Add to `opt_model/add_lin_constraint()` the option to provide/store
+    the transpose of the `A` matrix instead of the original. This can
+    potentially save significant memory for sparse matrices with many more
+    columns than rows. E.g. storage constraints in [MOST][11] for 8760 hour
+    planning horizon.
+
 #### 10/13/23
   - Update `opt_model/display_soln()` to avoid displaying an infinite
     average for quadratic costs when corresponding quantity is zero.
@@ -437,3 +444,4 @@ Version 0.7.0 - *Jun 20, 2019*
 [8]: https://github.com/MATPOWER/mptest
 [9]: https://github.com/MATPOWER/mips
 [10]: https://savannah.gnu.org/bugs/?52614
+[11]: https://github.com/MATPOWER/most

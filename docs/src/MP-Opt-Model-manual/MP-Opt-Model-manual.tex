@@ -151,10 +151,11 @@
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{4.1}
+\newcommand{\mpomver}[0]{4.1+}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
+\newcommand{\mostlink}[0]{\href{\mosturl}{\most{}}}
 \newcommand{\mostver}[0]{1.2}
 \newcommand{\syngrid}[0]{{SynGrid}}
 \newcommand{\syngridver}[0]{1.0.1}
@@ -242,7 +243,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-\date{December 13, 2022} % comment this line to display the current date
+%\date{December 13, 2022} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -253,7 +254,7 @@
 \vfill
 \begin{center}
 {\scriptsize
-\copyright~2020--2022~\PSERC{}\\
+\copyright~2020--2023~\PSERC{}\\
 All Rights Reserved}
 \end{center}
 
@@ -4492,7 +4493,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item 
+\item Option for \code{opt\_model/add\_lin\_constraint()} to provide/store the transpose of the $A$ matrix instead of the original. This can potentially save significant memory for sparse matrices with many more columns than rows. E.g. storage constraints in \mostlink{} for 8760 hour planning horizon.
 \item New functions:
     \begin{itemize}
     \item \code{foobar()} does whizbang.
