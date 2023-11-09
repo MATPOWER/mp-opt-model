@@ -4475,7 +4475,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.1.pdf}{\mpom{} 4.1 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item Add support to \code{qps\_master()} for calling \code{qps\_<my\_solver>()} by setting \code{opt.alg} to \codeq{<MY\_SOLVER>} to allow for custom solvers.
+\item Add support to \code{qps\_master()} for calling \code{qps\_<my\_solver>()} by setting \code{opt.alg} to \codeq{<MY\_SOLVER>} to allow for handling custom LP/QP solvers.
 \end{itemize}
 
 \subsubsection*{Other Changes}
@@ -4494,6 +4494,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 \subsubsection*{New Features}
 \begin{itemize}
 \item Option for \code{opt\_model/add\_lin\_constraint()} to provide/store the transpose of the $A$ matrix instead of the original. This can potentially save significant memory for sparse matrices with many more columns than rows. E.g. storage constraints in \mostlink{} for 8760 hour planning horizon.
+\item Add support to \code{nlps\_master()} for calling \code{nlps\_<my\_solver>()} by setting \code{opt.alg} to \codeq{<MY\_SOLVER>} to allow for handling custom NLP solvers.
 \item New functions:
     \begin{itemize}
     \item \code{foobar()} does whizbang.
