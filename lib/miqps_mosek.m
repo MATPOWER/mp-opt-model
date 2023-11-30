@@ -4,7 +4,8 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 %       MIQPS_MOSEK(H, C, A, L, U, XMIN, XMAX, X0, VTYPE, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = MIQPS_MOSEK(PROBLEM)
 %   A wrapper function providing a standardized interface for using
-%   MOSEKOPT to solve the following QP (quadratic programming) problem:
+%   MOSEKOPT to solve the following MILP/MIQP (mixed integer linear
+%   programming/mixed integer quadratic programming) problem:
 %
 %       min 1/2 X'*H*X + C'*X
 %        X
