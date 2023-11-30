@@ -218,7 +218,13 @@ switch alg
         [x, f, eflag, output, lambda] = ...
             miqps_ot(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
     otherwise
-        error('miqps_master: ''%s'' is not a valid algorithm code', alg);
+        fcn = ['miqps_' lower(alg)];
+        if exist([fcn '.m']) == 2
+            [x, f, eflag, output, lambda] = ...
+                feval(fcn, H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+        else
+            error('miqps_master: ''%s'' is not a valid algorithm code', alg);
+        end
 end
 if ~isfield(output, 'alg') || isempty(output.alg)
     output.alg = alg;

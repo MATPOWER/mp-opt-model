@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 11/29/23
+  - Add support to `miqps_master()` for calling `miqps_<my_solver>()` by
+    setting `opt.alg` to `'<MY_SOLVER>'` to allow for handling custom
+    MILP/MIQP solvers.
+
 #### 11/8/23
   - Add support to `nlps_master()` for calling `nlps_<my_solver>()` by setting
     `opt.alg` to `'<MY_SOLVER>'` to allow for handling custom NLP solvers.
