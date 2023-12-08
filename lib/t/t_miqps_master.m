@@ -21,7 +21,7 @@ if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_qp(1) = 1;
 end
 
-n = 46;
+n = 49;
 nqp = 28;
 nmiqp = 7;
 t_begin(n*length(algs), quiet);
@@ -192,6 +192,23 @@ for k = 1:length(algs)
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4; 2], 12, [t 'x']);
         t_is(f, -14, 12, [t 'f']);
+
+        t = sprintf('%s - 6-d ILP : ', names{k});
+        %% from https://doi.org/10.1109/TASE.2020.2998048
+        c = [1; 2; 3; 1; 2; 3];
+        A = [1 3 5 1 3 5;
+             2 1.5 5 2 0.5 1];
+        l = [26; 16];
+        xmin = zeros(6, 1);
+        xmax = 3 * ones(6, 1);
+        vtype = 'I';
+        p = struct('c', c, 'A', A, 'l', l, 'xmin', xmin, 'xmax', xmax, 'vtype', vtype, 'opt', opt);
+        [x, f, s, out, lam] = miqps_master(p);
+        t_is(s, 1, 12, [t 'success']);
+        t_ok(isequal(x, [1; 0; 3; 0; 0; 2]) || ...
+             isequal(x, [0; 0; 3; 1; 0; 2]) || ...
+             isequal(x, [0; 0; 3; 0; 2; 1]), [t 'x']);
+        t_is(f, 16, 12, [t 'f']);
 
         if does_qp(k)
             t = sprintf('%s - 4-d MIQP : ', names{k});
