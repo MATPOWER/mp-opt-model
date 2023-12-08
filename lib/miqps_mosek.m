@@ -470,8 +470,8 @@ if mi && eflag == 1 && (~isfield(p.opt, 'skip_prices') || ~p.opt.skip_prices)
     if abs(f - f_)/max(abs(f), 1) > tol
         warning('miqps_mosek: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
     end
-    xn = x;
-    xn(abs(xn)<1) = 1;
+    xn = abs(x);
+    xn(xn<1) = 1;
     [mx, k] = max(abs(x - x_) ./ xn);
     if mx > tol
         warning('miqps_mosek: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
