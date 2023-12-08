@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 12/8/23
+  - Always skip price computation stage in `miqps_<solver>()` functions for
+    pure (as opposed to mixed) integer problems.
+
 #### 11/29/23
   - Add support to `miqps_master()` for calling `miqps_<my_solver>()` by
     setting `opt.alg` to `'<MY_SOLVER>'` to allow for handling custom

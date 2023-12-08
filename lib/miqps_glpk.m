@@ -308,37 +308,39 @@ else
 end
 
 if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
-    if verbose
-        fprintf('--- Integer stage complete, starting price computation stage ---\n');
-    end
-    if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
-        tol = opt.price_stage_warn_tol;
-    else
-        tol = 1e-7;
-    end
     k = find(vtype == 'I' | vtype == 'B');
-    x(k) = round(x(k));
-    xmin(k) = x(k);
-    xmax(k) = x(k);
-    x0 = x;
-    opt.glpk_opt.lpsolver = 1;      %% simplex
-    opt.glpk_opt.dual = 0;          %% primal simplex
-    if have_feature('octave') && have_feature('octave', 'vnum') >= 3.007
-        opt.glpk_opt.dual = 1;      %% primal simplex
-    end
+    if length(k) < nx   %% still have some free variables
+        if verbose
+            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+        end
+        if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
+            tol = opt.price_stage_warn_tol;
+        else
+            tol = 1e-7;
+        end
+        x(k) = round(x(k));
+        xmin(k) = x(k);
+        xmax(k) = x(k);
+        x0 = x;
+        opt.glpk_opt.lpsolver = 1;      %% simplex
+        opt.glpk_opt.dual = 0;          %% primal simplex
+        if have_feature('octave') && have_feature('octave', 'vnum') >= 3.007
+            opt.glpk_opt.dual = 1;      %% primal simplex
+        end
     
-    [x_, f_, eflag_, output_, lambda] = qps_glpk(H, c, A, l, u, xmin, xmax, x0, opt);
-    if eflag ~= eflag_
-        error('miqps_glpk: EXITFLAG from price computation stage = %d', eflag_);
+        [x_, f_, eflag_, output_, lambda] = qps_glpk(H, c, A, l, u, xmin, xmax, x0, opt);
+        if eflag ~= eflag_
+            error('miqps_glpk: EXITFLAG from price computation stage = %d', eflag_);
+        end
+        if abs(f - f_)/max(abs(f), 1) > tol
+            warning('miqps_glpk: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
+        end
+        xn = abs(x);
+        xn(xn<1) = 1;
+        [mx, k] = max(abs(x - x_) ./ xn);
+        if mx > tol
+            warning('miqps_glpk: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
+        end
+        output.price_stage = output_;
     end
-    if abs(f - f_)/max(abs(f), 1) > tol
-        warning('miqps_glpk: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
-    end
-    xn = abs(x);
-    xn(xn<1) = 1;
-    [mx, k] = max(abs(x - x_) ./ xn);
-    if mx > tol
-        warning('miqps_glpk: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
-    end
-    output.price_stage = output_;
 end
