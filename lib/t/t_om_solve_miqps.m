@@ -21,8 +21,8 @@ if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_qp(1) = 1;
 end
 
-n = 14;
-nmiqp = 7;
+n = 17;
+nmiqp = 10;
 t_begin(28+n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
@@ -115,9 +115,9 @@ for k = 1:length(algs)
         om.add_lin_constraint('Ax', A, l, u);
         [x, f, s, out, lam] = om.solve(opt);
         t_is(s, 1, 12, [t 'success']);
-        t_ok(isequal(x, [1; 0; 3; 0; 0; 2]) || ...
-             isequal(x, [0; 0; 3; 1; 0; 2]) || ...
-             isequal(x, [0; 0; 3; 0; 2; 1]), [t 'x']);
+        t_ok(norm(x - [1; 0; 3; 0; 0; 2], Inf) < 1e-12 || ...
+             norm(x - [0; 0; 3; 1; 0; 2], Inf) < 1e-12 || ...
+             norm(x - [0; 0; 3; 0; 2; 1], Inf) < 1e-12, [t 'x']);
         t_is(f, 16, 12, [t 'f']);
 
         if does_qp(k)
@@ -151,6 +151,25 @@ for k = 1:length(algs)
             t_is(lam.mu_u, [0; 272; 0], 6, [t 'lam.mu_u']);
             t_is(lam.lower, [0; 0; 349.5; 4350], 5, [t 'lam.lower']);
             t_is(lam.upper, [0; 0; 0; 0], 7, [t 'lam.upper']);
+
+            t = sprintf('%s - 6-d IQP : ', names{k});
+            %% from Bragin, et. al. https://doi.org/10.1007/s10957-014-0561-3
+            H = sparse(1:6, 1:6, [1 0.2 1 0.2 1 0.2], 6, 6);
+            a = [-5 1 -5 1 -5 1];
+            A = [a/5; a];
+            u = [-48; -250];
+            xmin = zeros(6, 1);
+            vtype = 'I';
+            om = opt_model;
+            om.add_var('x', 6, [], xmin, [], vtype);
+            om.add_quad_cost('c', H, []);
+            om.add_lin_constraint('Ax', A, [], u);
+            [x, f, s, out, lam] = om.solve(opt);
+            t_is(s, 1, 12, [t 'success']);
+            t_ok(norm(x - [16; 0; 17; 0; 17; 0], Inf) < 1e-7 || ...
+                 norm(x - [17; 0; 16; 0; 17; 0], Inf) < 1e-7 || ...
+                 norm(x - [17; 0; 17; 0; 16; 0], Inf) < 1e-7, [t 'x']);
+            t_is(f, 417, 6, [t 'f']);
         else
             t_skip(nmiqp, sprintf('%s does not handle MIQP problems', names{k}));
         end
