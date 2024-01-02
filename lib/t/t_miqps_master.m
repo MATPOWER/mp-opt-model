@@ -21,9 +21,9 @@ if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_qp(1) = 1;
 end
 
-n = 52;
+n = 53;
 nqp = 28;
-nmiqp = 10;
+nmiqp = 11;
 t_begin(n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
@@ -242,9 +242,10 @@ for k = 1:length(algs)
 
             t = sprintf('%s - 6-d IQP : ', names{k});
             %% from Bragin, et. al. https://doi.org/10.1007/s10957-014-0561-3
+            %% with sign of A(2,[2;4;6]) corrected
             H = sparse(1:6, 1:6, [1 0.2 1 0.2 1 0.2], 6, 6);
-            a = [-5 1 -5 1 -5 1];
-            A = [a/5; a];
+            A = [-1 0.2 -1 0.2 -1 0.2;
+                 -5  -1 -5  -1 -5  -1];
             u = [-48; -250];
             xmin = zeros(6, 1);
             vtype = 'I';
@@ -252,10 +253,11 @@ for k = 1:length(algs)
                 'xmin', xmin, 'vtype', vtype, 'opt', opt);
             [x, f, s, out, lam] = miqps_master(p);
             t_is(s, 1, 12, [t 'success']);
-            t_ok(norm(x - [16; 0; 17; 0; 17; 0], Inf) < 1e-7 || ...
-                 norm(x - [17; 0; 16; 0; 17; 0], Inf) < 1e-7 || ...
-                 norm(x - [17; 0; 17; 0; 16; 0], Inf) < 1e-7, [t 'x']);
-            t_is(f, 417, 6, [t 'f']);
+            t_ok(norm(x([1;3;5]) - [16; 16; 17], Inf) < 1e-5 || ...
+                 norm(x([1;3;5]) - [17; 16; 16], Inf) < 1e-5, [t 'x([1;3;5])']);
+            t_ok(norm(x([2;4;6]) - [1; 2; 2], Inf) < 1e-5 || ...
+                 norm(x([2;4;6]) - [2; 2; 1], Inf) < 1e-5, [t 'x([2;4;6])']);
+            t_is(f, 401.4, 5, [t 'f']);
         else
             t_skip(nmiqp, sprintf('%s does not handle MIQP problems', names{k}));
         end
