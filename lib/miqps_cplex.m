@@ -361,7 +361,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
         xmin(k) = x(k);
         xmax(k) = x(k);
         x0 = x;
-        opt.cplex_opt.lpmethod = 1;     %% primal simplex
+        opt.cplex_opt.lpmethod = 2;     %% dual simplex
         opt.cplex_opt.qpmethod = 1;     %% primal simplex
     
         [x_, f_, eflag_, output_, lambda] = qps_cplex(H, c, A, l, u, xmin, xmax, x0, opt);

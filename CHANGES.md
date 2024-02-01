@@ -11,6 +11,9 @@ Since version 4.1
     linear constraints and their multipliers between a single set of
     doubly-bounded inequality constraints and separate sets of equality
     and upper-bounded inequality constraints.
+  - Change solver for CPLEX price computation stage in `miqps_cplex()` from
+    primal simplex to dual simplex (probably no impact, except it was a
+    simple way to get a newly failing test in another project to pass again).
 
 #### 12/8/23
   - Always skip price computation stage in `miqps_<solver>()` functions for
