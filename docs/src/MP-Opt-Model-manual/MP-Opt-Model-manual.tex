@@ -3518,6 +3518,43 @@ name & description \\
 \clearpage
 \section{Utility Functions}
 
+\subsection{\tt convert\_lin\_constraint}
+\begin{Code}
+  [ieq, igt, ilt, Ae, be, Ai, bi] = convert_lin_constraint(A, l, u)
+  [ieq, igt, ilt, A, b] = convert_lin_constraint(A, l, u)
+\end{Code}
+
+This function converts linear constraints from a single set of doubly-bounded inequality constraints
+\begin{equation}
+l \le A x \le u
+\end{equation}
+to separate sets of equality and upper-bounded inequality constraints.
+\begin{align}
+A_e x &= b_e \\
+A_i x &\le b_i
+\end{align}
+
+The first three return values are index vectors which satisfy the following.
+\begin{Code}
+Ae = A(ieq, :);
+be = u(ieq, 1);
+Ai  = [ A(ilt, :); -A(igt, :) ];
+bi  = [ u(ilt, 1); -l(igt, 1) ];
+\end{Code}
+Alternatively, the returned matrices and right hand side vectors can be stacked into a single set with the equalities first, then the inequalities.
+\begin{Code}
+A = [Ae; Ai]
+b = [be; bi]
+\end{Code}
+
+\subsection{\tt convert\_lin\_constraint\_multipliers}
+\begin{Code}
+  [mu_l, mu_u] = convert_lin_constraint_multipliers(lam, mu, ieq, igt, ilt)
+\end{Code}
+
+This function converts the multipliers on linear constraints from separate sets for equality and upper-bounded inequality constraints to those for doubly-bounded inequality constraints.
+
+
 \subsection{\tt have\_fcn}
 
 This function is deprecated. Instead, please use \code{have\_feature}, now included as part of \mptestlink{} and described in the \mptest{} \href{\mptesturl/blob/master/README.md}{\code{README}} file. It is simply a drop-in replacement that has been reimplemented with an extensible, modular design, where the detection of a feature named \code{<tag>} is implemented by the function named \code{have\_feature\_<tag>}. The current \code{have\_fcn} is a simple wrapper around \code{have\_feature}.
@@ -4498,7 +4535,8 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 \item Add support to \code{miqps\_master()} for calling \code{miqps\_<my\_solver>()} by setting \code{opt.alg} to \codeq{<MY\_SOLVER>} to allow for handling custom MILP/MIQP solvers.
 \item New functions:
     \begin{itemize}
-    \item \code{foobar()} does whizbang.
+    \item \code{convert\_lin\_constraint()} converts linear constraints from a single set of doubly-bounded inequality constraints to separate sets of equality and upper-bounded inequality constraints.
+    \item \code{convert\_lin\_constraint\_multipliers()} converts multipliers on linear constraints from separate sets for equality and upper-bounded inequality constraints to those for doubly-bounded inequality constraints.
     \end{itemize}
 \item New \code{opt\_model} methods:
     \begin{itemize}

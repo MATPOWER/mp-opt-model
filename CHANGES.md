@@ -5,6 +5,13 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 1/31/24
+  - Add `convert_lin_constraint()` and `convert_lin_constraint_multipliers()`
+    functions to eliminate code duplication for common task of converting
+    linear constraints and their multipliers between a single set of
+    doubly-bounded inequality constraints and separate sets of equality
+    and upper-bounded inequality constraints.
+
 #### 12/8/23
   - Always skip price computation stage in `miqps_<solver>()` functions for
     pure (as opposed to mixed) integer problems.

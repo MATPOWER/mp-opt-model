@@ -203,19 +203,7 @@ else
 end
 
 %% split up linear constraints
-ieq = find( abs(u-l) <= eps );          %% equality
-igt = find( u >=  1e10 & l > -1e10 );   %% greater than, unbounded above
-ilt = find( l <= -1e10 & u <  1e10 );   %% less than, unbounded below
-ibx = find( (abs(u-l) > eps) & (u < 1e10) & (l > -1e10) );
-Ae = A(ieq, :);
-be = u(ieq);
-Ai  = [ A(ilt, :); -A(igt, :); A(ibx, :); -A(ibx, :) ];
-bi  = [ u(ilt);    -l(igt);    u(ibx);    -l(ibx)];
-
-%% grab some dimensions
-nlt = length(ilt);      %% number of upper bounded linear inequalities
-ngt = length(igt);      %% number of lower bounded linear inequalities
-nbx = length(ibx);      %% number of doubly bounded linear inequalities
+[ieq, igt, ilt, Ae, be, Ai, bi] = convert_lin_constraint(A, l, u);
 
 %% mixed integer?
 if isempty(vtype) || isempty(find(vtype == 'B' | vtype == 'I'))
@@ -308,18 +296,7 @@ if isempty(lam) || (isempty(lam.eqlin) && isempty(lam.ineqlin) && ...
         'upper', NaN(nx, 1) ...
     );
 else
-    kl = find(lam.eqlin < 0);   %% lower bound binding
-    ku = find(lam.eqlin > 0);   %% upper bound binding
-
-    mu_l = zeros(nA, 1);
-    mu_l(ieq(kl)) = -lam.eqlin(kl);
-    mu_l(igt) = lam.ineqlin(nlt+(1:ngt));
-    mu_l(ibx) = lam.ineqlin(nlt+ngt+nbx+(1:nbx));
-
-    mu_u = zeros(nA, 1);
-    mu_u(ieq(ku)) = lam.eqlin(ku);
-    mu_u(ilt) = lam.ineqlin(1:nlt);
-    mu_u(ibx) = lam.ineqlin(nlt+ngt+(1:nbx));
+    [mu_l, mu_u] = convert_lin_constraint_multipliers(lam.eqlin, lam.ineqlin, ieq, igt, ilt);
 
     lambda = struct( ...
         'mu_l', mu_l, ...
