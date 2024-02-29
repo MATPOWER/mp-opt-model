@@ -94,7 +94,7 @@ if MQ
     end
     nx = MQ;
 else
-    if ~Mc
+    if nv && ~Mc
         error('@opt_model/add_quad_cost: Q and c cannot both be empty');
     end
     nx = Mc;
