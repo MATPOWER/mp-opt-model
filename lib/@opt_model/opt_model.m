@@ -56,6 +56,7 @@ classdef opt_model < mp_idx_manager
 %       get_soln
 %       parse_soln
 %       is_solved
+%       has_parsed_soln
 %
 %   Retreive user data in the model object:
 %       get_userdata
@@ -310,6 +311,10 @@ classdef opt_model < mp_idx_manager
 
         function TorF = is_solved(om)
             TorF = ~isempty(om.soln.eflag);
+        end
+
+        function TorF = has_parsed_soln(om)
+            TorF = isfield(om.soln, 'var');
         end
     end     %% methods
 end         %% classdef

@@ -3113,6 +3113,14 @@ via the \code{get\_soln} method as well, but \code{parse\_soln} is generally mor
 
 If the optional \code{stash} input argument is present and true, the fields of the return struct are copied to \code{om.soln} where they are available with others listed in Table~\ref{tab:soln}.
 
+\subsubsection*{\code{has\_parsed\_soln}}
+\label{sec:has_parsed_soln}
+\begin{Code}
+TorF = om.has_parsed_soln()
+\end{Code}
+
+The \code{has\_parsed\_soln} method returns \code{1} if the model has a parsed solution available in \code{om.soln}, \code{0} otherwise.
+
 
 \clearpage
 \subsection{Modifying the Model}
@@ -3488,6 +3496,7 @@ name & description \\
 \code{~~eval\_nln\_cost}	& evaluates nonlinear cost function and its derivatives\tnote{\ddag}, see Section~\ref{sec:eval_nln_cost}	\\
 \code{~~eval\_quad\_cost}	& evaluates quadratic cost function and its derivatives\tnote{\ddag}, see Section~\ref{sec:eval_quad_cost}	\\
 \code{~~get\_soln}	& returns named/indexed results for solved model	\\
+\code{~~has\_parsed\_soln}	& returns 1 if model has a parsed solution available, 0 otherwise	\\
 \code{~~is\_mixed\_integer}	& returns 1 if any of the variables are binary or integer, 0 otherwise	\\
 \code{~~is\_solved}	& returns 1 if model has been solved, 0 otherwise	\\
 \code{~~params\_lin\_constraint}	& assembles and returns parameters for linear constraints\tnote{\ddag}	\\
@@ -4552,7 +4561,8 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
     \end{itemize}
 \item New \code{opt\_model} methods:
     \begin{itemize}
-      \item \code{is\_solved()} determines whether the model has been solved.
+      \item \code{is\_solved()} indicatess whether the model has been solved.
+      \item \code{has\_parsed\_soln()} indicatess whether a parsed solution is available in the model.
       \item \code{display\_soln()} display the results of a solved model, including values, bounds and shadow prices for variables and linear constraints, values and shadow prices for nonlinear constraints, and individual cost components.
     \end{itemize}
 \end{itemize}

@@ -10,6 +10,8 @@ Since version 4.1
     input argument that, if present and true, causes the parsed solution
     to be stored back in the object, as the `solve()` method was already
     doing when `opt.parse_soln` is true.
+  - Add new method `has_parsed_soln()` to `opt_model` to check for
+    availability of a parsed solution in the model.
 
 #### 3/1/24
   - Update `have_feature_ipopt()` to recognize IPOPT MEX installations from
