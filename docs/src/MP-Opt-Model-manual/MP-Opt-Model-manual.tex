@@ -4554,7 +4554,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 
 \subsubsection*{Other Changes}
 \begin{itemize}
-\item Update \code{have\_feature\_ipopt()} to recognize \ipopt{} MEX installations from Enrico Bertolazzi's \href{https://github.com/ebertolazzi/mexIPOPT}{mexIPOPT}\footnote{\href{https://github.com/ebertolazzi/mexIPOPT}{mexIPOPT} is available at \url{https://github.com/ebertolazzi/mexIPOPT}.}, which include MEX files that have been renamed to architecture-specific names along with an \code{ipopt.m} wrapper function to call the appropriate one. \emph{Thanks to Carlos E. Murillo-S{\'a}nchez.} \\
+\item Update \code{have\_feature\_ipopt()} to recognize \ipopt{} MEX installations from Enrico Bertolazzi's \href{https://github.com/ebertolazzi/mexIPOPT}{mexIPOPT}\footnote{\href{https://github.com/ebertolazzi/mexIPOPT}{mexIPOPT} is available at \url{https://github.com/ebertolazzi/mexIPOPT}.}, which include MEX files that have been renamed to architecture-specific names along with an \code{ipopt.m} wrapper function to call the appropriate one. \emph{Thanks to Carlos Murillo-S{\'a}nchez.} \\
 \emph{{\bf Note:} While MATPOWER no longer requires this, my recommendation is still to simply rename the MEX file to \code{ipopt.<mexext>}, with the appropriate architecture-specific extension, and delete the unnecessary \code{ipopt.m} entirely.}
 \item Update for compatibility with MATLAB R2023a (Optimization Toolbox 9.5) which removed \code{x0} as a valid input to \code{linprog}.
 \item Always skip price computation stage in \code{miqps\_<solver>()} functions for pure (as opposed to mixed) integer problems.

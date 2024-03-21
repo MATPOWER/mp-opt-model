@@ -64,7 +64,7 @@ function opt = mosek_options(overrides, mpopt)
 %   for MATLAB manaul" for details on the available options. You may also
 %   want to use the symbolic constants defined by MOSEK_SYMBCON.
 %
-%       http://docs.mosek.com/7.1/toolbox/Parameters.html
+%       https://docs.mosek.com/latest/toolbox/param-groups.html
 %
 %   See also MOSEK_SYMBCON, MOSEKOPT, MPOPTION.
 
