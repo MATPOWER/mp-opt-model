@@ -255,8 +255,7 @@ end
 
 %% parse solution
 if isfield(opt, 'parse_soln') && opt.parse_soln
-    ps = om.parse_soln();
-    om.soln = nested_struct_copy(om.soln, ps, struct('copy_mode', '='));
+    om.parse_soln(true);
 end
 om.soln.output.et = toc(t0);    %% stop timer
 

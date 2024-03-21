@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 3/21/24
+  - Add to the `parse_soln()` method of `opt_model` an optional `stash`
+    input argument that, if present and true, causes the parsed solution
+    to be stored back in the object, as the `solve()` method was already
+    doing when `opt.parse_soln` is true.
+
 #### 3/1/24
   - Update `have_feature_ipopt()` to recognize IPOPT MEX installations from
     Enrico Bertolazzi's [mexIPOPT][12], which include MEX files that have
