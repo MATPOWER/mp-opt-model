@@ -1,5 +1,7 @@
 function ps = parse_soln(om, stash)
-%PARSE_SOLN  Parse solution vector and shadow prices by all named sets.
+% parse_soln - Parse solution vector and shadow prices by all named sets.
+% ::
+%
 %   PS = OM.PARSE_SOLN()
 %   OM.PARSE_SOLN(STASH)
 %
@@ -30,7 +32,7 @@ function ps = parse_soln(om, stash)
 %   If the optional STASH input argument is present and true, the fields
 %   of the return struct are copied to OM.SOLN.
 %
-%   See also GET_SOLN
+% See also get_soln.
 
 %   MP-Opt-Model
 %   Copyright (c) 2020-2024, Power Systems Engineering Research Center (PSERC)

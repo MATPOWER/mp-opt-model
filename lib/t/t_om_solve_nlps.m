@@ -1,8 +1,8 @@
 function t_om_solve_nlps(quiet)
-%T_OM_SOLVE_NLPS  Tests of NLP solvers via OM.SOLVE().
+% t_om_solve_nlps - Tests of NLP solvers via opt_model.solve.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2022, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.

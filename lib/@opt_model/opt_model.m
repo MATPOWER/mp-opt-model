@@ -1,5 +1,7 @@
 classdef opt_model < mp_idx_manager
-%OPT_MODEL  Constructor for optimization model class.
+% opt_model - Constructor for optimization model class.
+% ::
+%
 %   OM = OPT_MODEL
 %   OM = OPT_MODEL(S)
 %
@@ -216,9 +218,11 @@ classdef opt_model < mp_idx_manager
 %           .lambda - Lagrange and Kuhn-Tucker multipliers on constraints
 %       .userdata   - any user defined data
 %           .(user defined fields)
+%
+% See also mp_idx_manager.
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2023, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -233,7 +237,9 @@ classdef opt_model < mp_idx_manager
         qdc             %% quadratic costs
         nlc             %% general nonlinear costs
         prob_type = ''; %% problem type
-        soln = struct( ...  %% results of solve()
+        
+        %% results of solve()
+        soln = struct( ...
             'eflag', [], ...    %% exit flag
             'output', [], ...   %% algorithm code & solver-specific fields
             'x', [], ...        %% solution vector
@@ -243,8 +249,14 @@ classdef opt_model < mp_idx_manager
     end     %% properties
 
     methods
-        %% constructor
         function om = opt_model(varargin)
+            % Constructor.
+            % ::
+            %
+            %   om = opt_model()
+            %   om = opt_model(a_struct)
+            %   om = opt_model(an_om)
+
             %% call parent constructor
             om@mp_idx_manager(varargin{:});
 
@@ -260,6 +272,8 @@ classdef opt_model < mp_idx_manager
         end
 
         function om = def_set_types(om)
+            % Define set types ``var``, ``lin``, ``nle``, ``nli``, ``qdc``, ``nlc``.
+
             om.set_types = struct(...
                     'var', 'VARIABLES', ...
                     'lin', 'LINEAR CONSTRAINTS', ...
@@ -271,6 +285,8 @@ classdef opt_model < mp_idx_manager
         end
 
         function om = init_set_types(om)
+            % Initialize data structures for each set type.
+
             %% call parent to create base data structures for each type
             init_set_types@mp_idx_manager(om);
 
@@ -310,10 +326,14 @@ classdef opt_model < mp_idx_manager
         end
 
         function TorF = is_solved(om)
+            % Return true if model has been solved.
+
             TorF = ~isempty(om.soln.eflag);
         end
 
         function TorF = has_parsed_soln(om)
+            % Return true if model has a parsed solution.
+
             TorF = isfield(om.soln, 'var');
         end
     end     %% methods
