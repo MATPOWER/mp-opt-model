@@ -11,6 +11,7 @@ Since version 4.1
     relaxing any potentially tighter bounds provided as input.
   - Clear cached parameters after updating linear constraints via
     `opt_model/set_params()`.
+  - Add caching of aggregate output parameters in `opt_model/params_var()`.
 
 #### 3/21/24
   - Add to the `parse_soln()` method of `opt_model` an optional `stash`

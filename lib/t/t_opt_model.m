@@ -1265,6 +1265,7 @@ if have_feature('isequaln')
     t = 'om.set_params(''var'', name, ...) : ';
     val = [1:4]';
     s.var.data.v0.Va = val;
+    s.var.params = [];  % remove cache, as set_params() does
     om.set_params('var', 'Va', 'v0', val);
     t_ok(isequaln(struct(om), s), [t 'Va, v0']);
 

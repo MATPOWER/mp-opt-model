@@ -4581,7 +4581,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 \emph{{\bf Note:} While MATPOWER no longer requires this, my recommendation is still to simply rename the MEX file to \code{ipopt.<mexext>}, with the appropriate architecture-specific extension, and delete the unnecessary \code{ipopt.m} entirely.}
 \item Update for compatibility with MATLAB R2023a (Optimization Toolbox 9.5) which removed \code{x0} as a valid input to \code{linprog}.
 \item Always skip price computation stage in \code{miqps\_<solver>()} functions for pure (as opposed to mixed) integer problems.
-
+\item Add caching of aggregate output parameters in \code{opt\_model/params\_var()}.
 
 \end{itemize}
 
