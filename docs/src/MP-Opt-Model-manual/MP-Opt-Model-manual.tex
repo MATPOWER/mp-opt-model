@@ -4570,6 +4570,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 \subsubsection*{Bugs Fixed}
 \begin{itemize}
 \item Clear cached parameters after updating quadratic costs via \code{opt\_model/set\_params()}.
+\item In \code{miqps\_mosek()} the lower and upper bounds of binary variables got overwritten with 0 and 1, respectively, effectively relaxing any potentially tighter bounds provided as input.
 \item 
     \emph{Thanks to Fulano.}
 \end{itemize}

@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 4/5/24
+  - Fix bug in `miqps_mosek()` where the lower and upper bounds of binary
+    variables got overwritten with 0 and 1, respectively, effectively
+    relaxing any potentially tighter bounds provided as input.
+
 #### 3/21/24
   - Add to the `parse_soln()` method of `opt_model` an optional `stash`
     input argument that, if present and true, causes the parsed solution

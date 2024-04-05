@@ -1,5 +1,5 @@
 classdef opt_model < mp_idx_manager
-% opt_model - Constructor for optimization model class.
+% opt_model - MP-Opt-Model optimization model class.
 % ::
 %
 %   OM = OPT_MODEL
