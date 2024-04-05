@@ -179,6 +179,9 @@ switch st
                 end
             end
         end
+
+        %% clear cached parameters
+        om.var.params = [];
     case 'lin'
         %% get current parameters
         [A, l, u, vs, ~, ~, tr] = om.params_lin_constraint(name, idx);
@@ -279,6 +282,9 @@ switch st
                 end
             end
         end
+
+        %% clear cached parameters
+        om.lin.params = [];
     case 'qdc'
         %% get current parameters
         [Q, c, kk, vs] = om.params_quad_cost(name, idx);

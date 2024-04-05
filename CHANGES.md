@@ -9,6 +9,8 @@ Since version 4.1
   - Fix bug in `miqps_mosek()` where the lower and upper bounds of binary
     variables got overwritten with 0 and 1, respectively, effectively
     relaxing any potentially tighter bounds provided as input.
+  - Clear cached parameters after updating linear constraints via
+    `opt_model/set_params()`.
 
 #### 3/21/24
   - Add to the `parse_soln()` method of `opt_model` an optional `stash`
