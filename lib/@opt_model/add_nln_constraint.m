@@ -112,7 +112,7 @@ varsets = om.varsets_cell2struct(varsets);
 %% add the named nonlinear constraint set
 if iscell(name)
     if length(name) ~= length(N)
-        error('@opt_model/add_nln_constraint: dimensions of NAME and N must match');
+        error('opt_model.add_nln_constraint: dimensions of NAME and N must match');
     end
     om.add_named_set(ff, name{1}, idx, N(1), fcn, hess, '', varsets);
     for k = 2:length(name)
