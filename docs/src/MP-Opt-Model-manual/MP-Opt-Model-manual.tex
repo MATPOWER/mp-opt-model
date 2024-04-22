@@ -4571,6 +4571,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 \begin{itemize}
 \item Clear cached parameters after updating linear constraints or quadratic costs via \code{opt\_model.set\_params()}.
 \item In \code{miqps\_mosek()} the lower and upper bounds of binary variables got overwritten with 0 and 1, respectively, effectively relaxing any potentially tighter bounds provided as input.
+\item Fix false positive in \code{have\_feature\_fsolve} in case where the file is present, but without a valid license.
 \item 
     \emph{Thanks to Fulano.}
 \end{itemize}

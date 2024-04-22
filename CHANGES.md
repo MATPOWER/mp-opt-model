@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 Since version 4.1
 -----------------
 
+#### 4/22/24
+  - Fix false positive in `have_feature_fsolve` in case where the file is
+    present, but without a valid license.
+
 #### 4/5/24
   - Fix bug in `miqps_mosek()` where the lower and upper bounds of binary
     variables got overwritten with 0 and 1, respectively, effectively
