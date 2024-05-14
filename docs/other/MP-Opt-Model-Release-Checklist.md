@@ -22,7 +22,7 @@ Pre-release
   - `docs/relnotes/MP-Opt-Model-Release-Notes-#.#.md`
   - `docs/src/MP-Opt-Model-manual/MP-Opt-Model-manual.tex`
     - title page
-    - copyright
+    - copyright (front page and LICENSE text)
     - Appendix C Release History
     - `\mpomver` (update `\mpver`, `\mptestver`, `\mostver`, `mipsver` too)
   - Sphinx docs
@@ -80,7 +80,7 @@ Pre-release
 Release
 -------
 - Merge latest `prep-for-release` into `master`.
-- Tag with version number, e.g. `1.3`.
+- Tag with version number, e.g. `4.2`.
 - Push `master` to GitHub.
 - Publish new release on GitHub: https://github.com/MATPOWER/mp-opt-model/releases/new
   - use (possibly shortened) contents of `docs/relnotes/MP-Opt-Model-Release-Notes-#.#.md`
