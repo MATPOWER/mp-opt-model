@@ -151,7 +151,7 @@
 \newcommand{\mpomlink}[0]{\href{\mpomurl}{\mpom{}}}
 \newcommand{\mpomname}[0]{\mpom{}}
 % \newcommand{\mpomname}[0]{{{\bf M}{\sc at}{\bf P}{\sc ower} \textbf{Opt}imization \textbf{Model}}}
-\newcommand{\mpomver}[0]{4.2}
+\newcommand{\mpomver}[0]{4.3-dev}
 \newcommand{\most}[0]{{MOST}}
 \newcommand{\mostname}[0]{{{\bf M}{\sc atpower} \textbf{O}ptimal \textbf{S}cheduling \textbf{T}ool}}
 \newcommand{\mosturl}[0]{https://github.com/MATPOWER/most}
@@ -239,7 +239,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-\date{May 10, 2024} % comment this line to display the current date
+%\date{May 10, 2024} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -3340,6 +3340,58 @@ om.init_set_types()
 \end{Code}
 Initializes the base data structures for each set type.
 
+
+\subsection{MP Set Manager Class -- {\tt mp.set\_manager}}
+
+The \code{opt\_model} class manages several ordered sets of entities, such as variables, various kinds of constraints, costs, etc. These sets consist of named (or named and indexed) subsets.
+
+The functionality for managing the indexing and data for these various ordered set types is implemented in \code{mp.set\_manager} and several subclasses. The properties and methods implemented by \code{mp.set\_manager} are shown in Table~\ref{tab:mp_set_manager}.
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{MP Set Manager (\code{mp.set\_manager}) Properties and Methods}
+\label{tab:mp_set_manager}
+\footnotesize
+\begin{tabular}{lp{0.66\textwidth}}
+\toprule
+name & description \\
+\midrule
+\multicolumn{2}{l}{\emph{Properties}} \\
+\code{~~idx}	& struct with fields:	\\
+& \begin{tabular}{c @{ -- } p{0.65\textwidth}}
+\code{i1} & starting index of subset within full set\tnote{*} \\
+\code{iN} & ending index of subset within full set\tnote{*} \\
+\code{N} & number of elements in this subset\tnote{*} \\
+\end{tabular}	\\
+\code{~~N}	& total number of entities in the full set	\\
+\code{~~NS}	& number of named or named/indexed subsets or blocks	\\
+\code{~~order}	& struct array of blocks in order, with fields:	\\
+& \begin{tabular}{c @{ -- } p{0.65\textwidth}}
+\code{name} & name of the block \\
+\code{idx} & cell array of indices for the name \\
+\end{tabular}	\\
+\code{~~data}	& struct of additional set-type-specific data for each block\tnote{*}	\\
+\\
+\multicolumn{2}{l}{\emph{Public Methods}} \\
+\code{~~mp.set\_manager}	& constructor for \code{mp.set\_manager} class	\\
+\code{~~add}	& adds indexing information for new named (or named and indexed) subset	\\
+\code{~~copy}	& makes a copy of an existing \code{mp.set\_manager} object	\\
+\code{~~describe\_idx}	& describes indices of the set, e.g.~element 361 corresponds to \code{w(68)}, see also Section~\ref{sec:describe_idx} \\
+\code{~~display}	& displays summary of indexing for the set	\\
+\code{~~init\_indexed\_name}	& initializes dimensions for a particular indexed named subset	\\
+\code{~~set\_type\_idx\_map}	& maps indices of the set, e.g.~element 361 corresponds to \code{w(68)}, see Section~\ref{sec:set_type_idx_map} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {This field is a struct and the description applies to each field of the struct. The fields are the names corresponding to the subsets added.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
 \subsection{\matpower{} Index Manager Base Class -- {\tt mp\_idx\_manager}}
 
 Most of the functionality of the \code{opt\_model} class related to managing the indexing of the various set types is inherited from the \matpower{} Index Manager base class named \code{mp\_idx\_manager}. The properties and methods implemented in this base class and inherited or overridden by \code{opt\_model} are listed in Table~\ref{tab:mp_idx_manager2}.
@@ -4581,10 +4633,40 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.2.pdf}{\mpom{} 4.2 Use
 
 \end{itemize}
 
-% \subsection{Version 4.0 -- released ??? ?, 202?}
-% \label{app:v40}
+\subsection{Version 4.3 -- released ??? ?, 202?}
+\label{app:v43}
+
+The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}}
+
+\subsubsection*{New Features}
+\begin{itemize}
+\item 
+\item New class:
+    \begin{itemize}
+    \item \code{mp.set\_manager} encapsulates \class{mp\_idx\_manager} functionality into an individual field object representing a specific set type, rather than in the container class.
+    \end{itemize}
+\item New functions:
+    \begin{itemize}
+    \item \code{foobar()} does whizbang.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection*{Bugs Fixed}
+\begin{itemize}
+\item 
+    \emph{Thanks to Fulano.}
+\end{itemize}
+
+\subsubsection*{Other Changes}
+\begin{itemize}
+\item 
+
+\end{itemize}
+
+% \subsection{Version 5.0 -- released ??? ?, 202?}
+% \label{app:v50}
 % 
-% The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.0.pdf}{\mpom{} 4.0 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-4.0.pdf}}
+% The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 User's Manual} is available online.\footnote{\url{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}}
 % 
 % \subsubsection*{New Features}
 % \begin{itemize}

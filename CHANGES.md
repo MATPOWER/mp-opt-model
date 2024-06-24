@@ -2,7 +2,16 @@ Change history for MP-Opt-Model
 ===============================
 
 
- Version 4.2 - *May 10, 2024*
+since 4.2
+---------
+
+#### 6/24/24
+  - Add `mp.set_manager` class to encapsulate `mp_idx_manager` functionality
+    into an individual field object representing a specific set type, rather
+    than in the container class.
+
+
+Version 4.2 - *May 10, 2024*
 ----------------------------
 
 #### 5/10/24

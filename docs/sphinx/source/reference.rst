@@ -12,6 +12,7 @@ Use :class:`opt_model` to build and solve your mathematical programming and opti
 .. toctree::
 
    classes/opt_model
+   classes/mp/set_manager
    classes/mp_idx_manager
 
 
