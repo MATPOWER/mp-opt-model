@@ -3396,6 +3396,8 @@ name & description \\
 
 Most of the functionality of the \code{opt\_model} class related to managing the indexing of the various set types is inherited from the \matpower{} Index Manager base class named \code{mp\_idx\_manager}. The properties and methods implemented in this base class and inherited or overridden by \code{opt\_model} are listed in Table~\ref{tab:mp_idx_manager2}.
 
+Since \mpom{} 4.2, the implementation for most of the functionality for the \matpower{} Index Manager base class has been moved to \code{mp.set\_manager}. Now it is essentially a backward compatible container base class for \code{mp.set\_manager} objects and many of its methods are just wrappers around the corresponding \code{mp.set\_manager} method.
+
 The \matpower{} Index Manager base class initializes and manages the data that is common across all set types. Table~\ref{tab:obj_structure} illustrates for an example \codeq{var} set type, such as defined in \code{opt\_model}, what the data structure looks like, but it is the same for any other set types defined by child classes, such as \code{opt\_model}.
 
 \begin{table}[!ht]
@@ -3416,19 +3418,19 @@ name & description \\
 \multicolumn{2}{l}{\emph{Public Methods}} \\
 \code{~~mp\_idx\_manager}	& constructor for \code{mp\_idx\_manager} class	\\
 \code{~~copy}	& makes a copy of an existing \code{mp\_idx\_manager} object	\\
-\code{~~describe\_idx}	& describes indices of a given set type, e.g.~variable 361 corresponds to \code{w(68)}, see Section~\ref{sec:describe_idx} \\
-\code{~~display\_set}	& displays indexing for a particular set type, typically called by \code{display}	\\
+\code{~~describe\_idx}	& wrapper around \code{describe\_idx} for a given set object \\
+\code{~~display\_set}	& wrapper around \code{display} for a given set object, typically called by \code{display}	\\
 \code{~~get}	& access (possibly nested) fields of the object	\\
 \code{~~get\_idx}	& returns index structure(s) for specified set type(s), with starting/ending indices and number of elements for each named (and optionally indexed) block	\\
 \code{~~get\_userdata}	& retreives values of user data stored in the object	\\
 \code{~~getN}	& returns the number of elements of any given set type\tnote{\dag}	\\
-\code{~~init\_indexed\_name}	& initializes dimensions for a particular indexed named set	\\
-\code{~~set\_type\_idx\_map}	& maps indices of a given set type, e.g.~variable 361 corresponds to \code{w(68)}, see Section~\ref{sec:set_type_idx_map} \\
+\code{~~init\_indexed\_name}	& wrapper around \code{init\_indexed\_name} for a given set object	\\
+\code{~~set\_type\_idx\_map}	& wrapper around \code{set\_type\_idx\_map} for a given set object \\
 \\
 \multicolumn{2}{l}{\emph{Private Methods}\tnote{\ddag}} \\
-\code{~~add\_named\_set}	& adds indexing information for new instance of a given set type	\\
+\code{~~add\_named\_set}	& wrapper around \code{add} for a given set object	\\
 \code{~~init\_set\_types}	& initializes the data structures for each set type	\\
-\code{~~valid\_named\_set\_type}	& returns label for given named set type if valid, empty otherwise	\\
+\code{~~valid\_named\_set\_type}	& returns label or set object for given named set type if valid, empty otherwise	\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -3453,7 +3455,7 @@ name & description \\
 \midrule
 \code{obj}	& 	\\
 \code{~~.set\_types}	& struct whose fields define the valid set types	\\
-\code{~~.var}	& data for \codeq{var} set type, e.g. variable sets that make up the full optimization variable $x$	\\
+\code{~~.var}	& \code{mp.set\_manager} object with data for \codeq{var} set type, e.g. variable sets that make up the full optimization variable $x$	\\
 \code{~~~~.idx}	& 	\\
 \code{~~~~~~.i1}	& starting index within $x$	\\
 \code{~~~~~~.iN}	& ending index within $x$	\\
@@ -3464,7 +3466,7 @@ name & description \\
 \code{~~~~.order}	& struct array of names/indices for variable blocks in the order they appear in $x$	\\
 \code{~~~~~~.name}	& name of the block, e.g. \code{z}	\\
 \code{~~~~~~.idx}	& indices for name, \code{\{2,3\}} $\rightarrow$ \code{z(2,3)}	\\
-\code{~~.<other-set-types>}	& with structure identical to \code{var}	\\
+\code{~~.<other-set-types>}	& other \code{mp.set\_manager} objects, with structure identical to \code{var}	\\
 \code{~~.userdata}	& struct for storing arbitrary user-defined data	\\
 \bottomrule
 \end{tabular}
@@ -4643,7 +4645,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 \item 
 \item New class:
     \begin{itemize}
-    \item \code{mp.set\_manager} encapsulates \class{mp\_idx\_manager} functionality into an individual field object representing a specific set type, rather than in the container class.
+    \item \code{mp.set\_manager} encapsulates \code{mp\_idx\_manager} functionality into an individual field object representing a specific set type, rather than in the container class.
     \end{itemize}
 \item New functions:
     \begin{itemize}
@@ -4659,7 +4661,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 
 \subsubsection*{Other Changes}
 \begin{itemize}
-\item 
+\item Refactor \code{mp\_idx\_manager} to use new \code{mp.set\_manager} class.
 
 \end{itemize}
 

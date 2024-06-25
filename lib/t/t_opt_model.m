@@ -1728,21 +1728,21 @@ g = om.describe_idx('var', 15);
 t_ok(isequal(g, 'Vm2(3)'), [t '''var'', 15']);
 if have_feature('isequaln')
     g = om.describe_idx('nli', 15);
-    t_ok(isequal(g, 'mynli(2,2)(4)'), [t '''nli'', 15']);
+    t_ok(isequal(g, 'mynli{2,2}(4)'), [t '''nli'', 15']);
     g = om.describe_idx('qdc', [5;192;20]);
-    e = {'qc3(3)'; 'qc(1,2)(1)'; 'qc5(7)'};
+    e = {'qc3(3)'; 'qc{1,2}(1)'; 'qc5(7)'};
     t_ok(isequal(g, e), [t '''qdc'', [5;192;20]']);
     g = om.describe_idx('lin', [12 3;2 10]);
-    e = {'mylin(2,1)(2)', 'Qmis(1)'; 'Pmis(2)', 'mylin(1,2)(3)'};
+    e = {'mylin{2,1}(2)', 'Qmis(1)'; 'Pmis(2)', 'mylin{1,2}(3)'};
     t_ok(isequal(g, e), [t '''lin'', [12 3;2 10]']);
 else
     g = om.describe_idx('nli', 13);
-    t_ok(isequal(g, 'mynli(2,2)(3)'), [t '''nli'', 13']);
+    t_ok(isequal(g, 'mynli{2,2}(3)'), [t '''nli'', 13']);
     g = om.describe_idx('qdc', [5;192;20]);
     e = {'qc3(3)'; 'qc6(169)'; 'qc5(4)'};
     t_ok(isequal(g, e), [t '''qdc'', [5;192;20]']);
     g = om.describe_idx('lin', [12 3;2 10]);
-    e = {'mylin(2,1)(1)', 'Pmis(3)'; 'Pmis(2)', 'mylin(1,2)(2)'};
+    e = {'mylin{2,1}(1)', 'Pmis(3)'; 'Pmis(2)', 'mylin{1,2}(2)'};
     t_ok(isequal(g, e), [t '''lin'', [12 3;2 10]']);
 end
 

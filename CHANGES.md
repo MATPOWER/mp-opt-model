@@ -9,6 +9,7 @@ since 4.2
   - Add `mp.set_manager` class to encapsulate `mp_idx_manager` functionality
     into an individual field object representing a specific set type, rather
     than in the container class.
+  - Refactor `mp_idx_manager` to use new `mp.set_manager` class.
 
 
 Version 4.2 - *May 10, 2024*
