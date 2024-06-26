@@ -1,4 +1,4 @@
-function N = getN(obj, set_type, name, idx)
+function N = getN(obj, set_type, varargin)
 % getN - Returns the number of elements of a given set type.
 % ::
 %
@@ -27,18 +27,4 @@ function N = getN(obj, set_type, name, idx)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
-if nargin < 3
-    N = obj.(set_type).N;
-else
-    if isfield(obj.(set_type).idx.N, name)
-        if nargin < 4 || isempty(idx)
-            N = obj.(set_type).idx.N.(name);
-        else
-            % s1 = substruct('.', name, '()', idx);
-            sn = struct('type', {'.', '()'}, 'subs', {name, idx});  %% num array field
-            N = subsref(obj.(set_type).idx.N, sn);
-        end
-    else
-        N = 0;
-    end
-end
+N = obj.(set_type).get_N(varargin{:});
