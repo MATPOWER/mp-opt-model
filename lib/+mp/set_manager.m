@@ -24,6 +24,7 @@ classdef set_manager < handle
 %   * add - a named (and optionally indexed) subset of entities
 %   * describe_idx - provide/display name and index label for given indices
 %   * display - display summary of indexing of subsets in object
+%   * get_N - return the number of elements in the set
 %   * init_indexed_name - initialize dimensions for an indexed named set
 %   * set_type_idx_map - map index back to named subset & index within set
 %   * params - *(abstract)* return set-type-specific data
@@ -243,14 +244,14 @@ classdef set_manager < handle
                 %% struct for addressing numeric array fields
                 %% sn = substruct('.', name, '()', idx);
                 sn = struct('type', {'.', '()'}, 'subs', {name, idx});  %% num array field
-            
+
                 %% prevent duplicate name in set of specified type
                 if subsref(obj.idx.i1, sn) ~= 0
                     str = '%d'; for m = 2:length(idx), str = [str ',%d']; end
                     nname = sprintf(['%s(' str, ')'], name, idx{:});
                     error('mp_idx_manager.add_named_set: %s set named ''%s'' already exists', obj.name, nname);
                 end
-            
+
                 %% add indexing info about this set
                 obj.idx.i1  = subsasgn(obj.idx.i1, sn, obj.N + 1);  %% starting index
                 obj.idx.iN  = subsasgn(obj.idx.iN, sn, obj.N + N);  %% ending index
@@ -293,9 +294,9 @@ classdef set_manager < handle
             %   labels = sm.describe_idx([38; 49; 93]));
             %
             % See also set_type_idx_map.
-            
+
             label = cell(size(idxs));       %% pre-allocate return cell array
-            
+
             if ~isempty(idxs)
                 s = obj.set_type_idx_map(idxs);
             end
@@ -349,6 +350,41 @@ classdef set_manager < handle
                 fprintf(fmt, obj.NS, obj.type, obj.N, obj.type);
             else
                 fprintf('%-26s  :  <none>\n', obj.name);
+            end
+        end
+
+        function N = get_N(obj, name, idx)
+            % get_N - Return the number of elements in the set.
+            % ::
+            %
+            %   N = obj.get_N()
+            %   N = obj.get_N(name)
+            %   N = obj.get_N(name, idx_list)
+            %
+            % Returns either the total number of elements in the set or the
+            % number corresponding to a specified named block, or indexed named
+            % subset.
+            %
+            % Examples::
+            %
+            %   N = obj.get_N()             % total number of elements in set
+            %   N = obj.get_N(name)         % # of elements in named set
+            %   N = obj.get_N(name, idx)    % # of elements in indexed named set
+
+            if nargin < 2
+                N = obj.N;
+            else
+                if isfield(obj.idx.N, name)
+                    if nargin < 3 || isempty(idx)
+                        N = obj.idx.N.(name);
+                    else
+                        % s1 = substruct('.', name, '()', idx);
+                        sn = struct('type', {'.', '()'}, 'subs', {name, idx});  %% num array field
+                        N = subsref(obj.idx.N, sn);
+                    end
+                else
+                    N = 0;
+                end
             end
         end
 
