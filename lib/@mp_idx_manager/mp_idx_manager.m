@@ -226,7 +226,7 @@ classdef mp_idx_manager < handle
         function display_set(obj, stype, sname)
             % Display indexing information for a given set type.
 
-            obj.(stype).display();
+            obj.(stype).display(stype);
         end
 
         obj = add_named_set(obj, set_type, name, idx, N, varargin)

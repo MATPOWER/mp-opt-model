@@ -2,7 +2,7 @@ classdef set_manager < handle
 % mp.set_manager -  MP Set Manager base class.
 % ::
 %
-%   sm = mp.set_manager(name)
+%   sm = mp.set_manager(label)
 %
 % Implements functionality to manage the indexing of various named and
 % indexed blocks of elements, such as variables, constraints, etc. This class
@@ -11,7 +11,7 @@ classdef set_manager < handle
 % to handle data associated with each block.
 %
 % mp.set_manager Properties:
-%   * name - the name of the set, e.g. ``'VARIABLES'``, ``'LINEAR CONSTRAINTS'``
+%   * label - the label of the set, e.g. ``'VARIABLES'``, ``'LINEAR CONSTRAINTS'``
 %   * idx - indexing information
 %   * N - total number of entities in the full set
 %   * NS - number of named or named/indexed subsets or blocks
@@ -27,18 +27,29 @@ classdef set_manager < handle
 %   * get_N - return the number of elements in the set
 %   * init_indexed_name - initialize dimensions for an indexed named set
 %   * set_type_idx_map - map index back to named subset & index within set
-%   * params - *(abstract)* return set-type-specific data
+%   * params - *(abstract)* return set-type-specific parameter data
 %
-% By convention, ``sm`` is the variable name used for mp.set_manager objects.
+% By convention, ``sm`` is the variable name used for generic mp.set_manager
+% objects.
 %
-% For example, suppose the goal is to create and manage a set of variables
-% related to the charging of a fleet of :math:`n` electric vehicles over a week,
-% where we have variables representing daily charging amounts for each
-% vehicle, daily discharge amounts from driving, and the final battery
-% state at the end of the week. These could be organized as 7 blocks of
-% ``charge`` variables, 1 for each day of the week, 7 blocks of ``discharge``
-% variables, and 1 ``battery_state`` block, where each block consists of an
-% :math:`n \times 1` vector of variables.
+% **Simple vs. Indexed Named Subsets**
+%
+% A subset or block of entities can be added as a simple named subset
+% identified by a single name (e.g. ``foo``), or as an indexed named subset
+% identified by a name that is indexed by one or more indices (e.g.
+% ``bar{4,3}``). For an indexed named subset, the dimensions of the indexed
+% subset must be supplied by calling init_indexed_name() before calling add().
+%
+% **Example**
+%
+% Suppose the goal is to create and manage a set of variables related to the
+% charging of a fleet of :math:`n` electric vehicles over a week, where we have
+% variables representing daily charging amounts for each vehicle, daily
+% discharge amounts from driving, and the final battery state at the end of
+% the week. These could be organized as 7 blocks of ``charge`` variables,
+% 1 for each day of the week, 7 blocks of ``discharge`` variables, and
+% 1 ``battery_state`` block, where each block consists of an :math:`n \times 1`
+% vector of variables.
 %
 % ::
 %
@@ -73,7 +84,7 @@ classdef set_manager < handle
 % corresponding blocks of elements of that type (e.g. variables, constraints,
 % etc.). They are found in order in the corresponding .order field. The
 % description next to these fields gives the meaning of the value for each
-% named sub-field. E.g. obj.var.data.v0.Pg contains a vector of initial values
+% named sub-field. E.g. var.data.v0.Pg contains a vector of initial values
 % for the 'Pg' block of variables.
 %
 %   obj
@@ -103,10 +114,8 @@ classdef set_manager < handle
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
     properties
-        type
-
         % *(char array)* label used as header for display
-        name
+        label
 
         % *(struct)* indexing information, with the following 3 fields:
         %
@@ -125,7 +134,7 @@ classdef set_manager < handle
         % a ``bar`` blocked indexed by ``i`` and ``j``, ``idx.iN.bar(i,j)``
         % is the ending index of the ``bar{i,j}`` block in the full set.
         % Similarly, ``idx.N.bar(i,j)`` is the number of elements in that
-        % block, i.e. ``idx.iN.bar(i,j) - idx.i1.bar(i,j) + 1``.
+        % block, i.e. ``idx.iN.bar(i,j) - idx.i1.bar(i,j) + 1``.
         idx = struct('i1', struct(), 'iN', struct(), 'N', struct());
 
         N = 0;  % *(integer)* total number of individual elements in set
@@ -146,13 +155,13 @@ classdef set_manager < handle
     end     %% properties
 
     methods
-        function obj = set_manager(name)
+        function obj = set_manager(label)
             % Constructor.
             % ::
             %
-            %   sm = mp.set_manager(name)
+            %   sm = mp.set_manager(label)
 
-            obj.name = name;
+            obj.label = label;
         end
 
         function new_obj = copy(obj)
@@ -165,7 +174,7 @@ classdef set_manager < handle
             % top-level properties.
 
             %% create new object
-            new_obj = eval(sprintf('%s(''%s'')', class(obj), obj.name));
+            new_obj = eval(sprintf('%s(''%s'')', class(obj), obj.label));
 
             %% get the names of the properties
             if have_feature('octave')
@@ -228,7 +237,7 @@ classdef set_manager < handle
             if isempty(idx)     %% simple named set
                 %% prevent duplicate name in set of specified type
                 if isfield(obj.idx.N, name)
-                    error('mp.set_manager.add: %s set named ''%s'' already exists', obj.name, name);
+                    error('mp.set_manager.add: %s set named ''%s'' already exists', obj.label, name);
                 end
 
                 %% add indexing info about this set
@@ -249,7 +258,7 @@ classdef set_manager < handle
                 if subsref(obj.idx.i1, sn) ~= 0
                     str = '%d'; for m = 2:length(idx), str = [str ',%d']; end
                     nname = sprintf(['%s(' str, ')'], name, idx{:});
-                    error('mp_idx_manager.add_named_set: %s set named ''%s'' already exists', obj.name, nname);
+                    error('mp_idx_manager.add_named_set: %s set named ''%s'' already exists', obj.label, nname);
                 end
 
                 %% add indexing info about this set
@@ -318,7 +327,7 @@ classdef set_manager < handle
             end
         end
 
-        function display(obj)
+        function display(obj, tag)
             % Display summary of indexing of subsets in object.
             %
             % This method is called automatically when omitting a semicolon
@@ -329,8 +338,8 @@ classdef set_manager < handle
 
             if obj.NS
                 fmt = '%-26s %6s %8s %8s %8s\n';
-                fprintf(fmt, obj.name, 'name', 'i1', 'iN', 'N');
-                fprintf(fmt, repmat('=', 1, length(obj.name)), '------', '-----', '-----', '------');
+                fprintf(fmt, obj.label, 'name', 'i1', 'iN', 'N');
+                fprintf(fmt, repmat('=', 1, length(obj.label)), '------', '-----', '-----', '------');
                 idx = obj.idx;
                 fmt = '%10d:%22s %8d %8d %8d\n';
                 for k = 1:obj.NS
@@ -346,10 +355,15 @@ classdef set_manager < handle
                                 subsref(idx.i1, s), subsref(idx.iN, s), subsref(idx.N, s));
                     end
                 end
-                fmt = sprintf('%%10d = %%s.NS%%%dd = %%s.N\\n\\n', 35-length(obj.type));
-                fprintf(fmt, obj.NS, obj.type, obj.N, obj.type);
+                if nargin < 2
+                    tag = '';
+                else
+                    tag = [tag '.'];
+                end
+                fmt = sprintf('%%10d = %%sNS%%%dd = %%sN\\n\\n', 36-length(tag));
+                fprintf(fmt, obj.NS, tag, obj.N, tag);
             else
-                fprintf('%-26s  :  <none>\n', obj.name);
+                fprintf('%-26s  :  <none>\n', obj.label);
             end
         end
 
