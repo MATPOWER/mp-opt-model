@@ -111,7 +111,7 @@ classdef opt_model < mp_idx_manager
 %                     blocks in the order they appear in x
 %               .name   - name of the block, e.g. Pg
 %               .idx    - indices for name, {2,3} => Pg(2,3)
-%           .params - cache for previously assembled aggregate parameters
+%           .cache - cache for previously assembled aggregate parameters
 %               .v0  - aggregate vector of variable initial values
 %               .vl  - aggregate vector of variable lower bounds
 %               .vu  - aggregate vector of variable upper bounds
@@ -168,7 +168,7 @@ classdef opt_model < mp_idx_manager
 %                     blocks in the order they appear in ghl(x)
 %               .name   - name of the block, e.g. Pmis
 %               .idx    - indices for name, {2,3} => Pmis(2,3)
-%           .params - cache for previously assembled aggregate parameters
+%           .cache - cache for previously assembled aggregate parameters
 %               .A  - aggregate sparse linear constraint matrix
 %               .l  - aggregate left hand side vector, bounding A*x below
 %               .u  - aggregate right hand side vector, bounding A*x above
@@ -189,7 +189,7 @@ classdef opt_model < mp_idx_manager
 %                     in the order the were added
 %               .name   - name of the block, e.g. R
 %               .idx    - indices for name, {2,3} => R(2,3)
-%           .params - cache for previously assembled aggregate parameters
+%           .cache - cache for previously assembled aggregate parameters
 %               .Q  - aggregate sparse matrix of quadratic cost coefficients
 %               .c  - aggregate column vector of linear cost coefficients
 %               .k  - aggregate constant term
@@ -302,7 +302,7 @@ classdef opt_model < mp_idx_manager
                 'vl', es, ...
                 'vu', es, ...
                 'vt', es );
-            om.var.params = [];
+            om.var.cache = [];
             om.nle.data = struct( ...
                 'fcn', [], ...
                 'hess', [], ...
@@ -319,13 +319,13 @@ classdef opt_model < mp_idx_manager
                 'u', es, ...
                 'tr', es, ...
                 'vs', es );
-            om.lin.params = [];
+            om.lin.cache = [];
             om.qdc.data = struct( ...
                 'Q', es, ...
                 'c', es, ...
                 'k', es, ...
                 'vs', es );
-            om.qdc.params = [];
+            om.qdc.cache = [];
             om.nlc.data = struct( ...
                 'fcn', es, ...
                 'vs', es );

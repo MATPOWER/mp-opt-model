@@ -181,7 +181,7 @@ switch st
         end
 
         %% clear cached parameters
-        om.var.params = [];
+        om.var.cache = [];
     case 'lin'
         %% get current parameters
         [A, l, u, vs, ~, ~, tr] = om.params_lin_constraint(name, idx);
@@ -284,7 +284,7 @@ switch st
         end
 
         %% clear cached parameters
-        om.lin.params = [];
+        om.lin.cache = [];
     case 'qdc'
         %% get current parameters
         [Q, c, kk, vs] = om.params_quad_cost(name, idx);
@@ -380,7 +380,7 @@ switch st
         end
 
         %% clear cached parameters
-        om.qdc.params = [];
+        om.qdc.cache = [];
     case {'nle', 'nli'}
         %% get current parameters
         if isempty(idx)

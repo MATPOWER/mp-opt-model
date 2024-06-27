@@ -28,6 +28,7 @@ classdef set_manager < handle
 %   * init_indexed_name - initialize dimensions for an indexed named set
 %   * set_type_idx_map - map index back to named subset & index within set
 %   * params - *(abstract)* return set-type-specific parameter data
+%   * set_params - *(abstract)* modify set-type-specific parameter data
 %
 % By convention, ``sm`` is the variable name used for generic mp.set_manager
 % objects.
@@ -150,8 +151,8 @@ classdef set_manager < handle
         % *(struct)* additional set-type-specific data for each block
         data = struct();
 
-        % :hl:`to be moved to subclasses for` ``var``, ``lin``, ``qdc``
-        params
+        % :hl:`to be moved to subclasses for` ``var``, ``lin``, ``qdc``, ``cost``
+        cache
     end     %% properties
 
     methods
@@ -601,7 +602,128 @@ classdef set_manager < handle
                 end
             end
         end
+
+        function rv = params(obj, name, idx)
+            % Return set-type-specific parameters.
+            % ::
+            %
+            %   [...] = var.params()
+            %   [...] = var.params(name)
+            %   [...] = var.params(name, idx_list)
+            %
+            % .. note::
+            %    This abstract method must be implemented by the subclass.
+            %
+            % Returns set-type-specific parameters for the full set, if called
+            % without input arguments, or for a specific named or named and
+            % indexed subset.
+            %
+            % Inputs:
+            %   name (char array) : *(optional)* name of subset
+            %   idx_list (cell array) : *(optional)* index list for subset
+            %
+            % Outputs are determined by the implementing subclass.
+            %
+            % See also add, set_params.
+        end
+
+        function obj = set_params(obj, name, idx, params, vals)
+            % set_params - Modify parameter data.
+            % ::
+            %
+            %   var.set_params(name, params, vals)
+            %   var.set_params(name, idx, params, vals)
+            %
+            % .. note::
+            %    This abstract method must be implemented by the subclass.
+            %
+            % This method can be used to modify set-type-specific parameters
+            % for an existing subset.
+            %
+            % Inputs:
+            %   name (char array) : name of subset/block of entities to modify
+            %   idx_list (cell array) : *(optional)* index list for subset/block
+            %       of entities modify (for an indexed subset)
+            %   params : can be one of three options:
+            %
+            %       - ``'all'`` - indicates that ``vals`` is a cell array
+            %         whose elements correspond to the input parameters of
+            %         the add() method
+            %       - name of a parameter - ``val`` is the value of that
+            %         parameter
+            %       - cell array of parameter names - ``vals`` is a cell array
+            %         of corresponding values
+            %   vals : new value or cell array of new values corresponding to
+            %       ``params``
+            %
+            % Valid parameter names are defined by the implementing subclass.
+            %
+            % See also add, params.
+        end
     end     %% methods
+
+    methods (Access=protected)
+        function str = nameidxstr(obj, name, idx)
+            str = sprintf('%s%s', name, idxstr(idx));
+        end
+
+        function [is_all, np, params, vals] = set_params_std_args(obj, default_params, params, vals)
+            %% standardize provided arguments in cell arrays params, vals
+            is_all = 0;     %% flag to indicate all params for set are being replaced
+            if ischar(params)
+                if strcmp(params, 'all')
+                    is_all = 1;
+                    np = length(vals);      %% number of parameter values provided
+                    params = default_params(1:np);
+                else
+                    np = 1;                 %% number of parameter values provided
+                    params = {params};
+                    vals = {vals};
+                end
+            else
+                np = length(vals);          %% number of parameter values provided
+            end
+        end
+
+        function obj = set_params_update_dims(obj, dN, name, idx)
+            %% calls to substruct() are relatively expensive, so we pre-build the
+            %% struct for addressing num array fields
+            %% sn = substruct('.', name, '()', idx);
+            sn = struct('type', {'.', '()'}, 'subs', {'', 1});  %% num array field
+            update = 0;             %% not yet reached set being updated
+            update_i1 = 0;          %% flag to indicate whether to update i1
+            for k = 1:obj.NS
+                o = obj.order(k);
+                if ~update && strcmp(o.name, name) && isequal(o.idx, idx)
+                    update = 1;     %% arrived at set being updated
+                end
+                if update
+                    if isempty(o.idx)   %% simple named set
+                        if update_i1
+                            obj.idx.i1.(o.name) = obj.idx.i1.(o.name) + dN;
+                        else
+                            obj.idx.N.(o.name) = obj.idx.N.(o.name) + dN;
+                        end
+                        obj.idx.iN.(o.name) = obj.idx.iN.(o.name) + dN;
+                    else                %% indexed named set
+                        sn(1).subs = o.name;
+                        sn(2).subs = o.idx;
+                        if update_i1
+                            v = subsref(obj.idx.i1, sn);
+                            obj.idx.i1 = subsasgn(obj.idx.i1, sn, v + dN);
+                        else
+                            v = subsref(obj.idx.N, sn);
+                            obj.idx.N = subsasgn(obj.idx.N, sn, v + dN);
+                        end
+                        v = subsref(obj.idx.iN, sn);
+                        obj.idx.iN = subsasgn(obj.idx.iN, sn, v + dN);
+                    end
+                    update_i1 = 1;  %% update i1 from here on out
+                end
+            end
+            obj.N = obj.N + dN;
+        end
+    end     %% methods (Access=protected)
 end         %% classdef
 
 
@@ -610,5 +732,15 @@ function name_idx = join_name_idx(name, idx)
         name_idx = name;
     else
         name_idx = [name sprintf('_%d', idx{:})];
+    end
+end
+
+function str = idxstr(idx)
+    if isempty(idx)
+        str = '';
+    elseif length(idx) == 1
+        str = sprintf('(%d)', idx{1});
+    else
+        str = ['(' sprintf('%d', idx{1}) sprintf(',%d', idx{2:end}) ')'];
     end
 end

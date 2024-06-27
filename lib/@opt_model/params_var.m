@@ -35,7 +35,7 @@ else
     have_vt = 0;
 end
 if nargin < 2       %% aggregate
-    cache = om.var.params;
+    cache = om.var.cache;
     if isempty(cache)       %% build the aggregate
         v0 = []; vl = []; vu = []; vt = char([]);
         %% calls to substruct() are relatively expensive, so we pre-build the
@@ -86,7 +86,7 @@ if nargin < 2       %% aggregate
         end
 
         %% cache aggregated parameters
-        om.var.params = struct('v0', v0, 'vl', vl, 'vu', vu, 'vt', vt);
+        om.var.cache = struct('v0', v0, 'vl', vl, 'vu', vu, 'vt', vt);
     else                    %% return cached values
         v0 = cache.v0;
         vl = cache.vl;

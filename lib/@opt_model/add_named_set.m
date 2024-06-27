@@ -61,8 +61,8 @@ switch set_type
             om_ff.data.vu = subsasgn(om_ff.data.vu, sc, vu);    %% upper bound
             om_ff.data.vt = subsasgn(om_ff.data.vt, sc, vt);    %% variable type
         end
-        if ~isempty(om_ff.params)       %% clear cache of aggregated params
-            om_ff.params = [];
+        if ~isempty(om_ff.cache)    %% clear cache of aggregated params
+            om_ff.cache = [];
         end
     case 'lin'          %% linear constraint set
         [A, l, u, varsets, tr] = deal(varargin{:});
@@ -79,8 +79,8 @@ switch set_type
             om_ff.data.tr  = subsasgn(om_ff.data.tr, sc, tr);
             om_ff.data.vs = subsasgn(om_ff.data.vs, sc, varsets);
         end
-        if ~isempty(om_ff.params)       %% clear cache of aggregated params
-            om_ff.params = [];
+        if ~isempty(om_ff.cache)    %% clear cache of aggregated params
+            om_ff.cache = [];
         end
     case {'nle', 'nli'} %% nonlinear constraint set
         [fcn, hess, computed_by, varsets] = deal(varargin{:});
@@ -121,8 +121,8 @@ switch set_type
             om_ff.data.k  = subsasgn(om_ff.data.k, sc, k);
             om_ff.data.vs = subsasgn(om_ff.data.vs, sc, varsets);
         end
-        if ~isempty(om_ff.params)       %% clear cache of aggregated params
-            om_ff.params = [];
+        if ~isempty(om_ff.cache)    %% clear cache of aggregated params
+            om_ff.cache = [];
         end
     case 'nlc'          %% general nonlinear cost set
         [fcn, varsets] = deal(varargin{:});

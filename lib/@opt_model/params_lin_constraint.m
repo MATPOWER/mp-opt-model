@@ -83,7 +83,7 @@ if nargin > 1       %% individual set
         end
     end
 else                %% aggregate
-    cache = om.lin.params;
+    cache = om.lin.cache;
     if isempty(cache)       %% build the aggregate
         nx = om.var.N;          %% number of variables
         nlin = om.lin.N;        %% number of linear constraints
@@ -183,7 +183,7 @@ else                %% aggregate
         end
 
         %% cache aggregated parameters
-        om.lin.params = struct('A', A, 'l', l, 'u', u);
+        om.lin.cache = struct('A', A, 'l', l, 'u', u);
     else                    %% return cached values
         A = cache.A;
         l = cache.l;

@@ -62,7 +62,7 @@ if nargin > 1       %% individual set
         end
     end
 else                %% aggregate
-    cache = om.qdc.params;
+    cache = om.qdc.cache;
     if isempty(cache)       %% build the aggregate
         nx = om.var.N;          %% number of variables
         if om.qdc.NS < 25 || om.qdc.NS < 100 && nx < 300
@@ -180,7 +180,7 @@ else                %% aggregate
         end
 
         %% cache aggregated parameters
-        om.qdc.params = struct('Q', Q, 'c', c, 'k', K);
+        om.qdc.cache = struct('Q', Q, 'c', c, 'k', K);
     else                    %% return cached values
         Q = cache.Q;
         c = cache.c;
