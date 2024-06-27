@@ -49,21 +49,21 @@ om_ff = om.(set_type);
 om.(set_type) = [];
 switch set_type
     case 'var'          %% variable set
-        [v0, vl, vu, vt] = deal(varargin{:});
-        if isempty(idx)
-            om_ff.data.v0.(name) = v0;          %% initial value
-            om_ff.data.vl.(name) = vl;          %% lower bound
-            om_ff.data.vu.(name) = vu;          %% upper bound
-            om_ff.data.vt.(name) = vt;          %% variable type
-        else
-            om_ff.data.v0 = subsasgn(om_ff.data.v0, sc, v0);    %% initial value
-            om_ff.data.vl = subsasgn(om_ff.data.vl, sc, vl);    %% lower bound
-            om_ff.data.vu = subsasgn(om_ff.data.vu, sc, vu);    %% upper bound
-            om_ff.data.vt = subsasgn(om_ff.data.vt, sc, vt);    %% variable type
-        end
-        if ~isempty(om_ff.cache)    %% clear cache of aggregated params
-            om_ff.cache = [];
-        end
+%         [v0, vl, vu, vt] = deal(varargin{:});
+%         if isempty(idx)
+%             om_ff.data.v0.(name) = v0;          %% initial value
+%             om_ff.data.vl.(name) = vl;          %% lower bound
+%             om_ff.data.vu.(name) = vu;          %% upper bound
+%             om_ff.data.vt.(name) = vt;          %% variable type
+%         else
+%             om_ff.data.v0 = subsasgn(om_ff.data.v0, sc, v0);    %% initial value
+%             om_ff.data.vl = subsasgn(om_ff.data.vl, sc, vl);    %% lower bound
+%             om_ff.data.vu = subsasgn(om_ff.data.vu, sc, vu);    %% upper bound
+%             om_ff.data.vt = subsasgn(om_ff.data.vt, sc, vt);    %% variable type
+%         end
+%         if ~isempty(om_ff.cache)    %% clear cache of aggregated params
+%             om_ff.cache = [];
+%         end
     case 'lin'          %% linear constraint set
         [A, l, u, varsets, tr] = deal(varargin{:});
         if isempty(idx)

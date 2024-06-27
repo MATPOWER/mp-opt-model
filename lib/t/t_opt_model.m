@@ -1254,7 +1254,7 @@ if have_feature('isequaln')
         om.set_params('var', 'Va', 'v0', val);
         t_ok(0, [t 'Va, v0 (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'parameter ''var'' ''Va'' ''v0'' should have length 4 (or 1)');
+        TorF = strfind(me.message, 'parameter ''Va'' ''v0'' should have length 4 (or 1)');
         t_ok(TorF, [t 'Va, v0 (wrong size)']);
         if ~TorF
             me.message
@@ -1279,7 +1279,7 @@ if have_feature('isequaln')
         om.set_params('var', 'Pg', 'all', val);
         t_ok(0, [t 'Pg, all (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'dimension change for ''var'' ''Pg'' not allowed');
+        TorF = strfind(me.message, 'dimension change for ''Pg'' not allowed');
         t_ok(TorF, [t 'Pg, all (wrong size)']);
         if ~TorF
             me.message

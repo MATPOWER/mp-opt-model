@@ -16,9 +16,4 @@ function vs = varsets_cell2struct(om, vs)
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
-%% convert varsets from cell to struct array if necessary
-if ~isempty(vs) && iscell(vs)
-    empty_cells = cell(1, length(vs));
-    [empty_cells{:}] = deal({});    %% empty cell arrays
-    vs = struct('name', vs, 'idx', empty_cells);
-end
+vs = mp.sm_variable.varsets_cell2struct(vs);

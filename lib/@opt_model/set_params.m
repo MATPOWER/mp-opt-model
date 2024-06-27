@@ -59,7 +59,8 @@ end
 %% create default list of parameters to update based on set type & inputs
 switch st
     case 'var'
-        default_params = {'N', 'v0', 'vl', 'vu', 'vt'};
+        om.var.set_params(name, idx, params, vals);
+        return;
     case 'lin'
         default_params = {'A', 'l', 'u', 'vs', 'tr'};
     case {'nle', 'nli'}
@@ -97,91 +98,6 @@ end
 
 switch st
     case 'var'
-        %% get current parameters
-        [v0, vl, vu, vt] = om.params_var(name, idx);
-        N0 = om.getN('var', name, idx);
-        p = struct('N', N0, 'v0', v0, 'vl', vl, 'vu', vu, 'vt', vt);    %% current parameters
-        u = struct('N',  0, 'v0',  0, 'vl',  0, 'vu',  0, 'vt',  0);    %% which ones to update
-
-        %% replace with new parameters
-        for k = 1:np
-            p.(params{k}) = vals{k};
-            u.(params{k}) = 1;
-        end
-        N = p.N;
-
-        %% set missing default params for 'all'
-        if is_all
-            if np < 5
-                p.vt = 'C';
-                u.vt = 1;               %% update vt
-                if np < 4
-                    p.vu = Inf(N, 1);
-                    u.vu = 1;           %% update vu
-                    if np < 3
-                        p.vl = -Inf(N, 1);
-                        u.vl = 1;       %% update vl
-                        if np < 2
-                            p.v0 = zeros(N, 1);
-                            u.v0 = 1;   %% update v0
-                        end
-                    end
-                end
-            end
-        end
-
-        %% check consistency of parameters
-        %% no dimension change
-        if N ~= N0
-            error('opt_model.set_params: dimension change for ''%s'' ''%s'' not allowed', st, nameidxstr(name, idx));
-        end
-
-        %% check sizes of new values of v0, vl, vu, vt
-        for pn = {'v0', 'vl', 'vu', 'vt'}
-            if u.(pn{1})
-                nn = length(p.(pn{1}));
-                if nn ~= N
-                    if nn == 0
-                        switch pn{1}
-                            case 'v0'
-                                p.(pn{1}) = zeros(N, 0);
-                            case 'vl'
-                                p.(pn{1}) = -Inf(N, 0);
-                            case 'vu'
-                                p.(pn{1}) =  Inf(N, 0);
-                            case 'vt'
-                                p.(pn{1}) = 'C';
-                        end
-                    elseif nn == 1
-                        if pn{1} ~= 'vt'
-                            p.(pn{1}) = p.(pn{1}) * ones(N, 1);   %% expand from scalar
-                        end
-                    else
-                        error('opt_model.set_params: parameter ''%s'' ''%s'' ''%s'' should have length %d (or 1)', st, nameidxstr(name, idx), pn{1}, N);
-                    end
-                end
-            end
-        end
-
-        %% assign new parameters
-        if isempty(idx)     %% simple named set
-            for k = 2:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.var.data.(pn).(name) = p.(pn);
-                end
-            end
-        else                %% indexed named set
-            for k = 2:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.var.data.(pn) = subsasgn(om.var.data.(pn), sc, p.(pn));
-                end
-            end
-        end
-
-        %% clear cached parameters
-        om.var.cache = [];
     case 'lin'
         %% get current parameters
         [A, l, u, vs, ~, ~, tr] = om.params_lin_constraint(name, idx);
