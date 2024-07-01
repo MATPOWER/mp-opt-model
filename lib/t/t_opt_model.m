@@ -1314,7 +1314,7 @@ if have_feature('isequaln')
         om.set_params('lin', 'Qmis', 'A', val);
         t_ok(0, [t 'Qmis, A (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'dimension change for ''lin'' ''Qmis'' not allowed except for ''all''');
+        TorF = strfind(me.message, 'dimension change for ''Qmis'' not allowed except for ''all''');
         t_ok(TorF, [t 'Qmis, A (wrong size)']);
         if ~TorF
             me.message
@@ -1363,7 +1363,7 @@ if have_feature('isequaln')
         om.set_params('lin', 'mylin', {2,2}, 'all', val);
         t_ok(0, [t 'mylin{2,2}, all (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'for ''lin'' ''mylin(2,2)'' number of columns of ''A'' (5) must be consistent with ''vs'' (170)');
+        TorF = strfind(me.message, 'for ''mylin(2,2)'' number of columns of ''A'' (5) must be consistent with ''vs'' (170)');
         t_ok(TorF, [t 'mylin{2,2}, all (wrong size)']);
         if ~TorF
             me.message

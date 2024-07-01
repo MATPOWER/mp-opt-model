@@ -62,7 +62,8 @@ switch st
         om.var.set_params(name, idx, params, vals);
         return;
     case 'lin'
-        default_params = {'A', 'l', 'u', 'vs', 'tr'};
+        om.lin.set_params(om.var, name, idx, params, vals);
+        return;
     case {'nle', 'nli'}
         default_params = {'N', 'fcn', 'hess', 'vs'};
     case 'nlc'
@@ -99,108 +100,6 @@ end
 switch st
     case 'var'
     case 'lin'
-        %% get current parameters
-        [A, l, u, vs, ~, ~, tr] = om.params_lin_constraint(name, idx);
-        if tr
-            [M0, N0] = size(A);
-        else
-            [N0, M0] = size(A);
-        end
-        if isempty(vs), vs = {vs}; end
-        p = struct('A', A, 'l', l, 'u', u, 'vs', vs, 'tr', tr); %% current parameters
-        u = struct('A', 0, 'l', 0, 'u', 0, 'vs',  0, 'tr', 0);  %% which ones to update
-
-        %% replace with new parameters
-        for k = 1:np
-            p.(params{k}) = vals{k};
-            u.(params{k}) = 1;
-        end
-
-        %% set missing default params for 'all'
-        if p.tr
-            [M, N] = size(p.A);
-        else
-            [N, M] = size(p.A);
-        end
-        if is_all
-            u.A = 1;            %% always update A
-            u.l = 1;            %% alwaus update l
-            if np < 5
-                if p.tr
-                    p.tr = 0;
-                    u.tr = 1;       %% update tr
-                    [N, M] = deal(M, N);
-                end
-                if np < 4
-                    p.vs = {};
-                    u.vs = 1;       %% update vs
-                    if np < 3
-                        p.u = Inf(N, 1);
-                        u.u = 1;    %% update u
-                    end
-                end
-            end
-        end
-
-        %% check consistency of parameters
-        %% no dimension change unless 'all'
-        if N ~= N0 && ~is_all
-            error('opt_model.set_params: dimension change for ''%s'' ''%s'' not allowed except for ''all''', st, nameidxstr(name, idx));
-        end
-        %% no transpose change unless providing A
-        if u.tr && ~u.A
-            error('opt_model.set_params: update to ''tr'' for ''%s'' ''%s'' requires update to ''A''', st, nameidxstr(name, idx));
-        end
-
-        %% check sizes of new values of l, u
-        for pn = {'l', 'u'}
-            if u.(pn{1})
-                nn = length(p.(pn{1}));
-                if nn ~= N
-                    if nn == 0
-                        switch pn{1}
-                            case 'l'
-                                p.(pn{1}) = -Inf(N, 0);
-                            case 'u'
-                                p.(pn{1}) =  Inf(N, 0);
-                        end
-                    elseif nn == 1
-                        p.(pn{1}) = p.(pn{1}) * ones(N, 1);   %% expand from scalar
-                    else
-                        error('opt_model.set_params: parameter ''%s'' ''%s'' ''%s'' should have length %d (or 1)', st, nameidxstr(name, idx), pn{1}, N);
-                    end
-                end
-            end
-        end
-
-        %% check consistency of A and vs
-        if u.A || u.vs
-            p.vs = om.varsets_cell2struct(p.vs);
-            nv = om.varsets_len(p.vs);      %% number of variables
-            if M ~= nv
-                error('opt_model.set_params: for ''%s'' ''%s'' number of columns of ''A'' (%d) must be consistent with ''vs'' (%d)', st, nameidxstr(name, idx), M, nv);
-            end
-        end
-
-        %% assign new parameters
-        if isempty(idx)     %% simple named set
-            for k = 1:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.lin.data.(pn).(name) = p.(pn);
-                end
-            end
-        else                %% indexed named set
-            for k = 1:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.lin.data.(pn) = subsasgn(om.lin.data.(pn), sc, p.(pn));
-                end
-            end
-        end
-
-        %% clear cached parameters
-        om.lin.cache = [];
     case 'qdc'
         %% get current parameters
         [Q, c, kk, vs] = om.params_quad_cost(name, idx);

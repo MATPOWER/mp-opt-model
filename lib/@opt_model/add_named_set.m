@@ -65,23 +65,23 @@ switch set_type
 %             om_ff.cache = [];
 %         end
     case 'lin'          %% linear constraint set
-        [A, l, u, varsets, tr] = deal(varargin{:});
-        if isempty(idx)
-            om_ff.data.A.(name)  = A;
-            om_ff.data.l.(name)  = l;
-            om_ff.data.u.(name)  = u;
-            om_ff.data.tr.(name)  = tr;
-            om_ff.data.vs.(name) = varsets;
-        else
-            om_ff.data.A  = subsasgn(om_ff.data.A, sc, A);
-            om_ff.data.l  = subsasgn(om_ff.data.l, sc, l);
-            om_ff.data.u  = subsasgn(om_ff.data.u, sc, u);
-            om_ff.data.tr  = subsasgn(om_ff.data.tr, sc, tr);
-            om_ff.data.vs = subsasgn(om_ff.data.vs, sc, varsets);
-        end
-        if ~isempty(om_ff.cache)    %% clear cache of aggregated params
-            om_ff.cache = [];
-        end
+%         [A, l, u, varsets, tr] = deal(varargin{:});
+%         if isempty(idx)
+%             om_ff.data.A.(name)  = A;
+%             om_ff.data.l.(name)  = l;
+%             om_ff.data.u.(name)  = u;
+%             om_ff.data.tr.(name)  = tr;
+%             om_ff.data.vs.(name) = varsets;
+%         else
+%             om_ff.data.A  = subsasgn(om_ff.data.A, sc, A);
+%             om_ff.data.l  = subsasgn(om_ff.data.l, sc, l);
+%             om_ff.data.u  = subsasgn(om_ff.data.u, sc, u);
+%             om_ff.data.tr  = subsasgn(om_ff.data.tr, sc, tr);
+%             om_ff.data.vs = subsasgn(om_ff.data.vs, sc, varsets);
+%         end
+%         if ~isempty(om_ff.cache)    %% clear cache of aggregated params
+%             om_ff.cache = [];
+%         end
     case {'nle', 'nli'} %% nonlinear constraint set
         [fcn, hess, computed_by, varsets] = deal(varargin{:});
         if isempty(idx)

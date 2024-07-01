@@ -15,6 +15,7 @@ Use :class:`opt_model` to build and solve your mathematical programming and opti
    classes/mp_idx_manager
    classes/mp/set_manager
    classes/mp/sm_variable
+   classes/mp/sm_lin_constraint
 
 
 |MPOM| Functions
