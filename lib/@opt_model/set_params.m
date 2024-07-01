@@ -69,7 +69,8 @@ switch st
     case 'nlc'
         default_params = {'N', 'fcn', 'vs'};
     case 'qdc'
-        default_params = {'Q', 'c', 'k', 'vs'};
+        om.qdc.set_params(om.var, name, idx, params, vals);
+        return;
     otherwise
         error('opt_model.set_params: ''%s'' is not a valid SET_TYPE', st);
 end
@@ -101,101 +102,6 @@ switch st
     case 'var'
     case 'lin'
     case 'qdc'
-        %% get current parameters
-        [Q, c, kk, vs] = om.params_quad_cost(name, idx);
-        [MQ0, NQ0] = size(Q);
-        [Mc0, Nc0] = size(c);
-        Nk0 = length(kk);
-        nx0 = max([MQ0 Mc0 Nk0]);
-        N0 = om.getN('qdc', name, idx);
-        if isempty(vs), vs = {vs}; end
-        p = struct('Q', Q, 'c', c, 'k', kk, 'vs', vs);  %% current parameters
-        u = struct('Q', 0, 'c', 0, 'k',  0, 'vs',  0);  %% which ones to update
-
-        %% replace with new parameters
-        for k = 1:np
-            p.(params{k}) = vals{k};
-            u.(params{k}) = 1;
-        end
-
-        %% set missing default params for 'all'
-        [MQ, NQ] = size(p.Q);
-        [Mc, Nc] = size(p.c);
-        Nk = length(p.k);
-        nx = max([MQ Mc Nk]);
-        if NQ == 1 || (isempty(p.Q) && (Nk > 1 || k == 0))
-            %% Q is a column vector (cost is element-wise, i.e. a vector)
-            %% OR Q is empty and k is either a vector or zero
-            N = nx;
-        else            %% Q is a square matrix (cost is a scalar)
-            N = 1;
-        end
-        if is_all
-            u.Q = 1;                %% always update Q
-            if np < 4
-                p.vs = {};
-                u.vs = 1;           %% update vs
-                if np < 3
-                    p.k = 0;
-                    u.k = 1;        %% update k
-                    if np < 2
-                        p.c = [];
-                        u.c = 1;    %% update c
-                    end
-                end
-            end
-        end
-
-        %% check consistency of parameters
-        %% no dimension change unless 'all'
-        if (N ~= N0 || nx ~= nx0) && ~is_all
-            error('opt_model.set_params: dimension change for ''%s'' ''%s'' not allowed except for ''all''', st, nameidxstr(name, idx));
-        end
-
-        %% Q and c can't both be empty
-        if ~MQ && ~Mc
-            error('opt_model.set_params: ''%s'' ''%s'' : ''Q'' and ''c'' cannot both be empty', st, nameidxstr(name, idx));
-        end
-
-        %% check sizes of new values of Q, c, k
-        if ~isempty(p.Q) && (MQ ~= nx || (MQ ~= NQ && NQ ~= 1) )
-            error('opt_model.set_params: ''%s'' ''%s'' : ''%s'' is expected to be (%d x %d)', st, nameidxstr(name, idx), 'Q', MQ, NQ);
-        end
-        if ~isempty(p.c) && Mc ~= nx
-            error('opt_model.set_params: ''%s'' ''%s'' : ''%s'' is expected to be (%d x %d)', st, nameidxstr(name, idx), 'c', Mc, 1);
-        end
-        if ~isempty(p.k) && any(p.k) && Nk ~= N && Nk ~= 1
-            error('opt_model.set_params: ''%s'' ''%s'' : ''%s'' is expected to be (%d x %d)', st, nameidxstr(name, idx), 'k', N, 1);
-        end
-
-        %% check consistency of Q, c, k and vs
-        if u.Q || u.c || u.vs
-            p.vs = om.varsets_cell2struct(p.vs);
-            nv = om.varsets_len(p.vs);      %% number of variables
-            if nx ~= nv
-                error('opt_model.set_params: for ''%s'' ''%s'' dimensions of ''Q'', ''c'', ''k'' (%d) must be consistent with ''vs'' (%d)', st, nameidxstr(name, idx), nx, nv);
-            end
-        end
-
-        %% assign new parameters
-        if isempty(idx)     %% simple named set
-            for k = 1:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.qdc.data.(pn).(name) = p.(pn);
-                end
-            end
-        else                %% indexed named set
-            for k = 1:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.qdc.data.(pn) = subsasgn(om.qdc.data.(pn), sc, p.(pn));
-                end
-            end
-        end
-
-        %% clear cached parameters
-        om.qdc.cache = [];
     case {'nle', 'nli'}
         %% get current parameters
         if isempty(idx)

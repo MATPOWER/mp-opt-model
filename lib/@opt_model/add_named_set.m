@@ -109,21 +109,21 @@ switch set_type
             om_ff.data.vs   = subsasgn(om_ff.data.vs, sc, varsets);
         end
     case 'qdc'          %% quadratic cost set
-        [Q, c, k, varsets] = deal(varargin{:});
-        if isempty(idx)
-            om_ff.data.Q.(name)  = Q;
-            om_ff.data.c.(name)  = c;
-            om_ff.data.k.(name)  = k;
-            om_ff.data.vs.(name) = varsets;
-        else
-            om_ff.data.Q  = subsasgn(om_ff.data.Q, sc, Q);
-            om_ff.data.c  = subsasgn(om_ff.data.c, sc, c);
-            om_ff.data.k  = subsasgn(om_ff.data.k, sc, k);
-            om_ff.data.vs = subsasgn(om_ff.data.vs, sc, varsets);
-        end
-        if ~isempty(om_ff.cache)    %% clear cache of aggregated params
-            om_ff.cache = [];
-        end
+%         [Q, c, k, varsets] = deal(varargin{:});
+%         if isempty(idx)
+%             om_ff.data.Q.(name)  = Q;
+%             om_ff.data.c.(name)  = c;
+%             om_ff.data.k.(name)  = k;
+%             om_ff.data.vs.(name) = varsets;
+%         else
+%             om_ff.data.Q  = subsasgn(om_ff.data.Q, sc, Q);
+%             om_ff.data.c  = subsasgn(om_ff.data.c, sc, c);
+%             om_ff.data.k  = subsasgn(om_ff.data.k, sc, k);
+%             om_ff.data.vs = subsasgn(om_ff.data.vs, sc, varsets);
+%         end
+%         if ~isempty(om_ff.cache)    %% clear cache of aggregated params
+%             om_ff.cache = [];
+%         end
     case 'nlc'          %% general nonlinear cost set
         [fcn, varsets] = deal(varargin{:});
         if isempty(idx)

@@ -1523,7 +1523,7 @@ if have_feature('isequaln')
         om.set_params('qdc', 'qc1', 'Q', val);
         t_ok(0, [t 'qc1, Q (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'dimension change for ''qdc'' ''qc1'' not allowed except for ''all''');
+        TorF = strfind(me.message, 'dimension change for ''qc1'' not allowed except for ''all''');
         t_ok(TorF, [t 'qc1, Q (wrong size)']);
         if ~TorF
             me.message
@@ -1572,7 +1572,7 @@ if have_feature('isequaln')
         om.set_params('qdc', 'qc', {2,2}, 'all', val);
         t_ok(0, [t 'qc{2,2}, all (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'for ''qdc'' ''qc(2,2)'' dimensions of ''Q'', ''c'', ''k'' (3) must be consistent with ''vs'' (170)');
+        TorF = strfind(me.message, 'for ''qc(2,2)'' dimensions of ''Q'', ''c'', ''k'' (3) must be consistent with ''vs'' (170)');
         t_ok(TorF, [t 'qc{2,2}, all (wrong size)']);
         if ~TorF
             me.message
