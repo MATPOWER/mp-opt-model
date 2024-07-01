@@ -17,9 +17,11 @@ classdef sm_variable < mp.set_manager
 %   * sm_variable - constructor
 %   * add - add a subset of variables, with initial value, bounds, and var type
 %   * params - return initial values, lower bounds, upper bounds, and var type
-%   * set_params - modify parameter data
-%   * varsets_len - return the total number of variables in ``varsets``
-%   * varsets_cell2struct - convert ``varsets`` from cell array to struct array
+%   * set_params - modify parameter data for variables
+%   * varsets_idx - return vector of indices into full :math:`\x` corresponding to ``vs``
+%   * varsets_len - return the total number of variables specified by ``vs``
+%   * varsets_x - return subset of :math:`\x` specified by ``vs``
+%   * varsets_cell2struct - convert ``vs`` from cell array to struct array
 %
 % See also mp.set_manager.
 
@@ -319,7 +321,7 @@ classdef sm_variable < mp.set_manager
         end
 
         function obj = set_params(obj, name, idx, params, vals)
-            % set_params - Modify parameter data.
+            % set_params - Modify parameter data for variables.
             % ::
             %
             %   var.set_params(name, params, vals)
@@ -331,7 +333,7 @@ classdef sm_variable < mp.set_manager
             % Inputs:
             %   name (char array) : name of subset/block of variables to modify
             %   idx_list (cell array) : *(optional)* index list for subset/block
-            %       of variables modify (for an indexed subset)
+            %       of variables to modify (for an indexed subset)
             %   params : can be one of three options:
             %
             %       - ``'all'`` - indicates that ``vals`` is a cell array
@@ -406,7 +408,7 @@ classdef sm_variable < mp.set_manager
             %% check consistency of parameters
             %% no dimension change
             if N ~= N0
-                error('sm_variable.set_params: dimension change for ''%s'' not allowed', obj.nameidxstr(name, idx));
+                error('mp.sm_variable.set_params: dimension change for ''%s'' not allowed', obj.nameidxstr(name, idx));
             end
 
             %% check sizes of new values of v0, vl, vu, vt
@@ -430,7 +432,7 @@ classdef sm_variable < mp.set_manager
                                 p.(pn{1}) = p.(pn{1}) * ones(N, 1);   %% expand from scalar
                             end
                         else
-                            error('sm_variable.set_params: parameter ''%s'' ''%s'' should have length %d (or 1)', obj.nameidxstr(name, idx), pn{1}, N);
+                            error('mp.sm_variable.set_params: parameter ''%s'' ''%s'' should have length %d (or 1)', obj.nameidxstr(name, idx), pn{1}, N);
                         end
                     end
                 end
@@ -467,23 +469,87 @@ classdef sm_variable < mp.set_manager
             end
         end
 
-        function nv = varsets_len(obj, vs)
-            % varsets_len - Return the total number of variables in ``varsets``.
+        function kk = varsets_idx(obj, vs)
+            % varsets_idx - Return vector of indices into full :math:`\x` corresponding to ``vs``.
             % ::
             %
-            %   nv = var.varsets_len(varsets)
+            %   k = var.varsets_idx(vs)
             %
-            % Return the total number of elements in the variable sub-vector
-            % specified by ``varsets``.
+            % Returns a vector of indices into the full variable :math:`\x`
+            % corresponding to the variable sub-vector specified by ``vs``.
             %
             % Input:
-            %   varsets (cell or struct array) : cell array of names of
-            %       variable subsets, or a struct array of ``name``, ``idx``
-            %       pairs of indexed named subsets of variables
+            %   vs (struct array) : variable set, struct array of ``name``,
+            %       ``idx`` pairs of indexed named subsets of variables
+            %
+            % Output:
+            %   k (integer) : vector of indices into full variable :math:`\x`
+            %       for sub-vector specified by ``vs``.
+            %
+            % See also varsets_x.
+
+            persistent sn;
+            if isempty(vs)
+                kk = (1:obj.N);
+            else
+                vsN = length(vs);
+                k = cell(1, vsN);       %% indices for varsets
+
+                %% calls to substruct() are relatively expensive, so we pre-build the
+                %% struct for addressing numeric array fields, updating only
+                %% the subscripts before use
+                if isempty(sn)
+                    sn = struct('type', {'.', '()'}, 'subs', {'', 1});
+                end
+
+                ki = 0;
+                for v = 1:vsN
+                    vname = vs(v).name;
+                    vidx = vs(v).idx;
+                    if isempty(vidx)
+                        i1 = obj.idx.i1.(vname);        %% starting index in full x
+                        iN = obj.idx.iN.(vname);        %% ending index in full x
+                    else
+                        % (calls to substruct() are relatively expensive ...
+                        % sn = substruct('.', vname, '()', vidx);
+                        % ... so replace it with these more efficient lines)
+                        sn(1).subs = vname;
+                        sn(2).subs = vidx;
+                        i1 = subsref(obj.idx.i1, sn);   %% starting index in full x
+                        iN = subsref(obj.idx.iN, sn);   %% ending index in full x
+                    end
+                    if isscalar(i1)         %% simple named set, or indexed named set
+                        ki = ki + 1;
+                        k{ki} = (i1:iN);                %% single set of indices for varset
+                    else                    %% multi-dim named set w/no index specified
+                        ii1 = permute(i1, ndims(i1):-1:1);
+                        iiN = permute(iN, ndims(i1):-1:1);
+                        for j = 1:length(ii1(:))
+                            ki = ki + 1;
+                            k{ki} = (ii1(j):iiN(j));    %% multiple sets of indices for varset
+                        end
+                    end
+                end
+                kk = [k{:}];
+            end
+        end
+
+        function nv = varsets_len(obj, vs)
+            % varsets_len - Return the total number of variables specified by ``vs``.
+            % ::
+            %
+            %   nv = var.varsets_len(vs)
+            %
+            % Return the total number of elements in the variable sub-vector
+            % specified by ``vs``.
+            %
+            % Input:
+            %   vs (struct array) : variable set, struct array of ``name``,
+            %       ``idx`` pairs of indexed named subsets of variables
             %
             % Output:
             %   nv (integer) : total number of elements in the variable
-            %       sub-vector specified by ``varsets``.
+            %       sub-vector specified by ``vs``.
             %
             % See also varsets_cell2struct.
 
@@ -492,14 +558,14 @@ classdef sm_variable < mp.set_manager
                 nv = obj.N;
             else
                 nv = 0;
-            
+
                 %% calls to substruct() are relatively expensive, so we pre-build the
                 %% struct for addressing numeric array fields, updating only
                 %% the subscripts before use
                 if isempty(sn)
                     sn = struct('type', {'.', '()'}, 'subs', {'', 1});
                 end
-            
+
                 for v = 1:length(vs)
                     idx = vs(v).idx;
                     if isempty(idx)
@@ -516,26 +582,100 @@ classdef sm_variable < mp.set_manager
                 end
             end
         end
+
+        function xx = varsets_x(obj, x, vs, return_vector)
+            % varsets_x - Return subset of :math:`\x` specified by ``vs``.
+            % ::
+            %
+            %   xx = obj.varsets_x(x, vs)
+            %   xx = obj.varsets_x(x, vs, return_vector)
+            %
+            % Returns a cell array of sub-vectors of :math:`\x` specified by
+            % ``vs``, or a stacked variable vector.
+            %
+            % Input:
+            %   x (double) : full variable vector :math:`\x`
+            %   vs (struct array) : variable set, struct array of ``name``,
+            %       ``idx`` pairs of indexed named subsets of variables
+            %   return_vector : if present and true, returns a stacked vector
+            %       instead of a cell array
+            %
+            % Output:
+            %   xx (cell array or double) : cell array of sub-vectors of
+            %       :math:`\x` specified by ``vs`` or vector of stacked
+            %       sub-vectors, depending on presence and value of
+            %       ``return_vector``; returns full stacked variable vector
+            %       if ``vs`` is missing or empty.
+            %
+            % See also varsets_len.
+
+            persistent sn;
+            if isempty(vs)          %% all rows of x
+                xx = x;
+            else                    %% selected rows of x
+                vsN = length(vs);
+                xx = cell(1, vsN);
+
+                %% calls to substruct() are relatively expensive, so we pre-build the
+                %% struct for addressing numeric array fields, updating only
+                %% the subscripts before use
+                if isempty(sn)
+                    sn = struct('type', {'.', '()'}, 'subs', {'', 1});
+                end
+
+                ki = 0;
+                for v = 1:length(vs)
+                    vname = vs(v).name;
+                    vidx = vs(v).idx;
+                    if isempty(vidx)
+                        i1 = obj.idx.i1.(vname);    %% starting row in full x
+                        iN = obj.idx.iN.(vname);    %% ending row in full x
+                    else
+                        % (calls to substruct() are relatively expensive ...
+                        % sn = substruct('.', vname, '()', vidx);
+                        % ... so replace it with these more efficient lines)
+                        sn(1).subs = vname;
+                        sn(2).subs = vidx;
+                        i1 = subsref(obj.idx.i1, sn);   %% starting row in full x
+                        iN = subsref(obj.idx.iN, sn);   %% ending row in full x
+                    end
+                    if isscalar(i1)         %% simple named set, or indexed named set
+                        ki = ki + 1;
+                        xx{ki} = x(i1:iN);  %% single set of indices for varset
+                    else                    %% multi-dim named set w/no index specified
+                        ii1 = permute(i1, ndims(i1):-1:1);
+                        iiN = permute(iN, ndims(i1):-1:1);
+                        for j = 1:length(ii1(:))
+                            ki = ki + 1;
+                            xx{ki} = x(ii1(j):iiN(j));  %% multiple sets of indices for varset
+                        end
+                    end
+                end
+                if nargin > 3 && any(return_vector)
+                    xx = vertcat(xx{:});
+                end
+            end
+        end
     end     %% methods
 
     methods (Static)
         function vs = varsets_cell2struct(vs)
-            % varsets_cell2struct - Convert ``varsets`` from cell array to struct array.
+            % varsets_cell2struct - Convert ``vs`` from cell array to struct array.
             % ::
             %
-            %   varsets = mp.sm_variable.varsets_cell2struct(varsets)
+            %   vs = mp.sm_variable.varsets_cell2struct(vs)
             %
-            % Converts ``varsets`` from a cell array to a struct array,
+            % Converts ``vs`` from a cell array to a struct array,
             % if necessary.
             %
             % Input:
-            %   varsets (cell or struct array) : cell array of names of
-            %       variable subsets, or a struct array of ``name``, ``idx``
+            %   vs (cell or struct array) : variable set, cell array of names
+            %       of variable subsets, or a struct array of ``name``, ``idx``
             %       pairs of indexed named subsets of variables
             %
             % Output:
-            %   varsets (struct array) : struct array of ``name``, ``idx``
-            %       pairs of indexed named subsets of variables
+            %   vs (struct array) : variable set, struct array of ``name``,
+            %       ``idx`` pairs of indexed named subsets of variables
             %
             % See also varsets_len.
 
