@@ -404,7 +404,7 @@ classdef set_manager < handle
         end
 
         function obj = init_indexed_name(obj, name, dim_list)
-            % init_indexed_name - Initialize the dimensions for an indexed named set.
+            % init_indexed_name - Initialize dimensions for an indexed named set.
             % ::
             %
             %   sm.init_indexed_name(name, dim_list)
@@ -444,7 +444,14 @@ classdef set_manager < handle
             zero_vector = zeros(dim_list{:});
             obj.idx.i1.(name) = zero_vector;    %% starting index
             obj.idx.iN.(name) = zero_vector;    %% ending index
-            obj.idx.N.(name)  = zero_vector;    %% number of vars/constraints/costs
+            obj.idx.N.(name)  = zero_vector;    %% number of entities
+
+            %% initialize set-type-specific data
+            fn = fieldnames(obj.data);
+            empty_cell  = cell(dim_list{:});
+            for k = 1:length(fn)
+                obj.data.(fn{k}).(name) = empty_cell;
+            end
         end
 
         function s = set_type_idx_map(obj, idxs, group_by_name)
