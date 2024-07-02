@@ -46,7 +46,7 @@ classdef sm_quad_cost < mp.set_manager
 
     properties
         % struct for caching aggregated parameters for quadratic costs
-%         cache = [];
+        cache = [];
     end     %% properties
 
     methods

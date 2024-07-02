@@ -37,7 +37,7 @@ classdef sm_lin_constraint < mp.set_manager
 
     properties
         % struct for caching aggregated parameters for linear constraints
-%         cache = [];
+        cache = [];
     end     %% properties
 
     methods

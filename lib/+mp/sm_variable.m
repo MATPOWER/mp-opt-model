@@ -35,7 +35,7 @@ classdef sm_variable < mp.set_manager
 
     properties
         % struct for caching aggregated parameters for variables
-%         cache = [];
+        cache = [];
     end     %% properties
 
     methods

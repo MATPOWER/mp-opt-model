@@ -150,9 +150,6 @@ classdef set_manager < handle
 
         % *(struct)* additional set-type-specific data for each block
         data = struct();
-
-        % :hl:`to be moved to subclasses for` ``var``, ``lin``, ``qdc``, ``cost``
-        cache
     end     %% properties
 
     methods
