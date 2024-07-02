@@ -669,7 +669,7 @@ try
     [N, fcn] = om.params_nln_constraint(1, 'mynle')
     t_ok(0, t);
 catch me
-    t_ok(strfind(me.message, 'opt_model.params_nln_constraint: nonlinear constraint set ''mynle'' requires an IDX_LIST arg'), t);
+    t_ok(strfind(me.message, 'nonlinear constraint set ''mynle'' requires an IDX_LIST arg'), t);
 end
 
 t = 'om.params_nln_constraint(0, ''mynli'', {1,2})';
@@ -1389,7 +1389,7 @@ if have_feature('isequaln')
         om.set_params('nle', 'Qmise', 'N', val);
         t_ok(0, [t 'Qmise, N (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'dimension change for ''nle'' ''Qmise'' not allowed except for ''all''');
+        TorF = strfind(me.message, 'dimension change for ''Qmise'' not allowed except for ''all''');
         t_ok(TorF, [t 'Qmise, N (wrong size)']);
         if ~TorF
             me.message
@@ -1459,7 +1459,7 @@ if have_feature('isequaln')
         om.set_params('nli', 'Qmisi', 'N', val);
         t_ok(0, [t 'Qmisi, N (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'dimension change for ''nli'' ''Qmisi'' not allowed except for ''all''');
+        TorF = strfind(me.message, 'dimension change for ''Qmisi'' not allowed except for ''all''');
         t_ok(TorF, [t 'Qmisi, N (wrong size)']);
         if ~TorF
             me.message
