@@ -16,6 +16,7 @@ Use :class:`opt_model` to build and solve your mathematical programming and opti
    classes/mp/set_manager
    classes/mp/sm_variable
    classes/mp/sm_lin_constraint
+   classes/mp/sm_nln_cost
    classes/mp/sm_quad_cost
 
 

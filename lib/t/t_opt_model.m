@@ -1165,7 +1165,7 @@ try
     [N, fcn] = om.params_nln_cost('wc')
     t_ok(0, t);
 catch me
-    t_ok(strfind(me.message, 'opt_model.params_nln_cost: general nonlinear cost set ''wc'' requires an IDX_LIST arg'), t);
+    t_ok(strfind(me.message, 'general nonlinear cost set ''wc'' requires an IDX_LIST arg'), t);
 end
 
 t = 'om.params_nln_cost(''wc'', {1,2})';
@@ -1619,7 +1619,7 @@ if have_feature('isequaln')
         om.set_params('nlc', 'wc', {2,2}, 'all', val);
         t_ok(0, [t 'wc{2,2}, all (vector cost)']);
     catch me
-        TorF = strfind(me.message, 'vector value for ''nlc'' ''wc(2,2)'' not yet implemented');
+        TorF = strfind(me.message, 'vector value for ''wc(2,2)'' not yet implemented');
         t_ok(TorF, [t 'wc{2,2}, all (vector cost)']);
         if ~TorF
             me.message

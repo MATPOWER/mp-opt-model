@@ -125,13 +125,13 @@ switch set_type
 %             om_ff.cache = [];
 %         end
     case 'nlc'          %% general nonlinear cost set
-        [fcn, varsets] = deal(varargin{:});
-        if isempty(idx)
-            om_ff.data.fcn.(name)  = fcn;
-            om_ff.data.vs.(name) = varsets;
-        else
-            om_ff.data.fcn  = subsasgn(om_ff.data.fcn, sc, fcn);
-            om_ff.data.vs   = subsasgn(om_ff.data.vs, sc, varsets);
-        end
+%         [fcn, varsets] = deal(varargin{:});
+%         if isempty(idx)
+%             om_ff.data.fcn.(name)  = fcn;
+%             om_ff.data.vs.(name) = varsets;
+%         else
+%             om_ff.data.fcn  = subsasgn(om_ff.data.fcn, sc, fcn);
+%             om_ff.data.vs   = subsasgn(om_ff.data.vs, sc, varsets);
+%         end
 end
 om.(set_type) = om_ff;

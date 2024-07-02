@@ -67,7 +67,8 @@ switch st
     case {'nle', 'nli'}
         default_params = {'N', 'fcn', 'hess', 'vs'};
     case 'nlc'
-        default_params = {'N', 'fcn', 'vs'};
+        om.nlc.set_params(om.var, name, idx, params, vals);
+        return;
     case 'qdc'
         om.qdc.set_params(om.var, name, idx, params, vals);
         return;
@@ -165,56 +166,6 @@ switch st
             end
         end
     case 'nlc'
-        %% get current parameters
-        [N0, fcn, vs] = om.params_nln_cost(name, idx);
-        if isempty(vs), vs = {vs}; end
-        p = struct('N', N0, 'fcn', fcn, 'vs', vs);  %% current parameters
-        u = struct('N',  0, 'fcn',   0, 'vs',  0);  %% which ones to update
-
-        %% replace with new parameters
-        for k = 1:np
-            p.(params{k}) = vals{k};
-            u.(params{k}) = 1;
-        end
-        N = p.N;
-
-        %% set missing default params for 'all'
-        if is_all
-            u.N   = 1;          %% always update N
-            u.fcn = 1;          %% alwaus update fcn
-            if np < 3
-                p.vs = {};
-                u.vs = 1;       %% update vs
-            end
-        end
-
-        %% check consistency of parameters
-        %% no dimension change unless 'all'
-        if N ~= N0 && ~is_all
-            error('opt_model.set_params: dimension change for ''%s'' ''%s'' not allowed except for ''all''', st, nameidxstr(name, idx));
-        end
-
-        %% vector valued costs not yet implemented
-        if N ~= 1
-            error('opt_model.set_params: vector value for ''%s'' ''%s'' not yet implemented', st, nameidxstr(name, idx));
-        end
-
-        %% assign new parameters
-        if isempty(idx)     %% simple named set
-            for k = 2:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.nlc.data.(pn).(name) = p.(pn);
-                end
-            end
-        else                %% indexed named set
-            for k = 2:length(default_params)
-                pn = default_params{k};     %% param name
-                if u.(pn)   %% assign new val for this parameter
-                    om.nlc.data.(pn) = subsasgn(om.nlc.data.(pn), sc, p.(pn));
-                end
-            end
-        end
     otherwise
         error('opt_model.set_params: ''%s'' is not a valid SET_TYPE', st);
 end
