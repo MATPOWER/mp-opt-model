@@ -348,8 +348,8 @@ classdef sm_variable < mp.set_manager
             %
             % Valid parameter names are ``N``, ``v0``, ``vl``, ``vu``, ``vt``.
             %
-            % .. note::
-            %    Changing the dimension of a variable subset is not allowed.
+            % .. note:: Changing the dimension of a variable subset is not
+            %   allowed.
             %
             % Examples::
             %

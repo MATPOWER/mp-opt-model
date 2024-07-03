@@ -1,5 +1,10 @@
 function om = add_quad_cost(om, name, idx, varargin)
 % add_quad_cost - Adds a set of user costs to the model.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_quad_cost.add instead, as
+%       in ``om.qdc.add(...)``.
+%
 % ::
 %
 %   OM.ADD_QUAD_COST(NAME, Q, C);

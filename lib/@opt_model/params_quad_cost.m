@@ -1,5 +1,10 @@
 function varargout = params_quad_cost(om, varargin)
 % params_quad_cost - Returns the cost parameters for quadratic costs.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_quad_cost.params instead, as
+%       in ``om.qdc.params(...)``.
+%
 % ::
 %
 %   [Q, C] = OM.PARAMS_QUAD_COST()

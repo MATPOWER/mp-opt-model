@@ -615,8 +615,8 @@ classdef set_manager < handle
             %   [...] = var.params(name)
             %   [...] = var.params(name, idx_list)
             %
-            % .. note::
-            %    This abstract method must be implemented by the subclass.
+            % .. note:: This abstract method must be implemented by the
+            %   subclass.
             %
             % Returns set-type-specific parameters for the full set, if called
             % without input arguments, or for a specific named or named and
@@ -638,8 +638,8 @@ classdef set_manager < handle
             %   var.set_params(name, params, vals)
             %   var.set_params(name, idx, params, vals)
             %
-            % .. note::
-            %    This abstract method must be implemented by the subclass.
+            % .. note:: This abstract method must be implemented by the
+            %   subclass.
             %
             % This method can be used to modify set-type-specific parameters
             % for an existing subset.

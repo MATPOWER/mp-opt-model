@@ -1,5 +1,9 @@
 function obj = add_named_set(obj, set_type, name, idx, N, varargin)
 % add_named_set - Adds a named set of a particular type to the object.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.set_manager.add instead.
+%
 % ::
 %
 %   -----  PRIVATE METHOD  -----

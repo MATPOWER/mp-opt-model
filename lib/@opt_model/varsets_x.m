@@ -1,5 +1,10 @@
 function xx = varsets_x(om, x, varargin)
 % varsets_x - Returns a cell array of sub-vectors of X specified by VARSETS
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_variable.varsets_x instead, as
+%       in ``om.var.varsets_x(...)``.
+%
 % ::
 %
 %   X = OM.VARSETS_X(X, VARSETS)

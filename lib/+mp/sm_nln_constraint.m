@@ -110,9 +110,8 @@ classdef sm_nln_constraint < mp.set_manager
             %   dg (double) : :math:`n \times n_x` constraint Jacobian
             %       :math:`\g_\x = \der{\g}{\x}`
             %
-            %       .. note::
-            %           The ``dg`` return value is the transpose of what is
-            %           expected from an input function for nlps_master and
+            %       .. note:: The ``dg`` return value is the transpose of what
+            %           is expected from an input function for nlps_master and
             %           friends.
             %
             % **Hessian Function Implmentation** : ``hess``
@@ -617,7 +616,8 @@ classdef sm_nln_constraint < mp.set_manager
             % multiplying the transpose of the constraint Jacobian by a
             % vector :math:`\lambda` of multipliers.
             %
-            % .. note:: Evaluation of Hessian for individual subsets not yet implemented.
+            % .. note:: Evaluation of Hessian for individual subsets not yet
+            %   implemented.
             %
             % Inputs:
             %   var (mp.sm_variable) : corresponding mp.sm_variable object

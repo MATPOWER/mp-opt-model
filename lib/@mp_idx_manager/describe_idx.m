@@ -1,5 +1,9 @@
 function label = describe_idx(obj, set_type, idxs)
 % describe_idx - Identifies element indices for a give set type.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.set_manager.describe_idx instead.
+%
 % ::
 %
 %   LABEL = OBJ.DESCRIBE_IDX(SET_TYPE, IDXS)

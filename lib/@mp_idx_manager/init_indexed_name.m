@@ -1,5 +1,9 @@
 function obj = init_indexed_name(obj, set_type, name, dim_list)
 % init_indexed_name - Initializes the dimensions for an indexed named set.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.set_manager.init_indexed_name instead.
+%
 % ::
 %
 %   OBJ.INIT_INDEXED_NAME(SET_TYPE, NAME, DIM_LIST)

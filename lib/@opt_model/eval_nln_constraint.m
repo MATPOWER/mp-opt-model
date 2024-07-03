@@ -1,5 +1,10 @@
 function varargout = eval_nln_constraint(om, x, iseq, varargin)
 % eval_nln_constraint - Builds and returns full set of nonlinear constraints.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_nln_constraint.eval instead, as
+%       in ``om.nle.eval(...)`` or ``om.nli.eval(...)``.
+%
 % ::
 %
 %   G = OM.EVAL_NLN_CONSTRAINT(X, ISEQ)

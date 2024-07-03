@@ -1,5 +1,10 @@
 function varargout = params_lin_constraint(om, varargin)
 % params_lin_constraint - Builds and returns linear constraint parameters.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_lin_constraint.params instead, as
+%       in ``om.lin.params(...)``.
+%
 % ::
 %
 %   [A, L, U] = OM.PARAMS_LIN_CONSTRAINT()

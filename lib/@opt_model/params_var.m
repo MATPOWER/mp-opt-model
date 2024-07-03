@@ -1,5 +1,10 @@
 function varargout = params_var(om, varargin)
 % params_var - Returns initial value, lower bound and upper bound for opt variables.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_variable.params instead, as
+%       in ``om.var.params(...)``.
+%
 % ::
 %
 %   [V0, VL, VU] = OM.PARAMS_VAR()

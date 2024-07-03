@@ -1,5 +1,10 @@
 function om = add_nln_constraint(om, name, idx, varargin)
 % add_nln_constraint - Adds a set of nonlinear constraints to the model.
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_nln_constraint.add instead, as
+%       in ``om.nle.add(...)`` or ``om.nli.add(...)``.
+%
 % ::
 %
 %   OM.ADD_NLN_CONSTRAINT(NAME, N, ISEQ, FCN, HESS);

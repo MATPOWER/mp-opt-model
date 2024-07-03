@@ -1,4 +1,8 @@
 function N = getN(obj, set_type, varargin)
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.set_manager.get_N instead.
+%
 % getN - Returns the number of elements of a given set type.
 % ::
 %

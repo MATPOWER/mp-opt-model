@@ -1,5 +1,10 @@
 function nv = varsets_len(om, vs)
 % varsets_len - Returns the total number of variables in VARSETS
+%
+% .. note::
+%    .. deprecated:: 4.3 Please use mp.sm_variable.varsets_len instead, as
+%       in ``om.var.varsets_len(...)``.
+%
 % ::
 %
 %   NV = OM.VARSETS_LEN(VARSETS)
