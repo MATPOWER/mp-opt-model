@@ -146,30 +146,22 @@ classdef mp_idx_manager < handle
                         warning(s1.state, 'Octave:classdef-to-struct');
                     end
                     for k = 1:length(props)
-                        if isa(s.(props{k}), 'mp.set_manager')
-                            obj.(props{k}) = s.(props{k}).copy();
-                        else
-                            obj.(props{k}) = s.(props{k});
-                        end
+                        obj = copy_prop(s, obj, props{k});
                     end
                 elseif isstruct(s)
                     props = fieldnames(obj);
                     for k = 1:length(props)
                         if isfield(s, props{k})
-                            if isa(s.(props{k}), 'mp.set_manager')
-                                obj.(props{k}) = s.(props{k}).copy();
-                            else
-                                obj.(props{k}) = s.(props{k});
-                            end
+                            obj = copy_prop(s, obj, props{k});
                         end
                     end
                 else
                     error('mp_idx_manager.mp_idx_manager: input must be an ''mp_idx_manager'' object or a struct');
                 end
             end
-            
+
             obj.def_set_types();
-            
+
             %% The INIT_SET_TYPES() method should ideally be (1) called here
             %% in the MP_IDX_MANAGER constructor and (2) skipped if constructed
             %% from an existing object, neither of which work in Octave 5.2
@@ -206,6 +198,7 @@ classdef mp_idx_manager < handle
 
             %% make shallow copy of object
             new_obj = eval(class(obj));  %% create new object
+            new_obj.init_set_types();
             if have_feature('octave')
                 s1 = warning('query', 'Octave:classdef-to-struct');
                 warning('off', 'Octave:classdef-to-struct');
@@ -215,11 +208,7 @@ classdef mp_idx_manager < handle
                 warning(s1.state, 'Octave:classdef-to-struct');
             end
             for k = 1:length(props)
-                if isa(obj.(props{k}), 'mp.set_manager')
-                    new_obj.(props{k}) = obj.(props{k}).copy();
-                else
-                    new_obj.(props{k}) = obj.(props{k});
-                end
+                new_obj = copy_prop(obj, new_obj, props{k});
             end
         end
 
@@ -248,3 +237,14 @@ classdef mp_idx_manager < handle
         str = valid_named_set_type(obj, set_type)
     end     %% methods
 end         %% classdef
+
+function d = copy_prop(s, d, prop)
+    if isa(s.(prop), 'mp.set_manager')
+        d.(prop) = s.(prop).copy();
+    elseif isa(d.(prop), 'mp.set_manager')
+        d.(prop) = nested_struct_copy( ...
+            d.(prop), s.(prop));
+    else
+        d.(prop) = s.(prop);
+    end
+end

@@ -289,6 +289,22 @@ classdef opt_model < mp_idx_manager
                 );
         end
 
+        function new_om = copy(om)
+            % Duplicate the object.
+
+            %% delete old 'params' (cached parameters) fields
+            %% to avoid clash with newer params() method
+            fn = fieldnames(om.set_types);
+            for f = 1:length(fn)
+                if isfield(om.(fn{f}), 'params')
+                    om.(fn{f}) = rmfield(om.(fn{f}), 'params');
+                end
+            end
+
+            %% call parent to make the copy
+            new_om = copy@mp_idx_manager(om);
+        end
+
         function TorF = is_solved(om)
             % Return true if model has been solved.
 
