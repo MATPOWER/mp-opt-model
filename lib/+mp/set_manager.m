@@ -727,6 +727,83 @@ classdef set_manager < handle
             end
             obj.N = obj.N + dN;
         end
+
+        function ps = parse_soln_fields(obj, params)
+            % Parse solution fields for subclass parse_soln methods.
+            % ::
+            %
+            %   ps = sm.parse_soln_fields(params)
+            %
+            % Parse solution fields.
+            %
+            % Input:
+            %   params (struct) : struct array with fields:
+            %
+            %           - ``src`` - values from full solution struct
+            %           - ``dst`` - name of destination field in parsed
+            %             solution struct
+            %
+            % Output:
+            %   ps (struct) : parsed solution struct, fields names match
+            %       those provided in ``params.dst``, values are structs
+            %       whose field names correspond to the named subsets in the
+            %       set
+
+            %% calls to substruct() are relatively expensive, so we pre-build the
+            %% structs for addressing cell and numeric array fields, updating only
+            %% the subscripts before use
+            persistent sn;
+            persistent sc;
+            if isempty(sc)
+                sc = struct('type', {'.', '{}'}, 'subs', {'', 1});  %% cell array field
+            end
+            if isempty(sn)
+                sn = struct('type', {'.', '()'}, 'subs', {'', 1});  %% num array field
+            end
+
+            ps = struct();      %% parsed solution
+
+            np = length(params);
+            have_param = zeros(np, 1);
+            for j = 1:np
+                have_param(j) = ~isempty(params(j).src);
+            end
+            for k = 1:obj.NS
+                name = obj.order(k).name;
+                idx = obj.order(k).idx;
+                if isempty(idx)
+                    N = obj.idx.N.(name);
+                else
+                    sn(1).subs = name;
+                    sn(2).subs = idx;
+                    N = subsref(obj.idx.N, sn);
+                    need_init = all([idx{:}] == 1);
+                end
+                if N
+                    for j = 1:np
+                        if have_param(j)    %% parameter is available
+                            dname = params(j).dst;  %% destination field name
+                            if isempty(idx)
+                                i1 = obj.idx.i1.(name);
+                                iN = obj.idx.iN.(name);
+                                ps.(dname).(name)  = params(j).src(i1:iN);
+                            else
+                                if need_init
+                                    param_names = fieldnames(obj.data);
+                                    ps.(dname).(name) = cell(size(obj.data.(param_names{1}).(name)));
+                                end
+                                i1 = subsref(obj.idx.i1, sn);    %% starting row index
+                                iN = subsref(obj.idx.iN, sn);    %% ending row index
+                                sc(1).subs = name;
+                                sc(2).subs = idx;
+                                ps.(dname) = ...
+                                    subsasgn(ps.(dname), sc, params(j).src(i1:iN));
+                            end
+                        end
+                    end     %% for j
+                end
+            end     %% for k
+        end
     end     %% methods (Access=protected)
 end         %% classdef
 
