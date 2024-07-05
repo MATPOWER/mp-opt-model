@@ -18,6 +18,7 @@ classdef sm_variable < mp.set_manager
 %   * add - add a subset of variables, with initial value, bounds, and var type
 %   * params - return initial values, lower bounds, upper bounds, and var type
 %   * set_params - modify parameter data for variables
+%   * parse_soln - parse solution for variables
 %   * varsets_idx - return vector of indices into full :math:`\x` corresponding to ``vs``
 %   * varsets_len - return the total number of variables specified by ``vs``
 %   * varsets_x - return subset of :math:`\x` specified by ``vs``
@@ -467,6 +468,52 @@ classdef sm_variable < mp.set_manager
             if is_all && dN
                 obj.set_params_update_dims(dN, name, idx);
             end
+        end
+
+        function ps = parse_soln(obj, soln)
+            % Parse solution for variables.
+            % ::
+            %
+            %   ps = var.parse_soln(soln)
+            %
+            % Parse a full solution struct into parts corresponding to
+            % individual variable subsets.
+            %
+            % Input:
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %
+            % Output:
+            %   ps (struct) : parsed solution, struct where each field listed
+            %       below is a struct whos names are the names of the relevant
+            %       variable subsets and values are scalars for named sets,
+            %       arrays for named/indexed sets:
+            %
+            %           - ``val`` - variable values
+            %           - ``mu_l`` - variable lower bound shadow prices
+            %           - ``mu_u`` - variable upper bound shadow prices
+
+            params = struct('src', soln.x, 'dst', 'val');
+            if isfield(soln.lambda, 'lower')
+                params(end+1).src = soln.lambda.lower;
+                params(end  ).dst = 'mu_l';
+            end
+            if isfield(soln.lambda, 'upper')
+                params(end+1).src = soln.lambda.upper;
+                params(end  ).dst = 'mu_u';
+            end
+            ps = obj.parse_soln_fields(params);
         end
 
         function kk = varsets_idx(obj, vs)

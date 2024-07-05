@@ -24,6 +24,7 @@ classdef sm_lin_constraint < mp.set_manager
 %   * params - build and return linear constraint parameters :math:`\AA, \l, \u`
 %   * set_params - modify linear constraint parameter data
 %   * eval - evaluate individual or full set of linear constraints
+%   * parse_soln - parse solution for linear constraints
 %
 % See also mp.set_manager.
 
@@ -658,6 +659,61 @@ classdef sm_lin_constraint < mp.set_manager
                     if nargout > 2
                         A = [];
                     end
+                end
+            end
+        end
+
+        function ps = parse_soln(obj, soln)
+            % Parse solution for linear constraints.
+            % ::
+            %
+            %   ps = lin.parse_soln(soln)
+            %
+            % Parse a full solution struct into parts corresponding to
+            % individual linear constraint subsets.
+            %
+            % Input:
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %
+            % Output:
+            %   ps (struct) : parsed solution, struct where each field listed
+            %       below is a struct whos names are the names of the relevant
+            %       linear constraint subsets and values are scalars for named
+            %       sets, arrays for named/indexed sets:
+            %
+            %           - ``mu_l`` - constraint lower bound shadow prices
+            %           - ``mu_u`` - constraint upper bound shadow prices
+
+            ps = [];
+            if obj.get_N()
+                if isfield(soln.lambda, 'mu_l')
+                    if isfield(soln.lambda, 'mu_u')
+                        params = struct('src', {soln.lambda.mu_l, soln.lambda.mu_u}, ...
+                                        'dst', {'mu_l', 'mu_u'});
+                    else
+                        params = struct('src', soln.lambda.mu_l, 'dst', 'mu_l');
+                    end
+                else
+                    if isfield(soln.lambda, 'mu_u')
+                        params = struct('src', soln.lambda.mu_u, 'dst', 'mu_u');
+                    else
+                        params = [];
+                    end
+                end
+                if ~isempty(params)
+                    ps = obj.parse_soln_fields(params);
                 end
             end
         end

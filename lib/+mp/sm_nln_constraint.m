@@ -25,6 +25,7 @@ classdef sm_nln_constraint < mp.set_manager
 %   * set_params - modify nonlinear constraint parameter data
 %   * eval - evaluate individual or full set of nonlinear constraints
 %   * eval_hess - evaluate "Hessian" for full set of nonlinear constraints
+%   * parse_soln - parse solution for nonlinear constraints
 %
 % See also mp.set_manager.
 
@@ -708,6 +709,58 @@ classdef sm_nln_constraint < mp.set_manager
                 end
             end
             d2g = d2gt';
+        end
+
+        function ps = parse_soln(obj, soln, iseq)
+            % Parse solution for nonlinear constraints.
+            % ::
+            %
+            %   ps = nln.parse_soln(soln, iseq)
+            %
+            % Parse a full solution struct into parts corresponding to
+            % individual nonlinear constraint subsets.
+            %
+            % Inputs:
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   iseq (boolean) : true for equality constraints, false for
+            %       inequality constraints
+            %
+            % Output:
+            %   ps (struct) : parsed solution, struct where each field listed
+            %       below is a struct whos names are the names of the relevant
+            %       nonlinear constraint subsets and values are scalars for
+            %       named sets, arrays for named/indexed sets:
+            %
+            %           - ``lam`` - equality constraint shadow prices
+            %           - ``mu`` - inequality constraint shadow prices
+
+            ps = []; params = [];
+            if iseq
+                if obj.get_N() && isfield(soln.lambda, 'eqnonlin')
+                    params = struct('src', soln.lambda.eqnonlin, ...
+                                    'dst',     'lam'  );
+                end
+            else
+                if obj.get_N && isfield(soln.lambda, 'ineqnonlin')
+                    params = struct('src', soln.lambda.ineqnonlin, ...
+                                    'dst',      'mu' );
+                end
+            end
+            if ~isempty(params)
+                ps = obj.parse_soln_fields(params);
+            end
         end
     end     %% methods
 end         %% classdef
