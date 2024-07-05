@@ -271,7 +271,11 @@ classdef sm_lin_constraint < mp.set_manager
                                 i1 = obj.idx.i1.(name);      %% starting row index
                                 iN = obj.idx.iN.(name);      %% ending row index
                                 if nargout > 6
-                                    tr = obj.data.tr.(name);
+                                    if isfield(obj.data, 'tr')
+                                        tr = obj.data.tr.(name);
+                                    else
+                                        tr = 0;
+                                    end
                                 end
                             end
                         end
@@ -293,7 +297,11 @@ classdef sm_lin_constraint < mp.set_manager
                             i1 = subsref(obj.idx.i1, sn);   %% starting row index
                             iN = subsref(obj.idx.iN, sn);   %% ending row index
                             if nargout > 6
-                                tr = subsref(obj.data.tr, sc);
+                                if isfield(obj.data, 'tr')
+                                    tr = subsref(obj.data.tr, sc);
+                                else
+                                    tr = 0;
+                                end
                             end
                         end
                     end
