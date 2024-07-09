@@ -1,4 +1,4 @@
-classdef sm_nln_constraint < mp.set_manager
+classdef sm_nln_constraint < mp.set_manager_opt_model
 % mp.sm_nln_constraint -  MP Set Manager class for nonlinear constraints.
 % ::
 %
@@ -28,7 +28,7 @@ classdef sm_nln_constraint < mp.set_manager
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for nonlinear constraints
 %
-% See also mp.set_manager.
+% See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
 %   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
@@ -45,7 +45,7 @@ classdef sm_nln_constraint < mp.set_manager
             %
             %   sm = mp.sm_nln_constraint(label)
 
-            obj@mp.set_manager(varargin{:});
+            obj@mp.set_manager_opt_model(varargin{:});
             obj.data = struct( ...
                 'fcn', [], ...
                 'hess', [], ...
@@ -200,10 +200,10 @@ classdef sm_nln_constraint < mp.set_manager
                     error('mp.sm_nln_constraint.add: dimensions of NAME and N must match');
                 end
                 for k = 1:length(name)
-                    add@mp.set_manager(obj, name{k}, N(k), args{:});
+                    add@mp.set_manager_opt_model(obj, name{k}, N(k), args{:});
                 end
             else
-                add@mp.set_manager(obj, name, idx, N, args{:});
+                add@mp.set_manager_opt_model(obj, name, idx, N, args{:});
             end
 
             %% convert varsets from cell to struct array if necessary

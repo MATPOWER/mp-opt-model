@@ -1,4 +1,4 @@
-classdef sm_quad_cost < mp.set_manager
+classdef sm_quad_cost < mp.set_manager_opt_model
 % mp.sm_quad_cost -  MP Set Manager class for quadratic costs.
 % ::
 %
@@ -35,7 +35,7 @@ classdef sm_quad_cost < mp.set_manager
 %   * eval - evaluate individual or full set of quadratic costs
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %
-% See also mp.set_manager.
+% See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
 %   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
@@ -55,10 +55,10 @@ classdef sm_quad_cost < mp.set_manager
             % Constructor.
             % ::
             %
-            %   sm = mp.set_manager(label)
+            %   sm = mp.sm_quad_cost(label)
 
             es = struct();  %% empty struct
-            obj@mp.set_manager(varargin{:});
+            obj@mp.set_manager_opt_model(varargin{:});
             obj.data = struct( ...
                 'Q', es, ...
                 'c', es, ...
@@ -183,9 +183,9 @@ classdef sm_quad_cost < mp.set_manager
 
             %% call parent to handle standard indexing
             if isempty(idx)
-                add@mp.set_manager(obj, name, N, args{:});
+                add@mp.set_manager_opt_model(obj, name, N, args{:});
             else
-                add@mp.set_manager(obj, name, idx, N, args{:});
+                add@mp.set_manager_opt_model(obj, name, idx, N, args{:});
             end
 
             %% assign data

@@ -1,4 +1,4 @@
-classdef sm_lin_constraint < mp.set_manager
+classdef sm_lin_constraint < mp.set_manager_opt_model
 % mp.sm_lin_constraint -  MP Set Manager class for linear constraints.
 % ::
 %
@@ -27,7 +27,7 @@ classdef sm_lin_constraint < mp.set_manager
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for linear constraints
 %
-% See also mp.set_manager.
+% See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
 %   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
@@ -50,7 +50,7 @@ classdef sm_lin_constraint < mp.set_manager
             %   sm = mp.sm_lin_constraint(label)
 
             es = struct();  %% empty struct
-            obj@mp.set_manager(varargin{:});
+            obj@mp.set_manager_opt_model(varargin{:});
             obj.data = struct( ...
                 'A', es, ...
                 'l', es, ...
@@ -153,9 +153,9 @@ classdef sm_lin_constraint < mp.set_manager
 
             %% call parent to handle standard indexing
             if isempty(idx)
-                add@mp.set_manager(obj, name, N, args{:});
+                add@mp.set_manager_opt_model(obj, name, N, args{:});
             else
-                add@mp.set_manager(obj, name, idx, N, args{:});
+                add@mp.set_manager_opt_model(obj, name, idx, N, args{:});
             end
 
             if isempty(l)                   %% default l is -Inf

@@ -1,4 +1,4 @@
-classdef sm_variable < mp.set_manager
+classdef sm_variable < mp.set_manager_opt_model
 % mp.sm_variable -  MP Set Manager class for variables.
 % ::
 %
@@ -25,7 +25,7 @@ classdef sm_variable < mp.set_manager
 %   * varsets_x - return subset of :math:`\x` specified by ``vs``
 %   * varsets_cell2struct - convert ``vs`` from cell array to struct array
 %
-% See also mp.set_manager.
+% See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
 %   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
@@ -48,7 +48,7 @@ classdef sm_variable < mp.set_manager
             %   var = mp.sm_variable(label)
 
             es = struct();  %% empty struct
-            obj@mp.set_manager(varargin{:});
+            obj@mp.set_manager_opt_model(varargin{:});
             obj.data = struct( ...
                 'v0', es, ...
                 'vl', es, ...
@@ -108,7 +108,7 @@ classdef sm_variable < mp.set_manager
             % See also params, set_params.
 
             %% call parent to handle standard indexing
-            add@mp.set_manager(obj, name, idx, varargin{:});
+            add@mp.set_manager_opt_model(obj, name, idx, varargin{:});
 
             %% set up default args
             if iscell(idx)          %% indexed named set
