@@ -33,6 +33,7 @@ classdef sm_quad_cost < mp.set_manager
 %   * params - build and return cost parameters :math:`\QQ, \c, k` or :math:`\q, \c, \kk`
 %   * set_params - modify quadratic cost parameter data
 %   * eval - evaluate individual or full set of quadratic costs
+%   * get_soln - fetch solution values for specific named/indexed subsets
 %
 % See also mp.set_manager.
 
@@ -707,5 +708,115 @@ classdef sm_quad_cost < mp.set_manager
                 end
             end
         end
+
+        function varargout = get_soln(obj, var, soln, varargin)
+            % Fetch solution values for specific named/indexed subsets.
+            % ::
+            %
+            %   vals = qdc.get_soln(var, soln, name)
+            %   vals = qdc.get_soln(var, soln, name, idx)
+            %   vals = qdc.get_soln(var, soln, tags, name)
+            %   vals = qdc.get_soln(var, soln, tags, name, idx)
+            %
+            % Returns named/indexed quadratic cost results for a solved
+            % model, evaluated at the solution found.
+            %
+            % Inputs:
+            %   var (mp.sm_variable) : corresponding mp.sm_variable object
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   tags (char array or cell array of char arrays) : names of
+            %       desired outputs, default is ``{'f', 'df', 'd2f'}`` with
+            %       valid values:
+            %
+            %           - ``'f'`` - scalar cost :math:`f(\x)` for
+            %             :eq:`eq_qdc_form_1`, or vector cost
+            %             :math:`\rvec{f}(\x)` for :eq:`eq_qdc_form_2`
+            %           - ``'df'`` - cost first derivatives, gradient of
+            %             scalar cost :math:`\der{f}{\x}` for
+            %             :eq:`eq_qdc_form_1`, or vector of cost first
+            %             derivatives for :eq:`eq_qdc_form_2`
+            %           - ``'d2f'`` - second derivative of costs,
+            %             :math:`\der{^2 f}{\x^2}` for :eq:`eq_qdc_form_1`, or
+            %             vector of cost second derivatives for
+            %             :eq:`eq_qdc_form_2`
+            %   name (char array) : name of the subset
+            %   idx (cell array) : *(optional)* indices of the subset
+            %
+            % Outputs:
+            %     : Variable number of outputs corresponding to ``tags`` input.
+            %       If ``tags`` is empty or not specified, the calling context
+            %       will define the number of outputs, returned in order of
+            %       default tags.
+            %
+            % Example::
+            %
+            %     [f, df, d2f] = qdc.get_soln(var, soln, 'gen');
+            %     df_Pg_2_4 = qdc.get_soln(var, soln, 'df', 'Pg', {2,4});
+
+            % Add the below once parse_soln() is implemented:
+            %
+            % For a complete set of solution values, using the parse_soln()
+            % method may be more efficient.
+            %
+            % See also parse_soln.
+
+            %% input arg handling
+            [tags, name, idx, N, i1, iN] = obj.get_soln_std_args(varargin{:});
+
+            %% get outputs
+            varargout = cell(1, nargout);
+            if N && ~isempty(soln.eflag)
+                if ismember('d2f', tags(1:nargout))
+                    [f, df, d2f] = obj.eval(var, soln.x, name, idx);
+                elseif ismember('df', tags(1:nargout))
+                    [f, df] = obj.eval(var, soln.x, name, idx);
+                else
+                    f = obj.eval(var, soln.x, name, idx);
+                end
+                for k = 1:nargout
+                    switch tags{k}
+                        case 'f'
+                            varargout{k} = f;
+                        case 'df'
+                            varargout{k} = df;
+                        case 'd2f'
+                            varargout{k} = d2f;
+                        otherwise
+                            error('mp.sm_quad_cost.get_soln: unknown tag ''%s''', tags{k});
+                    end
+                end
+            end     %% if N
+        end
     end     %% methods
+
+    methods (Access=protected)
+        function default_tags = get_soln_default_tags(obj)
+            % Return default tags for get_soln().
+            % ::
+            %
+            %   default_tags = sm.get_soln_default_tags()
+            %
+            % Output:
+            %   default_tags (cell array) : tags defining the default outputs
+            %       of get_soln(), namely ``{'f', 'df', 'd2f'}``
+            %
+            % See also get_soln.
+
+            default_tags = {'f', 'df', 'd2f'};
+        end
+    end     %% methods (Access=protected)
 end         %% classdef

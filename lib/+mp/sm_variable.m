@@ -18,6 +18,7 @@ classdef sm_variable < mp.set_manager
 %   * add - add a subset of variables, with initial value, bounds, and var type
 %   * params - return initial values, lower bounds, upper bounds, and var type
 %   * set_params - modify parameter data for variables
+%   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for variables
 %   * varsets_idx - return vector of indices into full :math:`\x` corresponding to ``vs``
 %   * varsets_len - return the total number of variables specified by ``vs``
@@ -470,6 +471,81 @@ classdef sm_variable < mp.set_manager
             end
         end
 
+        function varargout = get_soln(obj, soln, varargin)
+            % Fetch solution values for specific named/indexed subsets.
+            % ::
+            %
+            %   vals = var.get_soln(soln, name)
+            %   vals = var.get_soln(soln, name, idx)
+            %   vals = var.get_soln(soln, tags, name)
+            %   vals = var.get_soln(soln, tags, name, idx)
+            %
+            % Returns named/indexed variable results for a solved model,
+            % evaluated at the solution found.
+            %
+            % Inputs:
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   tags (char array or cell array of char arrays) : names of
+            %       desired outputs, default is ``{'x', 'mu_l', 'mu_u'}``,
+            %       with valid values:
+            %
+            %           - ``'x'`` - value of solution variable
+            %           - ``'mu_l'`` - shadow price on variable lower bound
+            %           - ``'mu_u'`` - shadow price on variable upper bound
+            %   name (char array) : name of the subset
+            %   idx (cell array) : *(optional)* indices of the subset
+            %
+            % Outputs:
+            %     : Variable number of outputs corresponding to ``tags`` input.
+            %       If ``tags`` is empty or not specified, the calling context
+            %       will define the number of outputs, returned in order of
+            %       default tags.
+            %
+            % Example::
+            %
+            %     [P, muPmin, muPmax] = var.get_soln(soln, 'P');
+            %     muRmin_2_3 = var.get_soln(soln, 'mu_l', 'R', {2,3});
+            %
+            % For a complete set of solution values, using the parse_soln()
+            % method may be more efficient.
+            %
+            % See also parse_soln.
+
+            %% input arg handling
+            [tags, name, idx, N, i1, iN] = obj.get_soln_std_args(varargin{:});
+
+            %% get outputs
+            varargout = cell(1, nargout);
+            if N && ~isempty(soln.eflag)
+                for k = 1:nargout
+                    switch tags{k}
+                        case 'x'
+                            varargout{k} = soln.x(i1:iN);
+                        case 'mu_l'
+                            varargout{k} = soln.lambda.lower(i1:iN);
+                        case 'mu_u'
+                            varargout{k} = soln.lambda.upper(i1:iN);
+                        otherwise
+                            error('mp.sm_variable.get_soln: unknown tag ''%s''', tags{k});
+                    end
+                end
+            end     %% if N
+        end
+
         function ps = parse_soln(obj, soln)
             % Parse solution for variables.
             % ::
@@ -704,6 +780,23 @@ classdef sm_variable < mp.set_manager
             end
         end
     end     %% methods
+
+    methods (Access=protected)
+        function default_tags = get_soln_default_tags(obj)
+            % Return default tags for get_soln().
+            % ::
+            %
+            %   default_tags = sm.get_soln_default_tags()
+            %
+            % Output:
+            %   default_tags (cell array) : tags defining the default outputs
+            %       of get_soln(), namely ``{'x', 'mu_l', 'mu_u'}``
+            %
+            % See also get_soln.
+
+            default_tags = {'x', 'mu_l', 'mu_u'};
+        end
+    end     %% methods (Access=protected)
 
     methods (Static)
         function vs = varsets_cell2struct(vs)

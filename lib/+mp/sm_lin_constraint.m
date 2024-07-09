@@ -24,6 +24,7 @@ classdef sm_lin_constraint < mp.set_manager
 %   * params - build and return linear constraint parameters :math:`\AA, \l, \u`
 %   * set_params - modify linear constraint parameter data
 %   * eval - evaluate individual or full set of linear constraints
+%   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for linear constraints
 %
 % See also mp.set_manager.
@@ -663,6 +664,96 @@ classdef sm_lin_constraint < mp.set_manager
             end
         end
 
+        function varargout = get_soln(obj, var, soln, varargin)
+            % Fetch solution values for specific named/indexed subsets.
+            % ::
+            %
+            %   vals = lin.get_soln(var, soln, name)
+            %   vals = lin.get_soln(var, soln, name, idx)
+            %   vals = lin.get_soln(var, soln, tags, name)
+            %   vals = lin.get_soln(var, soln, tags, name, idx)
+            %
+            % Returns named/indexed linear constraint results for a solved
+            % model, evaluated at the solution found.
+            %
+            % Inputs:
+            %   var (mp.sm_variable) : corresponding mp.sm_variable object
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   tags (char array or cell array of char arrays) : names of
+            %       desired outputs, default is ``{'g', 'mu_l', 'mu_u'}`` with
+            %       valid values:
+            %
+            %           - ``'g'`` - 2 element cell array with constraint values
+            %             :math:`\AA \x - \u` and :math:`\l - \AA \x`,
+            %             respectively
+            %           - ``'Ax_u'`` or ``'f'`` - constraint values :math:`\AA \x - \u`
+            %           - ``'l_Ax'`` - constraint values :math:`\l - \AA \x`
+            %           - ``'mu_l'`` - shadow price on :math:`\l - \AA \x`
+            %           - ``'mu_u'`` - shadow price on :math:`\AA \x - \u`
+            %   name (char array) : name of the subset
+            %   idx (cell array) : *(optional)* indices of the subset
+            %
+            % Outputs:
+            %     : Variable number of outputs corresponding to ``tags`` input.
+            %       If ``tags`` is empty or not specified, the calling context
+            %       will define the number of outputs, returned in order of
+            %       default tags.
+            %
+            % Example::
+            %
+            %     [g, mu_l, mu_u] = lin.get_soln(var, soln, 'flow');
+            %     mu_l_Pmis_5_3 = lin.get_soln(var, soln, 'mu_l', 'Pmis', {5,3});
+            %
+            % For a complete set of solution values, using the parse_soln()
+            % method may be more efficient.
+            %
+            % See also parse_soln.
+
+            %% input arg handling
+            [tags, name, idx, N, i1, iN] = obj.get_soln_std_args(varargin{:});
+
+            %% get outputs
+            varargout = cell(1, nargout);
+            if N && ~isempty(soln.eflag)
+                if any(ismember({'g', 'Ax_u', 'l_Ax'}, tags(1:nargout)))
+                    g = cell(1,2);
+                    [g{:}] = obj.eval(var, soln.x, name, idx);
+                end
+                for k = 1:nargout
+                    switch tags{k}
+                        case 'g'
+                            varargout{k} = g;
+                        case 'Ax_u'
+                            varargout{k} = g{1};
+                        case 'l_Ax'
+                            varargout{k} = g{2};
+                        case 'f'
+                            varargout{k} = soln.f(i1:iN);
+                        case 'mu_l'
+                            varargout{k} = soln.lambda.mu_l(i1:iN);
+                        case 'mu_u'
+                            varargout{k} = soln.lambda.mu_u(i1:iN);
+                        otherwise
+                            error('mp.sm_lin_constraint.get_soln: unknown tag ''%s''', tags{k});
+                    end
+                end
+            end     %% if N
+        end
+
         function ps = parse_soln(obj, soln)
             % Parse solution for linear constraints.
             % ::
@@ -718,4 +809,21 @@ classdef sm_lin_constraint < mp.set_manager
             end
         end
     end     %% methods
+
+    methods (Access=protected)
+        function default_tags = get_soln_default_tags(obj)
+            % Return default tags for get_soln().
+            % ::
+            %
+            %   default_tags = sm.get_soln_default_tags()
+            %
+            % Output:
+            %   default_tags (cell array) : tags defining the default outputs
+            %       of get_soln(), namely ``{'g', 'mu_l', 'mu_u'}``
+            %
+            % See also get_soln.
+
+            default_tags = {'g', 'mu_l', 'mu_u'};   %% 'Ax_u', 'l_Ax' are also options
+        end
+    end     %% methods (Access=protected)
 end         %% classdef

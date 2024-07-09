@@ -611,9 +611,9 @@ classdef set_manager < handle
             % Return set-type-specific parameters.
             % ::
             %
-            %   [...] = var.params()
-            %   [...] = var.params(name)
-            %   [...] = var.params(name, idx_list)
+            %   [...] = sm.params()
+            %   [...] = sm.params(name)
+            %   [...] = sm.params(name, idx_list)
             %
             % .. note:: This abstract method must be implemented by the
             %   subclass.
@@ -632,11 +632,11 @@ classdef set_manager < handle
         end
 
         function obj = set_params(obj, name, idx, params, vals)
-            % set_params - Modify parameter data.
+            % Modify parameter data.
             % ::
             %
-            %   var.set_params(name, params, vals)
-            %   var.set_params(name, idx, params, vals)
+            %   sm.set_params(name, params, vals)
+            %   sm.set_params(name, idx, params, vals)
             %
             % .. note:: This abstract method must be implemented by the
             %   subclass.
@@ -726,6 +726,63 @@ classdef set_manager < handle
                 end
             end
             obj.N = obj.N + dN;
+        end
+
+        function default_tags = get_soln_default_tags(obj)
+            % Return default tags for get_soln().
+            % ::
+            %
+            %   default_tags = sm.get_soln_default_tags()
+            %
+            % .. note:: This protected abstract method must be implemented by
+            %   the subclass.
+            %
+            % Output:
+            %   default_tags (cell array) : tags defining the default outputs
+            %       of get_soln()
+            %
+            % See also get_soln.
+
+            default_tags = {};
+        end
+
+        function [tags, name, idx, N, i1, iN] = get_soln_std_args(obj, tags, name, idx)
+            %% input arg handling
+            if nargin == 2              %% obj.get_soln(soln, name)
+                idx = [];
+                name = tags;
+                tags = {};
+            elseif nargin == 3
+                if ischar(name)         %% obj.get_soln(soln, tags, name)
+                    idx = [];
+                else                    %% obj.get_soln(soln, name, idx)
+                    idx = name;
+                    name = tags;
+                    tags = {};
+                end
+            end
+
+            %% set up tags for default outputs
+            if isempty(tags)
+                tags = obj.get_soln_default_tags();
+            elseif ~iscell(tags)
+                tags = { tags };
+            end
+
+            %% set up indexing
+            if isempty(idx)         %% simple named set
+                N = obj.idx.N.(name);
+                i1 = obj.idx.i1.(name);         %% starting row index
+                iN = obj.idx.iN.(name);         %% ending row index
+            else                    %% indexed named set
+                %% calls to substruct() are relatively expensive, so we pre-build the
+                %% structs for addressing cell and numeric array fields, updating only
+                %% the subscripts before use
+                sn = struct('type', {'.', '()'}, 'subs', {name, idx});  %% num array field
+                N = subsref(obj.idx.N, sn);
+                i1 = subsref(obj.idx.i1, sn);   %% starting row index
+                iN = subsref(obj.idx.iN, sn);   %% ending row index
+            end
         end
 
         function ps = parse_soln_fields(obj, params)

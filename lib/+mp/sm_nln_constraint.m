@@ -25,6 +25,7 @@ classdef sm_nln_constraint < mp.set_manager
 %   * set_params - modify nonlinear constraint parameter data
 %   * eval - evaluate individual or full set of nonlinear constraints
 %   * eval_hess - evaluate "Hessian" for full set of nonlinear constraints
+%   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for nonlinear constraints
 %
 % See also mp.set_manager.
@@ -83,7 +84,7 @@ classdef sm_nln_constraint < mp.set_manager
             %       optionally the corresponding :math:`n \times n_x` Jacobian
             %       :math:`\g_\x = \der{\g}{\x}`
             %   hess (function handle) : handle to function that evaluates the
-            %       constraint "Hessian" :math:`\g_{\x\x}(\lambda)` as
+            %       constraint "Hessian" :math:`\g_{\x\x}(\lam)` as
             %       described below
             %   vs (cell or struct array) : *(optional, default* ``{}`` *)*
             %       variable set defining vector :math:`\x` for this
@@ -119,7 +120,7 @@ classdef sm_nln_constraint < mp.set_manager
             %
             % Similarly, the ``hess`` input should point to a function that
             % returns an :math:`n_x \times n_x` matrix constraint "Hessian"
-            % matrix :math:`\g_{\x\x}(\lambda)` for a given set of multipliers,
+            % matrix :math:`\g_{\x\x}(\lam)` for a given set of multipliers,
             % with the following interface::
             %
             %   d2g = hess(x, lam)
@@ -129,11 +130,11 @@ classdef sm_nln_constraint < mp.set_manager
             %       corresponding to the full variable vector, or to a set of
             %       sub-vectors defined by the variable set provided in ``vs``
             %   lam (double) : :math:`n \times 1` vector of multipliers
-            %       :math:`\lambda`
+            %       :math:`\lam`
             %
             % Output:
             %   d2g (double) : :math:`n_x \times n_x` "Hessian" matrix
-            %       :math:`\g_{\x\x}(\lambda) = \der{}{\x}(\trans{\g_\x} \lambda)`
+            %       :math:`\g_{\x\x}(\lam) = \der{}{\x}(\trans{\g_\x} \lam)`
             %
             % For both functions, the input argument ``x`` takes one of two
             % forms. If the constraint set is added with varset input ``vs``
@@ -264,7 +265,7 @@ classdef sm_nln_constraint < mp.set_manager
             %       optionally the corresponding :math:`n \times n_x` Jacobian
             %       :math:`\g_\x = \der{\g}{\x}`
             %   hess (function handle) : handle to function that evaluates the
-            %       constraint "Hessian" :math:`\g_{\x\x}(\lambda)`; see
+            %       constraint "Hessian" :math:`\g_{\x\x}(\lam)`; see
             %       add() for details
             %   vs (struct array) : variable set, ``name``, ``idx`` pairs
             %       specifying the set of variables defining vector :math:`\x`
@@ -615,7 +616,7 @@ classdef sm_nln_constraint < mp.set_manager
             % Instead of evaluating the full 3 dimensional Hessian, it
             % actually evaluates the Jacobian of the vector formed by
             % multiplying the transpose of the constraint Jacobian by a
-            % vector :math:`\lambda` of multipliers.
+            % vector :math:`\lam` of multipliers.
             %
             % .. note:: Evaluation of Hessian for individual subsets not yet
             %   implemented.
@@ -624,7 +625,7 @@ classdef sm_nln_constraint < mp.set_manager
             %   var (mp.sm_variable) : corresponding mp.sm_variable object
             %   x (double) : full :math:`n_x \times 1` variable vector :math:`\x`
             %   lam (double) : :math:`n \times 1` vector of multipliers
-            %       :math:`\lambda`
+            %       :math:`\lam`
             %   name (char array) : *(optional, and not yet implemented)* name
             %       of subset/block of nonlinear constraints to evaluate
             %   idx_list (cell array) : *(optional, and not yet implemente)*
@@ -633,7 +634,7 @@ classdef sm_nln_constraint < mp.set_manager
             %
             % Outputs:
             %   d2g (double) : :math:`n_x \times n_x` "Hessian" matrix
-            %       :math:`\g_{\x\x}(\lambda) = \der{}{\x}(\trans{\g_\x} \lambda)`
+            %       :math:`\g_{\x\x}(\lam) = \der{}{\x}(\trans{\g_\x} \lam)`
             %
             % See also add, params.
 
@@ -711,6 +712,95 @@ classdef sm_nln_constraint < mp.set_manager
             d2g = d2gt';
         end
 
+        function varargout = get_soln(obj, var, soln, iseq, varargin)
+            % Fetch solution values for specific named/indexed subsets.
+            % ::
+            %
+            %   vals = nln.get_soln(var, soln, iseq, name)
+            %   vals = nln.get_soln(var, soln, iseq, name, idx)
+            %   vals = nln.get_soln(var, soln, iseq, tags, name)
+            %   vals = nln.get_soln(var, soln, iseq, tags, name, idx)
+            %
+            % Returns named/indexed nonlinear constraint results for a solved
+            % model, evaluated at the solution found.
+            %
+            % Inputs:
+            %   var (mp.sm_variable) : corresponding mp.sm_variable object
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   iseq (boolean) : true for equality constraints, false for
+            %       inequality constraints
+            %   tags (char array or cell array of char arrays) : names of
+            %       desired outputs, default is ``{'g', 'lam', 'dg'}`` with
+            %       valid values:
+            %
+            %           - ``'g'`` or ``'h'`` - constraint value :math:`\g(\x)`
+            %           - ``'lam'`` or ``'mu'`` - shadow price :math:`\lam` on
+            %             constraint
+            %           - ``'dg'`` or ``'dh'`` - constraint Jacobian
+            %             :math:`\g_\x = \der{\g}{\x}`
+            %   name (char array) : name of the subset
+            %   idx (cell array) : *(optional)* indices of the subset
+            %
+            % Outputs:
+            %     : Variable number of outputs corresponding to ``tags`` input.
+            %       If ``tags`` is empty or not specified, the calling context
+            %       will define the number of outputs, returned in order of
+            %       default tags.
+            %
+            % Example::
+            %
+            %     [g, lam, dg] = nln.get_soln(var, soln, false, 'flow');
+            %     dg_Pmis_5_3 = nln.get_soln(var, soln, true, 'dg', 'Pmis', {5,3});
+            %
+            % For a complete set of solution values, using the parse_soln()
+            % method may be more efficient.
+            %
+            % See also parse_soln.
+
+            %% input arg handling
+            [tags, name, idx, N, i1, iN] = obj.get_soln_std_args(varargin{:});
+
+            %% get outputs
+            varargout = cell(1, nargout);
+            if N && ~isempty(soln.eflag)
+                if any(ismember({'dg', 'dh'}, tags(1:nargout)))
+                    [g, dg] = obj.eval(var, soln.x, name, idx);
+                elseif ismember('g', tags(1:nargout))
+                    g = obj.eval(var, soln.x, name, idx);
+                end
+                for k = 1:nargout
+                    switch tags{k}
+                        case {'g', 'h'}
+                            varargout{k} = g;
+                        case {'dg', 'dh'}
+                            varargout{k} = dg;
+                        case {'lam', 'mu'}
+                            if iseq
+                                varargout{k} = soln.lambda.eqnonlin(i1:iN);
+                            else
+                                varargout{k} = soln.lambda.ineqnonlin(i1:iN);
+                            end
+                        otherwise
+                            error('mp.sm_nln_constraint.get_soln: unknown tag ''%s''', tags{k});
+                    end
+                end
+            end     %% if N
+        end
+
         function ps = parse_soln(obj, soln, iseq)
             % Parse solution for nonlinear constraints.
             % ::
@@ -763,4 +853,21 @@ classdef sm_nln_constraint < mp.set_manager
             end
         end
     end     %% methods
+
+    methods (Access=protected)
+        function default_tags = get_soln_default_tags(obj)
+            % Return default tags for get_soln().
+            % ::
+            %
+            %   default_tags = sm.get_soln_default_tags()
+            %
+            % Output:
+            %   default_tags (cell array) : tags defining the default outputs
+            %       of get_soln(), namely ``{'g', 'lam', 'dg'}``
+            %
+            % See also get_soln.
+
+            default_tags = {'g', 'lam', 'dg'};
+        end
+    end     %% methods (Access=protected)
 end         %% classdef
