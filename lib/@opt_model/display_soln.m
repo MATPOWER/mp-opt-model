@@ -94,7 +94,7 @@ if om.is_solved()
             end
 
             %% set type headers
-            fprintf(fid, '=====  %s  =====\n', om.set_types.(st));
+            fprintf(fid, '=====  %s  =====\n', om.set_types.(st).label);
             %% common columns
             hdr1 = {'  idx    description                ', ...
                     '------- ----------------------------' };
