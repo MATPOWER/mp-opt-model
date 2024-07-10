@@ -118,23 +118,41 @@ if om.is_solved()
                 case 'var'
                     [v0, vl, vu] = om.params_var();
                     v = s.x;
-                    mu_l = s.lambda.lower;
-                    mu_u = s.lambda.upper;
+                    if isempty(s.lambda)
+                        mu_l = NaN(size(v));
+                        mu_u = mu_l;
+                    else
+                        mu_l = s.lambda.lower;
+                        mu_u = s.lambda.upper;
+                    end
                 case 'lin'
                     [A, vl, vu] = om.params_lin_constraint();
                     v = A * s.x;
-                    mu_l = s.lambda.mu_l;
-                    mu_u = s.lambda.mu_u;
+                    if isempty(s.lambda)
+                        mu_l = NaN(size(v));
+                        mu_u = mu_l;
+                    else
+                        mu_l = s.lambda.mu_l;
+                        mu_u = s.lambda.mu_u;
+                    end
                 end
             case 'nle'
                 hdr2 = {'    val    lambda', ...
                         ' -------- --------' };
-                lam = s.lambda.eqnonlin;
+                if isempty(s.lambda)
+                    lam = NaN(om_st.N, 1);
+                else
+                    lam = s.lambda.eqnonlin;
+                end
                 v = om.eval_nln_constraint(s.x, 1);
             case 'nli'
                 hdr2 = {'    val      ub      mu_ub', ...
                         ' -------- -------- --------' };
-                mu_u = s.lambda.ineqnonlin;
+                if isempty(s.lambda)
+                    mu_u = NaN(om_st.N, 1);
+                else
+                    mu_u = s.lambda.ineqnonlin;
+                end
                 v = om.eval_nln_constraint(s.x, 0);
             case 'qdc'
                 hdr2 = {'   cost  =  quad    linear  constant  average', ...
@@ -208,12 +226,16 @@ if om.is_solved()
 
                 switch st
                 case {'var', 'lin'}
-                    if abs(mu_l(idxs(k))) < mu_thresh
+                    if isnan(mu_l(idxs(k)))
+                        mu_lb = sprintf( ' ');
+                    elseif abs(mu_l(idxs(k))) < mu_thresh
                         mu_lb = sprintf(none);
                     else
                         mu_lb = sprintf_num(8, mu_l(idxs(k)));
                     end
-                    if abs(mu_u(idxs(k))) < mu_thresh
+                    if isnan(mu_u(idxs(k)))
+                        mu_ub = sprintf( ' ');
+                    elseif abs(mu_u(idxs(k))) < mu_thresh
                         mu_ub = sprintf(none);
                     else
                         mu_ub = sprintf_num(8, mu_u(idxs(k)));
@@ -321,8 +343,13 @@ end
 
 function str = sprintf_num(width, val)
 val = full(val);
-fmt = sprintf('%%%dg', width);
-str = sprintf(fmt, val);
+if all(isnan(val))
+    fmt = sprintf('%%%ds', width);
+    str = sprintf(fmt, ' ');
+else
+    fmt = sprintf('%%%dg', width);
+    str = sprintf(fmt, val);
+end
 if length(str) > width
     fmt = sprintf('%%%d.*g', width);
     for p = width-2:-1:0
