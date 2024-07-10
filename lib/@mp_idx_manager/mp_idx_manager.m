@@ -145,6 +145,8 @@ classdef mp_idx_manager < handle
                     if have_feature('octave')
                         warning(s1.state, 'Octave:classdef-to-struct');
                     end
+                    [~, k] = ismember('set_types', props);
+                    props(k) = [];  %% remove 'set_types'
                     for k = 1:length(props)
                         obj = copy_prop(s, obj, props{k});
                     end
@@ -196,9 +198,11 @@ classdef mp_idx_manager < handle
         function new_obj = copy(obj)
             % Duplicate the object.
 
-            %% make shallow copy of object
+            %% initialize copy
             new_obj = eval(class(obj));  %% create new object
             new_obj.init_set_types();
+
+            %% copy properties/fields
             if have_feature('octave')
                 s1 = warning('query', 'Octave:classdef-to-struct');
                 warning('off', 'Octave:classdef-to-struct');
@@ -207,6 +211,8 @@ classdef mp_idx_manager < handle
             if have_feature('octave')
                 warning(s1.state, 'Octave:classdef-to-struct');
             end
+            [~, k] = ismember('set_types', props);
+            props(k) = [];  %% remove 'set_types'
             for k = 1:length(props)
                 new_obj = copy_prop(obj, new_obj, props{k});
             end
