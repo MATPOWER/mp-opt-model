@@ -5,6 +5,9 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 7/10/24
+  - Add option for `opt_model.display_soln()` to print to a file.
+
 #### 6/24/24
   - Add `mp.set_manager` class to encapsulate `mp_idx_manager` functionality
     into an individual field object representing a specific set type, rather

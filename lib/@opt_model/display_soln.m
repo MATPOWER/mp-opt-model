@@ -1,4 +1,4 @@
-function om = display_soln(om, set_type, name, idx)
+function om = display_soln(om, varargin)
 % display_soln - Display solution values.
 % ::
 %
@@ -6,6 +6,10 @@ function om = display_soln(om, set_type, name, idx)
 %   OM.DISPLAY_SOLN(SET_TYPE)
 %   OM.DISPLAY_SOLN(SET_TYPE, NAME)
 %   OM.DISPLAY_SOLN(SET_TYPE, NAME, IDX)
+%   OM.DISPLAY_SOLN(FID)
+%   OM.DISPLAY_SOLN(FID, SET_TYPE)
+%   OM.DISPLAY_SOLN(FID, SET_TYPE, NAME)
+%   OM.DISPLAY_SOLN(FID, SET_TYPE, NAME, IDX)
 %
 %   Displays the model solution, including values, bounds and shadow
 %   prices for variables and linear constraints, values and shadow
@@ -47,17 +51,24 @@ function om = display_soln(om, set_type, name, idx)
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% input arg handling
-if nargin < 4
+if nargin < 2 || ischar(varargin{1})
+    fid = 1;
+    args = varargin;
+else
+    fid = varargin{1};
+    args = varargin(2:end);
+end
+nargs = length(args);
+
+if nargs < 3
     idx = [];
-    if nargin < 3
+    if nargs < 2
         name = [];
-        if nargin < 2
+        if nargs < 1
             set_type = 'all';
         end
     end
 end
-
-fid = 1;
 
 mu_thresh = 1e-7;
 num_inf = 1e10;
