@@ -18,6 +18,7 @@ classdef sm_variable < mp.set_manager_opt_model
 %   * add - add a subset of variables, with initial value, bounds, and var type
 %   * params - return initial values, lower bounds, upper bounds, and var type
 %   * set_params - modify parameter data for variables
+%   * display_soln - display solution values for variables
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for variables
 %   * varsets_idx - return vector of indices into full :math:`\x` corresponding to ``vs``
@@ -471,6 +472,106 @@ classdef sm_variable < mp.set_manager_opt_model
             end
         end
 
+        function obj = display_soln(obj, soln, varargin)
+            % Display solution values for variables.
+            % ::
+            %
+            %   var.display_soln(soln)
+            %   var.display_soln(soln, name)
+            %   var.display_soln(soln, name, idx)
+            %   var.display_soln(soln, fid)
+            %   var.display_soln(soln, fid, name)
+            %   var.display_soln(soln, fid, name, idx)
+            %
+            % Displays the solution values for all variables (default) or an
+            % individual named or named/indexed subset.
+            %
+            % Inputs:
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   fid (fileID) : fileID of open file to write to (default is
+            %       1 for standard output)
+            %   name (char array) : *(optional)* name of individual subset
+            %   idx (cell array) : *(optional)* indices of individual subset
+
+            [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
+
+            if obj.N
+                [v0, vl, vu] = obj.params();
+                v = soln.x;
+                if isempty(soln.lambda)
+                    mu_l = NaN(size(v));
+                    mu_u = mu_l;
+                else
+                    mu_l = soln.lambda.lower;
+                    mu_u = soln.lambda.upper;
+                end
+
+                %% print header rows
+                hdr2 = {'   mu_lb     lb       val      ub      mu_ub', ...
+                        ' -------- -------- -------- -------- --------' };
+                obj.display_soln_print_headers(fid, hdr1, hdr2);
+
+                %% print data
+                none = '- ';
+                for k = 1:length(idxs)
+                    obj.display_soln_print_row(fid, idxs(k));
+
+                    if isnan(mu_l(idxs(k)))
+                        mu_lb = sprintf( ' ');
+                    elseif abs(mu_l(idxs(k))) < obj.mu_thresh()
+                        mu_lb = sprintf(none);
+                    else
+                        mu_lb = obj.sprintf_num(8, mu_l(idxs(k)));
+                    end
+                    if isnan(mu_u(idxs(k)))
+                        mu_ub = sprintf( ' ');
+                    elseif abs(mu_u(idxs(k))) < obj.mu_thresh()
+                        mu_ub = sprintf(none);
+                    else
+                        mu_ub = obj.sprintf_num(8, mu_u(idxs(k)));
+                    end
+                    if vl(idxs(k)) < -obj.num_inf()
+                        lb = sprintf(none);
+                    else
+                        lb = obj.sprintf_num(8, vl(idxs(k)));
+                    end
+                    if vu(idxs(k)) > obj.num_inf()
+                        ub = sprintf(none);
+                    else
+                        ub = obj.sprintf_num(8, vu(idxs(k)));
+                    end
+                    fprintf(fid, '%9s%9s%9s%9s%9s\n', ...
+                        mu_lb, lb, obj.sprintf_num(8, v(idxs(k))), ub, mu_ub);
+                end
+
+                %% print footer rows
+                fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                fprintf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', 'Min', ...
+                    obj.sprintf_num(8, min(mu_l)), obj.sprintf_num(8, min(vl)), ...
+                    obj.sprintf_num(8, min(v)), ...
+                    obj.sprintf_num(8, min(vu)), obj.sprintf_num(8, min(mu_u)));
+                fprintf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', 'Max', ...
+                    obj.sprintf_num(8, max(mu_l)), obj.sprintf_num(8, max(vl)), ...
+                    obj.sprintf_num(8, max(v)), ...
+                    obj.sprintf_num(8, max(vu)), obj.sprintf_num(8, max(mu_u)));
+                fprintf(fid, '\n');
+            end
+        end
+
         function varargout = get_soln(obj, soln, varargin)
             % Fetch solution values for specific named/indexed subsets.
             % ::
@@ -786,7 +887,7 @@ classdef sm_variable < mp.set_manager_opt_model
             % Return default tags for get_soln().
             % ::
             %
-            %   default_tags = sm.get_soln_default_tags()
+            %   default_tags = var.get_soln_default_tags()
             %
             % Output:
             %   default_tags (cell array) : tags defining the default outputs

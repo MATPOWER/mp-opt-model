@@ -18,6 +18,7 @@ classdef sm_nln_cost < mp.set_manager_opt_model
 %   * params - return general nonlinear cost parameters
 %   * set_params - modify general nonlinear cost parameter data
 %   * eval - evaluate individual or full set of general nonlinear costs
+%   * display_soln - display solution values for general nonlinear costs
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %
 % See also mp.set_manager, mp.set_manager_opt_model.
@@ -35,7 +36,7 @@ classdef sm_nln_cost < mp.set_manager_opt_model
             % Constructor.
             % ::
             %
-            %   sm = mp.sm_nln_cost(label)
+            %   nlc = mp.sm_nln_cost(label)
 
             es = struct();  %% empty struct
             obj@mp.set_manager_opt_model(varargin{:});
@@ -484,6 +485,76 @@ classdef sm_nln_cost < mp.set_manager_opt_model
             end
         end
 
+        function obj = display_soln(obj, var, soln, varargin)
+            % Display solution values for general nonlinear costs.
+            % ::
+            %
+            %   nlc.display_soln(var, soln)
+            %   nlc.display_soln(var, soln, name)
+            %   nlc.display_soln(var, soln, name, idx)
+            %   nlc.display_soln(var, soln, fid)
+            %   nlc.display_soln(var, soln, fid, name)
+            %   nlc.display_soln(var, soln, fid, name, idx)
+            %
+            % Displays the solution values for all general nonlinear costs
+            % (default) or an individual named or named/indexed subset.
+            %
+            % Inputs:
+            %   var (mp.sm_variable) : corresponding mp.sm_variable object
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   fid (fileID) : fileID of open file to write to (default is
+            %       1 for standard output)
+            %   name (char array) : *(optional)* name of individual subset
+            %   idx (cell array) : *(optional)* indices of individual subset
+
+            [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
+
+            if obj.N
+                c = [];
+                for k = 1:length(obj.order)
+                    n = obj.order(k).name;
+                    i = obj.order(k).idx;
+                    c_total = obj.eval(var, soln.x, n, i);
+                    c = [c; c_total];
+                end
+
+                %% print header rows
+                hdr2 = {'   cost', ...
+                        ' --------' };
+                obj.display_soln_print_headers(fid, hdr1, hdr2);
+
+                %% print data
+                for k = 1:length(idxs)
+                    obj.display_soln_print_row(fid, idxs(k));
+
+                    fprintf(fid, '%9s\n', obj.sprintf_num(8, c(idxs(k))));
+                end
+
+                %% print footer rows
+                if length(c) > 1
+                    fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                    fprintf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', ...
+                        'Sum of Displayed Costs', ...
+                        obj.sprintf_num(8, sum(c(idxs))));
+                end
+                fprintf(fid, '\n');
+            end
+        end
+
         function varargout = get_soln(obj, var, soln, varargin)
             % Fetch solution values for specific named/indexed subsets.
             % ::
@@ -577,7 +648,7 @@ classdef sm_nln_cost < mp.set_manager_opt_model
             % Return default tags for get_soln().
             % ::
             %
-            %   default_tags = sm.get_soln_default_tags()
+            %   default_tags = nlc.get_soln_default_tags()
             %
             % Output:
             %   default_tags (cell array) : tags defining the default outputs

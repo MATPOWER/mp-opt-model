@@ -33,6 +33,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
 %   * params - build and return cost parameters :math:`\QQ, \c, k` or :math:`\q, \c, \kk`
 %   * set_params - modify quadratic cost parameter data
 %   * eval - evaluate individual or full set of quadratic costs
+%   * display_soln - display solution values for quadratic costs
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %
 % See also mp.set_manager, mp.set_manager_opt_model.
@@ -55,7 +56,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             % Constructor.
             % ::
             %
-            %   sm = mp.sm_quad_cost(label)
+            %   qdc = mp.sm_quad_cost(label)
 
             es = struct();  %% empty struct
             obj@mp.set_manager_opt_model(varargin{:});
@@ -709,6 +710,119 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             end
         end
 
+        function obj = display_soln(obj, var, soln, varargin)
+            % Display solution values for quadratic costs.
+            % ::
+            %
+            %   qdc.display_soln(var, soln)
+            %   qdc.display_soln(var, soln, name)
+            %   qdc.display_soln(var, soln, name, idx)
+            %   qdc.display_soln(var, soln, fid)
+            %   qdc.display_soln(var, soln, fid, name)
+            %   qdc.display_soln(var, soln, fid, name, idx)
+            %
+            % Displays the solution values for all quadratic costs (default)
+            % or an individual named or named/indexed subset.
+            %
+            % Inputs:
+            %   var (mp.sm_variable) : corresponding mp.sm_variable object
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   fid (fileID) : fileID of open file to write to (default is
+            %       1 for standard output)
+            %   name (char array) : *(optional)* name of individual subset
+            %   idx (cell array) : *(optional)* indices of individual subset
+
+            [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
+
+            if obj.N
+                c = [];
+                c_k = [];
+                c_lin = [];
+                c_avg = [];
+                vv = var.idx;
+                for k = 1:length(obj.order)
+                    n = obj.order(k).name;
+                    i = obj.order(k).idx;
+                    [QQ, cc, kk, vs] = obj.params(var, n, i);
+                    xx = var.varsets_x(soln.x, vs, 'vector');
+                    c_total = obj.eval(var, soln.x, n, i);
+                    len = length(c_total);
+                    if len == 1
+                        c_constant = kk;
+                        c_linear = cc' * xx;
+                        if abs(sum(xx)) > 1e-9
+                            c_average = c_total / sum(xx);
+                        else
+                            c_average = NaN;
+                        end
+                    else
+                        c_linear = cc .* xx;
+                        c_average = c_total ./ xx;
+                        c_average(isinf(c_average)) = NaN;
+                        if isscalar(kk)
+                            c_constant = ones(len, 1)*kk/len;
+                        else
+                            c_constant = kk;
+                        end
+                    end
+                    if sum(sum(QQ)) == 0 && sum(kk) == 0 && len == length(cc)
+                        c_average = cc;
+                    end
+                    c = [c; c_total];
+                    c_lin = [c_lin; c_linear];
+                    c_k = [c_k; c_constant];
+                    c_avg = [c_avg; c_average];
+                end
+                c_quad = c - c_lin - c_k;
+
+                %% print header rows
+                hdr2 = {'   cost  =  quad    linear  constant  average', ...
+                        ' -------- -------- -------- -------- --------' };
+                obj.display_soln_print_headers(fid, hdr1, hdr2);
+
+                %% print data
+                for k = 1:length(idxs)
+                    obj.display_soln_print_row(fid, idxs(k));
+
+                    if isnan(c_avg(idxs(k)))
+                        cc_avg = '- ';
+                    else
+                        cc_avg = obj.sprintf_num(8, c_avg(idxs(k)));
+                    end
+                    fprintf(fid, '%9s%9s%9s%9s%9s\n', ...
+                        obj.sprintf_num(8, c(idxs(k))), ...
+                        obj.sprintf_num(8, c_quad(idxs(k))), ...
+                        obj.sprintf_num(8, c_lin(idxs(k))), ...
+                        obj.sprintf_num(8, c_k(idxs(k))), ...
+                        cc_avg);
+                end
+
+                %% print footer rows
+                fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                fprintf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', ...
+                    'Sum of Displayed Costs', ...
+                    obj.sprintf_num(8, sum(c(idxs))), ...
+                    obj.sprintf_num(8, sum(c_quad(idxs))), ...
+                    obj.sprintf_num(8, sum(c_lin(idxs))), ...
+                    obj.sprintf_num(8, sum(c_k(idxs))), '');
+                fprintf(fid, '\n');
+            end
+        end
+
         function varargout = get_soln(obj, var, soln, varargin)
             % Fetch solution values for specific named/indexed subsets.
             % ::
@@ -808,7 +922,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             % Return default tags for get_soln().
             % ::
             %
-            %   default_tags = sm.get_soln_default_tags()
+            %   default_tags = qdc.get_soln_default_tags()
             %
             % Output:
             %   default_tags (cell array) : tags defining the default outputs

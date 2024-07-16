@@ -25,6 +25,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
 %   * set_params - modify nonlinear constraint parameter data
 %   * eval - evaluate individual or full set of nonlinear constraints
 %   * eval_hess - evaluate "Hessian" for full set of nonlinear constraints
+%   * display_soln - display solution values for nonlinear constraints
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for nonlinear constraints
 %
@@ -43,7 +44,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             % Constructor.
             % ::
             %
-            %   sm = mp.sm_nln_constraint(label)
+            %   nln = mp.sm_nln_constraint(label)
 
             obj@mp.set_manager_opt_model(varargin{:});
             obj.data = struct( ...
@@ -712,6 +713,110 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             d2g = d2gt';
         end
 
+        function obj = display_soln(obj, var, soln, iseq, varargin)
+            % Display solution values for nonlinear constraints.
+            % ::
+            %
+            %   nln.display_soln(var, soln, iseq)
+            %   nln.display_soln(var, soln, iseq, name)
+            %   nln.display_soln(var, soln, iseq, name, idx)
+            %   nln.display_soln(var, soln, iseq, fid)
+            %   nln.display_soln(var, soln, iseq, fid, name)
+            %   nln.display_soln(var, soln, iseq, fid, name, idx)
+            %
+            % Displays the solution values for all nonlinear constraints
+            % (default) or an individual named or named/indexed subset.
+            %
+            % Inputs:
+            %   var (mp.sm_variable) : corresponding mp.sm_variable object
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   iseq (boolean) : true for equality constraints, false for
+            %       inequality constraints
+            %   fid (fileID) : fileID of open file to write to (default is
+            %       1 for standard output)
+            %   name (char array) : *(optional)* name of individual subset
+            %   idx (cell array) : *(optional)* indices of individual subset
+
+            [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
+
+            if obj.N
+                if iseq
+                    hdr2 = {'    val    lambda', ...
+                            ' -------- --------' };
+                    if isempty(soln.lambda)
+                        lam = NaN(obj.N, 1);
+                    else
+                        lam = soln.lambda.eqnonlin;
+                    end
+                else
+                    hdr2 = {'    val      ub      mu_ub', ...
+                            ' -------- -------- --------' };
+                    if isempty(soln.lambda)
+                        mu_u = NaN(obj.N, 1);
+                    else
+                        mu_u = soln.lambda.ineqnonlin;
+                    end
+                end
+                v = obj.eval(var, soln.x);
+
+                %% print header rows
+                obj.display_soln_print_headers(fid, hdr1, hdr2);
+
+                %% print data
+                none = '- ';
+                for k = 1:length(idxs)
+                    obj.display_soln_print_row(fid, idxs(k));
+                    if iseq
+                        if abs(lam(idxs(k))) < obj.mu_thresh()
+                            mu_ub = sprintf(none);
+                        else
+                            mu_ub = obj.sprintf_num(8, lam(idxs(k)));
+                        end
+                        fprintf(fid, '%9s%9s\n', obj.sprintf_num(8, v(idxs(k))), ...
+                            mu_ub);
+                    else
+                        if abs(mu_u(idxs(k))) < obj.mu_thresh()
+                            mu_ub = sprintf(none);
+                        else
+                            mu_ub = obj.sprintf_num(8, mu_u(idxs(k)));
+                        end
+                        fprintf(fid, '%9s%9s%9s\n', obj.sprintf_num(8, v(idxs(k))), ...
+                            '0', mu_ub);
+                    end
+                end
+
+                %% print footer rows
+                fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                if iseq
+                    fprintf(fid, '%7s %-28s%9s%9s\n', '', 'Min', ...
+                        obj.sprintf_num(8, min(v)), ...
+                        obj.sprintf_num(8, min(lam)));
+                    fprintf(fid, '%7s %-28s%9s%9s\n', '', 'Max', ...
+                        obj.sprintf_num(8, max(v)), ...
+                        obj.sprintf_num(8, max(lam)));
+                else
+                    fprintf(fid, '%7s %-28s%9s%9s%9s\n', '', 'Max', ...
+                        obj.sprintf_num(8, max(v)), '0', ...
+                        obj.sprintf_num(8, max(mu_u)));
+                end
+                fprintf(fid, '\n');
+            end
+        end
+
         function varargout = get_soln(obj, var, soln, iseq, varargin)
             % Fetch solution values for specific named/indexed subsets.
             % ::
@@ -859,7 +964,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             % Return default tags for get_soln().
             % ::
             %
-            %   default_tags = sm.get_soln_default_tags()
+            %   default_tags = nln.get_soln_default_tags()
             %
             % Output:
             %   default_tags (cell array) : tags defining the default outputs

@@ -10,6 +10,7 @@ classdef set_manager_opt_model < mp.set_manager
 % mp.set_manager_opt_model Methods:
 %   * params - *(abstract)* return set-type-specific parameter data
 %   * set_params - *(abstract)* modify set-type-specific parameter data
+%   * display_soln - display solution values
 %
 % By convention, ``sm`` is the variable name used for mp.set_manager_opt_model
 % objects.
@@ -89,6 +90,63 @@ classdef set_manager_opt_model < mp.set_manager
             %
             % See also mp.set_manager.add, params.
         end
+
+        function obj = display_soln(obj, var, soln, varargin)
+            % Display solution values for generic set type.
+            % ::
+            %
+            %   sm.display_soln(var, soln)
+            %   sm.display_soln(var, soln, name)
+            %   sm.display_soln(var, soln, name, idx)
+            %   sm.display_soln(var, soln, fid)
+            %   sm.display_soln(var, soln, fid, name)
+            %   sm.display_soln(var, soln, fid, name, idx)
+            %
+            % Displays the solution values for all elements (default)
+            % or an individual named or named/indexed subset.
+            %
+            % Inputs:
+            %   var (mp.sm_variable) : corresponding mp.sm_variable object
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``eflag`` - exit flag, 1 = success, 0 or negative =
+            %             solver-specific failure code
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   fid (fileID) : fileID of open file to write to (default is
+            %       1 for standard output)
+            %   name (char array) : *(optional)* name of individual subset
+            %   idx (cell array) : *(optional)* indices of individual subset
+
+            [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
+
+            if obj.N
+                %% print header rows
+                hdr2 = {'', ...
+                        '' };
+                obj.display_soln_print_headers(fid, hdr1, hdr2);
+
+                %% print data
+                none = '- ';
+                for k = 1:length(idxs)
+                    obj.display_soln_print_row(fid, idxs(k));
+                    fprintf(fid, '\n');
+                end
+
+                %% print footer rows
+                fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                fprintf(fid, '\n');
+            end
+        end
     end     %% methods
 
     methods (Access=protected)
@@ -161,6 +219,120 @@ classdef set_manager_opt_model < mp.set_manager
                 end
             end
             obj.N = obj.N + dN;
+        end
+
+        function [fid, name, idx, idxs, hdr1] = display_soln_std_args(obj, varargin)
+            % Standardize input args for use in subclass display_soln method.
+            % ::
+            %
+            %   [fid, name, idx, idxs, hdr1] = sm.display_soln_std_args()
+            %   [...] = sm.display_soln_std_args(name)
+            %   [...] = sm.display_soln_std_args(name, idx)
+            %   [...] = sm.display_soln_std_args(fid)
+            %   [...] = sm.display_soln_std_args(fid, name)
+            %   [...] = sm.display_soln_std_args(fid, name, idx)
+            %
+            % Inputs:
+            %   fid (fileID) : fileID of open file to write to (default is
+            %       1 for standard output)
+            %   name (char array) : *(optional)* name of individual subset
+            %   idx (cell array) : *(optional)* indices of individual subset
+            %
+            % Outputs:
+            %   fid (fileID) : fileID of open file to write to (default is
+            %       1 for standard output)
+            %   name (char array) : *(optional)* name of individual subset
+            %   idx (cell array) : *(optional)* indices of individual subset
+            %   idxs (integer) : vector of indices of individual elements
+            %   hdr1 (cell array) : 2 element cell array char arrays; first is
+            %       column headings, second is column separator row; for
+            %       ``idx`` and ``description`` columns
+            %
+            % See also display_soln.
+
+            if nargin < 1 || ischar(varargin{1})
+                fid = 1;
+                args = varargin;
+            else
+                fid = varargin{1};
+                args = varargin(2:end);
+            end
+            nargs = length(args);
+
+            if nargs < 2
+                idx = [];
+                if nargs < 1
+                    name = [];
+                else
+                    name = args{1};
+                end
+            else
+                idx = args{2};
+            end
+
+            if obj.N
+                if isempty(name)            %% all indices for set type
+                    idxs = (1:obj.N);
+                elseif isempty(idx)         %% all indices for set type & name
+                    idxs = [];
+                    for k = 1:length(obj.order)
+                        if strcmp(obj.order(k).name, name)
+                            i1 = obj.idx.i1.(name)(obj.order(k).idx{:});
+                            iN = obj.idx.iN.(name)(obj.order(k).idx{:});
+                            idxs = [idxs (i1:iN)];
+                        end
+                    end
+                else                        %% indices for name, idx
+                    idxs = (obj.idx.i1.(name)(idx{:}):obj.idx.iN.(name)(idx{:}));
+                end
+                hdr1 = {'  idx    description                ', ...
+                        '------- ----------------------------' };
+            else
+                idxs = [];
+                hdr1 = {};
+            end
+        end
+
+        function obj = display_soln_print_headers(obj, fid, hdr1, hdr2)
+            % Print headers for solution display.
+            % ::
+            %
+            %   obj.display_soln_print_headers(fid, hdr2)
+            %
+            % Inputs:
+            %   fid (fileID) : fileID of open file to write to (1 for standard
+            %       output)
+            %   hdr1 (cell array) : 2 element cell array char arrays; first is
+            %       column headings, second is column separator row; for
+            %       ``idx`` and ``description`` columns
+            %   hdr2 (cell array) : 2 element cell array char arrays; first is
+            %       column headings, second is column separator row; for
+            %       set-type-specific columns
+            %
+            % See also display_soln.
+
+            fprintf(fid, '=====  %s  =====\n', obj.label);
+            for h = 1:length(hdr1)
+                fprintf(fid, '%s\n', [hdr1{h} hdr2{h}]);
+            end
+        end
+
+        function obj = display_soln_print_row(obj, fid, i)
+            % Print idx and description columns for row i of solution display.
+            % ::
+            %
+            %   obj.display_soln_print_row(fid, i)
+            %
+            % Inputs:
+            %   fid (fileID) : fileID of open file to write to (1 for standard
+            %       output)
+            %   i (integer) : index of element to be printed in this row
+            %
+            % See also display_soln.
+
+            ii = sprintf('%d', i);
+            fmt = sprintf('%%-%ds', length(ii)+ceil((7-length(ii))/2));
+            fprintf(fid, '%7s %-28s', sprintf(fmt, ii), obj.describe_idx(i));
         end
 
         function default_tags = get_soln_default_tags(obj)
@@ -302,6 +474,35 @@ classdef set_manager_opt_model < mp.set_manager
                     end     %% for j
                 end
             end     %% for k
+        end
+
+        function str = sprintf_num(obj, width, val)
+            val = full(val);
+            if all(isnan(val))
+                fmt = sprintf('%%%ds', width);
+                str = sprintf(fmt, ' ');
+            else
+                fmt = sprintf('%%%dg', width);
+                str = sprintf(fmt, val);
+            end
+            if length(str) > width
+                fmt = sprintf('%%%d.*g', width);
+                for p = width-2:-1:0
+                    str = sprintf(fmt, p, val);
+                    if length(str) <= width
+                        break;
+                    end
+                end
+            end
+            assert(length(str) <= width)
+        end
+
+        function v = mu_thresh(obj)
+            v = 1e-7;
+        end
+
+        function v = num_inf(obj)
+            v = 1e10;
         end
     end     %% methods (Access=protected)
 end         %% classdef
