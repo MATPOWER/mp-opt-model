@@ -856,7 +856,7 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             end     %% if N
         end
 
-        function ps = parse_soln(obj, soln)
+        function ps = parse_soln(obj, soln, stash)
             % Parse solution for linear constraints.
             % ::
             %
@@ -879,6 +879,8 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             %               - ``mu_u`` - linear constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
+            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %       property
             %
             % Output:
             %   ps (struct) : parsed solution, struct where each field listed
@@ -908,6 +910,10 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
                 if ~isempty(params)
                     ps = obj.parse_soln_fields(params);
                 end
+            end
+
+            if nargin > 2 && stash
+                obj.soln = ps;
             end
         end
     end     %% methods

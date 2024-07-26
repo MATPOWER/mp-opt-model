@@ -647,7 +647,7 @@ classdef sm_variable < mp.set_manager_opt_model
             end     %% if N
         end
 
-        function ps = parse_soln(obj, soln)
+        function ps = parse_soln(obj, soln, stash)
             % Parse solution for variables.
             % ::
             %
@@ -670,6 +670,8 @@ classdef sm_variable < mp.set_manager_opt_model
             %               - ``mu_u`` - linear constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
+            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %       property
             %
             % Output:
             %   ps (struct) : parsed solution, struct where each field listed
@@ -691,6 +693,10 @@ classdef sm_variable < mp.set_manager_opt_model
                 params(end  ).dst = 'mu_u';
             end
             ps = obj.parse_soln_fields(params);
+
+            if nargin > 2 && stash
+                obj.soln = ps;
+            end
         end
 
         function kk = varsets_idx(obj, vs)

@@ -906,7 +906,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             end     %% if N
         end
 
-        function ps = parse_soln(obj, soln, iseq)
+        function ps = parse_soln(obj, soln, iseq, stash)
             % Parse solution for nonlinear constraints.
             % ::
             %
@@ -931,6 +931,8 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             %               - ``upper`` - variable upper bounds
             %   iseq (boolean) : true for equality constraints, false for
             %       inequality constraints
+            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %       property
             %
             % Output:
             %   ps (struct) : parsed solution, struct where each field listed
@@ -955,6 +957,10 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             end
             if ~isempty(params)
                 ps = obj.parse_soln_fields(params);
+            end
+
+            if nargin > 3 && stash
+                obj.soln = ps;
             end
         end
     end     %% methods
