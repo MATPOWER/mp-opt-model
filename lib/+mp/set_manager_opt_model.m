@@ -7,10 +7,14 @@ classdef set_manager_opt_model < mp.set_manager
 % Implements functionality to handle parameters and solution data for
 % set types used to implement properties of the opt_model class.
 %
+% mp.set_manager_opt_model Properties:
+%   * soln - struct for storing parsed solution values
+%
 % mp.set_manager_opt_model Methods:
 %   * params - *(abstract)* return set-type-specific parameter data
 %   * set_params - *(abstract)* modify set-type-specific parameter data
 %   * display_soln - display solution values
+%   * has_parsed_soln - return true if parsed solution is available
 %
 % By convention, ``sm`` is the variable name used for mp.set_manager_opt_model
 % objects.
@@ -22,6 +26,11 @@ classdef set_manager_opt_model < mp.set_manager
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
+
+    properties
+        % *(struct)* for storing parsed solution values
+        soln
+    end     %% properties
 
     methods
         function obj = set_manager_opt_model(varargin)
@@ -146,6 +155,20 @@ classdef set_manager_opt_model < mp.set_manager
                 fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
                 fprintf(fid, '\n');
             end
+        end
+
+        function TorF = has_parsed_soln(obj)
+            % Return true if parsed solution is available.
+            % ::
+            %
+            %   TorF = sm.has_parsed_soln()
+            %
+            % Output:
+            %   TorF (boolean) : true if parsed solution is available in
+            %       :attr:`soln` property; format of :attr:`soln` depends
+            %       on implementing subclass
+
+            TorF = ~isempty(obj.soln);
         end
     end     %% methods
 
