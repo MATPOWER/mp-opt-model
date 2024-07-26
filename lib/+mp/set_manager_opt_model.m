@@ -170,6 +170,40 @@ classdef set_manager_opt_model < mp.set_manager
 
             TorF = ~isempty(obj.soln);
         end
+
+        function ps = parse_soln(obj, soln, stash)
+            % Parse solution.
+            % ::
+            %
+            %   ps = sm.parse_soln(soln)
+            %
+            % Parse a full solution struct into parts corresponding to
+            % individual subsets.
+            %
+            % Input:
+            %   soln (struct) : full solution struct with these fields
+            %       (among others):
+            %
+            %           - ``x`` - variable values
+            %           - ``lambda`` - constraint shadow prices, struct with
+            %             fields:
+            %
+            %               - ``eqnonlin`` - nonlinear equality constraints
+            %               - ``ineqnonlin`` - nonlinear inequality constraints
+            %               - ``mu_l`` - linear constraint lower bounds
+            %               - ``mu_u`` - linear constraint upper bounds
+            %               - ``lower`` - variable lower bounds
+            %               - ``upper`` - variable upper bounds
+            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %       property
+            %
+            % Output:
+            %   ps (struct) : parsed solution, struct where each field is a
+            %       struct whos names are the names of the relevant subsets
+            %       and values are scalars for named sets, arrays for
+            %       named/indexed sets; fields depend on implementing class
+
+        end
     end     %% methods
 
     methods (Access=protected)
