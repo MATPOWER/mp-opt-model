@@ -239,11 +239,11 @@ if have_miqp_solver()
 
     t = 'parse_soln : ';
     t_ok(om.has_parsed_soln(), [t 'has_parsed_soln() is true']);
-    t_is(om.soln.var.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
-    t_is(om.soln.var.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
-    t_is(om.soln.var.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
-    t_is(om.soln.lin.mu_l.Ax, om.get_soln('lin', 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
-    t_is(om.soln.lin.mu_u.Ax, om.get_soln('lin', 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
+    t_is(om.var.soln.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
+    t_is(om.var.soln.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
+    t_is(om.var.soln.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
+    t_is(om.lin.soln.mu_l.Ax, om.get_soln('lin', 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
+    t_is(om.lin.soln.mu_u.Ax, om.get_soln('lin', 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
 
     t = 'disp_soln';
     rn = fix(1e9*rand);

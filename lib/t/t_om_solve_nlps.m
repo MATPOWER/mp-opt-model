@@ -269,11 +269,11 @@ t_is(df, edf, 14, [t 'df']);
 
 t = 'parse_soln : ';
 t_ok(om.has_parsed_soln(), [t 'has_parsed_soln() is true']);
-t_is(om.soln.var.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
-t_is(om.soln.var.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
-t_is(om.soln.var.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
-t_is(om.soln.nle.lam.g, om.get_soln('nle', 'lam', 'g'), 14, [t 'nle.lam.g']);
-t_is(om.soln.nli.mu.h, om.get_soln('nli', 'mu', 'h'), 14, [t 'nli.mu.h']);
+t_is(om.var.soln.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
+t_is(om.var.soln.mu_l.x, om.get_soln('var', 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
+t_is(om.var.soln.mu_u.x, om.get_soln('var', 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
+t_is(om.nle.soln.lam.g, om.get_soln('nle', 'lam', 'g'), 14, [t 'nle.lam.g']);
+t_is(om.nli.soln.mu.h, om.get_soln('nli', 'mu', 'h'), 14, [t 'nli.mu.h']);
 
 t = 'disp_soln';
 rn = fix(1e9*rand);

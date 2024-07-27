@@ -47,26 +47,27 @@ if nargin < 2
 end
 
 %% var
-ps = struct('var', om.var.parse_soln(om.soln));
+ps = struct('var', om.var.parse_soln(om.soln, stash));
 
 %% lin
-ps_lin = om.lin.parse_soln(om.soln);
+ps_lin = om.lin.parse_soln(om.soln, stash);
 if ~isempty(ps_lin)
     ps.lin = ps_lin;
 end
 
 %% nle
-ps_nle = om.nle.parse_soln(om.soln, true);
+ps_nle = om.nle.parse_soln(om.soln, true, stash);
 if ~isempty(ps_nle)
     ps.nle = ps_nle;
 end
 
 %% nli
-ps_nli = om.nli.parse_soln(om.soln, false);
+ps_nli = om.nli.parse_soln(om.soln, false, stash);
 if ~isempty(ps_nli)
     ps.nli = ps_nli;
 end
 
+%%-----  DEPRECATED  -----
 %% stash the result, if requested
 if stash
     om.soln = nested_struct_copy(om.soln, ps, struct('copy_mode', '='));

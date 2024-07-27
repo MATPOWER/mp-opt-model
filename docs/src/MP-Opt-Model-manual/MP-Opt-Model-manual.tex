@@ -2438,7 +2438,8 @@ name & default & description \\
 0 & print no progress info \\
 1--5 & print increasing level of progress info \\
 \end{tabular}	\\
-\code{~~parse\_soln}	& 0	& flag that specifies whether or not to call the \code{parse\_soln} method and place the return values in \code{om.soln}	\\
+\code{~~parse\_soln}	& 0	& flag that specifies whether or not to call the \code{parse\_soln} method and place the return values in the \code{soln}
+property of the field type objects \\
 \code{~~x0}	& \emph{empty}	& optional initial value of $x$, overrides value stored in model, \emph{(ignored by some solvers)}	\\
 \midrule
 \multicolumn{3}{l}{\emph{Additional Options for Specific Problem Types}} \\
@@ -2931,11 +2932,17 @@ $\le 0$ & solver-specific failure code \\
 \code{~~~~~~.eqnonlin} & nonlinear equality constraints	\\
 \code{~~~~~~.ineqnonlin} & nonlinear inequality constraints	\\
 \\
+\multicolumn{2}{l}{\emph{Parsed Solution (deprecated)}\tnote{\dag}} \\
+\code{~~~~.var} & parsed solution for variables\tnote{\ddag} \\
+\code{~~~~.lin} & parsed solution for linear constraints\tnote{\ddag} \\
+\code{~~~~.nle} & parsed solution for nonlinear equality constraints\tnote{\ddag} \\
+\code{~~~~.nli} & parsed solution for nonlinear inequality constraints\tnote{\ddag} \\
+\\
 \multicolumn{2}{l}{\emph{Parsed Solution}\tnote{\dag}} \\
-\code{~~~.var} & parsed solution for variables\tnote{\ddag} \\
-\code{~~~.lin} & parsed solution for linear constraints\tnote{\ddag} \\
-\code{~~~.nle} & parsed solution for nonlinear equality constraints\tnote{\ddag} \\
-\code{~~~.nli} & parsed solution for nonlinear inequality constraints\tnote{\ddag} \\
+\code{~~.var.soln} & parsed solution for variables\tnote{\ddag} \\
+\code{~~.lin.soln} & parsed solution for linear constraints\tnote{\ddag} \\
+\code{~~.nle.soln} & parsed solution for nonlinear equality constraints\tnote{\ddag} \\
+\code{~~.nli.soln} & parsed solution for nonlinear inequality constraints\tnote{\ddag} \\
 & \\
 \bottomrule
 \end{tabular}
@@ -3107,7 +3114,7 @@ fields & description \\
 The value of each element in the returned struct can be obtained
 via the \code{get\_soln} method as well, but \code{parse\_soln} is generally more efficient if a complete set of values is needed.
 
-If the optional \code{stash} input argument is present and true, the fields of the return struct are copied to \code{om.soln} where they are available with others listed in Table~\ref{tab:soln}.
+If the optional \code{stash} input argument is present and true, the fields of the return struct are copied to the \code{soln} property of the corresponding set type object in \code{om}. They are also copied to \code{om.soln} where they are available with others listed in Table~\ref{tab:soln}, but this is deprecated.
 
 \subsubsection*{\code{has\_parsed\_soln}}
 \label{sec:has_parsed_soln}
@@ -3115,7 +3122,7 @@ If the optional \code{stash} input argument is present and true, the fields of t
 TorF = om.has_parsed_soln()
 \end{Code}
 
-The \code{has\_parsed\_soln} method returns \code{1} if the model has a parsed solution available in \code{om.soln}, \code{0} otherwise.
+The \code{has\_parsed\_soln} method returns \code{1} if the model has a parsed solution available in the \code{soln} property of the set type objects, \code{0} otherwise.
 
 
 \clearpage

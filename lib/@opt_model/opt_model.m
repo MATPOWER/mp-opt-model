@@ -314,7 +314,7 @@ classdef opt_model < mp_idx_manager
         function TorF = has_parsed_soln(om)
             % Return true if model has a parsed solution.
 
-            TorF = isfield(om.soln, 'var');
+            TorF = om.var.has_parsed_soln();
         end
     end     %% methods
 end         %% classdef

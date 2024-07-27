@@ -199,8 +199,8 @@ t_is(dg, jac(1:2, 1:2), 14, [t 'jac']);
 
 t = 'parse_soln : ';
 t_ok(om.has_parsed_soln(), [t 'has_parsed_soln() is true']);
-t_is(om.soln.var.val.x1, om.get_soln('var', 'x1'), 14, [t 'var.val.x1']);
-t_is(om.soln.var.val.x2, om.get_soln('var', 'x2'), 14, [t 'var.val.x2']);
+t_is(om.var.soln.val.x1, om.get_soln('var', 'x1'), 14, [t 'var.val.x1']);
+t_is(om.var.soln.val.x2, om.get_soln('var', 'x2'), 14, [t 'var.val.x2']);
 
 t = 'disp_soln';
 rn = fix(1e9*rand);
