@@ -2168,6 +2168,10 @@ om = opt_model;
 
 Variables, constraints and costs can then be added to the model using named sets. For variables and constraints, each set represents a column vector, and the sets are stacked in the order they are added to construct the full optimization variable or full constraint vector. For costs, each set represents a component of a scalar cost, and the components are summed together to construct the full objective function value.
 
+\subsection*{Important Note}
+
+\mpom{} 4.3 introduced a major refactorization of \code{opt\_model}. While it is mostly backward compatible with what is described here, please see Section~\ref{sec:mp_set_manager} and the online \href{https://matpower.org/doc/mpom/}{\mpom{} Reference Manual}\footnote{\url{https://matpower.org/doc/mpom/}} for more details and up-to-date documentation.
+
 \subsection{Adding Variables}
 \label{sec:add_var}
 
@@ -3485,6 +3489,22 @@ name & description \\
 \end{table}
 
 \clearpage
+\subsection{\matpower{} Set Manager -- {\tt mp.set\_manager}}
+\label{sec:mp_set_manager}
+
+\mpom{} 4.3 introduced a major refactorization in which much of the functionality of the \code{mp\_idx\_manager} and \code{opt\_model} classes were moved from the container class, into individual set type properties which were converted from simple structs into mostly backward-compatible objects that inherit from the new \code{mp.set\_manager} and \code{mp.set\_manager\_opt\_model} classes, namely:
+
+\begin{itemize}
+\item \code{mp.sm\_lin\_constraint} - set manager class for linear constraints
+\item \code{mp.sm\_nln\_constraint} - set manager class for nonlinear constraints
+\item \code{mp.sm\_nln\_cost} - set manager class for general nonlinear costs
+\item \code{mp.sm\_quad\_cost} - set manager class for quadratic costs
+\item \code{mp.sm\_variable} - set manager class for variables
+\end{itemize}
+
+For more details on these classes, please see the online \href{https://matpower.org/doc/mpom/}{\mpom{} Reference Manual}\footnote{\url{https://matpower.org/doc/mpom/}}.
+
+\clearpage
 \subsection{Reference}
 
 \subsubsection{Properties}
@@ -4650,9 +4670,15 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 \subsubsection*{New Features}
 \begin{itemize}
 \item 
-\item New class:
+\item New classes:
     \begin{itemize}
     \item \code{mp.set\_manager} encapsulates \code{mp\_idx\_manager} functionality into an individual field object representing a specific set type, rather than in the container class.
+    \item \code{mp.set\_manager\_opt\_model} is a subclass of \code{mp.set\_manager} that handles common functionality, e.g. related to handling solution data, for all of the set manager subclasses used by \code{opt\_model}.
+    \item \code{mp.sm\_lin\_constraint} - set manager class for linear constraints
+    \item \code{mp.sm\_nln\_constraint} - set manager class for nonlinear constraints
+    \item \code{mp.sm\_nln\_cost} - set manager class for general nonlinear costs
+    \item \code{mp.sm\_quad\_cost} - set manager class for quadratic costs
+    \item \code{mp.sm\_variable} - set manager class for variables
     \end{itemize}
 \item New functions:
     \begin{itemize}
@@ -4668,8 +4694,49 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 
 \subsubsection*{Other Changes}
 \begin{itemize}
-\item Refactor \code{mp\_idx\_manager} to use new \code{mp.set\_manager} class.
+\item Major refactor of \code{mp\_idx\_manager} to use new \code{mp.set\_manager} class.
+\item Major refactor of \code{opt\_model} to use new \code{mp.set\_manager\_opt\_model} subclasses:
+    \begin{itemize}
+    \item \code{mp.sm\_lin\_constraint} - set manager class for linear constraints
+    \item \code{mp.sm\_nln\_constraint} - set manager class for nonlinear constraints
+    \item \code{mp.sm\_nln\_cost} - set manager class for general nonlinear costs
+    \item \code{mp.sm\_quad\_cost} - set manager class for quadratic costs
+    \item \code{mp.sm\_variable} - set manager class for variables
+    \end{itemize}
+\item Deprecate the following \code{opt\_model} methods in favor of methods of the individual \code{mp.set\_manager} objects contained by the \code{opt\_model} object:
+    \begin{itemize}
+    \item \code{add\_named\_set()} -- use \code{mp.set\_manager.add()}
+    \item \code{describe\_idx()} -- use \code{mp.set\_manager.describe\_idx()}
+    \item \code{getN()} -- use \code{mp.set\_manager.get\_N()}
+    \item \code{init\_indexed\_name()} -- use \code{mp.set\_manager.init\_indexed\_name()}
+    \item \code{set\_type\_idx\_map()} -- use \code{mp.set\_manager.set\_type\_idx\_map()}
+    \item \code{add\_lin\_constraint()} -- use \code{mp.sm\_lin\_constraint.add()}
+    \item \code{add\_nln\_constraint()} -- use \code{mp.sm\_nln\_constraint.add()}
+    \item \code{add\_nln\_cost()} -- use \code{mp.sm\_nln\_cost.add()}
+    \item \code{add\_quad\_cost()} -- use \code{mp.sm\_quad\_cost.add()}
+    \item \code{add\_var()} -- use \code{mp.sm\_variable.add()}
+    \item \code{eval\_lin\_constraint()} -- use \code{mp.sm\_lin\_constraint.eval()}
+    \item \code{eval\_nln\_constraint()} -- use \code{mp.sm\_nln\_constraint.eval()}
+    \item \code{eval\_nln\_constraint\_hess()} -- use \code{mp.sm\_nln\_constraint.eval\_hess()}
+    \item \code{eval\_nln\_cost()} -- use \code{mp.sm\_nln\_cost.eval()}
+    \item \code{eval\_quad\_cost()} -- use \code{mp.sm\_quad\_cost.eval()}
+    \item \code{init\_indexed\_name()} -- use \code{mp.set\_manager.init\_indexed\_name()}
+    \item \code{params\_lin\_constraint()} -- use \code{mp.sm\_lin\_constraint.params()}
+    \item \code{params\_nln\_constraint()} -- use \code{mp.sm\_nln\_constraint.params()}
+    \item \code{params\_nln\_cost()} -- use \code{mp.sm\_nln\_cost.params()}
+    \item \code{params\_quad\_cost()} -- use \code{mp.sm\_quad\_cost.params()}
+    \item \code{params\_var()} -- use \code{mp.sm\_variable.params()}
+    \item \code{set\_params()} -- use \code{mp.set\_manager.set\_params()}
+    \item \code{varsets\_cell2struct()} -- use \code{mp.sm\_variable.varsets\_cell2struct()}
+    \item \code{varsets\_idx()} -- use \code{mp.sm\_variable.varsets\_idx()}
+    \item \code{varsets\_len()} -- use \code{mp.sm\_variable.varsets\_len()}
+    \item \code{varsets\_x()} -- use \code{mp.sm\_variable.varsets\_x()}
+    \end{itemize}
+\end{itemize}
 
+\subsubsection*{Incompatible Changes}
+\begin{itemize}
+\item Parsed solution information was moved from the \code{soln} property of the \code{opt\_model} object to the \code{soln} property of the individual child \code{mp.set\_manager\_opt\_model} objects. Currently it is still available at the original location, but this is now deprecated.
 \end{itemize}
 
 % \subsection{Version 5.0 -- released ??? ?, 202?}
