@@ -57,6 +57,7 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %           cplex_opt   - options struct for CPLEX
 %           glpk_opt    - options struct for GLPK
 %           grb_opt     - options struct for GUROBI
+%           knitro_opt  - options struct for KNITRO
 %           ipopt_opt   - options struct for IPOPT
 %           linprog_opt - options struct for LINPROG
 %           mips_opt    - options struct for QPS_MIPS
@@ -182,6 +183,8 @@ if ~isempty(opt) && isfield(opt, 'alg') && ~isempty(opt.alg)
                 alg = 'MOSEK';
             case 700
                 alg = 'GUROBI';
+            case 800
+                alg = 'KNITRO';
             otherwise
                 error('qps_master: %d is not a valid algorithm code', alg);
         end
@@ -207,6 +210,8 @@ if strcmp(alg, 'DEFAULT')
         alg = 'GLPK';               %% prob is LP (not QP), then GLPK, if available
     elseif have_feature('bpmpd')    %% if not, then BPMPD_MEX, if available
         alg = 'BPMPD';
+    elseif have_feature('knitro')   %% if not, then KNITRO, if available
+        alg = 'KNITRO';
     else                            %% otherwise MIPS
         alg = 'MIPS';
     end
@@ -266,6 +271,9 @@ switch alg
     case 'OT'                   %% use QUADPROG or LINPROG from Opt Tbx ver 2.x+
         [x, f, eflag, output, lambda] = ...
             qps_ot(H, c, A, l, u, xmin, xmax, x0, opt);
+    case 'KNITRO'
+        [x, f, eflag, output, lambda] = ...
+            qps_knitro(H, c, A, l, u, xmin, xmax, x0, opt);
     otherwise
         fcn = ['qps_' lower(alg)];
         if exist([fcn '.m']) == 2
