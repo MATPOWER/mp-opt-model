@@ -307,7 +307,7 @@ classdef set_manager_opt_model < mp.set_manager
             %
             % See also display_soln.
 
-            if nargin < 1 || ischar(varargin{1})
+            if nargin < 2 || ischar(varargin{1})
                 fid = 1;
                 args = varargin;
             else
