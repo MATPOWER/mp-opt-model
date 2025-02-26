@@ -224,11 +224,12 @@ switch pt
     otherwise
         %% get parameters
         [HH, CC, C0] = om.params_quad_cost();
+        [Q, C, k, ll, uu] = om.qcn.params(om.var);
         [A, l, u] = om.params_lin_constraint();
         mixed_integer = strcmp(pt(1:2), 'MI') && ...
             (~isfield(opt, 'relax_integer') || ~opt.relax_integer);
 
-        if mixed_integer    %% MILP, MIQP - mixed integer linear/quadratic program
+        if mixed_integer
             %% optimization vars, bounds, types
             [x0, xmin, xmax, vtype] = om.params_var();
             if isfield(opt, 'x0')
@@ -236,8 +237,14 @@ switch pt
             end
 
             %% run solver
-            [x, f, eflag, output, lambda] = ...
-                miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
+            if isempty(Q)          %% MILP, MIQP - mixed integer linear/quadratic program
+                [x, f, eflag, output, lambda] = ...
+                    miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
+            else                   %% MIQCQP - mixed integer quadratically constrained quadratic program
+                % To be implemented ...
+                % [x, f, eflag, output, lambda] = ...
+                %    miqcqps_master(HH, CC, Q, C, k, ll, uu, A, l, u, xmin, xmax, x0, vtype, opt);
+            end
         else                %% LP, QP - linear/quadratic program
             %% optimization vars, bounds, types
             [x0, xmin, xmax] = om.params_var();
@@ -246,8 +253,13 @@ switch pt
             end
 
             %% run solver
-            [x, f, eflag, output, lambda] = ...
-                qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
+            if isempty(Q)          %% LP, QP - linear/quadratic program
+                [x, f, eflag, output, lambda] = ...
+                    qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
+            else                   %% QCQP - quadratically constrained quadratic program
+                [x, f, eflag, output, lambda] = ...
+                    qcqps_master(HH, CC, Q, C, k, ll, uu, A, l, u, xmin, xmax, x0, opt);
+            end
         end
         f = f + C0;
 end
