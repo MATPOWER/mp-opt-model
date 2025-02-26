@@ -68,7 +68,8 @@ if ~isempty(ps_nli)
 end
 
 %%-----  DEPRECATED  -----
-%% stash the result, if requested
+%% if requested, stash the result directly in om.soln
+%% (they are already stashed in the soln property of each set type)
 if stash
     om.soln = nested_struct_copy(om.soln, ps, struct('copy_mode', '='));
 end
