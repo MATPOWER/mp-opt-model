@@ -46,6 +46,10 @@ if nargin < 2
     stash = false;
 end
 
+if ~om.is_solved()
+    error('opt_model.parse_soln: model not solved');
+end
+
 %% var
 ps = struct('var', om.var.parse_soln(om.soln, stash));
 

@@ -11,6 +11,10 @@ since 4.2
     `knitrover()`, and `artelys_knitro_options()`.
     *Thanks to Wilson Gonzalez Vanegas.*
 
+#### 2/28/25
+  - Throw error if `opt_model.parse_soln()` is called for an unsolved
+    model. 
+
 #### 10/29/24
   - Add `relax_integer` option for `opt_model.solve()`. Set to true to easily
     solve the LP or QP relaxation of a mixed integer LP or QP.
