@@ -102,9 +102,13 @@ else
 end
 
 %%-----  set default options for Knitro  -----
-kv = knitrover;
-if have_feature('knitro') && str2double(kv(1:2)) >= 14
-    opt = knitro_options;
+if have_feature('knitro')
+    if have_feature('knitro', 'vnum') >= 13
+        opt = knitro_options;
+    else
+        kv = knitrover;
+        error('artelys_knitro_options: requires Aretelys Knitro version 13.x or later (installed version is %s)', kv)
+    end
 else
     error('artelys_knitro_options: requires Aretelys Knitro version 13.x or later');
 end
