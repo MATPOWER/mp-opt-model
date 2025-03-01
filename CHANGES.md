@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 3/1/25
+  - Add support to `qps_master()` for [Artelys Knitro][14] solver for
+    LP and QP problems, including functions `qps_knitro()`,
+    `knitrover()`, and `artelys_knitro_options()`.
+    *Thanks to Wilson Gonzalez Vanegas.*
+
 #### 10/29/24
   - Add `relax_integer` option for `opt_model.solve()`. Set to true to easily
     solve the LP or QP relaxation of a mixed integer LP or QP.
@@ -571,3 +577,4 @@ Version 0.7.0 - *Jun 20, 2019*
 [11]: https://github.com/MATPOWER/most
 [12]: https://github.com/ebertolazzi/mexIPOPT
 [13]: https://matpower.org/doc/mpom/
+[14]: https://www.artelys.com/solvers/knitro/
