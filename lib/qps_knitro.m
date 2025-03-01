@@ -77,7 +77,6 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 %       [x, f, exitflag, output] = qps_knitro(...)
 %       [x, f, exitflag, output, lambda] = qps_knitro(...)
 %
-%
 %   Example: (problem from from https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm)
 %       H = [   1003.1  4.3     6.3     5.9;
 %               4.3     2.2     2.1     3.9;
@@ -96,8 +95,9 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 % See also qps_master, knitro_qp, knitro_lp
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
