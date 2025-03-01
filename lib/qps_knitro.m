@@ -1,12 +1,12 @@
 function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x0, opt)
-% qps_knitro - Quadratic Program Solver based on Artelys KNITRO.
+% qps_knitro - Quadratic Program Solver based on Artelys Knitro.
 % ::
 %
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
 %       QPS_KNITRO(H, C, A, L, U, XMIN, XMAX, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QPS_KNITRO(PROBLEM)
 %   A wrapper function providing a standardized interface for using
-%   KNITRO to solve the following QP (quadratic programming)
+%   Artelys Knitro to solve the following QP (quadratic programming)
 %   problem:
 %
 %       min 1/2 X'*H*X + C'*X
@@ -34,7 +34,7 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 %               1 = some progress output
 %               2 = verbose progress output
 %               3 = even more verbose progress output
-%           knitro_opt - options struct for KNITRO, value in verbose
+%           knitro_opt - options struct for Artelys Knitro, value in verbose
 %                        overrides these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
@@ -43,11 +43,11 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 %   Outputs:
 %       X : solution vector
 %       F : final objective function value
-%       EXITFLAG : KNITRO exit flag
+%       EXITFLAG : Artelys Knitro exit flag
 %           1 = converged
-%           (see KNITRO documentation for details)
-%       OUTPUT : KNITRO output struct
-%           (see KNITRO documentation for details)
+%           (see Artelys Knitro documentation for details)
+%       OUTPUT : Artelys Knitro output struct
+%           (see Artelys Knitro documentation for details)
 %       LAMBDA : struct containing the Langrange and Kuhn-Tucker
 %           multipliers on the constraints, with fields:
 %           mu_l - lower (left-hand) limit on linear constraints
@@ -217,7 +217,7 @@ end
 
 if verbose
     vn = knitrover;
-    fprintf('Artelys KNITRO Version %s -- %s %s solver\n', ...
+    fprintf('Artelys Knitro Version %s -- %s %s solver\n', ...
         vn, output.algorithm, lpqp);
 end
 

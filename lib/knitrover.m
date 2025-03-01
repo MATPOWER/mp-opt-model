@@ -1,5 +1,5 @@
 function rv = knitrover(varargin)
-% knitrover - Prints or returns installed Artelys KNITRO version info.
+% knitrover - Prints or returns installed Artelys Knitro version info.
 % ::
 %
 %   knitrover
@@ -7,11 +7,11 @@ function rv = knitrover(varargin)
 %   v = knitrover('all')
 %
 % When called with an output argument and no input argument, knitrover
-% returns the current KNITRO version numbers. With an input argument
+% returns the current Artelys Knitro version numbers. With an input argument
 % (e.g. ``'all'``) it returns  a struct with the fields ``Name``,
 % ``Version``, ``Release``, and ``Date`` *(all char arrays)*. Calling
 % knitrover without assigning the return value prints the version and
-% release date of the current installation of KNITRO.
+% release date of the current installation of Artelys Knitro.
 %
 % See also mpver, knitro_solve.
 
@@ -28,7 +28,7 @@ if ~kntr.av
     kntr.vstr = '<unknown>';
 end
 
-v = struct( 'Name',     'Knitro', ... 
+v = struct( 'Name',     'Artelys Knitro', ... 
             'Version',  kntr.vstr, ...
             'Release',  '', ...
             'Date',     kntr.date );
