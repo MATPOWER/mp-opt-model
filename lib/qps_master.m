@@ -122,8 +122,9 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %       [x, f, s, out, lambda] = qps_master(H, c, A, l, u, xmin, [], x0, opt);
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
+%   and Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
@@ -206,12 +207,12 @@ if strcmp(alg, 'DEFAULT')
         alg = 'MOSEK';
     elseif have_feature('quadprog') && have_feature('matlab')   %% if not, then Opt Tbx, if available in MATLAB
         alg = 'OT';
+    elseif have_feature('knitro')   %% if not, then Artelys Knitro, if available
+        alg = 'KNITRO';
     elseif (isempty(H) || ~any(any(H))) && have_feature('glpk') %% if not, and
         alg = 'GLPK';               %% prob is LP (not QP), then GLPK, if available
     elseif have_feature('bpmpd')    %% if not, then BPMPD_MEX, if available
         alg = 'BPMPD';
-    elseif have_feature('knitro')   %% if not, then KNITRO, if available
-        alg = 'KNITRO';
     else                            %% otherwise MIPS
         alg = 'MIPS';
     end

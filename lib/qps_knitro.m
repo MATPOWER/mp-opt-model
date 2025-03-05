@@ -1,12 +1,12 @@
 function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x0, opt)
-% qps_knitro - Quadratic Program Solver based on Artelys KNITRO.
+% qps_knitro - Quadratic Program Solver based on Artelys Knitro.
 % ::
 %
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
 %       QPS_KNITRO(H, C, A, L, U, XMIN, XMAX, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QPS_KNITRO(PROBLEM)
 %   A wrapper function providing a standardized interface for using
-%   KNITRO to solve the following QP (quadratic programming)
+%   Artelys Knitro to solve the following QP (quadratic programming)
 %   problem:
 %
 %       min 1/2 X'*H*X + C'*X
@@ -34,7 +34,7 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 %               1 = some progress output
 %               2 = verbose progress output
 %               3 = even more verbose progress output
-%           knitro_opt - options struct for KNITRO, value in verbose
+%           knitro_opt - options struct for Artelys Knitro, value in verbose
 %                        overrides these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
@@ -43,11 +43,11 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 %   Outputs:
 %       X : solution vector
 %       F : final objective function value
-%       EXITFLAG : KNITRO exit flag
+%       EXITFLAG : Artelys Knitro exit flag
 %           1 = converged
-%           (see KNITRO documentation for details)
-%       OUTPUT : KNITRO output struct
-%           (see KNITRO documentation for details)
+%           (see Artelys Knitro documentation for details)
+%       OUTPUT : Artelys Knitro output struct
+%           (see Artelys Knitro documentation for details)
 %       LAMBDA : struct containing the Langrange and Kuhn-Tucker
 %           multipliers on the constraints, with fields:
 %           mu_l - lower (left-hand) limit on linear constraints
@@ -77,7 +77,6 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 %       [x, f, exitflag, output] = qps_knitro(...)
 %       [x, f, exitflag, output, lambda] = qps_knitro(...)
 %
-%
 %   Example: (problem from from https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm)
 %       H = [   1003.1  4.3     6.3     5.9;
 %               4.3     2.2     2.1     3.9;
@@ -96,8 +95,9 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 % See also qps_master, knitro_qp, knitro_lp
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
@@ -217,7 +217,7 @@ end
 
 if verbose
     vn = knitrover;
-    fprintf('Artelys KNITRO Version %s -- %s %s solver\n', ...
+    fprintf('Artelys Knitro Version %s -- %s %s solver\n', ...
         vn, output.algorithm, lpqp);
 end
 

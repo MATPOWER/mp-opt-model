@@ -1,5 +1,5 @@
 function opt = artelys_knitro_options(overrides, mpopt)
-% artelys_knitro_options - Sets options for KNITRO (version 14.x and greater).
+% artelys_knitro_options - Sets options for Artelys Knitro (version 13.x and greater).
 % ::
 %
 %   OPT = ARTELYS_KNITRO_OPTIONS
@@ -7,7 +7,7 @@ function opt = artelys_knitro_options(overrides, mpopt)
 %   OPT = ARTELYS_KNITRO_OPTIONS(OVERRIDES, FNAME)
 %   OPT = ARTELYS_KNITRO_OPTIONS(OVERRIDES, MPOPT)
 %
-%   Sets the values for the options struct normally passed to KNITRO.
+%   Sets the values for the options struct normally passed to Artelys Knitro.
 %
 %   Inputs are all optional, second argument must be either a string
 %   (FNAME) or a struct (MPOPT):
@@ -33,7 +33,7 @@ function opt = artelys_knitro_options(overrides, mpopt)
 %               'knitro_user_options_' (for backward compatibility with old
 %               MATPOWER option KNITRO_OPT).
 %
-%   Output is a parameter struct to pass to KNITRO.
+%   Output is a parameter struct to pass to Artelys Knitro.
 %
 %   There are multiple ways of providing values to override the default
 %   options. Their precedence and order of application are as follows:
@@ -48,7 +48,7 @@ function opt = artelys_knitro_options(overrides, mpopt)
 %
 %   Example:
 %
-%   If knitro.opt = 3, then after setting the default KNITRO options,
+%   If knitro.opt = 3, then after setting the default Artelys Knitro options,
 %   ARTELYS_KNITRO_OPTIONS will execute the following user-defined function
 %   to allow option overrides:
 %
@@ -70,8 +70,9 @@ function opt = artelys_knitro_options(overrides, mpopt)
 % See also knitro_options, mpoption.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
@@ -101,11 +102,15 @@ else
 end
 
 %%-----  set default options for Knitro  -----
-kv = knitrover;
-if have_feature('knitro') && str2double(kv(1:2)) >= 14
-    opt = knitro_options;
+if have_feature('knitro')
+    if have_feature('knitro', 'vnum') >= 13
+        opt = knitro_options;
+    else
+        kv = knitrover;
+        error('artelys_knitro_options: requires Aretelys Knitro version 13.x or later (installed version is %s)', kv)
+    end
 else
-    error('Mp-Opt-Model:artelys_knitro_options: knitro version %s is older that 14.x \n', kv)
+    error('artelys_knitro_options: requires Aretelys Knitro version 13.x or later');
 end
 
 if have_mpopt
