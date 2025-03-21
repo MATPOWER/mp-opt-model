@@ -48,6 +48,7 @@ if isempty(om.prob_type) || nargin > 1 && recheck
     nliN = om.getN('nli');      %% nonlinear inequalities
     nlcN = om.getN('nlc');      %% general nonlinear costs
     qdcN = om.getN('qdc');      %% quadratic costs
+    qcnN = om.getN('qcn');      %% quadratic constraints
     linN = om.getN('lin');      %% linear constraints
     varN = om.getN('var');      %% variables
     if varN == 0
@@ -55,6 +56,8 @@ if isempty(om.prob_type) || nargin > 1 && recheck
     elseif nlcN || qdcN         %% problem has costs
         if nliN || nleN || nlcN %% nonlinear
             prob = 'NLP';           %% nonlinear program
+        elseif qcnN                 %% quadratically constrained quadratic program
+            prob = 'QCQP';
         else                    %% linear constraints, no general nonlinear costs
             %% get quadratic cost coefficients
             H = om.params_quad_cost();
