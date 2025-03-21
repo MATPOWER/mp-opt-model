@@ -5,6 +5,16 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 3/19/25
+  - Update `miqps_<solver>()` functions to avoid changing MIP solution
+    values in price computation stage. It was rounding integer variables,
+    potentionally causing a small discrepancy between the objective
+    value reported by the solver and the value obtained by computing
+    directly from the returned solution x.
+
+#### 3/8/25
+  - Update `mosek_options()` for MOSEK 11.x compatibility.
+
 #### 3/1/25
   - Add support to `qps_master()` for [Artelys Knitro][14] solver for
     LP and QP problems, including functions `qps_knitro()`,
