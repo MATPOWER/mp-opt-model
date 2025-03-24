@@ -20,6 +20,7 @@ Use :class:`opt_model` to build and solve your mathematical programming and opti
    classes/mp/sm_nln_constraint
    classes/mp/sm_nln_cost
    classes/mp/sm_quad_cost
+   classes/mp/sm_quad_constraint
 
 
 |MPOM| Functions
@@ -30,7 +31,7 @@ Use :class:`opt_model` to build and solve your mathematical programming and opti
 Master Functions
 ^^^^^^^^^^^^^^^^
 
-The |MPOM| master functions provide unified interfaces to multiple solvers for linear program (LP), quadratic program (QP), nonlinear program (NLP), mixed-integer program (MILP/MIQP) optimization, as well as nonlinear equation (NLEQ) solving and parameterized nonlinear equation (PNE) solution tracing.
+The |MPOM| master functions provide unified interfaces to multiple solvers for linear program (LP), quadratic program (QP), quadratically constrained quadratic program (QCQP), nonlinear program (NLP), mixed-integer program (MILP/MIQP) optimization, as well as nonlinear equation (NLEQ) solving and parameterized nonlinear equation (PNE) solution tracing.
 
 .. toctree::
 
@@ -38,6 +39,7 @@ The |MPOM| master functions provide unified interfaces to multiple solvers for l
    functions/nleqs_master
    functions/nlps_master
    functions/pnes_master
+   functions/qcqps_master
    functions/qps_master
 
 
@@ -50,6 +52,7 @@ Use these functions to convert linear constraints or to copy data from one struc
 
    functions/convert_lin_constraint_multipliers
    functions/convert_lin_constraint
+   functions/convert_quad_constraint
    functions/nested_struct_copy
 
 
@@ -71,6 +74,7 @@ Use these functions to set up input options for individual solvers.
    functions/mpopt2nleqopt
    functions/mpopt2nlpopt
    functions/mpopt2pneopt
+   functions/mpopt2qcqpopt
    functions/mpopt2qpopt
 
 
@@ -165,6 +169,18 @@ LP/QP Solver
    functions/qps_ot
 
 
+QCQP Solver
+^^^^^^^^^^^
+
+.. toctree::
+
+   functions/qcqp_nlp_consfcn
+   functions/qcqp_nlp_costfcn
+   functions/qcqp_nlp_hessfcn
+   functions/qcqps_gurobi
+   functions/qcqps_knitro
+
+
 |MPOM| Examples
 ---------------
 
@@ -197,10 +213,13 @@ These functions test that |MPOM| is installed and functioning as expected.
    functions/t_om_solve_nleqs
    functions/t_om_solve_nlps
    functions/t_om_solve_pne
+   functions/t_om_solve_qcqps
    functions/t_om_solve_qps
    functions/t_opt_model
    functions/t_pnes_master
+   functions/t_qcqps_master
    functions/t_qps_master
+   functions/t_sm_quad_constraint
 
 
 Private Functions
