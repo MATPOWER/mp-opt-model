@@ -413,7 +413,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             end
         end
 
-        function [QFx_u, l_QFx, JQF] = eval(obj, var, x, name, idx)
+        function [QFx_u, l_QFx, QFx, JQF] = eval(obj, var, x, name, idx)
             % Evaluate individual or full set of quadratic constraints.
             % ::
             %
@@ -422,6 +422,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   QFx_u = qcn.eval(var, x, name, idx)
             %   [QFx_u, l_QFx] = qcn.eval(...)
             %   [QFx_u, l_QFx, JQF] = qcn.eval(...)
+            %   [QFx_u, l_QFx, JQF, QFx] = qcn.eval(...)
             %
             % For a given value of the variable vector x, this method evaluates
             % the quadratic constraints for an individual subset, if name or name 
@@ -433,7 +434,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % or in compact form for a subset or full set of constraints:
             % 
-            %                   l <= QFX <= u
+            %                   l - C <= QFX <= u - C
+            %
+            % where C is the matrix whose rows are c_i
             %
             % Returns QFX - u, and optionally l - QFX and the jacobian JQF.
             %
@@ -446,9 +449,10 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %       of quadratic constraints to evaluate (for an indexed subset)
             %
             % Outputs:
-            %   QFx_u (double) : value of QFX - u
-            %   l_QFx (double) : *(optional)* value of l - QFX
+            %   QFx_u (double) : value of QFX - (u - C)
+            %   l_QFx (double) : *(optional)* value of l - (QFX + C)
             %   JQF (double) : *(optional)* Jacobian of quadratic constraints
+            %   QFx (double) : *(optional)* value of QFX
             % 
             % Examples::
             %
@@ -485,29 +489,25 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 blkx = blkdiag(xx{:});
 
                 %% Compute quadratic constraints
-                if any(isinf([l;u]))
-                    if isempty(k)
-                        QFx_u = 1/2 * diag(blkx * Qblk * blkx') + C * x;
-                    elseif isempty(C)
-                        QFx_u = 1/2 * diag(blkx * Qblk * blkx') + k;
-                    else
-                        QFx_u = 1/2 * diag(blkx * Qblk * blkx') + C * x + k;
-                    end
+                if isempty(k)
+                    QFX = 1/2 * diag(blkx * Qblk * blkx') + C * x;
+                    QFx_u = QFX - u;
+                elseif isempty(C)
+                    QFX = 1/2 * diag(blkx * Qblk * blkx');
+                    QFx_u = QFX + k - u;
                 else
-                    if isempty(k)
-                        QFx_u = 1/2 * diag(blkx * Qblk * blkx') + C * x - u;
-                    elseif isempty(C)
-                        QFx_u = 1/2 * diag(blkx * Qblk * blkx') + k - u;
-                    else
-                        QFx_u = 1/2 * diag(blkx * Qblk * blkx') + C * x + k - u;
-                    end
+                    QFX = 1/2 * diag(blkx * Qblk * blkx') + C * x;
+                    QFx_u = QFX + k - u;
                 end
 
                 if nargout > 1
-                    l_QFx = l - (QFx_u + u);
+                    l_QFx = l - QFX;
                     if nargout > 2   %% Jacobian is requested
                         Qx = obj.blkprod2vertcat(blkx, Qblk, length(x));
                         JQF = Qx + C;
+                        if nargout > 3
+                            QFx = QFX;
+                        end
                     end
                 end
             else
@@ -516,6 +516,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     l_QFx = [];
                     if nargout > 2
                         JQF = [];
+                        if nargout > 3
+                            QFx = [];
+                        end
                     end
                 end
             end
