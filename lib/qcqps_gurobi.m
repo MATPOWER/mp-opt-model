@@ -370,7 +370,7 @@ lam.upper(ku)   = -rc(ku);
 
 if ~isempty(Q_quad) 
     if ~isfield(results, 'qcpi') || isempty(results.qcpi)
-        qcpi = NaN(length(m.quadcon), 1); % Current version of Gurobi (11.0.3) does not return multipliers for non-convex qcqp
+        qcpi = NaN(length(m.quadcon), 1); % Current version of Gurobi (11.0.3) does not return multipliers for non-convex qcqp. See https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/constraintquadratic.html#qcpi
     else
         qcpi = results.qcpi;
     end
