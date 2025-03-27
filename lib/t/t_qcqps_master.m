@@ -23,19 +23,24 @@ does_qp       = [1 1 1 1 1 1 0 1 1 1  1  1  0  1  0];
 does_qcqp     = [1 0 1 1 1 0 1 1 0 1  1  0  0  0  1];
 does_nonconv  = [1 1 1 1 1 0 1 0 0 1  1  0  0  0  1];
 
-nlp = 2;
+nlp_feas = 1;
+nlp_nonfeas = 1;
 nqpconv = 4;
 nqpnonconv = 0;
 nqcqpconv = 2;
 nqcqpnonconv = 1;
-nproblems = nlp+nqpconv+nqpnonconv+nqcqpconv+nqcqpnonconv;
-ntests = 9;
-nskipsolver = (ntests-1)*nproblems+1;
-nskiplp = (ntests-1)*nlp+1;
-nskipqpnonconv = (ntests-1)*nqpnonconv+1;
-nskipqp = nskipqpnonconv+(ntests-1)*nqpconv+1;
-nskipqcqpnonconv = (ntests-1)*nqcqpnonconv+1;
-nskipqcqp = nskipqcqpnonconv+(ntests-1)*nqcqpconv+1;
+nproblems_feas = nqpconv+nqpnonconv+nqcqpconv+nqcqpnonconv;
+nproblems_nonfeas = nlp_nonfeas;
+ntests_feas = 9;
+ntests_nonfeas = 1;
+nskiplp_feas = (ntests_feas-2)*nlp_feas;
+nskiplp_nonfeas = ntests_nonfeas*nlp_nonfeas;
+nskipqpnonconv = ntests_feas*nqpnonconv;
+nskipqp = nskipqpnonconv+ntests_feas*nqpconv;
+nskipqcqpnonconv = ntests_feas*nqcqpnonconv;
+nskipqcqp = nskipqcqpnonconv+ntests_feas*nqcqpconv;
+nskipsolver = ntests_feas*nproblems_feas + ...
+              (ntests_feas-2)*nlp_feas + ntests_nonfeas*nproblems_nonfeas;
 
 t_begin(nskipsolver*length(algs), quiet);
 
@@ -71,7 +76,6 @@ for k = 1:length(algs)
                  'threads', 0, ...
                  'opts', [], ...
                  'opt_fname', [], ...
-                 'BarQCPConvTol', 0, ...
                  'opt', 0), ...
              'knitro', struct( ...
                  'tol_x', 1e-10, ...
@@ -123,9 +127,11 @@ for k = 1:length(algs)
         end
         if have_feature('gurobi')
             opt.grb_opt = gurobi_options([], mpopt);
+            opt.grb_opt.BarQCPConvTol = 1e-8;
         end
         if have_feature('knitro')
             opt.knitro_opt = artelys_knitro_options([],  mpopt);
+            opt.knitro_opt.ncvx_qcqp_init = 1;
         end
 
         if does_lp(k)
@@ -160,7 +166,7 @@ for k = 1:length(algs)
             [x, f, s, out, lam] = qcqps_master(p);
             t_ok(s <= 0, [t 'no success']);
         else
-            t_skip(nskiplp, sprintf('%s does not handle LP problems', names{k}));
+            t_skip(nskiplp_feas+nskiplp_nonfeas, sprintf('%s does not handle LP problems', names{k}));
         end
 
         if does_qp(k)
@@ -232,7 +238,7 @@ for k = 1:length(algs)
                 t_is(lam.lower, [2.24;0;0;1.7667], 4, [t 'lam.lower']);
                 t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
             end
-            t_skip(2, [t 'lam.mu_l/u_quad: no multipliers of quad constraints for QPs'])
+            t_skip(2, [t 'lam.mu_l/u_quad: no multipliers of quad constraints for this QP'])
             
             %% 6) Same previous passing a struct
             t = sprintf('%s - (struct) constrained 4-d convex QP : ', names{k});
@@ -249,7 +255,7 @@ for k = 1:length(algs)
                 t_is(lam.lower, [2.24;0;0;1.7667], 4, [t 'lam.lower']);
                 t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
             end
-            t_skip(2, [t 'lam.mu_l/u_quad: no multipliers of quad constraints for QPs'])
+            t_skip(2, [t 'lam.mu_l/u_quad: no multipliers of quad constraints for this QP'])
         else
             t_skip(nskipqp, sprintf('%s does not handle QP problems', names{k}));
         end
@@ -280,12 +286,9 @@ for k = 1:length(algs)
             t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
             t_is(lam.mu_l, 0, 6, [t 'lam.mu_l']);
             t_is(lam.mu_u, 0.391577, 6, [t 'lam.mu_u']);
-            if strcmp(algs{k}, 'GUROBI')
-                t_skip(2, [t 'lam.lower/upper : QCQP-GUROBI version 11.0.3  does not return multipliers on quad constraints for nonconvex qcqp']);
-            else
-                t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
-                t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
-            end
+            t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
+            t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
+            
             %% 8) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
             t = sprintf('%s - convex 3-d QCQP with quad objective: ', names{k});
             H = sparse([2 0 -1; 0 0.2 0; -1 0 2]);
