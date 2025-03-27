@@ -1,14 +1,14 @@
-function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, k, l, u)
+function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, l, u)
 % convert_quad_constraint - Convert a set of bounded quadratic constraints to 
 % equality/inequality pair
 % ::
 %
-%   [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, k, l, u)
-%   [ieq, igt, ilt, Q, C, b] = convert_quad_constraint(Q, C, k, l, u)
+%   [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, l, u)
+%   [ieq, igt, ilt, Q, C, b] = convert_quad_constraint(Q, C, l, u)
 %
 % Convert a set of constraints of the form:
 %
-%       l(j) <= x'*Q{j}*x + C(j,:)*x + k(j) <= u(j),  j = 1,2,...,NQ
+%       l(j) <= x'*Q{j}*x + C(j,:)*x <= u(j),  j = 1,2,...,NQ
 %
 % to:
 %
@@ -19,10 +19,10 @@ function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C,
 %
 %       Qe = Q(ieq)
 %       Ce = C(ieq,:)
-%       be = u(ieq) - k(ieq)
+%       be = u(ieq)
 %       Qi = [Q(ilt); -Q(igt)]
 %       Ci = [C(ilt,:); -C(igt,:)]
-%       bi = [u(ilt)-k(ilt);  -l(igt)+k(igt)]
+%       bi = [u(ilt);  -l(igt)]
 %
 % Alternatively, the returned cells, matrices, and RHS vectors can be stacked
 % into a single set with the equalities first, then the inequalities.
@@ -36,7 +36,6 @@ function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C,
 %                holding the quadratic parameters of the quadratic constraints
 %   C (double) : NQ x n, matrix whose rows represent the linear parameters of
 %                the quadratic constraints
-%   k (double) : NQ x 1, vector of constant terms of the quadratic constraints
 %   l (double) : NQ x 1, quadratic constraint lower bound vector
 %   u (double) : NQ x 1, quadratic constraint upper bound vector
 %
@@ -72,12 +71,12 @@ ilt = find( u <  1e10 & ~eq );  %% inequality w/finite upper bound
 if nargout < 9      %% stacked case
     Qe = [Q([ieq; ilt]); cellfun(@(x)(-1*x), Q(igt), 'UniformOutput', false)];
     Ce = [C([ieq; ilt],:); -C(igt,:)];
-    be = [u([ieq; ilt])-k([ieq; ilt]);  -l(igt)+k(igt)];
+    be = [u([ieq; ilt]);  -l(igt)];
 else                %% equality/inequality pairs
     Qe = Q(ieq);
     Ce = C(ieq,:);
-    be = u(ieq) - k(ieq);
+    be = u(ieq);
     Qi = [Q(ilt); cellfun(@(x)(-1*x), Q(igt), 'UniformOutput', false)];
     Ci = [C(ilt,:); -C(igt,:)];
-    bi = [u(ilt)-k(ilt);  -l(igt)+k(igt)];
+    bi = [u(ilt);  -l(igt)];
 end

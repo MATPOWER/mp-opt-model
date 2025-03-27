@@ -1,4 +1,4 @@
-function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, k, l1, u1, A, l2, u2, xmin, xmax, x0, opt)
+function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt)
 % qcqps_knitro - Quadratically Constrained Quadratic Program Solver based on 
 % Artelys KNITRO.
 % ::
@@ -89,21 +89,20 @@ if nargin == 1 && isstruct(H)       %% problem struct
     if isfield(p, 'A'),     A = p.A;        else,   A = [];     end
     if isfield(p, 'u1'),    u1 = p.u1;      else,   u1 = [];    end
     if isfield(p, 'l1'),    l1 = p.l1;      else,   l1 = [];    end
-    if isfield(p, 'k'),     k = p.k;        else,   k = [];     end
     if isfield(p, 'C'),     C = p.C;        else,   C = [];     end
     if isfield(p, 'Q'),     Q = p.Q;        else,   Q = {};     end
     if isfield(p, 'b'),     b = p.b;        else,   b = [];     end
     if isfield(p, 'H'),     H = p.H;        else,   H = [];     end
 else                                %% individual args
-    if nargin < 14
+    if nargin < 13
         opt = [];
-        if nargin < 13
+        if nargin < 12
             x0 = [];
-            if nargin < 12
+            if nargin < 11
                 xmax = [];
-                if nargin < 11
+                if nargin < 10
                     xmin = [];
-                    if nargin < 8
+                    if nargin < 7
                         A = [];
                         l2 = [];
                         u2 = [];
@@ -117,7 +116,7 @@ end
 %% define nx, set default values for missing optional inputs
 if isempty(Q)
     if isempty(H) || ~any(any(H))
-        if isempty(C) && isempty(k) && isempty(A) && isempty(xmin) && isempty(xmax)
+        if isempty(C) && isempty(A) && isempty(xmin) && isempty(xmax)
             error('qcqps_knitro: LP problem must include constraints or variable bounds');
         else
             if ~isempty(A) && ~isempty(C)
@@ -139,7 +138,6 @@ if isempty(Q)
     if isempty(C) || (~isempty(C) && (isempty(l1) || all(l1 == -Inf)) && ...
                                      (isempty(u1) || all(u1 == Inf)))
         C = sparse(0,nx);           %% no l1 & u1 limits => no quadratic constraints
-        k = [];
     end
     nrowC = size(C, 1);             %% number of original quadratic constraints
     if isempty(u1)                  %% By default, quadratic inequalities are ...
@@ -230,7 +228,7 @@ end
 
 %% split up quadratic constraints
 [ieq_quad, igt_quad, ilt_quad, Qe, Ce, sc, Qi, Ci, ubi] = ...
-    convert_quad_constraint(Q, C, k, l1, u1);
+    convert_quad_constraint(Q, C, l1, u1);
 
 %% split up linear constraints
 if ~issparse(A)

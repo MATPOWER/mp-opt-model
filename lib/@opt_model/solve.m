@@ -224,7 +224,7 @@ switch pt
     otherwise
         %% get parameters
         [HH, CC, C0] = om.params_quad_cost();
-        [Q, C, k, ll, uu] = om.qcn.params(om.var);
+        [Q, C, ll, uu] = om.qcn.params(om.var);
         [A, l, u] = om.params_lin_constraint();
         mixed_integer = strcmp(pt(1:2), 'MI') && ...
             (~isfield(opt, 'relax_integer') || ~opt.relax_integer);
@@ -258,7 +258,7 @@ switch pt
                     qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
             else                   %% QCQP - quadratically constrained quadratic program
                 [x, f, eflag, output, lambda] = ...
-                    qcqps_master(HH, CC, Q, C, k, ll, uu, A, l, u, xmin, xmax, x0, opt);
+                    qcqps_master(HH, CC, Q, C, ll, uu, A, l, u, xmin, xmax, x0, opt);
             end
         end
         f = f + C0;

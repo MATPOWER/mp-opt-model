@@ -7,7 +7,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
 %
 % MP Set Manager class for quadratic constraints of the form
 %
-% .. math:: l(i) <= 1/2 X'*Q{i}*X + C(i,:)*X + k(i) <= u(i),  i = 1,2,...,NQ 
+% .. math:: l(i) <= 1/2 X'*Q{i}*X + C(i,:)*X <= u(i),  i = 1,2,...,NQ 
 %   :label: 
 %
 % Manages quadratic constraint sets and their indexing.
@@ -55,10 +55,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             obj.data = struct( ...
                 'Q', es, ...
                 'C', es, ...
-                'k', es, ...
                 'l', es, ...
                 'u', es, ...
-                'vs', es );
+                'vs', es);
         end
 
         function obj = add(obj, var, name, idx, varargin)
@@ -66,13 +65,11 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % ::
             %
             %   qcn.add(var, name, l, u, Q, C);
-            %   qcn.add(var, name, l, u, Q, C, k);
-            %   qcn.add(var, name, l, u, Q, C, k, vs);            
+            %   qcn.add(var, name, l, u, Q, C, vs);
             %
             %   Indexed Named Sets:
             %   qcn.add(var, name, idx_list, l, u, Q, C);
-            %   qcn.add(var, name, idx_list, l, u, Q, C, k);
-            %   qcn.add(var, name, idx_list, l, u, Q, C, k, vs);            
+            %   qcn.add(var, name, idx_list, l, u, Q, C, vs);            
             %
             % Add a named, and possibly indexed, subset of quadratic constraints
             % to the set, of the form :math:``, 
@@ -101,7 +98,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   C (double) : matrix (posibly sparse) of linear term of quadratic
             %        constraints. Each row of the matrix is the linear term of 
             %        each quadratic onstraint.
-            %   k (double) : vector of constant terms of quadratic constraints
             %   vs (cell or struct array) : *(optional, default* ``{}`` *)*
             %       variable set defining vector :math:`\x` for this
             %       constraint subset; can be either a cell array of names of
@@ -112,7 +108,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % Examples::
             %
-            %   qcn.add(var, 'my_quad', l1, u1, Q1, C1, k1, {'my_var1', 'my_var2'});
+            %   qcn.add(var, 'my_quad', l1, u1, Q1, C1, {'my_var1', 'my_var2'});
             %
             %   qcn.init_indexed_name('my_set', {3, 2})
             %   for i = 1:3
@@ -135,16 +131,13 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             nargs = length(args);
 
             %% prepare data
-            k = []; vs = {}; 
+            vs = {}; 
             if nargs >= 3
                u = args{1};
                Q = args{2};
                C = args{3};
                if nargs >= 4
-                   k = args{4};
-                   if nargs >= 5
-                       vs = args{5};                       
-                   end
+                   vs = args{4};
                end
             else
                 error('mp.sm_quad_constraint.add: not enough input arguments');
@@ -154,7 +147,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             [MQ, NQ] = size(Q);
             [MQi, NQi] = size(Q{1});
             [MC, NC] = size(C);
-            [MK, NK] = size(k);
 
             if isempty(l)
                 l = -inf(MC, 1);
@@ -195,20 +187,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 nx = MQi;
             else
                 if nv && ~MC
-                    error('mp.sm_quad_constraint.add: Q and c cannot both be empty');
+                    error('mp.sm_quad_constraint.add: Q and C cannot both be empty');
                 end
                 nx = MC;
             end
-            if MK
-                if NK ~= 1
-                    error('mp.sm_quad_constraint.add: K (%d x %d) must be a column vector', MQ, NQ)
-                else
-                    if MK ~= MC
-                        error('mp.sm_quad_constraint.add: dimensions of C (%d x %d) and K (%d x %d) do not match\nnumber of variables (%d)\n', MC, NC, MK, NK, nv);
-                    end
-                    N = MC;
-                end
-            end
+            N = MC;
+
             if nx ~= nv
                 error('mp.sm_quad_constraint.add: dimensions of Q (%d x %d), C (%d x %d), and K (%d x %d) do not match\nnumber of variables (%d)\n', MQ, NQ, MC, NC, MK, NK, nv);
             end
@@ -224,7 +208,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             if isempty(idx)
                 obj.data.Q.(name)  = Q;
                 obj.data.C.(name)  = C;
-                obj.data.k.(name)  = k;
                 obj.data.l.(name)  = l;
                 obj.data.u.(name)  = u;
                 obj.data.vs.(name) = vs;
@@ -235,7 +218,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 sc = struct('type', {'.', '{}'}, 'subs', {name, idx});  %% cell array field
                 obj.data.Q  = subsasgn(obj.data.Q, sc, Q);
                 obj.data.C  = subsasgn(obj.data.C, sc, C);
-                obj.data.k  = subsasgn(obj.data.k, sc, k);
                 obj.data.l  = subsasgn(obj.data.l, sc, l);
                 obj.data.u  = subsasgn(obj.data.u, sc, u);
                 obj.data.vs = subsasgn(obj.data.vs, sc, vs);
@@ -245,15 +227,15 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             end
         end
 
-        function [Qblk, C, k, l, u, vs, i1, iN] = params(obj, var, name, idx, isblk)
+        function [Qblk, C, l, u, vs, i1, iN] = params(obj, var, name, idx, isblk)
             % Returns the constraint parameters for a set of quadratic constraints
             % ::
             %
-            %   [Qblk, C, k, l, u] = qcn.params(var)
-            %   [Qblk, C, k, l, u] = qcn.params(var, name)
-            %   [Qblk, C, k, l, u] = qcn.params(var, name, idx)
-            %   [Qblk, C, k, l, u, vs] = qcn.params(...)
-            %   [Qblk, C, k, l, u, vs, i1, iN] = qcn.params(name, ...)
+            %   [Qblk, C, l, u] = qcn.params(var)
+            %   [Qblk, C, l, u] = qcn.params(var, name)
+            %   [Qblk, C, l, u] = qcn.params(var, name, idx)
+            %   [Qblk, C, l, u, vs] = qcn.params(...)
+            %   [Qblk, C, l, u, vs, i1, iN] = qcn.params(name, ...)
             %
             % With no input parameters, it assembles and returns the parameters
             % for the aggregate parameters from all quadratic constraint sets added
@@ -262,7 +244,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % input isblk is set to 1, it calculated a set of  assembled quadratic 
             % constraints of the form:
             %
-            %    F(X) = 1/2 * DIAG( BLKDIAG(X)' * QBLK * BLKDIAG(X) )  +  C * X  +  K
+            %    F(X) = 1/2 * DIAG( BLKDIAG(X)' * QBLK * BLKDIAG(X) )  +  C * X
             %
             % Here Qblk is the block diagonal matrix formed from the individual
             % quadratic matrices of the set of constraints. When isblk is set to 0,
@@ -289,7 +271,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   Qblk (double or cell array) : constraint coefficient matrix
             %       or array depending on the value of input isblk
             %   C (double) : contraint coefficient matrix for linear terms
-            %   k (double) : constraint coefficient vector for constant terms
             %   l (double) : constraint left-hand side vector
             %   u (double) : constraint right-hand side vector
             %   vs (struct array) : variable set, ``name``, ``idx`` pairs
@@ -301,8 +282,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % Examples::
             % 
-            %   [Qblk, C, k, l, u] = qcn.params(var)
-            %   [Qblk, C, k, l, u] = qcn.params(var, 'my_set')
+            %   [Qblk, C, l, u] = qcn.params(var)
+            %   [Qblk, C, l, u] = qcn.params(var, 'my_set')
             %
             % See also add.
 
@@ -324,12 +305,11 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                             end
                         end
                         C = obj.data.C.(name);
-                        k = obj.data.k.(name);
                         l = obj.data.l.(name);
                         u = obj.data.u.(name);
-                        if nargout > 5
+                        if nargout > 4
                             vs = obj.data.vs.(name);
-                            if nargout > 7
+                            if nargout > 6
                                 i1 = obj.idx.i1.(name);      %% starting row index
                                 iN = obj.idx.iN.(name);      %% ending row index
                             end
@@ -344,7 +324,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     sc = struct('type', {'.', '{}'}, 'subs', {name, idx});
                     Qblk  = subsref(obj.data.Q, sc);
                     C     = subsref(obj.data.C, sc);
-                    k     = subsref(obj.data.k, sc);
                     l     = subsref(obj.data.l, sc);
                     u     = subsref(obj.data.u, sc);
                     if isblk
@@ -367,14 +346,13 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     nquad = obj.N;           %% number of quadratic constraints
                     Qblk = cell(nquad, 1);   %% cell array of quadratic constraints
                     C = sparse(nquad, nx);   %% matrix of linear components of quadratic constraints
-                    k = zeros(nquad, 1);     %% vector of constant components of quadratic constraints
                     u = Inf(nquad, 1);       %% upper bound
                     l = -u;                  %% lower bound
                     
                     for j = 1:obj.NS   %% For each set of quadratic constraints
                         name = obj.order(j).name;
                         idx  = obj.order(j).idx;
-                        [Qj, Cj, kj, lj, uj, vsj, i1, iN] = obj.params(var, name, idx);
+                        [Qj, Cj, lj, uj, vsj, i1, iN] = obj.params(var, name, idx);
                         
                         if isempty(vsj)   % full nx vars
                             Qblk(i1:iN) = Qj;
@@ -393,17 +371,15 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                             Caux(:, 1:length(jj)) = Cj;
                             C(i1:iN, jj) = Caux;
                         end
-                        k(i1:iN,:) = kj;
                         l(i1:iN,:) = lj;
                         u(i1:iN,:) = uj;
                     end
                     %% cache aggregated parameters
-                    obj.cache = struct('C', C, 'k', k, 'l', l, 'u', u);
+                    obj.cache = struct('C', C, 'l', l, 'u', u);
                     obj.cache.Qblk = Qblk;
                 else
                     Qblk = cache.Qblk;
                     C = cache.C;
-                    k = cache.k;
                     l = cache.l;
                     u = cache.u;
                 end
@@ -430,13 +406,11 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % The constraints are of the form:
             %
-            %      l_i <= (1/2)*x'*Q_i*x + k_i*x + c_i  <= u_i , for all i = 1,2,...,NQ
+            %      l_i <= (1/2)*x'*Q_i*x + c_i*x  <= u_i , for all i = 1,2,...,NQ
             %
             % or in compact form for a subset or full set of constraints:
             % 
-            %                   l - C <= QFX <= u - C
-            %
-            % where C is the matrix whose rows are c_i
+            %                   l <= QFX <= u                       
             %
             % Returns QFX - u, and optionally l - QFX and the jacobian JQF.
             %
@@ -449,10 +423,10 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %       of quadratic constraints to evaluate (for an indexed subset)
             %
             % Outputs:
-            %   QFx_u (double) : value of QFX - (u - C)
-            %   l_QFx (double) : *(optional)* value of l - (QFX + C)
-            %   JQF (double) : *(optional)* Jacobian of quadratic constraints
+            %   QFx_u (double) : value of QFX - u 
+            %   l_QFx (double) : *(optional)* value of l - QFX
             %   QFx (double) : *(optional)* value of QFX
+            %   JQF (double) : *(optional)* Jacobian of quadratic constraints            
             % 
             % Examples::
             %
@@ -467,19 +441,19 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             if obj.N
                 %% collect constraint parameters
                 if nargin < 4                       %% full set
-                    [Qblk_aux, C, k, l , u, vs] = obj.params(var);
+                    [Qblk_aux, C, l, u, vs] = obj.params(var);
                     Qblk = blkdiag(Qblk_aux{:});
                     Nq = obj.N; 
                 elseif nargin < 5 || isempty(idx)   %% name, no idx provided
                     dims = size(obj.idx.i1.(name));
                     if prod(dims) == 1              %% simple named set
-                        [Qblk, C, k, l, u, vs] = obj.params(var, name, {}, 1);
+                        [Qblk, C, l, u, vs] = obj.params(var, name, {}, 1);
                         Nq = obj.get_N(name);
                     else
                         error('mp.sm_quad_constraint.eval: quadratic constraint set ''%s'' requires an IDX_LIST arg', name)
                     end
                 else                                %% indexed named set
-                    [Qblk, C, k, l, u, vs] = obj.params(var, name, idx, 1);
+                    [Qblk, C, l, u, vs] = obj.params(var, name, idx, 1);
                     Nq = obj.get_N(name, idx);
                 end
 
@@ -489,24 +463,21 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 blkx = blkdiag(xx{:});
 
                 %% Compute quadratic constraints
-                if isempty(k)
-                    QFX = 1/2 * diag(blkx * Qblk * blkx') + C * x;
-                    QFx_u = QFX - u;
-                elseif isempty(C)
+                if isempty(C)
                     QFX = 1/2 * diag(blkx * Qblk * blkx');
-                    QFx_u = QFX + k - u;
+                    QFx_u = QFX - u;
                 else
                     QFX = 1/2 * diag(blkx * Qblk * blkx') + C * x;
-                    QFx_u = QFX + k - u;
+                    QFx_u = QFX - u;
                 end
 
                 if nargout > 1
                     l_QFx = l - QFX;
-                    if nargout > 2   %% Jacobian is requested
-                        Qx = obj.blkprod2vertcat(blkx, Qblk, length(x));
-                        JQF = Qx + C;
-                        if nargout > 3
-                            QFx = QFX;
+                    if nargout > 2
+                        QFx = QFX;
+                        if nargout > 3   %% Jacobian is requested                            
+                            Qx = obj.blkprod2vertcat(blkx, Qblk, length(x));
+                            JQF = Qx + C;
                         end
                     end
                 end
@@ -552,12 +523,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   vals : new value or cell array of new values corresponding to
             %       ``params``
             %
-            % Valid parameter names are ``Q``, ``C``, ``k``, ``l``, ``u``, ``vs``.
+            % Valid parameter names are ``Q``, ``C``, ``l``, ``u``, ``vs``.
             %
             % Examples::
             %
             %   qcn.set_params(var, 'y', {2,3}, {'l', 'u'}, {l, u});
-            %   qcn.set_params(var, 'Pmis', 'all', {Q, C, k, l, u, vs});
+            %   qcn.set_params(var, 'Pmis', 'all', {Q, C, l, u, vs});
             %
             % See also add, params.
 
@@ -568,19 +539,19 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             end
 
             %% create default list of parameters to update based on set type & inputs
-            default_params = {'Q', 'C', 'k', 'l', 'u', 'vs'};
+            default_params = {'Q', 'C', 'l', 'u', 'vs'};
 
             %% standardize provided arguments in cell arrays params, vals
             [is_all, np, params, vals] = ...
                 obj.set_params_std_args(default_params, params, vals);
 
             %% get current parameters
-            [Q, C, k, l , u, vs] = obj.params(var, name, idx);
+            [Q, C, l , u, vs] = obj.params(var, name, idx);
             MC0 = size(C, 1);
             MQ0 = size(Q, 1);
             if isempty(vs), vs = {vs}; end
-            p = struct('C', C, 'k', k, 'l', l, 'u', u, 'vs', vs); p.Q = Q; %% current parameters
-            u = struct('Q', 0, 'C', 0, 'k', 0, 'l', 0, 'u', 0, 'vs',  0);  %% which ones to update
+            p = struct('C', C, 'l', l, 'u', u, 'vs', vs); p.Q = Q; %% current parameters
+            u = struct('Q', 0, 'C', 0, 'l', 0, 'u', 0, 'vs',  0);  %% which ones to update
 
             %% replace with new parameters
             for j = 1:np
@@ -594,7 +565,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             if is_all
                 u.Q = 1;            %% always update Q
                 u.C = 1;            %% always update C
-                u.k = 1;            %% always update k
                 u.l = 1;            %% always update l
                 if np < 6
                     p.vs = {};
@@ -618,7 +588,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             end         
 
             %% check sizes of new values of l, u, and k
-            for pn = {'l', 'u', 'k'}
+            for pn = {'l', 'u'}
                 if u.(pn{1})
                     nn = length(p.(pn{1}));
                     if nn ~= MC
@@ -628,8 +598,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                                     p.(pn{1}) = -Inf(MC, 0);
                                 case 'u'
                                     p.(pn{1}) =  Inf(MC, 0);
-                                case 'k'
-                                    p.(pn{1}) = zeros(MC, 0);
                             end
                         elseif nn == 1
                             p.(pn{1}) = p.(pn{1}) * ones(MC, 1);   %% expand from scalar
@@ -731,12 +699,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
 
             if obj.N
-                [Q, C, k, vl, vu] = obj.params(var);
+                [Q, C, vl, vu] = obj.params(var);
                 Nq = length(vl);
                 Qblk = blkdiag(Q{:});
                 xx = mat2cell(repmat(sparse(soln.x'), Nq, 1), ones(Nq,1));
                 blkx = blkdiag(xx{:});
-                v = diag(1/2 * blkx * Qblk * blkx' + C * soln.x + k);
+                v = diag(1/2 * blkx * Qblk * blkx' + C * soln.x);
                 if isempty(soln.lambda)
                     mu_l_quad = NaN(size(v));
                     mu_u_quad = mu_l_quad;

@@ -1,4 +1,4 @@
-function [x, f, eflag, output, lambda] = qcqps_master(H, b, Q, C, k, l1, u1, A, l2, u2, xmin, xmax, x0, opt)
+function [x, f, eflag, output, lambda] = qcqps_master(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt)
 % qcqps_master - Quadratically Constrained Quadratic Program Solver wrapper function.
 % ::
 %
@@ -134,21 +134,20 @@ if nargin == 1 && isstruct(H)       %% problem struct
     if isfield(p, 'A'),     A = p.A;        else,   A = [];     end
     if isfield(p, 'u1'),    u1 = p.u1;      else,   u1 = [];    end
     if isfield(p, 'l1'),    l1 = p.l1;      else,   l1 = [];    end
-    if isfield(p, 'k'),     k = p.k;        else,   k = [];     end
     if isfield(p, 'C'),     C = p.C;        else,   C = [];     end
     if isfield(p, 'Q'),     Q = p.Q;        else,   Q = {};     end
     if isfield(p, 'b'),     b = p.b;        else,   b = [];     end
     if isfield(p, 'H'),     H = p.H;        else,   H = [];     end
 else                                %% individual args
-    if nargin < 14
+    if nargin < 13
         opt = [];
-        if nargin < 13
+        if nargin < 12
             x0 = [];
-            if nargin < 12
+            if nargin < 11
                 xmax = [];
-                if nargin < 11
+                if nargin < 10
                     xmin = [];
-                    if nargin < 8
+                    if nargin < 7
                         A = [];
                         l2 = [];
                         u2 = [];
@@ -214,13 +213,13 @@ if is_qcqp
     switch alg
         case 'GUROBI'
             [x, f, eflag, output, lambda] = ...
-                qcqps_gurobi(H, b, Q, C, k, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
+                qcqps_gurobi(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
         case 'KNITRO'
             [x, f, eflag, output, lambda] = ...
-                qcqps_knitro(H, b, Q, C, k, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
+                qcqps_knitro(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
         case {'MOSEK'}
             [x, f, eflag, output, lambda] = ...
-                qcqps_mosek(H, b, Q, C, k, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
+                qcqps_mosek(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
         otherwise
             id_ = find(alg == '_');
             if ~isempty(id_)         %% QCQP treated as a general nonlinear program
@@ -230,7 +229,7 @@ if is_qcqp
             end
 
             % compute parameters for constraints function evaluation
-            [ieq_quad, igt_quad, ilt_quad, Qe, Ce, lbe, Qi, Ci, lbi] = convert_quad_constraint(Q, C, k, l1, u1);
+            [ieq_quad, igt_quad, ilt_quad, Qe, Ce, lbe, Qi, Ci, lbi] = convert_quad_constraint(Q, C, l1, u1);
             QQ = struct('blkQe', blkdiag(Qe{:}), 'blkQi', blkdiag(Qi{:}));
             CC = struct('Ce', Ce, 'Ci', Ci);
             bb = struct('be', lbe, 'bi', lbi);
