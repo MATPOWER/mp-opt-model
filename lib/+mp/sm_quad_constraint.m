@@ -829,7 +829,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
             %   tags (char array or cell array of char arrays) : names of
-            %       desired outputs, default is ``{'g', 'mu_l_quad', 'mu_u_quad'}``
+            %       desired outputs, default is ``{'g', 'mu_l', 'mu_u'}``
             %       with valid values:
             %
             %           - ``'g'`` - 2 element cell array with constraint values
@@ -838,8 +838,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %             constraints being fetched
             %           - ``'QFx_u'`` or ``'f'`` - constraint values QFx - u
             %           - ``'l_QFx'`` - constraint values l - QFx
-            %           - ``'mu_l_quad'`` - shadow price on l - QFx
-            %           - ``'mu_u_quad'`` - shadow price on QFx - u
+            %           - ``'mu_l'`` - shadow price on l - QFx
+            %           - ``'mu_u'`` - shadow price on QFx - u
             %   name (char array) : name of the subset
             %   idx (cell array) : *(optional)* indices of the subset
             %
@@ -851,7 +851,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % Example::
             %
-            %     [g, mu_l_quad, mu_u_quad] = qcn.get_soln(var, soln, 'flow');
+            %     [g, mu_l, mu_u] = qcn.get_soln(var, soln, 'flow');
             %     mu_l_quad_Pmis_5_3 = qcn.get_soln(var, soln, 'mu_l', 'Pmis', {5,3});
             %
             % For a complete set of solution values, using the parse_soln()
@@ -879,9 +879,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                             varargout{k} = g{2};
                         case 'f'
                             varargout{k} = soln.f(i1:iN);
-                        case 'mu_l_quad'
+                        case 'mu_l'
                             varargout{k} = soln.lambda.mu_l_quad(i1:iN);
-                        case 'mu_u_quad'
+                        case 'mu_u'
                             varargout{k} = soln.lambda.mu_u_quad(i1:iN);
                         otherwise
                             error('mp.sm_quad_constraint.get_soln: unknown tag ''%s''', tags{k});
@@ -924,21 +924,21 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %       linear constraint subsets and values are scalars for named
             %       sets, arrays for named/indexed sets:
             %
-            %           - ``mu_l_quad`` - constraint lower bound shadow prices
-            %           - ``mu_u_quad`` - constraint upper bound shadow prices
+            %           - ``mu_l`` - constraint lower bound shadow prices
+            %           - ``mu_u`` - constraint upper bound shadow prices
 
             ps = [];
             if obj.get_N()
                 if isfield(soln.lambda, 'mu_l_quad')
                     if isfield(soln.lambda, 'mu_u_quad')
                         params = struct('src', {soln.lambda.mu_l_quad, soln.lambda.mu_u_quad}, ...
-                                        'dst', {'mu_l_quad', 'mu_u_quad'});
+                                        'dst', {'mu_l', 'mu_u'});
                     else
-                        params = struct('src', soln.lambda.mu_l_quad, 'dst', 'mu_l_quad');
+                        params = struct('src', soln.lambda.mu_l_quad, 'dst', 'mu_l');
                     end
                 else
                     if isfield(soln.lambda, 'mu_u_quad')
-                        params = struct('src', soln.lambda.mu_u_quad, 'dst', 'mu_u_quad');
+                        params = struct('src', soln.lambda.mu_u_quad, 'dst', 'mu_u');
                     else
                         params = [];
                     end
@@ -1033,7 +1033,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % See also get_soln.
 
-            default_tags = {'g', 'mu_l_quad', 'mu_u_quad'};
+            default_tags = {'g', 'mu_l', 'mu_u'};
         end
     end     %% methods (Access=protected)
 end         %% classdef
