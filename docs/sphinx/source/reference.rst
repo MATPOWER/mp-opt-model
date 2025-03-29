@@ -219,7 +219,6 @@ These functions test that |MPOM| is installed and functioning as expected.
    functions/t_pnes_master
    functions/t_qcqps_master
    functions/t_qps_master
-   functions/t_sm_quad_constraint
 
 
 Private Functions
