@@ -14,23 +14,23 @@ if nargin < 1
     quiet = 0;
 end
 
-algs = {'DEFAULT', 'KNITRO', 'GUROBI', 'IPOPT', 'KNITRO_NLP', 'FMINCON', 'MIPS'};
-names = {'DEFAULT', 'KNITRO', 'GUROBI', 'IPOPT', 'KNITRO_NLP', 'FMINCON', 'MIPS'};
-check = {[], 'knitro', 'gurobi', 'knitro', 'ipopt', 'knitro', 'fmincon', 'MIPS'};
-does_nonconvex = [1 1 1 1 1 1 1];
+%           1        2        3         4         5         6         7 
+algs = {'DEFAULT', 'MIPS', 'IPOPT', 'FMINCON', 'GUROBI', 'KNITRO', 'KNITRO_NLP'};
+names = {'DEFAULT', 'MIPS', 'IPOPT', 'fmincon', 'GUROBI', 'KNITRO', 'KNITRO_NLP'};
+check = {[], [], 'ipopt', 'fmincon', 'gurobi', 'knitro', 'knitro'};
+%               1 2 3 4 5 6 7
+does_nonconv = [1 1 1 1 1 1 1];
 
-nqcqpconv = 2;
-nqcqpnonconv = 1;
-nproblems = nqcqpconv+nqcqpnonconv;
-ntests_om_out = 9;
-ntests_om_mthds = 25;
-nskipsolver = ntests_om_out*nproblems;
-nskipqcqpnonconv = ntests_om_out*nqcqpnonconv;
 show_diff_on_fail = false;
+
+nqcqp_convex = 18;
+nqcqp_nonconvex = 9;
+n = nqcqp_convex+nqcqp_nonconvex;
+ntests_om_mthds = 25;
 
 reps = {};
 
-t_begin(nskipsolver*length(algs)+ntests_om_mthds, quiet);
+t_begin(n * length(algs) + ntests_om_mthds, quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
@@ -46,12 +46,7 @@ for k = 1:length(algs)
         mpopt = struct( ...
             'verbose', 0, ...
             'opf', struct( ...
-                'violation', 1e-8 ), ...
-            'knitro', struct( ...
-                 'tol_x', 1e-10, ...
-                 'tol_f', 1e-10, ...
-                 'maxit', 0, ...
-                 'opt', 0), ...
+                'violation', 1e-6 ), ...
             'gurobi', struct( ...
                  'method', -1, ...
                  'timelimit', Inf, ...
@@ -59,43 +54,21 @@ for k = 1:length(algs)
                  'opts', [], ...
                  'opt_fname', [], ...
                  'opt', 0), ...
-            'mosek', struct( ...
-                'lp_alg', 0, ...
-                'max_it', 0, ...
-                'gap_tol', 0, ...
-                'max_time', 0, ...
-                'num_threads', 0, ...
-                'opt', 0 ) ...            
+            'knitro', struct( ...
+                 'tol_x', 1e-10, ...
+                 'tol_f', 1e-10, ...
+                 'maxit', 0, ...
+                 'opt', 0) ...
         );
+        if have_feature('gurobi')
+            opt.grb_opt = gurobi_options([], mpopt);
+            opt.grb_opt.BarQCPConvTol = 1e-8;
+        end
         if have_feature('knitro')
             opt.knitro_opt = artelys_knitro_options([],  mpopt);
             opt.knitro_opt.ncvx_qcqp_init = 1;
         end
-        if have_feature('gurobi')
-            opt.grb_opt = gurobi_options([], mpopt);
-            opt.grb_opt.BarQCPConvTol = 1e-10;
-        end
-        if have_feature('mosek')
-%             sc = mosek_symbcon;
-%             alg = sc.MSK_OPTIMIZER_DUAL_SIMPLEX;    %% use dual simplex
-%             alg = sc.MSK_OPTIMIZER_INTPNT;          %% use interior point
-%             mpopt.mosek.lp_alg = alg;
-            mpopt.mosek.gap_tol = 1e-10;
-%             mpopt.mosek.opts.MSK_DPAR_INTPNT_TOL_PFEAS = 1e-10;
-%             mpopt.mosek.opts.MSK_DPAR_INTPNT_TOL_DFEAS = 1e-10;
-%             mpopt.mosek.opts.MSK_DPAR_INTPNT_TOL_INFEAS = 1e-10;
-%             mpopt.mosek.opts.MSK_DPAR_INTPNT_TOL_REL_GAP = 1e-10;
-            vnum = have_feature('mosek', 'vnum');
-            if vnum >= 8
-%                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_PFEAS = 1e-10;
-%                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_DFEAS = 1e-10;
-%                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_INFEAS = 1e-10;
-%                 mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_MU_RED = 1e-10;
-                mpopt.mosek.opts.MSK_DPAR_INTPNT_QO_TOL_REL_GAP = 1e-10;
-            end
-            opt.mosek_opt = mosek_options([], mpopt);
-        end
-    
+
         %% 1) From https://docs.gurobi.com/projects/examples/en/current/examples/matlab/qcp.html
         t = sprintf('%s - convex 3-d QCQP with linear objective: ', names{k});
         H = [];
@@ -158,9 +131,9 @@ for k = 1:length(algs)
         t_is(lam.mu_l_quad, 0.9419, 4, [t 'lam.mu_l_quad']);
         t_is(lam.mu_u_quad, 0, 4, [t 'lam.mu_l_quad']);
 
-        if does_nonconvex(k)
-            %% 3) From "examples" folder of Knitro (exampleQCQP1)
-            t = sprintf('%s - nonconvex 3-d QCQP : ', names{k});
+        %% 3) From "examples" folder of Knitro (exampleQCQP1)
+        t = sprintf('%s - nonconvex 3-d QCQP : ', names{k});
+        if does_nonconv(k)
             H = sparse([-2 -1 -1; -1 -4 0; -1 0 -2]);
             B = zeros(3,1);
             Q = {sparse(-2*eye(3))};
@@ -185,7 +158,8 @@ for k = 1:length(algs)
             t_is(x, [0; 0; 8], 5, [t 'x']);
             t_is(f, -64, 4, [t 'f']);
             if strcmp(algs{k}, 'GUROBI')
-                t_skip(6, [t 'lam : GUROBI version 12.0 and lower does not return multipliers for nonconvex qcqp']); %% See: https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/constraintquadratic.html#qcpi
+                %% See https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/constraintquadratic.html#qcpi
+                t_skip(6, [t 'lam : GUROBI version 12.0 and earlier does not return multipliers for nonconvex QCQP']);
             else
                 t_is(lam.lower, [10.285714;32;0], 5, [t 'lam.lower']);
                 t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
@@ -195,9 +169,8 @@ for k = 1:length(algs)
                 t_is(lam.mu_u_quad, 0, 4, [t 'lam.mu_u_quad']);
             end
         else
-            t_skip(nskipqcqpnonconv, sprintf('%s does not handle nonconvex QCQP problems', names{k}));
+            t_skip(nqcqp_nonconvex, sprintf('%s does not handle nonconvex QCQP problems', names{k}));
         end
-
     end
 end
 
