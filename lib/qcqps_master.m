@@ -230,7 +230,17 @@ if is_qcqp
 
             % compute parameters for constraints function evaluation
             [ieq_quad, igt_quad, ilt_quad, Qe, Ce, lbe, Qi, Ci, lbi] = convert_quad_constraint(Q, C, l1, u1);
-            QQ = struct('blkQe', blkdiag(Qe{:}), 'blkQi', blkdiag(Qi{:}));
+            if isempty(Qe)
+                blkQe = [];
+            else
+                blkQe = blkdiag(Qe{:});
+            end
+            if isempty(Qi)
+                blkQi = [];
+            else
+                blkQi = blkdiag(Qi{:});
+            end
+            QQ = struct('blkQe', blkQe, 'blkQi', blkQi);
             CC = struct('Ce', Ce, 'Ci', Ci);
             bb = struct('be', lbe, 'bi', lbi);
 
