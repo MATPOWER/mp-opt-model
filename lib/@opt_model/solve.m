@@ -189,12 +189,7 @@ switch pt
             x0 = om.params_var();
         end
 
-        if om.getN('lin')
-            [A, b] = om.params_lin_constraint();
-            fcn = @(x)nleq_fcn_(om, x, A, b);
-        else
-            fcn = @(x)om.eval_nln_constraint(x, 1);
-        end
+        fcn = @(x)nleq_fcn_(om, x);
         switch pt
             case 'NLEQ' %% NLEQ - nonlinear equation
                 [x, f, eflag, output, lambda] = nleqs_master(fcn, x0, opt);
@@ -282,11 +277,37 @@ end
 om.soln.output.et = toc(t0);    %% stop timer
 
 %% system of nonlinear and linear equations
-function [f, J] = nleq_fcn_(om, x, A, b)
-if nargout > 1
-    [ff, JJ] = om.eval_nln_constraint(x, 1);
-    J = [JJ; A];
-else
-    ff = om.eval_nln_constraint(x, 1);
+% function [f, J] = nleq_fcn_(om, x, A, b)
+% if nargout > 1
+%     [ff, JJ] = om.eval_nln_constraint(x, 1);
+%     J = [JJ; A];
+% else
+%     ff = om.eval_nln_constraint(x, 1);
+% end
+% f = [ff; A*x - b];
+
+function [f, J] = nleq_fcn_(om, x)
+flin = []; Jlin = [];
+fqcn = []; Jqcn = [];
+fnln = []; Jnln = [];
+if om.getN('lin')
+    [Jlin, b] = om.lin.params();
+    flin = Jlin*x - b;
 end
-f = [ff; A*x - b];
+if nargout > 1
+    if om.getN('qcn')
+        [fqcn, Jqcn] = om.qcn.eval(om.var, x); 
+    end
+    if om.getN('nle')
+        [fnln, Jnln] = om.nle.eval(om.var, x);
+    end
+    J = [Jnln; Jqcn; Jlin];
+else    
+    if om.getN('qcn')
+        fqcn = om.qcn.eval(om.var, x); 
+    end
+    if om.getN('nle')
+        fnln = om.nle.eval(om.var, x);
+    end
+end
+f = [fnln; fqcn; flin];
