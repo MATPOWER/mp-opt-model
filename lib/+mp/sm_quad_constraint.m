@@ -64,12 +64,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % Add a subset of NQ quadratic constraints.
             % ::
             %
-            %   qcn.add(var, name, l, u, Q, C);
-            %   qcn.add(var, name, l, u, Q, C, vs);
+            %   qcn.add(var, name, Q, C, l, u);
+            %   qcn.add(var, name, Q, C, l, u, vs);
             %
             %   Indexed Named Sets:
-            %   qcn.add(var, name, idx_list, l, u, Q, C);
-            %   qcn.add(var, name, idx_list, l, u, Q, C, vs);            
+            %   qcn.add(var, name, idx_list, Q, C, l, u);
+            %   qcn.add(var, name, idx_list, Q, C, l, u, vs);            
             %
             % Add a named, and possibly indexed, subset of quadratic constraints
             % to the set, of the form :math:``, 
@@ -85,12 +85,6 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %       constraints to add
             %   idx_list (cell array) : *(optional)* index list for subset/block
             %       of constraints to add (for an indexed subset)
-            %   l (double) : *(optional, default =* ``-Inf`` *)* constraint
-            %       left-hand side vector :math:`\l`, or scalar which is
-            %       expanded to a vector
-            %   u (double) : *(optional, default =* ``Inf`` *)* constraint
-            %       right-hand side vector :math:`\u`, or scalar which is
-            %       expanded to a vector
             %   Q (cell vector): NQ x 1 cell array of sparse quadratic matrices
             %       for quadratic constraints. Each element of the array must
             %       have the same size based on whether the full vector of 
@@ -98,6 +92,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   C (double) : matrix (posibly sparse) of linear term of quadratic
             %        constraints. Each row of the matrix is the linear term of 
             %        each quadratic onstraint.
+            %   l (double) : *(optional, default =* ``-Inf`` *)* constraint
+            %       left-hand side vector :math:`\l`, or scalar which is
+            %       expanded to a vector
+            %   u (double) : *(optional, default =* ``Inf`` *)* constraint
+            %       right-hand side vector :math:`\u`, or scalar which is
+            %       expanded to a vector
             %   vs (cell or struct array) : *(optional, default* ``{}`` *)*
             %       variable set defining vector :math:`\x` for this
             %       constraint subset; can be either a cell array of names of
@@ -108,34 +108,47 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % Examples::
             %
-            %   qcn.add(var, 'my_quad', l1, u1, Q1, C1, {'my_var1', 'my_var2'});
+            %   qcn.add(var, 'my_quad', Q1, C1, l1, u1, {'my_var1', 'my_var2'});
             %
             %   qcn.init_indexed_name('my_set', {3, 2})
             %   for i = 1:3
             %       for j = 1:2
-            %           qcn.add(var, 'my_set', {i, j}, l{i,j}, u{i,j}, Q{i,j} ...);
+            %           qcn.add(var, 'my_set', {i, j}, Q{i,j}, C{i,j}, l{i,j}, ...);
             %       end
             %   end
             %            
             % See also params, set_params, eval.
 
             %% set up default args
-            if iscell(idx)
-                l =  varargin{1};
-                args = varargin(2:end);
-            else                    %% simple named set
-                l = idx;
+            if numel(idx{1}) > 1    %% simple named set
+                Q = idx;
                 idx = {};
                 args = varargin;
+            else
+                sz_obj_idx = size(obj.idx.N.(name));
+                if numel(idx) > 1
+                    sz_idx = size(idx);
+                else
+                    sz_idx = [numel(idx) 1];
+                end
+
+                if numel(sz_idx) == numel(sz_obj_idx) && all( (sz_obj_idx-cell2mat(idx)) >=0 )
+                    Q =  varargin{1};
+                    args = varargin(2:end);
+                else    %% simple named set
+                    Q = idx;
+                    idx = {};
+                    args = varargin;
+                end
             end
             nargs = length(args);
 
             %% prepare data
             vs = {}; 
             if nargs >= 3
-               u = args{1};
-               Q = args{2};
-               C = args{3};
+               C = args{1};
+               l = args{2};
+               u = args{3};
                if nargs >= 4
                    vs = args{4};
                end

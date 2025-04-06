@@ -90,7 +90,7 @@ for k = 1:length(algs)
         om.init_set_types();
         om.var.add('x', 3, x0, xmin, xmax);
         om.qdc.add(om.var, 'cost', H, B);
-        om.qcn.add(om.var, 'QFx', l1, u1, Q, C);
+        om.qcn.add(om.var, 'QFx', Q, C, l1, u1);
         om.lin.add(om.var, 'Ax', A, l2, u2);
         [x, f, s, out, lam] = om.solve(opt);
         t_is(s, 1, 12, [t 'success']);
@@ -119,7 +119,7 @@ for k = 1:length(algs)
         om.init_set_types();
         om.var.add('x', 3, x0, xmin, xmax);
         om.qdc.add(om.var, 'cost', H, B);
-        om.qcn.add(om.var, 'QFx', l1, u1, Q, C);
+        om.qcn.add(om.var, 'QFx', Q, C, l1, u1);
         [x, f, s, out, lam] = om.solve(opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4.4880; 9.3192; 6.7411]*1e-1, 4, [t 'x']);
@@ -151,7 +151,7 @@ for k = 1:length(algs)
             om.init_set_types();
             om.var.add('x', 3, x0, xmin, xmax);
             om.qdc.add(om.var, 'cost', H, B);
-            om.qcn.add(om.var, 'QFx', l1, u1, Q, C);
+            om.qcn.add(om.var, 'QFx', Q, C, l1, u1);
             om.lin.add(om.var, 'Ax', A, l2, u2);
             [x, f, s, out, lam] = om.solve(opt);
             t_is(s, 1, 12, [t 'success']);
@@ -191,7 +191,7 @@ om = opt_model();
 om.init_set_types();
 om.var.add('x', 3, x0, xmin, xmax);
 om.qdc.add(om.var, 'cost', H, B);
-om.qcn.add(om.var, 'QFx', l1, u1, Q, C);
+om.qcn.add(om.var, 'QFx', Q, C, l1, u1);
 opt.parse_soln = 1;
 [x, f, s, out, lam] = om.solve(opt);
 t_is(om.soln.x, x, 4, [t 'x']);
