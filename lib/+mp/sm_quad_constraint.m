@@ -389,16 +389,16 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             end
         end
 
-        function [QFx_u, l_QFx, QFx, JQF] = eval(obj, var, x, name, idx)
+        function [QFx_u, JQF, QFx, l_QFx] = eval(obj, var, x, name, idx)
             % Evaluate individual or full set of quadratic constraints.
             % ::
             %
             %   QFx_u = qcn.eval(var, x)
             %   QFx_u = qcn.eval(var, x, name)
             %   QFx_u = qcn.eval(var, x, name, idx)
-            %   [QFx_u, l_QFx] = qcn.eval(...)
-            %   [QFx_u, l_QFx, JQF] = qcn.eval(...)
-            %   [QFx_u, l_QFx, JQF, QFx] = qcn.eval(...)
+            %   [QFx_u, JQF] = qcn.eval(...)
+            %   [QFx_u, JQF, QFx] = qcn.eval(...)
+            %   [QFx_u, JQF, QFx, l_QFx] = qcn.eval(...)
             %
             % For a given value of the variable vector x, this method evaluates
             % the quadratic constraints for an individual subset, if name or name 
@@ -471,24 +471,24 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     QFx_u = QFX - u;
                 end
 
-                if nargout > 1
-                    l_QFx = l - QFX;
+                if nargout > 1 %% Jacobian is requested
+                    Qx = obj.blkprod2vertcat(blkx, Qblk, length(x));
+                    JQF = Qx + C;
                     if nargout > 2
                         QFx = QFX;
-                        if nargout > 3   %% Jacobian is requested                            
-                            Qx = obj.blkprod2vertcat(blkx, Qblk, length(x));
-                            JQF = Qx + C;
+                        if nargout > 3
+                            l_QFx = l - QFX;
                         end
                     end
                 end
             else
                 QFx_u = [];
                 if nargout > 1
-                    l_QFx = [];
+                    JQF = [];
                     if nargout > 2
-                        JQF = [];
+                        QFx = [];
                         if nargout > 3
-                            QFx = [];
+                            l_QFx = [];
                         end
                     end
                 end
@@ -834,7 +834,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             varargout = cell(1, nargout);
             if N && ~isempty(soln.eflag)
                 if any(ismember({'g', 'QFx_u', 'l_QFx'}, tags(1:nargout)))
-                    g = cell(1,2);
+                    g = cell(1,4);
                     [g{:}] = obj.eval(var, soln.x, name, idx);
                 end
                 for k = 1:nargout
@@ -844,7 +844,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                         case 'QFx_u'
                             varargout{k} = g{1};
                         case 'l_QFx'
-                            varargout{k} = g{2};
+                            varargout{k} = g{4};
                         case 'f'
                             varargout{k} = soln.f(i1:iN);
                         case 'mu_l'

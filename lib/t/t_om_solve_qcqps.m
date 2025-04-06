@@ -218,7 +218,7 @@ t = sprintf('%s - om.qcn.get_soln(var, soln, ''QFx'') : ', opt.alg);
 [g, mu_l] = om.qcn.get_soln(om.var, om.soln, 'QFx');
 %t_is(g{1}, 1/2*x'*Q{:}*x+C*x+K-u1, 8, [t '1/2*x''*Q*x + C*x + K - u']);
 t_ok(isequal(g{1}, 1/2*x'*Q{:}*x+C*x+K-u1), [t '1/2*x''*Q*x + C*x + K - u']);
-t_is(g{2}, l1-(1/2*x'*Q{:}*x+C*x+K), 8, [t 'l - (1/2*x''*Q*x + C*x + K)']);
+t_is(g{4}, l1-(1/2*x'*Q{:}*x+C*x+K), 8, [t 'l - (1/2*x''*Q*x + C*x + K)']);
 t_is(mu_l, lam.mu_l_quad, 8, [t 'mu_l_quad']);
 
 t = sprintf('%s - om.qcn.get_soln(var, soln, {''mu_u_quad'', ''mu_l_quad'', ''QFx_u''}, ''QFx'') : ', opt.alg);
