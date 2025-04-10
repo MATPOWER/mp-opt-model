@@ -15,7 +15,7 @@ function om = set_params(om, st, name, idx, params, vals)
 %   constraint or cost in the model.
 %
 %   OM.SET_PARAMS(SET_TYPE, NAME, PARAMS, VALS)
-%   OM.SET_PARAMS(SET_TYPE, NAME, IDX, PARAMS, VALS)
+%   OM.SET_PARAMS(SET_TYPE, NAME, IDX_LIST, PARAMS, VALS)
 %
 %   Inputs:
 %       SET_TYPE : one of 'var', 'lin', 'nle', 'nli', 'nlc', 'qdc' for

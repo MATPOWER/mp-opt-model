@@ -193,7 +193,7 @@ classdef set_manager < handle
             % ::
             %
             %   sm.add(name, N, ...)
-            %   sm.add(name, idx, N, ...)
+            %   sm.add(name, idx_list, N, ...)
             %
             % This base class method handles the indexing part. Subclasses are
             % expected to override it to handle any data that goes with each

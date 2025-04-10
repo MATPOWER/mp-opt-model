@@ -19,12 +19,12 @@ function N = getN(obj, set_type, varargin)
 %       N = obj.getN('lin')      : total number of linear constraints
 %       N = obj.getN('var', name)    : # of variables in named set
 %       N = obj.getN('lin', name)    : # of linear constraints in named set
-%       N = obj.getN('var', name, idx) : # of variables in indexed named set
+%       N = obj.getN('var', name, idx_list) : # of variables in indexed named set
 %
 % See also opt_model.
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2025, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.

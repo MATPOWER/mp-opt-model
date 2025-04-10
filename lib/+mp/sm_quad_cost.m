@@ -228,7 +228,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             % :eq:`eq_qdc_form_1`, or :math:`\q, \c`, and optionally
             % :math:`\kk` for the vector cost form in :eq:`eq_qdc_form_2`.
             %
-            % If a name or name and index list are provided then it simply
+            % If a name or name and index list are provided, then it simply
             % returns the parameters for the corresponding set. It can also
             % optionally return the variable sets used by this cost set
             % (the dimensions of :math:`\QQ, \q, \c, \kk` will be consistent
@@ -415,7 +415,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             % ::
             %
             %   qdc.set_params(name, params, vals)
-            %   qdc.set_params(name, idx, params, vals)
+            %   qdc.set_params(name, idx_list, params, vals)
             %
             % This method can be used to modify parameters for an existing
             % subset of quadratic costs.
@@ -716,10 +716,10 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             %
             %   qdc.display_soln(var, soln)
             %   qdc.display_soln(var, soln, name)
-            %   qdc.display_soln(var, soln, name, idx)
+            %   qdc.display_soln(var, soln, name, idx_list)
             %   qdc.display_soln(var, soln, fid)
             %   qdc.display_soln(var, soln, fid, name)
-            %   qdc.display_soln(var, soln, fid, name, idx)
+            %   qdc.display_soln(var, soln, fid, name, idx_list)
             %
             % Displays the solution values for all quadratic costs (default)
             % or an individual named or named/indexed subset.
@@ -744,7 +744,8 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             %   fid (fileID) : fileID of open file to write to (default is
             %       1 for standard output)
             %   name (char array) : *(optional)* name of individual subset
-            %   idx (cell array) : *(optional)* indices of individual subset
+            %   idx_list (cell array) : *(optional)* indices of individual
+            %       subset
 
             [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
 
@@ -828,9 +829,9 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             % ::
             %
             %   vals = qdc.get_soln(var, soln, name)
-            %   vals = qdc.get_soln(var, soln, name, idx)
+            %   vals = qdc.get_soln(var, soln, name, idx_list)
             %   vals = qdc.get_soln(var, soln, tags, name)
-            %   vals = qdc.get_soln(var, soln, tags, name, idx)
+            %   vals = qdc.get_soln(var, soln, tags, name, idx_list)
             %
             % Returns named/indexed quadratic cost results for a solved
             % model, evaluated at the solution found.
@@ -868,7 +869,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             %             vector of cost second derivatives for
             %             :eq:`eq_qdc_form_2`
             %   name (char array) : name of the subset
-            %   idx (cell array) : *(optional)* indices of the subset
+            %   idx_list (cell array) : *(optional)* indices of the subset
             %
             % Outputs:
             %     : Variable number of outputs corresponding to ``tags`` input.

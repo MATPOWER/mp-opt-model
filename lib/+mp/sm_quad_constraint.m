@@ -237,7 +237,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             %   [Qblk, C, l, u] = qcn.params(var)
             %   [Qblk, C, l, u] = qcn.params(var, name)
-            %   [Qblk, C, l, u] = qcn.params(var, name, idx)
+            %   [Qblk, C, l, u] = qcn.params(var, name, idx_list)
             %   [Qblk, C, l, u, vs] = qcn.params(...)
             %   [Qblk, C, l, u, vs, i1, iN] = qcn.params(name, ...)
             %
@@ -264,12 +264,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % Inputs:
             %   var (mp.sm_variable) : corresponding mp.sm_variable object
             %   name (char array) : *(optional)* name of subset
-            %   idx (cell array) : *(optional)* index list for subset
             %   isblk *(optional default: 0)* : indicator for building Qblk parameter 
             %       set to 1 for building a block diagonal matrix with the
             %       matrices stored in the indicated quadratic constraint set
             %       Set to 0 for biulding a cell array formed by stacking vertically
             %       the matrices stored in the indicated contrained set
+            %   idx_list (cell array) : *(optional)* index list for subset
             %
             % Outputs:
             %   Qblk (double or cell array) : constraint coefficient matrix
@@ -399,7 +399,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             %   QFx_u = qcn.eval(var, x)
             %   QFx_u = qcn.eval(var, x, name)
-            %   QFx_u = qcn.eval(var, x, name, idx)
+            %   QFx_u = qcn.eval(var, x, name, idx_list)
             %   [QFx_u, JQF] = qcn.eval(...)
             %   [QFx_u, JQF, QFx] = qcn.eval(...)
             %   [QFx_u, JQF, QFx, l_QFx] = qcn.eval(...)
@@ -423,7 +423,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   x (double) : full n x 1 variable vector x
             %   name (char array) : name of subset/block of quadratic constraints
             %       to evaluate
-            %   idx (cell array) : *(optional)* index list for subset/block
+            %   idx_list (cell array) : *(optional)* index list for subset/block
             %       of quadratic constraints to evaluate (for an indexed subset)
             %
             % Outputs:
@@ -504,7 +504,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % ::
             %
             %   qcn.set_params(var, name, params, vals)
-            %   qcn.set_params(var, name, idx, params, vals)
+            %   qcn.set_params(var, name, idx_list, params, vals)
             %
             % This method can be used to modify parameters for an existing
             % subset of quadratic constraints.
@@ -513,7 +513,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   var (mp.sm_variable) : corresponding mp.sm_variable object
             %   name (char array) : name of subset/block of quadratic 
             %       constraints to modify
-            %   idx (cell array) : *(optional)* index list for subset/block
+            %   idx_list (cell array) : *(optional)* index list for subset/block
             %       of quadratic constraints to modify (for an indexed subset)
             %   params : can be one of three options:
             %
@@ -670,10 +670,10 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             %   qcn.display_soln(var, soln)
             %   qcn.display_soln(var, soln, name)
-            %   qcn.display_soln(var, soln, name, idx)
+            %   qcn.display_soln(var, soln, name, idx_list)
             %   qcn.display_soln(var, soln, fid)
             %   qcn.display_soln(var, soln, fid, name)
-            %   qcn.display_soln(var, soln, fid, name, idx)
+            %   qcn.display_soln(var, soln, fid, name, idx_list)
             %
             % Displays the solution values for all quadratic constraints (default)
             % or an individual named or named/indexed subset.
@@ -698,7 +698,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   fid (fileID) : fileID of open file to write to (default is
             %       1 for standard output)
             %   name (char array) : *(optional)* name of individual subset
-            %   idx (cell array) : *(optional)* indices of individual subset
+            %   idx_list (cell array) : *(optional)* indices of individual
+            %       subset
 
             [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
 
@@ -774,9 +775,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % ::
             %
             %   vals = qcn.get_soln(var, soln, name)
-            %   vals = qcn.get_soln(var, soln, name, idx)
+            %   vals = qcn.get_soln(var, soln, name, idx_list)
             %   vals = qcn.get_soln(var, soln, tags, name)
-            %   vals = qcn.get_soln(var, soln, tags, name, idx)
+            %   vals = qcn.get_soln(var, soln, tags, name, idx_list)
             %
             % Returns named/indexed quadratic constraint results for a solved
             % model, evaluated at the solution found.
@@ -813,7 +814,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %           - ``'mu_l'`` - shadow price on l - QFx
             %           - ``'mu_u'`` - shadow price on QFx - u
             %   name (char array) : name of the subset
-            %   idx (cell array) : *(optional)* indices of the subset
+            %   idx_list (cell array) : *(optional)* indices of the subset
             %
             % Outputs:
             %     : Variable number of outputs corresponding to ``tags`` input.
