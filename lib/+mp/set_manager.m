@@ -435,11 +435,6 @@ classdef set_manager < handle
                 dim_list = {dim_list{:}, 1};
             end
 
-            %% check for single index in single dimension
-            if dim_list{1} == 1
-                error('mp_idx_manager.init_indexed_name: an indexed name set is used for handling indices greater than 1. Use a simple named set instead.')
-            end
-
             %% add general info about this named set
             zero_vector = zeros(dim_list{:});
             obj.idx.i1.(name) = zero_vector;    %% starting index
