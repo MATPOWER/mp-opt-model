@@ -116,47 +116,38 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %           qcn.add(var, 'my_set', {i, j}, Q{i,j}, C{i,j}, l{i,j}, ...);
             %       end
             %   end
-            %            
+            %
             % See also params, set_params, eval.
 
             %% set up default args
-            if numel(idx{1}) > 1    %% simple named set
+            if isfield(obj.idx.N, name) && ~isscalar(obj.idx.N.(name))
+                %% indexed named set
+                Q = varargin{1};
+                args = varargin(2:end);
+            else
+                %% simple named set
                 Q = idx;
                 idx = {};
                 args = varargin;
-            else
-                sz_obj_idx = size(obj.idx.N.(name));
-                if numel(idx) > 1
-                    sz_idx = size(idx);
-                else
-                    sz_idx = [numel(idx) 1];
-                end
-
-                if numel(sz_idx) == numel(sz_obj_idx) && all( (sz_obj_idx-cell2mat(idx)) >=0 )
-                    Q =  varargin{1};
-                    args = varargin(2:end);
-                else    %% simple named set
-                    Q = idx;
-                    idx = {};
-                    args = varargin;
-                end
             end
             nargs = length(args);
 
             %% prepare data
-            vs = {}; 
-            if nargs >= 3
-               C = args{1};
-               l = args{2};
-               u = args{3};
-               if nargs >= 4
-                   vs = args{4};
-               end
-            else
-                error('mp.sm_quad_constraint.add: not enough input arguments');
+            C = []; l = []; u = []; vs = {};
+            if nargs >= 1
+                C = args{1};
+                if nargs >= 2
+                    l = args{2};
+                    if nargs >= 3
+                        u = args{3};
+                        if nargs >= 4
+                            vs = args{4};
+                        end
+                    end
+                end
             end
-    
-            %% check bounds            
+
+            %% check bounds
             [MQ, NQ] = size(Q);
             [MQi, NQi] = size(Q{1});
             [MC, NC] = size(C);
