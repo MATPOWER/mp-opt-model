@@ -277,22 +277,12 @@ end
 om.soln.output.et = toc(t0);    %% stop timer
 
 %% system of nonlinear and linear equations
-% function [f, J] = nleq_fcn_(om, x, A, b)
-% if nargout > 1
-%     [ff, JJ] = om.eval_nln_constraint(x, 1);
-%     J = [JJ; A];
-% else
-%     ff = om.eval_nln_constraint(x, 1);
-% end
-% f = [ff; A*x - b];
-
 function [f, J] = nleq_fcn_(om, x)
 flin = []; Jlin = [];
 fqcn = []; Jqcn = [];
 fnln = []; Jnln = [];
 if om.getN('lin')
-    [Jlin, b] = om.lin.params();
-    flin = Jlin*x - b;
+    [flin, ~, Jlin] = om.lin.eval(om.var, x);
 end
 if nargout > 1
     if om.getN('qcn')
