@@ -120,12 +120,10 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % See also params, set_params, eval.
 
             %% set up default args
-            if isfield(obj.idx.N, name) && ~isscalar(obj.idx.N.(name))
-                %% indexed named set
+            if isfield(obj.idx.N, name)     %% indexed named set
                 Q = varargin{1};
                 args = varargin(2:end);
-            else
-                %% simple named set
+            else                            %% simple named set
                 Q = idx;
                 idx = {};
                 args = varargin;
