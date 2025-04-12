@@ -1830,7 +1830,7 @@ else
     rr = r + kbar;                  %% apply non-dead zone shift
     M = sparse(iND, iND, mm(iND), nw, nw);  %% dead zone or scale
     diagrr = sparse(1:nw, 1:nw, rr, nw, nw);
-    
+
     %% linear rows multiplied by rr(i), quadratic rows by rr(i)^2
     w = M * (LL + QQ * diagrr) * rr;
 

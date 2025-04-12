@@ -1175,7 +1175,7 @@ To use a different solver such as \code{fmincon}, assuming it is available, simp
 
 Local minimum found that satisfies the constraints.
 
-Optimization completed because the objective function is non-decreasing in 
+Optimization completed because the objective function is non-decreasing in
 feasible directions, to within the value of the optimality tolerance,
 and constraints are satisfied to within the value of the constraint tolerance.
 
@@ -1495,7 +1495,7 @@ fprintf('   %12g\n', f);
 \clearpage
 \noindent Fast-decoupled Newton example results:
 \begin{Code}
->> nleqs_master_ex2('FD')    
+>> nleqs_master_ex2('FD')
 
  iteration    max residual    max residual 
 block    #        f[P]            f[Q]     
@@ -2387,7 +2387,7 @@ where \code{f} is a scalar with the value of the function $f(x)$, \code{df} is t
 
 The first input argument \code{x} takes one of two forms. If the constraint set is added with \code{varsets} empty or missing, then \code{x} will be the full optimization vector. Otherwise it will be a cell array of vectors corresponding to the variable sets specified in \code{varsets}.
 
-For example, suppose our problem has three sets of nonlinear costs, $f_1(x_1)$, $f_2(x_2)$, $f_3(x)$, where $x_1$ and $x_2$ are as defined in Section~\ref{sec:varsets} and $x$ is the full optimization vector from \eqref{eq:x}. Let \code{my\_cost\_fcn1}, \code{my\_cost\_fcn2}, and \code{my\_cost\_fcn3} functions that evaluate $f_1(x)$, $f_2(x)$, and $f_3(x)$ and their gradients and Hessians, respectively. 
+For example, suppose our problem has three sets of nonlinear costs, $f_1(x_1)$, $f_2(x_2)$, $f_3(x)$, where $x_1$ and $x_2$ are as defined in Section~\ref{sec:varsets} and $x$ is the full optimization vector from \eqref{eq:x}. Let \code{my\_cost\_fcn1}, \code{my\_cost\_fcn2}, and \code{my\_cost\_fcn3} functions that evaluate $f_1(x)$, $f_2(x)$, and $f_3(x)$ and their gradients and Hessians, respectively.
 
 These three nonlinear cost sets can be added to the model with the names \textbf{nlncost1}, \textbf{nlncost2}, and \textbf{nlncost3}, using the \code{add\_nln\_cost} method as follows:
 \begin{Code}
@@ -3290,7 +3290,7 @@ Returns 1 if any of the variables are binary or integer, 0 otherwise.
 prob_type = om.problem_type()
 prob_type = om.problem_type(recheck)
 \end{Code}
-Returns a string identifying the type of mathematical program represented by the current model, based on the variables, costs,and constraints that have been added to the model. Used to automatically select an appropriate solver. 
+Returns a string identifying the type of mathematical program represented by the current model, based on the variables, costs,and constraints that have been added to the model. Used to automatically select an appropriate solver.
 
 Linear and nonlinear equations are models with no costs, no inequality constraints, and an equal number of continuous variables and equality constraints.
 
@@ -3699,7 +3699,7 @@ This function implements the \codeq{clp} tag for \code{have\_feature} to detect 
 \subsubsection{\tt have\_feature\_opti\_clp}
 \label{sec:have_feature_opti_clp}
 
-This function implements the \codeq{opti\_clp} tag for \code{have\_feature} to detect the version of \clp{} distributed with OPTI Toolbox\footnote{The OPTI Toolbox is available from 
+This function implements the \codeq{opti\_clp} tag for \code{have\_feature} to detect the version of \clp{} distributed with OPTI Toolbox\footnote{The OPTI Toolbox is available from
 \url{https://www.inverseproblem.co.nz/OPTI/}.}~\cite{opti}. See also Appendix~\ref{app:clp}.
 
 \subsubsection{\tt have\_feature\_cplex}
@@ -4282,7 +4282,7 @@ When installed BPMPD\_MEX can be used to solve general LP and QP problems via \m
 
 The \clp{}~\cite{clp} ({\bf C}OIN-OR {\bf L}inear {\bf P}rogramming) solver is an open-source linear programming solver written in C++ by John Forrest. It can solve both linear programming (LP) and quadratic programming (QP) problems. It is primarily meant to be used as a callable library, but a basic, stand-alone executable version exists as well. It is available from the COIN-OR initiative at \url{https://github.com/coin-or/Clp}.
 
-To use \clp{} with \mpom{}, a MEX interface is required\footnote{According to David Gleich at \url{http://web.stanford.edu/~dgleich/notebook/2009/03/coinor_clop_for_matlab.html}, there was a \matlab{} MEX interface to \clp{} written by Johan Lofberg and available (at some point in the past) at \url{http://control.ee.ethz.ch/~joloef/mexclp.zip}. Unfortunately, at the time of this writing, it seems it is no longer available there, but Davide Barcelli makes some precompiled MEX files for some platforms available here \url{http://www.dii.unisi.it/~barcelli/software.php}, and the ZIP file linked as Clp 1.14.3 contains the MEX source as well as a \code{clp.m} wrapper function with some rudimentary documentation.}. For Microsoft Windows users, a pre-compiled MEX version of \clp{} (and numerous other solvers, such as \glpk{} and \ipopt{}) are easily installable as part of the OPTI Toolbox\footnote{The OPTI Toolbox is available from 
+To use \clp{} with \mpom{}, a MEX interface is required\footnote{According to David Gleich at \url{http://web.stanford.edu/~dgleich/notebook/2009/03/coinor_clop_for_matlab.html}, there was a \matlab{} MEX interface to \clp{} written by Johan Lofberg and available (at some point in the past) at \url{http://control.ee.ethz.ch/~joloef/mexclp.zip}. Unfortunately, at the time of this writing, it seems it is no longer available there, but Davide Barcelli makes some precompiled MEX files for some platforms available here \url{http://www.dii.unisi.it/~barcelli/software.php}, and the ZIP file linked as Clp 1.14.3 contains the MEX source as well as a \code{clp.m} wrapper function with some rudimentary documentation.}. For Microsoft Windows users, a pre-compiled MEX version of \clp{} (and numerous other solvers, such as \glpk{} and \ipopt{}) are easily installable as part of the OPTI Toolbox\footnote{The OPTI Toolbox is available from
 \url{https://www.inverseproblem.co.nz/OPTI/}.}~\cite{opti}
 
 With the \matlab{} interface to \clp{} installed, it can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master} with the algorithm option set to \codeq{CLP}, or by calling \code{qps\_clp} directly.
@@ -4299,9 +4299,9 @@ When the \matlab{} interface to \cplex{} is installed, it can also be used to so
 \subsection{\glpk{} -- GNU Linear Programming Kit}
 \label{app:glpk}
 
-The \glpk{}~\cite{glpk} ({\bf G}NU {\bf L}inear {\bf P}rogramming {\bf K}it) package is intended for solving large-scale linear programming (LP), mixed-integer programming (MIP), and other related problems. It is a set of routines written in ANSI C and organized in the form of a callable library. 
+The \glpk{}~\cite{glpk} ({\bf G}NU {\bf L}inear {\bf P}rogramming {\bf K}it) package is intended for solving large-scale linear programming (LP), mixed-integer programming (MIP), and other related problems. It is a set of routines written in ANSI C and organized in the form of a callable library.
 
-To use \glpk{} with \mpom{}, a MEX interface is required\footnote{The \url{http://glpkmex.sourceforge.net} site and Davide Barcelli's page \url{http://www.dii.unisi.it/~barcelli/software.php} may be useful in obtaining the MEX source or pre-compiled binaries for Mac or Linux platforms.}. For Microsoft Windows users, a pre-compiled MEX version of \glpk{} (and numerous other solvers, such as \clp{} and \ipopt{}) are easily installable as part of the OPTI Toolbox\footnote{The OPTI Toolbox is available from 
+To use \glpk{} with \mpom{}, a MEX interface is required\footnote{The \url{http://glpkmex.sourceforge.net} site and Davide Barcelli's page \url{http://www.dii.unisi.it/~barcelli/software.php} may be useful in obtaining the MEX source or pre-compiled binaries for Mac or Linux platforms.}. For Microsoft Windows users, a pre-compiled MEX version of \glpk{} (and numerous other solvers, such as \clp{} and \ipopt{}) are easily installable as part of the OPTI Toolbox\footnote{The OPTI Toolbox is available from
 \url{https://www.inverseproblem.co.nz/OPTI/}.}~\cite{opti}.
 
 When \glpk{} is installed, either as part of Octave or with a MEX interface for \matlab{}, it can be used to solve general LP problems via \mpom{}'s common QP solver interface \code{qps\_master}, or MILP problems via \code{miqps\_master}, with the algorithm option set to \codeq{GLPK}, or by calling \code{qps\_glpk} or \code{miqps\_glpk} directly.
@@ -4322,7 +4322,7 @@ When \gurobi{} is installed, it can be used to solve general LP and QP problems 
 
 \mpom{} requires the \matlab{} MEX interface to \ipopt{}, which is included in some versions of the \ipopt{} source distribution, but must be built separately. Additional information on the MEX interface is available at \url{https://projects.coin-or.org/Ipopt/wiki/MatlabInterface}. Please consult the \ipopt{} documentation, web-site and mailing lists for help in building and installing the \ipopt{} \matlab{} interface. This interface uses callbacks to \matlab{} functions to evaluate the objective function and its gradient, the constraint values and Jacobian, and the Hessian of the Lagrangian.
 
-Precompiled MEX binaries for a high-performance version of \ipopt{}, using the \pardiso{} linear solver~\cite{pardiso, pardiso2}, are available from the \pardiso{} project\footnote{See \url{https://pardiso-project.org/} for the download links.}. For Microsoft Windows users, a pre-compiled MEX version of \ipopt{} (and numerous other solvers, such as \clp{} and \glpk{}) are easily installable as part of the OPTI Toolbox\footnote{The OPTI Toolbox is available from 
+Precompiled MEX binaries for a high-performance version of \ipopt{}, using the \pardiso{} linear solver~\cite{pardiso, pardiso2}, are available from the \pardiso{} project\footnote{See \url{https://pardiso-project.org/} for the download links.}. For Microsoft Windows users, a pre-compiled MEX version of \ipopt{} (and numerous other solvers, such as \clp{} and \glpk{}) are easily installable as part of the OPTI Toolbox\footnote{The OPTI Toolbox is available from
 \url{https://www.inverseproblem.co.nz/OPTI/}.}~\cite{opti}.
 
 When installed, \ipopt{} can be used by \mpom{} to solve general LP, QP and NLP problems via \mpom{}'s common QP and NLP solver interfaces \code{qps\_master} and \code{nlps\_master} with the algorithm option set to \codeq{IPOPT}, or by calling \code{qps\_ipopt} or \code{nlps\_ipopt} directly.
@@ -4697,7 +4697,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 
 \subsubsection*{Bugs Fixed}
 \begin{itemize}
-\item 
+\item
     \emph{Thanks to Fulano.}
 \end{itemize}
 
@@ -4757,7 +4757,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 % 
 % \subsubsection*{New Features}
 % \begin{itemize}
-% \item 
+% \item
 % \item New functions:
 %     \begin{itemize}
 %     \item \code{foobar()} does whizbang.
@@ -4766,13 +4766,13 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 % 
 % \subsubsection*{Bugs Fixed}
 % \begin{itemize}
-% \item 
+% \item
 %     \emph{Thanks to Fulano.}
 % \end{itemize}
 % 
 % \subsubsection*{Other Changes}
 % \begin{itemize}
-% \item 
+% \item
 % 
 % \end{itemize}
 

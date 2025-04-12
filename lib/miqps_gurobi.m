@@ -370,13 +370,13 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
         else
             tol = 1e-7;
         end
-    
+
         x0 = x;
         x0(k) = round(x0(k));
         xmin(k) = x0(k);
         xmax(k) = x0(k);
     %     opt.grb_opt.Method = 0;     %% primal simplex
-    
+
         [x_, f_, eflag_, output_, lambda] = qps_gurobi(H, c, A, l, u, xmin, xmax, x0, opt);
         if eflag ~= eflag_
             error('miqps_gurobi: EXITFLAG from price computation stage = %d', eflag_);

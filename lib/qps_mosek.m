@@ -282,7 +282,7 @@ end
 %%-----  process return codes  -----
 if isfield(res, 'symbcon')
     sc = res.symbcon;
-else    
+else
     sc = mosek_symbcon;
 end
 eflag = -r;

@@ -23,7 +23,7 @@ function varargout = params_var(om, varargin)
 %       [x0, xmin, xmax] = om.params_var();
 %       [Pg0, Pmin, Pmax] = om.params_var('Pg');
 %       [zij0, zijmin, zijmax, ztype] = om.params_var('z', {i, j});
-%   
+%
 % See also opt_model, add_var.
 
 %   MP-Opt-Model

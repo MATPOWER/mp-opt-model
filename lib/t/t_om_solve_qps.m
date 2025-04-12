@@ -151,7 +151,7 @@ for k = 1:length(algs)
             t_ok(isempty(lam.mu_u), [t 'lam.mu_u']);
             t_is(lam.lower, zeros(size(x)), 13, [t 'lam.lower']);
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
-        
+
             t = sprintf('%s - constrained 2-d QP : ', names{k});
             %% example from 'doc quadprog'
             H = [   1   -1;

@@ -1,5 +1,5 @@
 function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt)
-% qcqps_knitro - Quadratically Constrained Quadratic Program Solver based on 
+% qcqps_knitro - Quadratically Constrained Quadratic Program Solver based on
 % Artelys KNITRO.
 % ::
 %
@@ -7,7 +7,7 @@ function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2,
 %       QCQPS_KNITRO(H, B, Q, C, K, L1, U1, A, L2, U2, XMIN, XMAX, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QCQPS_KNITRO(PROBLEM)
 %   A wrapper function providing a standardized interface for using
-%   KNITRO to solve the following (possibly non-convex) QCQP (quadratically 
+%   KNITRO to solve the following (possibly non-convex) QCQP (quadratically
 %   constrained quadratic programming) problem:
 %
 %       min X'*H*X + B'*X
@@ -15,14 +15,14 @@ function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2,
 %
 %   subject to
 %
-%    L1(i) <= X'*Q{i}*X + C(i,:)*X + K(i) <= U1(i),  i = 1,2,...,NQ   (quadratic constraints)
+%    L1(i) <= X'*Q{i}*X + C(i,:)*X + K(i) <= U1(i),  i = 1,2,...,nq   (quadratic constraints)
 %                 L2 <= A*X <= U2                                     (linear constraints)
 %                XMIN <= X <= XMAX                                    (variable bounds)
 %
 %   Inputs (all optional except H, B, Q, C, K, L1 and U1):
 %       H : matrix (possibly sparse) of quadratic cost coefficients
 %       B : vector of linear cost coefficients
-%       Q : NQ x 1 cell array of sparse quadratic matrices for quadratic constraints
+%       Q : nq x 1 cell array of sparse quadratic matrices for quadratic constraints
 %       C : matrix (posibly sparse) of linear term of quadratic constraints
 %       K : vector of constant terms of quadratic constraints
 %       L1, U1: define the lower an upper bounds on the quadratic constraints
@@ -59,9 +59,9 @@ function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2,
 %           multipliers on the constraints, with fields:
 %           mu_l - lower (left-hand) limit on linear constraints
 %           mu_u - upper (right-hand) limit on linear constraints
-%           mu_l_quad - (QCQP only) lower (left-hand) limit on quadratic 
+%           mu_l_quad - (QCQP only) lower (left-hand) limit on quadratic
 %                       constraints
-%           mu_u_quad - (QCQP only) upper (right-hand) limit on quadratic 
+%           mu_u_quad - (QCQP only) upper (right-hand) limit on quadratic
 %                       constraints
 %           lower - lower bound on optimization variables
 %           upper - upper bound on optimization variables
@@ -251,7 +251,7 @@ Qi_quad  = vertcat(cell(niq_lin,1), Qi);    % both linear/quadratic constraints 
 Qeq_quad = vertcat(cell(neq_lin,1), Qe);    %
 A_quad   = [Ai; Ci];                        %          1/2 * x' * Qi_quad * x + A_quad * x <= b_quad      (inequality constraints)
 Aeq_quad = [Ae, Ce];                        %          1/2 * x' * Qeq_quad * x + Aeq_quad * x = be_quad   (equality constraints)
-b_quad   = [bi; ubi];                       %           
+b_quad   = [bi; ubi];                       %
 beq_quad = [be; sc];                        %
 
 %% Call the solver
@@ -262,7 +262,7 @@ beq_quad = [be; sc];                        %
 [mu_l, mu_u] = convert_lin_constraint_multipliers(Lambda.eqlin(1:neq_lin), ...
                     Lambda.ineqlin(1:niq_lin), ieq_lin, igt_lin, ilt_lin);
 
-if (neq_quad + niq_quad) > 0 
+if (neq_quad + niq_quad) > 0
     [mu_l_quad, mu_u_quad] = convert_lin_constraint_multipliers(Lambda.eqlin(neq_lin+1:end), ...
                     Lambda.ineqlin(niq_lin+1:end), ieq_quad, igt_quad, ilt_quad);
 

@@ -311,7 +311,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
             % opt.glpk_opt.dual = 1;      %% primal simplex
             opt.glpk_opt.dual = 2;      %% dual simplex
         end
-    
+
         [x_, f_, eflag_, output_, lambda] = qps_glpk(H, c, A, l, u, xmin, xmax, x0, opt);
         if eflag ~= eflag_
             error('miqps_glpk: EXITFLAG from price computation stage = %d', eflag_);

@@ -49,7 +49,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % ::
             %
             %   qcn = mp.sm_quad_constraint(label)
-            
+
             es = struct();  %% empty struct
             obj@mp.set_manager_opt_model(varargin{:});
             obj.data = struct( ...
@@ -104,7 +104,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %       variable subsets, or a struct array of ``name``, ``idx``
             %       pairs of indexed named subsets of variables; order of
             %       ``vs`` determines order of blocks in :math:`\x`; if
-            %       empty, :math:`\x` is assumed to be the full variable vector                       
+            %       empty, :math:`\x` is assumed to be the full variable vector
             %
             % Examples::
             %
@@ -283,7 +283,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %   iN (integer) : index of last row of specified subset in full set
             %
             % Examples::
-            % 
+            %
             %   [Qblk, C, l, u] = qcn.params(var)
             %   [Qblk, C, l, u] = qcn.params(var, 'my_set')
             %
@@ -350,12 +350,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     C = sparse(nquad, nx);   %% matrix of linear components of quadratic constraints
                     u = Inf(nquad, 1);       %% upper bound
                     l = -u;                  %% lower bound
-                    
+
                     for j = 1:obj.NS   %% For each set of quadratic constraints
                         name = obj.order(j).name;
                         idx  = obj.order(j).idx;
                         [Qj, Cj, lj, uj, vsj, i1, iN] = obj.params(var, name, idx);
-                        
+
                         if isempty(vsj)   % full nx vars
                             Qblk(i1:iN) = Qj;
                             C(i1:iN,:) = Cj;
@@ -376,6 +376,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                         l(i1:iN,:) = lj;
                         u(i1:iN,:) = uj;
                     end
+
                     %% cache aggregated parameters
                     obj.cache = struct('C', C, 'l', l, 'u', u);
                     obj.cache.Qblk = Qblk;
@@ -509,7 +510,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %
             % Inputs:
             %   var (mp.sm_variable) : corresponding mp.sm_variable object
-            %   name (char array) : name of subset/block of quadratic 
+            %   name (char array) : name of subset/block of quadratic
             %       constraints to modify
             %   idx_list (cell array) : *(optional)* index list for subset/block
             %       of quadratic constraints to modify (for an indexed subset)
@@ -578,7 +579,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 end
             end
 
-            %% check consistency of parameters            
+            %% check consistency of parameters
             %% Q must be a MQ x 1 cell array
             if MQ ~= MC || NQ ~= 1
                 error('mp.sm_quad_constraint.set_params : dimension mismatch between rows/cols of ''C'' and ''Q''');
@@ -587,7 +588,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %% no dimension change unless 'all'
             if (MC ~= MC0 && ~is_all) || (MQ ~= MQ0 && ~is_all)
                 error('mp.sm_quad_constraint.set_params: dimension change for ''%s'' not allowed except for ''all''', obj.nameidxstr(name, idx));
-            end         
+            end
 
             %% check sizes of new values of l, u, and k
             for pn = {'l', 'u'}
@@ -608,8 +609,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                         end
                     end
                 end
-            end           
-            
+            end
+
             %% check consistency of C and vs
             p.vs = mp.sm_variable.varsets_cell2struct(p.vs);
             nv = var.varsets_len(p.vs);     %% number of variables
@@ -656,7 +657,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             obj.cache = [];
 
             %% update dimensions and indexing, if necessary
-            dMC = MC - MC0;            
+            dMC = MC - MC0;
             if is_all && dMC
                 obj.set_params_update_dims(dMC, name, idx);
             end

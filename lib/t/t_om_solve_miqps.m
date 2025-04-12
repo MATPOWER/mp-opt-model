@@ -295,7 +295,6 @@ if have_milp_solver()
             keyboard
         end
     end
-    
 else
     t_skip(nmiqp_soln, 'no MILP/MIQP solver installed');
 end

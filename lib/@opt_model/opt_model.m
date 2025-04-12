@@ -243,7 +243,7 @@ classdef opt_model < mp_idx_manager
         qdc             %% quadratic costs
         nlc             %% general nonlinear costs
         prob_type = ''; %% problem type
-        
+
         %% results of solve()
         soln = struct( ...
             'eflag', [], ...    %% exit flag

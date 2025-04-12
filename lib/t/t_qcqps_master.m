@@ -14,7 +14,7 @@ if nargin < 1
     quiet = 0;
 end
 
-%           1        2        3         4         5         6         7 
+%           1        2        3         4         5         6         7
 algs = {'DEFAULT', 'MIPS', 'IPOPT', 'FMINCON', 'GUROBI', 'KNITRO', 'KNITRO_NLP'};
 names = {'DEFAULT', 'MIPS', 'IPOPT', 'fmincon', 'GUROBI', 'KNITRO', 'KNITRO_NLP'};
 check = {[], [], 'ipopt', 'fmincon', 'gurobi', 'knitro', 'knitro'};
@@ -201,7 +201,7 @@ for k = 1:length(algs)
         t_is(lam.mu_u, 0.391577, 6, [t 'lam.mu_u']);
         t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
         t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
-        
+
         %% 8) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
         t = sprintf('%s - convex 3-d QCQP with quad objective: ', names{k});
         H = sparse([2 0 -1; 0 0.2 0; -1 0 2]);

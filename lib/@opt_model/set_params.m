@@ -2,8 +2,8 @@ function om = set_params(om, st, name, idx, params, vals)
 % set_params - Modifies parameters for variable, cost or constraint in model
 %
 % .. note::
-%    .. deprecated:: 4.3 Please use mp.sm_lin_constraint.set_params, 
-%       mp.sm_nln_constraint.set_params, mp.sm_nln_cost.set_params, 
+%    .. deprecated:: 4.3 Please use mp.sm_lin_constraint.set_params,
+%       mp.sm_nln_constraint.set_params, mp.sm_nln_cost.set_params,
 %       mp.sm_quad_cost.set_params, or mp.sm_variable.set_params instead,
 %       as in ``om.lin.set_params(...)``, ``om.nle.set_params(...)``,
 %       ``om.nli.set_params(...)``, ``om.nlc.set_params(...)``,

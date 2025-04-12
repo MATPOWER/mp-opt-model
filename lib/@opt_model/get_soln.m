@@ -81,7 +81,7 @@ switch set_type
         [varargout{1:nargout}] = om.(set_type).get_soln(om.var, om.soln, varargin{:});
     case 'lin'
         if strcmp(om.problem_type(), 'LEQ')
-            %% tag must be 'f' 
+            %% tag must be 'f'
             if length(varargin) >= 2 && ischar(varargin{2})
                 varargin{1} = {'f'};
             else

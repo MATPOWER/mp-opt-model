@@ -5,7 +5,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
 %       MIQPS_MASTER(H, C, A, L, U, XMIN, XMAX, X0, VTYPE, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = MIQPS_MASTER(PROBLEM)
-%   A common wrapper function for various MILP/MIQP solvers. 
+%   A common wrapper function for various MILP/MIQP solvers.
 %   Solves the following MILP/MIQP (mixed integer linear programming/
 %   mixed integer quadratic programming) problem:
 %

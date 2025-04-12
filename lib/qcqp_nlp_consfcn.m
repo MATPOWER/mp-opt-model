@@ -13,7 +13,7 @@ function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
 %
 %   Inputs:
 %     X   : optimization vector
-%     QQ  : struct with (possibly sparse) quadratic matrices for 
+%     QQ  : struct with (possibly sparse) quadratic matrices for
 %           equality/inequality constraints with the following fields:
 %         BLKQI : block diagonal matrix formed from the NQI x 1 cell array 
 %                 of sparse quadratic matrices for inequaliy constraints
@@ -23,7 +23,7 @@ function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
 %          of equality/inequality constraints with the following fields:
 %         Ci : matrix with linear parameters for inequality constraints
 %         Ce : matrix with linear parameters for equality constraints
-%     BB : struct with the vector of constant terms of equality/inequality 
+%     BB : struct with the vector of constant terms of equality/inequality
 %          constraints with the following fields:
 %         bi : vector with constant terms for inequality constraints
 %         be : vector with constant terms for equality constraints
@@ -64,7 +64,7 @@ if nargout > 1       %% constraints
         blkxineq = blkdiag(xxineq{:});
         h = 1/2 * diag(blkxineq' * blkQi * blkxineq) + Ci * x - bi;
     end
-        
+
     if isempty(blkQe) || isempty(x)         %% equalities
         g = [];
     else

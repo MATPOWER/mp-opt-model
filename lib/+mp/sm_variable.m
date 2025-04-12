@@ -234,7 +234,7 @@ classdef sm_variable < mp.set_manager_opt_model
                             if have_vt
                                 N = obj.idx.N.(name);
                                 vt0 = obj.data.vt.(name);
-                                if isscalar(vt0) && N > 1 
+                                if isscalar(vt0) && N > 1
                                     vt = [ vt char(vt0 * ones(1, N)) ];
                                 else
                                     vt = [ vt vt0 ];
@@ -256,7 +256,7 @@ classdef sm_variable < mp.set_manager_opt_model
                                 sn = sc; sn(2).type = '()';
                                 N = subsref(obj.idx.N, sn);
                                 vt0 = subsref(obj.data.vt, sc);
-                                if isscalar(vt0) && N > 1 
+                                if isscalar(vt0) && N > 1
                                     vt = [ vt char(vt0 * ones(1, N)) ];
                                 else
                                     if ~isempty(vt0)
@@ -284,7 +284,7 @@ classdef sm_variable < mp.set_manager_opt_model
                         if have_vt
                             N = obj.idx.N.(name);
                             vt0 = obj.data.vt.(name);
-                            if isscalar(vt0) && N > 1 
+                            if isscalar(vt0) && N > 1
                                 vt = char(vt0 * ones(1, N));
                             else
                                 vt = vt0;
@@ -305,7 +305,7 @@ classdef sm_variable < mp.set_manager_opt_model
                             sn = sc; sn(2).type = '()';
                             N = subsref(obj.idx.N, sn);
                             vt0 = subsref(obj.data.vt, sc);
-                            if isscalar(vt0) && N > 1 
+                            if isscalar(vt0) && N > 1
                                 vt = char(vt0 * ones(1, N));
                             else
                                 vt = vt0;

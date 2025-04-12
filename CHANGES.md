@@ -23,7 +23,7 @@ since 4.2
 
 #### 2/28/25
   - Throw error if `opt_model.parse_soln()` is called for an unsolved
-    model. 
+    model.
 
 #### 10/29/24
   - Add `relax_integer` option for `opt_model.solve()`. Set to true to easily
@@ -120,7 +120,7 @@ Version 4.2 - *May 10, 2024*
     Enrico Bertolazzi's [mexIPOPT][12], which include MEX files that have
     been renamed to architecture-specific names along with an `ipopt.m`
     wrapper function to call the appropriate one.
-    *Thanks to Carlos Murillo-Sánchez.*  
+    *Thanks to Carlos Murillo-Sánchez.* 
     _**Note:** While MP-Opt-Model no longer requires this, my recommendation
      is still to simply rename the MEX file to `ipopt.<mexext>`, with the
      appropriate architecture-specific extension, and delete the
@@ -222,7 +222,7 @@ Version 4.0 - *Oct 18, 2021*
   - Add several enhancements to `mp_idx_manager/set_type_idx_map()`.
     - Speed improvements
     - Add idxs = [] option to specify "all"
-    - Add optional `group_by_name` input argument. 
+    - Add optional `group_by_name` input argument.
 
 #### 5/3/21
   - Add support for new class of problems - parameterized nonlinear

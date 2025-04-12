@@ -490,7 +490,7 @@ classdef set_manager < handle
             %     s = lin.set_type_idx_map([], 1));
             %
             % See also describe_idx, mp_idx_manager.
-    
+
             %% default args
             if nargin < 3
                 group_by_name = 0;
@@ -498,9 +498,9 @@ classdef set_manager < handle
                     idxs = [];
                 end
             end
-    
+
             NS = obj.NS;
-    
+
             %% special case : everything and grouped by name
             if group_by_name && isempty(idxs)
                 %% pre-allocate return struct

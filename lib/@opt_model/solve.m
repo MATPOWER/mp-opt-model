@@ -158,7 +158,7 @@ switch pt
             leq_opt = struct();
             leq_thresh = 0;
         end
-        
+
         [A, b] = om.params_lin_constraint();
         if leq_thresh           %% check for failure
             %% set up to trap non-singular matrix warnings
@@ -207,7 +207,7 @@ switch pt
             if isfield(opt, 'x0')
                 x0 = opt.x0;
             end
-        
+
             %% run solver
             [A, l, u] = om.params_lin_constraint();
             f_fcn = @(x)nlp_costfcn(om, x);
@@ -286,15 +286,15 @@ if om.getN('lin')
 end
 if nargout > 1
     if om.getN('qcn')
-        [fqcn, Jqcn] = om.qcn.eval(om.var, x); 
+        [fqcn, Jqcn] = om.qcn.eval(om.var, x);
     end
     if om.getN('nle')
         [fnln, Jnln] = om.nle.eval(om.var, x);
     end
     J = [Jnln; Jqcn; Jlin];
-else    
+else
     if om.getN('qcn')
-        fqcn = om.qcn.eval(om.var, x); 
+        fqcn = om.qcn.eval(om.var, x);
     end
     if om.getN('nle')
         fnln = om.nle.eval(om.var, x);

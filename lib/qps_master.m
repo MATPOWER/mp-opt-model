@@ -259,7 +259,7 @@ switch alg
             mips_opt = [];
         end
         mips_opt.verbose = verbose;
-        
+
         %% call solver
         [x, f, eflag, output, lambda] = ...
             qps_mips(H, c, A, l, u, xmin, xmax, x0, mips_opt);

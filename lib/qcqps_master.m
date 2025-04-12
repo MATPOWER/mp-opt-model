@@ -254,17 +254,17 @@ if is_qcqp
             hess_fcn = @(x, lambda, cost_mult)qcqp_nlp_hessfcn(x, lambda, H, matQi, matQe, cost_mult);
             [x, f, eflag, output, Lambda] = ...
                 nlps_master(f_fcn, x0, A, l2, u2, xmin, xmax, gh_fcn, hess_fcn, opt);
-            
+
             if ~isfield(Lambda, 'eqnonlin')
                 Lambda.eqnonlin =  zeros(length(lbe), 1);
             end
             if ~isfield(Lambda, 'ineqnonlin')
                 Lambda.ineqnonlin = zeros(length(lbi), 1);
             end
-            
+
             % gather multipliers for quadratic constraints
             [mu_l_quad, mu_u_quad] = convert_lin_constraint_multipliers(Lambda.eqnonlin, Lambda.ineqnonlin, ieq_quad, igt_quad, ilt_quad);  % WGV: we reuse the function for linear constraints, but a 'convert_quad_constraint_multipliers' is intended here
-            
+
             lambda = struct( ...
                 'mu_l'      , Lambda.mu_l, ...
                 'mu_u'      , Lambda.mu_u, ...

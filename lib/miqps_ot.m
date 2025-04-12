@@ -324,7 +324,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
         xmin(k) = x0(k);
         xmax(k) = x0(k);
     %     opt.linprog_opt.Algorithm = 'dual-simplex';     %% dual-simplex
-    
+
         [x_, f_, eflag_, output_, lambda] = qps_ot(H, c, A, l, u, xmin, xmax, x0, opt);
     %     output
     %     output.message

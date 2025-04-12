@@ -200,7 +200,7 @@ if have_feature('opti_clp')     %% use OPTI Toolbox version's MEX interface
     clp_opt.display = verbose;
 
     [x, f, exitflag, iter, lam] = clp(tril(H), c, A, l, u, xmin, xmax, clp_opt);
-    
+
     output.iter = iter;
 
     %% repackage lambdas
@@ -224,7 +224,7 @@ if have_feature('opti_clp')     %% use OPTI Toolbox version's MEX interface
         mu_u(mu_u < 0) = 0;
         lower(lower < 0) = 0;
         upper(upper < 0) = 0;
-        
+
         lambda = struct( ...
             'mu_l', mu_l, ...
             'mu_u', mu_u, ...

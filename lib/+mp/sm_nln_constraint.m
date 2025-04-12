@@ -489,7 +489,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             % For a given value of the variable vector :math:`\x`, this method
             % evaluates the nonlinear constraint function and optionally its
             % derivatives for an individual subset, if name or name and index
-            % list are provided, otherise, for the full set of constraints.
+            % list are provided, otherwise, for the full set of constraints.
             %
             % Inputs:
             %   var (mp.sm_variable) : corresponding mp.sm_variable object

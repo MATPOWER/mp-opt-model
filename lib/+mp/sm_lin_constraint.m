@@ -598,7 +598,7 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             %
             % For a given value of the variable vector :math:`\x`, this method
             % evaluates the linear constraints for an individual subset, if
-            % name or name and index list are provided, otherise, for the full
+            % name or name and index list are provided, otherwise, for the full
             % set of constraints.
             %
             % Returns :math:`\AA \x - \u`, and optionally :math:`\l - \AA \x`
@@ -620,7 +620,7 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             % See also add, params.
 
             if obj.N
-                %% collect cost parameters
+                %% collect constraint parameters
                 if nargin < 4                       %% full set
                     [A, l, u, vs] = obj.params(var);
                     tr = 0;
@@ -701,7 +701,8 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             %   idx_list (cell array) : *(optional)* indices of individual
             %       subset
 
-            [fid, name, idx, idxs, hdr1] = obj.display_soln_std_args(varargin{:});
+            [fid, name, idx, idxs, hdr1] = ...
+                obj.display_soln_std_args(varargin{:});
 
             if obj.N
                 [A, vl, vu] = obj.params(var);

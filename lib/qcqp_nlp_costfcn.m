@@ -1,6 +1,6 @@
 function [f, df, d2f] = qcqp_nlp_costfcn(x, H, b)
 % qcqp_nlp_costfcn - Evaluates objective function, gradient and Hessian
-% of a quadratically constrained quadratic program (QCQP) solved using a 
+% of a quadratically constrained quadratic program (QCQP) solved using a
 % solver with nonlinear programming features
 % ::
 %
