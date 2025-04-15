@@ -106,7 +106,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %       [x, f, exitflag, output] = miqps_master(...)
 %       [x, f, exitflag, output, lambda] = miqps_master(...)
 %
-%   Example: (problem from from %% from MOSEK 6.0 Guided Tour, section  7.13.1
+%   Example: (problem from %% from MOSEK 6.0 Guided Tour, section  7.13.1
 %             https://docs.mosek.com/6.0/toolbox/node009.html)
 %       c = [-2; -3];
 %       A = sparse([195 273; 4 40]);
