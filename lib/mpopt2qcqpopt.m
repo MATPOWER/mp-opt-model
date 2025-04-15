@@ -18,12 +18,10 @@ function qcqpopt = mpopt2qcqpopt(mpopt, model, alg)
 %           'QP'   - quadratic program with all continuous variables
 %                   (GUROBI, CPLEX, MOSEK, OT (if large-scale alg available),
 %                    BPMPD, MIPS)
-%           'MILP' - LP with mixed integer/continuous variables
-%                   (GUROBI, CPLEX, MOSEK, OT, GLPK)
 %           'QCQP' - (default) QCQP with all continuous variables
 %                   (GUROBI, IPOPT)
-%       ALG ('opf.ac') : (optional) 'opf.ac', 'most', or any valid value of
-%               OPT.alg for QCQPS_MASTER. The first option indicates 
+%       ALG ('opf.ac') : (optional) 'opf.ac', or any valid value of
+%               OPT.alg for QCQPS_MASTER. The first option indicates
 %               that it should be taken from MPOPT.opf.ac.solver.
 %
 %   Output:
@@ -31,13 +29,13 @@ function qcqpopt = mpopt2qcqpopt(mpopt, model, alg)
 %
 % See also qcqps_master, mpoption.
 
-%   MATPOWER
-%   Copyright (c) 2019-2024, Power Systems Engineering Research Center (PSERC)
-%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia
+%   MP-Opt-Model
+%   Copyright (c) 2015-2025, Power Systems Engineering Research Center (PSERC)
+%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %
-%   This file is part of MATPOWER.
+%   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
-%   See https://matpower.org for more info.
+%   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 %% set default args
 if nargin < 3
@@ -70,11 +68,7 @@ switch alg
         elseif have_feature('ipopt')
             alg = 'IPOPT';      %% if not, then IPOPT, if available
         else
-            if model(1) ~= 'M'  %% not a mixed-integer problem
-                alg = 'MIPS';   %% otherwise MIPS, if applicable
-            else
-                error('mpopt2qcqpopt: Sorry, no solver available for %s models', model);
-            end
+            alg = 'MIPS';   %% otherwise MIPS, if applicable
         end
 end
 
@@ -99,8 +93,5 @@ switch alg
         end
         if isfield(mpopt, 'quadprog') && ~isempty(mpopt.quadprog)
             qcqpopt.quadprog_opt = mpopt.quadprog;
-        end
-        if isfield(mpopt, 'intlinprog') && ~isempty(mpopt.intlinprog)
-            qcqpopt.intlinprog_opt = mpopt.intlinprog;
         end
 end

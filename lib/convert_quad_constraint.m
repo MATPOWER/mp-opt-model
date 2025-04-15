@@ -1,21 +1,20 @@
 function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, l, u)
-% convert_quad_constraint - Convert a set of bounded quadratic constraints to 
-% equality/inequality pair
+% convert_quad_constraint - Convert quadratic constraints from bounded to equality/inequality pair.
 % ::
 %
 %   [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, l, u)
 %   [ieq, igt, ilt, Q, C, b] = convert_quad_constraint(Q, C, l, u)
 %
-% Convert a set of constraints of the form:
+% Convert a set of constraints of the form::
 %
-%       l(j) <= x'*Q{j}*x + C(j,:)*x <= u(j),  j = 1,2,...,NQ
+%       l(j) <= x'*Q{j}*x + C(j,:)*x <= u(j),  j = 1,2,...,nq
 %
-% to:
+% to::
 %
-%       x'*Qe{j}*x + Ce(j,:)*x  =  be(j),  j = 1,2,...,NQe
-%       x'*Qi{j}*x + Ci(j,:)*x  <= bi(j),  j = 1,2,...,NQi   , NQ = NQe+NQi
+%       x'*Qe{j}*x + Ce(j,:)*x  =  be(j),  j = 1,2,...,nqe
+%       x'*Qi{j}*x + Ci(j,:)*x  <= bi(j),  j = 1,2,...,nqi   , nq = nqe+nqi
 %
-% where:
+% where::
 %
 %       Qe = Q(ieq)
 %       Ce = C(ieq,:)
@@ -24,20 +23,22 @@ function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C,
 %       Ci = [C(ilt,:); -C(igt,:)]
 %       bi = [u(ilt);  -l(igt)]
 %
-% Alternatively, the returned cells, matrices, and RHS vectors can be stacked
-% into a single set with the equalities first, then the inequalities.
+% Alternatively, the returned cell arrays, matrices, and RHS vectors can be
+% stacked into a single set with the equalities first, then the inequalities.
+% ::
 %
 %       Q = [Qe; Qi]
 %       C = [Ce; Ci]
 %       b = [be; bi]
-% 
+%
 % Inputs:
-%   Q (double) : NQ x 1, cell array with sparse n x n symmetric matrices 
-%                holding the quadratic parameters of the quadratic constraints
-%   C (double) : NQ x n, matrix whose rows represent the linear parameters of
-%                the quadratic constraints
-%   l (double) : NQ x 1, quadratic constraint lower bound vector
-%   u (double) : NQ x 1, quadratic constraint upper bound vector
+%   Q (double) : :math:`n_q \times 1`, cell array with sparse :math:`n \times n`
+%       symmetric matrices holding the quadratic parameters of the quadratic
+%       constraints
+%   C (double) : :math:`n_q \times n`, matrix whose rows represent the linear
+%                parameters of the quadratic constraints
+%   l (double) : :math:`n_q \times 1`, quadratic constraint lower bound vector
+%   u (double) : :math:`n_q \times 1`, quadratic constraint upper bound vector
 %
 % Outputs:
 %   ieq (integer) : vector of indices of equality constraints
@@ -56,8 +57,9 @@ function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C,
 % See also convert_constraint_multipliers.
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2023, Power Systems Engineering Research Center (PSERC)
-%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia
+%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model..
 %   Covered by the 3-clause BSD License (see LICENSE file for details).

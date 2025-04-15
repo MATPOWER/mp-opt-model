@@ -38,7 +38,7 @@ function ps = parse_soln(om, stash)
 % See also get_soln.
 
 %   MP-Opt-Model
-%   Copyright (c) 2020-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2020-2025, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %

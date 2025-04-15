@@ -1,6 +1,5 @@
 function Lxx = qcqp_nlp_hessfcn(x, lambda, H, QQi, QQe, cost_mult)
-% qcqp_nlp_hessfcn - Evaluates Hessian of Lagrangian of a quadratically
-% constrained quadratic programming problem
+% qcqp_nlp_hessfcn - Evaluates QCQP Hessian of Lagrangian for NLP solver.
 % ::
 %
 %   LXX = QCQP_NLP_HESSFCN(X, LAMBDA, H, QQI, QQE)
@@ -31,8 +30,9 @@ function Lxx = qcqp_nlp_hessfcn(x, lambda, H, QQi, QQe, cost_mult)
 % See also qcqp_nlp_costfcn, qcqp_nlp_consfcn, qcqps_master.
 
 %   MP-Opt-Model
-%   Copyright (c) 1996-2024, Power Systems Engineering Research Center (PSERC)
-%   by Ray Zimmerman, PSERC Cornell
+%   Copyright (c) 1996-2025, Power Systems Engineering Research Center (PSERC)
+%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
@@ -72,10 +72,3 @@ end
 
 %% ----- evaluate Hessian of the Lagrangian -----
 Lxx = d2f + d2G + d2H;
-
-%% force specified sparsity structure
-% if nargin > 4
-%     %% add sparse structure (with tiny values) to current matrices to
-%     %% ensure that sparsity structure matches that supplied
-%     Lxx = Lxx + Hs;
-% end

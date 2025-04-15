@@ -1,5 +1,5 @@
 function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
-% qcqp_nlp_consfcn - Evaluates quadratic constraints and their Jacobian.
+% qcqp_nlp_consfcn - Evaluates quadratic constraints and their Jacobian for NLP solver.
 % ::
 %
 %   [H, G] = QCQP_NLP_CONSFCN(X, QQ, CC, BB)
@@ -9,17 +9,21 @@ function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
 %   for use with MIPS, FMINCON, etc. Computes constraint vectors and their
 %   gradients for a set of quadratic constraints of the form:
 %
-%    L(i) <= 1/2 X'*Q{i}*X + C(i,:)*X + K(i) <= U(i),  i = 1,2,...,NQ
+%       1/2 Xblk' * blkQe * Xblk + Ce * X == be
+%       1/2 Xblk' * blkQi * Xblk + Ci * X == bi
+%
+%   where Xblk is formed by creating a block diagonal matrix with X repeated
+%   along the block diagonal.
 %
 %   Inputs:
 %     X   : optimization vector
 %     QQ  : struct with (possibly sparse) quadratic matrices for
 %           equality/inequality constraints with the following fields:
-%         BLKQI : block diagonal matrix formed from the NQI x 1 cell array 
+%         blkQi : block diagonal matrix formed from the nqi x 1 cell array
 %                 of sparse quadratic matrices for inequaliy constraints
-%         BLKQE : block diagonal matrix formed from the NQE x 1 cell array 
+%         blkQe : block diagonal matrix formed from the nqe x 1 cell array
 %                 of sparse quadratic matrices for equaliy constraints
-%     CC : struct with the matrices (posibly sparse) of linear parameters
+%     CC : struct with the matrices (possibly sparse) of linear parameters
 %          of equality/inequality constraints with the following fields:
 %         Ci : matrix with linear parameters for inequality constraints
 %         Ce : matrix with linear parameters for equality constraints
@@ -36,14 +40,15 @@ function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
 %     DG : (optional) equality constraint gradients
 %
 %   Examples:
-%       [h, g] = qcqp_nlp_consfcn(x, Q, C, k, l, u);
-%       [h, g, dh, dg] = qcqp_nlp_consfcn(x, Q, C, k, l, u);
+%       [h, g] = qcqp_nlp_consfcn(x, QQ, CC, bb);
+%       [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb);
 %
 % See also qcqp_nlp_costfcn, qcqp_nlp_hessfcn, qcqps_master.
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2023, Power Systems Engineering Research Center (PSERC)
-%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia
+%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
@@ -107,12 +112,4 @@ if nargout > 2       %% derivatives
         Qex = cell2mat(Qex);
         dg = (Qex + Ce)';
     end
-
-    %% force specified sparsity structure
-    % if nargin > 2
-    %     %% add sparse structure (with tiny values) to current matrices to
-    %     %% ensure that sparsity structure matches that supplied
-    %     dg = dg + dgs;
-    %     dh = dh + dhs;
-    % end
 end
