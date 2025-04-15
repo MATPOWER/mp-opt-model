@@ -1,32 +1,32 @@
-function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt)
+function [x, f, eflag, output, lambda] = qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
 % qcqps_knitro - Quadratically Constrained Quadratic Program Solver based on
-% Artelys KNITRO.
+% Artelys Knitro.
 % ::
 %
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
-%       QCQPS_KNITRO(H, B, Q, C, K, L1, U1, A, L2, U2, XMIN, XMAX, X0, OPT)
+%       QCQPS_KNITRO(H, C, Q, B, LQCN, UQCN, A, L, U, XMIN, XMAX, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QCQPS_KNITRO(PROBLEM)
 %   A wrapper function providing a standardized interface for using
 %   KNITRO to solve the following (possibly non-convex) QCQP (quadratically
 %   constrained quadratic programming) problem:
 %
-%       min X'*H*X + B'*X
+%       min 1/2 X'*H*X + C'*X
 %        X
 %
 %   subject to
 %
-%    L1(i) <= X'*Q{i}*X + C(i,:)*X + K(i) <= U1(i),  i = 1,2,...,nq   (quadratic constraints)
-%                 L2 <= A*X <= U2                                     (linear constraints)
-%                XMIN <= X <= XMAX                                    (variable bounds)
+%       LQCN(i) <= 1/2 X'*Q{i}*X + B(i,:)*X <= UQCN(i), i = 1,2,...,nq
+%                           (quadratic constraints)
+%       L <= A*X <= U       (linear constraints)
+%       XMIN <= X <= XMAX   (variable bounds)
 %
-%   Inputs (all optional except H, B, Q, C, K, L1 and U1):
+%   Inputs (all optional except H, C, Q, B, LQCN, and UQCN):
 %       H : matrix (possibly sparse) of quadratic cost coefficients
-%       B : vector of linear cost coefficients
+%       C : vector of linear cost coefficients
 %       Q : nq x 1 cell array of sparse quadratic matrices for quadratic constraints
-%       C : matrix (posibly sparse) of linear term of quadratic constraints
-%       K : vector of constant terms of quadratic constraints
-%       L1, U1: define the lower an upper bounds on the quadratic constraints
-%       A, L2, U2 : define the optional linear constraints. Default
+%       B : matrix (possibly sparse) of linear term of quadratic constraints
+%       LQCN, UQCN: define the lower an upper bounds on the quadratic constraints
+%       A, L, U : define the optional linear constraints. Default
 %           values for the elements of L and U are -Inf and Inf,
 %           respectively.
 %       XMIN, XMAX : optional lower and upper bounds on the
@@ -44,7 +44,7 @@ function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2,
 %                   overrides these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
-%           described above: H, B, Q, C, k, l1, u1, A, l2, u2, xmin, xmax, x0, opt
+%           described above: H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt
 %
 %   Outputs:
 %       X : solution vector
@@ -59,18 +59,54 @@ function [x, f, eflag, output, lambda] = qcqps_knitro(H, b, Q, C, l1, u1, A, l2,
 %           multipliers on the constraints, with fields:
 %           mu_l - lower (left-hand) limit on linear constraints
 %           mu_u - upper (right-hand) limit on linear constraints
-%           mu_l_quad - (QCQP only) lower (left-hand) limit on quadratic
-%                       constraints
-%           mu_u_quad - (QCQP only) upper (right-hand) limit on quadratic
-%                       constraints
+%           mu_l_quad - lower (left-hand) limit on quadratic constraints
+%           mu_u_quad - upper (right-hand) limit on quadratic constraints
 %           lower - lower bound on optimization variables
 %           upper - upper bound on optimization variables
+%
+%   Calling syntax options:
+%       [x, f, exitflag, output, lambda] = ...
+%           qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
+%
+%       x = qcqps_knitro(H, c, Q, B, lqcn, uqcn)
+%       x = qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u)
+%       x = qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax)
+%       x = qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0)
+%       x = qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
+%       x = qcqps_knitro(problem), where problem is a struct with fields:
+%                       H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt
+%                       all fields except 'c', are optional, and problem with
+%                       linear costs must include constraints
+%       x = qcqps_knitro(...)
+%       [x, f] = qcqps_knitro(...)
+%       [x, f, exitflag] = qcqps_knitro(...)
+%       [x, f, exitflag, output] = qcqps_knitro(...)
+%       [x, f, exitflag, output, lambda] = qcqps_knitro(...)
+%
+%   Example: (problem from https://docs.gurobi.com/projects/examples/en/current/examples/matlab/qcp.html)
+%       H = [];
+%       c = [-1;0;0];
+%       Q = { sparse([2 0 0; 0 2 0; 0 0 -2]), ...
+%             sparse([2 0 0; 0 0 -2; 0 -2 0]) };
+%       B = zeros(2,3);
+%       lqcn = [-Inf;-Inf];
+%       uqcn = [0; 0];
+%       A = [1 1 1];
+%       l = 1;
+%       u = 1;
+%       xmin = zeros(3,1);
+%       xmax = Inf(3,1);
+%       x0 = zeros(3,1);
+%       opt = struct('verbose', 2);
+%       [x, f, s, out, lambda] = ...
+%           qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
 %
 % See also qcqps_master, artelys_knitro_options, qcqp_knitro
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2023, Power Systems Engineering Research Center (PSERC)
-%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia
+%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model..
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
@@ -84,14 +120,14 @@ if nargin == 1 && isstruct(H)       %% problem struct
     if isfield(p, 'x0'),    x0 = p.x0;      else,   x0 = [];    end
     if isfield(p, 'xmax'),  xmax = p.xmax;  else,   xmax = [];  end
     if isfield(p, 'xmin'),  xmin = p.xmin;  else,   xmin = [];  end
-    if isfield(p, 'u2'),    u2 = p.u2;      else,   u2 = [];    end
-    if isfield(p, 'l2'),    l2 = p.l2;      else,   l2 = [];    end
+    if isfield(p, 'u'),     u = p.u;        else,   u = [];     end
+    if isfield(p, 'l'),     l = p.l;        else,   l = [];     end
     if isfield(p, 'A'),     A = p.A;        else,   A = [];     end
-    if isfield(p, 'u1'),    u1 = p.u1;      else,   u1 = [];    end
-    if isfield(p, 'l1'),    l1 = p.l1;      else,   l1 = [];    end
-    if isfield(p, 'C'),     C = p.C;        else,   C = [];     end
+    if isfield(p, 'uqcn'),  uqcn = p.uqcn;  else,   uqcn = [];  end
+    if isfield(p, 'lqcn'),  lqcn = p.lqcn;  else,   lqcn = [];  end
+    if isfield(p, 'B'),     B = p.B;        else,   B = [];     end
     if isfield(p, 'Q'),     Q = p.Q;        else,   Q = {};     end
-    if isfield(p, 'b'),     b = p.b;        else,   b = [];     end
+    if isfield(p, 'c'),     c = p.c;        else,   c = [];     end
     if isfield(p, 'H'),     H = p.H;        else,   H = [];     end
 else                                %% individual args
     if nargin < 13
@@ -104,8 +140,8 @@ else                                %% individual args
                     xmin = [];
                     if nargin < 7
                         A = [];
-                        l2 = [];
-                        u2 = [];
+                        l = [];
+                        u = [];
                     end
                 end
             end
@@ -116,14 +152,14 @@ end
 %% define nx, set default values for missing optional inputs
 if isempty(Q)
     if isempty(H) || ~any(any(H))
-        if isempty(C) && isempty(A) && isempty(xmin) && isempty(xmax)
+        if isempty(B) && isempty(A) && isempty(xmin) && isempty(xmax)
             error('qcqps_knitro: LP problem must include constraints or variable bounds');
         else
-            if ~isempty(A) && ~isempty(C)
-                if size(A,2) == size(C,2)
+            if ~isempty(A) && ~isempty(B)
+                if size(A,2) == size(B,2)
                     nx = size(A, 2);
                 else
-                    error('qcqp_knitro: number of columns of A and C must agree')
+                    error('qcqp_knitro: number of columns of A and B must agree')
                 end
             elseif ~isempty(xmin)
                 nx = length(xmin);
@@ -135,16 +171,16 @@ if isempty(Q)
     else
         nx = size(H, 1);
     end
-    if isempty(C) || (~isempty(C) && (isempty(l1) || all(l1 == -Inf)) && ...
-                                     (isempty(u1) || all(u1 == Inf)))
-        C = sparse(0,nx);           %% no l1 & u1 limits => no quadratic constraints
+    if isempty(B) || (~isempty(B) && (isempty(lqcn) || all(lqcn == -Inf)) && ...
+                                     (isempty(uqcn) || all(uqcn == Inf)))
+        B = sparse(0,nx);       %% no lqcn & uqcn limits => no quadratic constraints
     end
-    nrowC = size(C, 1);             %% number of original quadratic constraints
-    if isempty(u1)                  %% By default, quadratic inequalities are ...
-        u1 = Inf(nrowC, 1);         %% ... unbounded above and ...
+    nrowB = size(B, 1);         %% number of original quadratic constraints
+    if isempty(uqcn)            %% By default, quadratic inequalities are ...
+        uqcn = Inf(nrowB, 1);   %% ... unbounded above and ...
     end
-    if isempty(l1)
-        l1 = -Inf(nrowC, 1);        %% ... unbounded below.
+    if isempty(lqcn)
+        lqcn = -Inf(nrowB, 1);  %% ... unbounded below.
     end
 else
     [nrowQ, ncolQ] = size(Q);
@@ -156,10 +192,10 @@ else
             end
             nx = size(H, 1);
         else
-            if abs(sum((1/nrowQ)*size_Q(:,2)) - length(b))  > 1e-10
-                error('qcqp_knitro: Dimensions of matrices Q{i}, i=1,2,...,%d and vector b must agree.', nrowQ)
+            if abs(sum((1/nrowQ)*size_Q(:,2)) - length(c))  > 1e-10
+                error('qcqp_knitro: Dimensions of matrices Q{i}, i=1,2,...,%d and vector c must agree.', nrowQ)
             end
-            nx = length(b);
+            nx = length(c);
         end
     else
         error('qcqp_knitro: Input argument Q must be an N x 1 cell array')
@@ -170,24 +206,24 @@ if ~isempty(H) || any(any(H))
         H = sparse(H);
     end
 end
-if isempty(b)
-    b = zeros(nx, 1);
+if isempty(c)
+    c = zeros(nx, 1);
 end
 if isempty(A)
-   A = spalloc(1, nx, 0);
+   A = sparse(1, nx);
 end
-nrowA = size(A, 1);                %% number of original linear constraints
-if isempty(u2)                  %% By default, linear inequalities are ...
-    u2 = Inf(nrowA, 1);             %% ... unbounded above and ...
+nrowA = size(A, 1);         %% number of original linear constraints
+if isempty(u)               %% By default, linear inequalities are ...
+    u = Inf(nrowA, 1);      %% ... unbounded above and ...
 end
-if isempty(l2)
-    l2 = -Inf(nrowA, 1);            %% ... unbounded below.
+if isempty(l)
+    l = -Inf(nrowA, 1);     %% ... unbounded below.
 end
-if isempty(xmin)                %% By default, optimization variables are ...
-    xmin = -Inf(nx, 1);         %% ... unbounded below and ...
+if isempty(xmin)            %% By default, optimization variables are ...
+    xmin = -Inf(nx, 1);     %% ... unbounded below and ...
 end
 if isempty(xmax)
-    xmax = Inf(nx, 1);          %% ... unbounded above.
+    xmax = Inf(nx, 1);      %% ... unbounded above.
 end
 if isempty(x0)
     x0 = zeros(nx, 1);
@@ -226,20 +262,19 @@ if verbose
         vn, alg_names{kn_opt.Method+1}, lpqcqp);
 end
 
-%% split up quadratic constraints
-[ieq_quad, igt_quad, ilt_quad, Qe, Ce, sc, Qi, Ci, ubi] = ...
-    convert_quad_constraint(Q, C, l1, u1);
-
-%% split up linear constraints
 if ~issparse(A)
     A = sparse(A);
 end
-if issparse(b)
-    b = full(b);
+if issparse(c)
+    c = full(c);
 end
 
-[ieq_lin, igt_lin, ilt_lin, Ae, be, Ai, bi] = ...
-    convert_lin_constraint(A, l2, u2);
+%% split up quadratic constraints
+[ieq_quad, igt_quad, ilt_quad, Qe, Ce, sc, Qi, Ci, ubi] = ...
+    convert_quad_constraint(Q, B, lqcn, uqcn);
+
+%% split up linear constraints
+[ieq_lin, igt_lin, ilt_lin, Ae, be, Ai, bi] = convert_lin_constraint(A, l, u);
 
 %% grab some dimensions and adjust constraints
 neq_quad = length(ieq_quad);                       %% number of quadratic equalities
@@ -256,7 +291,8 @@ beq_quad = [be; sc];                        %
 
 %% Call the solver
 [x, f, exitflag, output, Lambda] = ...
-            knitro_qcqp(H, b, Qi_quad, A_quad, b_quad, Qeq_quad, Aeq_quad, beq_quad, xmin, xmax, x0, [], kn_opt);
+    knitro_qcqp(H, c, Qi_quad, A_quad, b_quad, Qeq_quad, Aeq_quad, beq_quad, ...
+        xmin, xmax, x0, [], kn_opt);
 
 %% Extract multipliers
 [mu_l, mu_u] = convert_constraint_multipliers(Lambda.eqlin(1:neq_lin), ...

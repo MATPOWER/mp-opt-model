@@ -1,9 +1,9 @@
 function t_qcqps_master(quiet)
-% t_qcqps_master - Tests of LP/QP/QCQP solvers via qcqps_master.
+% t_qcqps_master - Tests of QCQP solvers via qcqps_master.
 
 %   MP-Opt-Model
 %   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
-%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia
+%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -76,12 +76,12 @@ for k = 1:length(algs)
             A = [1 -1  1;
                 -3  -2  -4;
                 3  2  0];
-            l2 = [-Inf; -42; -Inf];
-            u2 = [20; Inf; 30];
+            l = [-Inf; -42; -Inf];
+            u = [20; Inf; 30];
             xmin = [0; 0; 0];
             xmax = [Inf; Inf; Inf];
             x0 = [];
-            [x, f, s, out, lam] = qcqps_master([], b, [], [], [], [], A, l2, u2, xmin, xmax, x0, opt);
+            [x, f, s, out, lam] = qcqps_master([], b, [], [], [], [], A, l, u, xmin, xmax, x0, opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [0; 15; 3], 6, [t 'x']);
             t_is(f, -78, 6, [t 'f']);
@@ -92,7 +92,7 @@ for k = 1:length(algs)
 
             %% 2) Infeasible LP problem
             t = sprintf('%s - infeasible LP : ', names{k});
-            p = struct('A', sparse([1 1]), 'b', [1;1], 'u2', -1, 'xmin', [0;0], 'opt', opt);
+            p = struct('A', sparse([1 1]), 'b', [1;1], 'u', -1, 'xmin', [0;0], 'opt', opt);
             [x, f, s, out, lam] = qcqps_master(p);
             t_ok(s <= 0, [t 'no success']);
         else
@@ -122,12 +122,12 @@ for k = 1:length(algs)
             A = [   1   1;
                     -1  2;
                     2   1   ];
-            l2 = [];
-            u2 = [2; 2; 3];
+            l = [];
+            u = [2; 2; 3];
             xmin = [0; 0];
             xmax = [Inf; Inf];
             x0 = [];
-            [x, f, s, out, lam] = qcqps_master(H, b, [], [], [], [], A, l2, u2, xmin, xmax, x0, opt);
+            [x, f, s, out, lam] = qcqps_master(H, b, [], [], [], [], A, l, u, xmin, xmax, x0, opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [2; 4]/3, 7, [t 'x']);
             t_is(f, -74/9, 6, [t 'f']);
@@ -145,12 +145,12 @@ for k = 1:length(algs)
             b = zeros(4,1);
             A = [   1       1       1       1;
                     0.17    0.11    0.10    0.18    ];
-            l2 = [1; 0.10];
-            u2 = [1; Inf];
+            l = [1; 0.10];
+            u = [1; Inf];
             xmin = zeros(4,1);
-            xmax = inf(4,1);
+            xmax = Inf(4,1);
             x0 = [1; 0; 0; 1];
-            [x, f, s, out, lam] = qcqps_master(H, b, [], [], [], [], A, l2, u2, xmin, xmax, x0, opt);
+            [x, f, s, out, lam] = qcqps_master(H, b, [], [], [], [], A, l, u, xmin, xmax, x0, opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [0; 2.8; 0.2; 0]/3, 5, [t 'x']);
             t_is(f, 3.29/3, 6, [t 'f']);
@@ -161,7 +161,7 @@ for k = 1:length(algs)
 
             %% 6) Same previous passing a struct
             t = sprintf('%s - (struct) constrained 4-d convex QP : ', names{k});
-            p = struct('H', H, 'A', A, 'l2', l2, 'u2', u2, 'xmin', xmin, 'x0', x0, 'opt', opt);
+            p = struct('H', H, 'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
             [x, f, s, out, lam] = qcqps_master(p);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [0; 2.8; 0.2; 0]/3, 5, [t 'x']);
@@ -177,21 +177,20 @@ for k = 1:length(algs)
         %% 7) From https://docs.gurobi.com/projects/examples/en/current/examples/matlab/qcp.html
         t = sprintf('%s - convex 3-d QCQP with lin objective: ', names{k});
         H = [];
-        B = [-1;0;0];
+        c = [-1;0;0];
         Q = cell(2,1);
         Q{1} = sparse([2 0 0; 0 2 0; 0 0 -2]);
         Q{2} = sparse([2 0 0; 0 0 -2; 0 -2 0]);
-        C = zeros(2,3);
-        K = [0;0];
-        l1 = [-inf;-inf] - K;
-        u1 = [0; 0] - K;
+        B = zeros(2,3);
+        lqcn = [-Inf;-Inf];
+        uqcn = [0; 0];
         A = [1 1 1];
-        l2 = 1;
-        u2 = 1;
+        l = 1;
+        u = 1;
         xmin = zeros(3,1);
-        xmax = inf(3,1);
+        xmax = Inf(3,1);
         x0 = zeros(3,1);
-        [x, f, s, out, lam] = qcqps_master(H, B, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
+        [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [3.91577; 1.78203; 4.3022]*1e-1, 6, [t 'x']);
         t_is(f, -0.391577, 6, [t 'f']);
@@ -205,16 +204,15 @@ for k = 1:length(algs)
         %% 8) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
         t = sprintf('%s - convex 3-d QCQP with quad objective: ', names{k});
         H = sparse([2 0 -1; 0 0.2 0; -1 0 2]);
-        B = [0;-1;0];
+        c = [0;-1;0];
         Q = {sparse([-2 0 0.2; 0 -2 0; 0.2 0 -0.2])};
-        C = [1 1 1];
-        K = 0;
-        l1 = 1 - K;
-        u1 = Inf - K;
+        B = [1 1 1];
+        lqcn = 1;
+        uqcn = Inf;
         xmin = zeros(3,1);
-        xmax = inf(3,1);
+        xmax = Inf(3,1);
         x0 = zeros(3,1);
-        [x, f, s, out, lam] = qcqps_master(H, B, Q, C, l1, u1, [], [], [], xmin, xmax, x0, opt);
+        [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lqcn, uqcn, [], [], [], xmin, xmax, x0, opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4.4880; 9.3192; 6.7411]*1e-1, 4, [t 'x']);
         t_is(f, -0.4918, 4, [t 'f']);
@@ -229,19 +227,18 @@ for k = 1:length(algs)
         t = sprintf('%s - nonconvex 3-d QCQP : ', names{k});
         if does_nonconv(k)
             H = sparse([-2 -1 -1; -1 -4 0; -1 0 -2]);
-            B = zeros(3,1);
-            Q = {sparse(-2*eye(3))};
-            C = spalloc(1,3,0);
-            K = 0;
-            l1 = -inf - K;
-            u1 = -25 - K;
+            c = zeros(3,1);
+            Q = {-2*speye(3)};
+            B = sparse(1,3);
+            lqcn = -Inf;
+            uqcn = -25;
             A = [8 14 7];
-            l2 = 56;
-            u2 = 56;
+            l = 56;
+            u = 56;
             xmin = zeros(3,1);
-            xmax = inf(3,1);
+            xmax = Inf(3,1);
             x0 = [0;0;20];
-            [x, f, s, out, lam] = qcqps_master(H, B, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt);
+            [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [0; 0; 8], 5, [t 'x']);
             t_is(f, -64, 4, [t 'f']);

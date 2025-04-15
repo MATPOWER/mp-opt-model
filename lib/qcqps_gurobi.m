@@ -1,31 +1,31 @@
-function [x, f, eflag, output, lambda] = qcqps_gurobi(H, b, Q, C, l1, u1, A, l2, u2, xmin, xmax, x0, opt)
+function [x, f, eflag, output, lambda] = qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
 % qcqps_gurobi - Quadratically Constrained Quadratic Program Solver based on GUROBI.
 % ::
 %
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
-%       QCQPS_GUROBI(H, B, Q, C, K, L1, U1, A, L2, U2, XMIN, XMAX, X0, OPT)
+%       QCQPS_GUROBI(H, C, Q, B, LQCN, UQCN, A, L, U, XMIN, XMAX, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QCQPS_GUROBI(PROBLEM)
 %   A wrapper function providing a standardized interface for using
 %   GUROBI to solve the following (possibly non-convex) QCQP (quadratically
 %   constrained quadratic programming) problem:
 %
-%       min X'*H*X + B'*X
+%       min 1/2 X'*H*X + C'*X
 %        X
 %
 %   subject to
 %
-%    L1(i) <= X'*Q{i}*X + C(i,:)*X + K(i) <= U1(i),  i = 1,2,...,nq   (quadratic constraints)
-%                 L2 <= A*X <= U2                                     (linear constraints)
-%                XMIN <= X <= XMAX                                    (variable bounds)
+%       LQCN(i) <= 1/2 X'*Q{i}*X + B(i,:)*X <= UQCN(i), i = 1,2,...,nq
+%                           (quadratic constraints)
+%       L <= A*X <= U       (linear constraints)
+%       XMIN <= X <= XMAX   (variable bounds)
 %
-%   Inputs (all optional except H, B, Q, C, K, L1 and U1):
+%   Inputs (all optional except H, C, Q, B, LQCN, and UQCN):
 %       H : matrix (possibly sparse) of quadratic cost coefficients
-%       B : vector of linear cost coefficients
+%       C : vector of linear cost coefficients
 %       Q : nq x 1 cell array of sparse quadratic matrices for quadratic constraints
-%       C : matrix (posibly sparse) of linear parameters of quadratic constraints
-%       K : vector of constant parameters of quadratic constraints
-%       L1, U1: define the lower an upper bounds on the quadratic constraints
-%       A, L2, U2 : define the optional linear constraints. Default
+%       B : matrix (possibly sparse) of linear term of quadratic constraints
+%       LQCN, UQCN: define the lower an upper bounds on the quadratic constraints
+%       A, L, U : define the optional linear constraints. Default
 %           values for the elements of L and U are -Inf and Inf,
 %           respectively.
 %       XMIN, XMAX : optional lower and upper bounds on the
@@ -43,7 +43,7 @@ function [x, f, eflag, output, lambda] = qcqps_gurobi(H, b, Q, C, l1, u1, A, l2,
 %                   overrides these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
-%           described above: H, B, Q, C, k, l1, u1, A, l2, u2, xmin, xmax, x0, opt
+%           described above: H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt
 %
 %   Outputs:
 %       X : solution vector
@@ -58,18 +58,54 @@ function [x, f, eflag, output, lambda] = qcqps_gurobi(H, b, Q, C, l1, u1, A, l2,
 %           multipliers on the constraints, with fields:
 %           mu_l - lower (left-hand) limit on linear constraints
 %           mu_u - upper (right-hand) limit on linear constraints
-%           mu_l_quad - (QCQP only) lower (left-hand) limit on quadratic
-%                       constraints
-%           mu_u_quad - (QCQP only) upper (right-hand) limit on quadratic
-%                       constraints
+%           mu_l_quad - lower (left-hand) limit on quadratic constraints
+%           mu_u_quad - upper (right-hand) limit on quadratic constraints
 %           lower - lower bound on optimization variables
 %           upper - upper bound on optimization variables
+%
+%   Calling syntax options:
+%       [x, f, exitflag, output, lambda] = ...
+%           qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
+%
+%       x = qcqps_gurobi(H, c, Q, B, lqcn, uqcn)
+%       x = qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u)
+%       x = qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax)
+%       x = qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0)
+%       x = qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
+%       x = qcqps_gurobi(problem), where problem is a struct with fields:
+%                       H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt
+%                       all fields except 'c', are optional, and problem with
+%                       linear costs must include constraints
+%       x = qcqps_gurobi(...)
+%       [x, f] = qcqps_gurobi(...)
+%       [x, f, exitflag] = qcqps_gurobi(...)
+%       [x, f, exitflag, output] = qcqps_gurobi(...)
+%       [x, f, exitflag, output, lambda] = qcqps_gurobi(...)
+%
+%   Example: (problem from https://docs.gurobi.com/projects/examples/en/current/examples/matlab/qcp.html)
+%       H = [];
+%       c = [-1;0;0];
+%       Q = { sparse([2 0 0; 0 2 0; 0 0 -2]), ...
+%             sparse([2 0 0; 0 0 -2; 0 -2 0]) };
+%       B = zeros(2,3);
+%       lqcn = [-Inf;-Inf];
+%       uqcn = [0; 0];
+%       A = [1 1 1];
+%       l = 1;
+%       u = 1;
+%       xmin = zeros(3,1);
+%       xmax = Inf(3,1);
+%       x0 = zeros(3,1);
+%       opt = struct('verbose', 2);
+%       [x, f, s, out, lambda] = ...
+%           qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
 %
 % See also qcqps_master, gurobi_options, gurobi.
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2023, Power Systems Engineering Research Center (PSERC)
-%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia
+%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
+%   and Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model..
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
@@ -83,14 +119,14 @@ if nargin == 1 && isstruct(H)       %% problem struct
     if isfield(p, 'x0'),    x0 = p.x0;      else,   x0 = [];    end
     if isfield(p, 'xmax'),  xmax = p.xmax;  else,   xmax = [];  end
     if isfield(p, 'xmin'),  xmin = p.xmin;  else,   xmin = [];  end
-    if isfield(p, 'u2'),    u2 = p.u2;      else,   u2 = [];    end
-    if isfield(p, 'l2'),    l2 = p.l2;      else,   l2 = [];    end
+    if isfield(p, 'u'),     u = p.u;        else,   u = [];     end
+    if isfield(p, 'l'),     l = p.l;        else,   l = [];     end
     if isfield(p, 'A'),     A = p.A;        else,   A = [];     end
-    if isfield(p, 'u1'),    u1 = p.u1;      else,   u1 = [];    end
-    if isfield(p, 'l1'),    l1 = p.l1;      else,   l1 = [];    end
-    if isfield(p, 'C'),     C = p.C;        else,   C = [];     end
+    if isfield(p, 'uqcn'),  uqcn = p.uqcn;  else,   uqcn = [];  end
+    if isfield(p, 'lqcn'),  lqcn = p.lqcn;  else,   lqcn = [];  end
+    if isfield(p, 'B'),     B = p.B;        else,   B = [];     end
     if isfield(p, 'Q'),     Q = p.Q;        else,   Q = {};     end
-    if isfield(p, 'b'),     b = p.b;        else,   b = [];     end
+    if isfield(p, 'c'),     c = p.c;        else,   c = [];     end
     if isfield(p, 'H'),     H = p.H;        else,   H = [];     end
 else                                %% individual args
     if nargin < 13
@@ -103,8 +139,8 @@ else                                %% individual args
                     xmin = [];
                     if nargin < 7
                         A = [];
-                        l2 = [];
-                        u2 = [];
+                        l = [];
+                        u = [];
                     end
                 end
             end
@@ -115,14 +151,14 @@ end
 %% define nx, set default values for missing optional inputs
 if isempty(Q)
     if isempty(H) || ~any(any(H))
-        if isempty(C) && isempty(A) && isempty(xmin) && isempty(xmax)
+        if isempty(B) && isempty(A) && isempty(xmin) && isempty(xmax)
             error('qcqps_gurobi: LP problem must include constraints or variable bounds');
         else
-            if ~isempty(A) && ~isempty(C)
-                if size(A,2) == size(C,2)
+            if ~isempty(A) && ~isempty(B)
+                if size(A,2) == size(B,2)
                     nx = size(A, 2);
                 else
-                    error('qcqp_gubori: number of columns of A and C must agree')
+                    error('qcqp_gubori: number of columns of A and B must agree')
                 end
             elseif ~isempty(xmin)
                 nx = length(xmin);
@@ -134,16 +170,16 @@ if isempty(Q)
     else
         nx = size(H, 1);
     end
-    if isempty(C) || (~isempty(C) && (isempty(l1) || all(l1 == -Inf)) && ...
-                                     (isempty(u1) || all(u1 == Inf)))
-        C = sparse(0,nx);           %% no l1 & u1 limits => no quadratic constraints
+    if isempty(B) || (~isempty(B) && (isempty(lqcn) || all(lqcn == -Inf)) && ...
+                                     (isempty(uqcn) || all(uqcn == Inf)))
+        B = sparse(0,nx);       %% no lqcn & uqcn limits => no quadratic constraints
     end
-    nrowC = size(C, 1);             %% number of original quadratic constraints
-    if isempty(u1)                  %% By default, quadratic inequalities are ...
-        u1 = Inf(nrowC, 1);         %% ... unbounded above and ...
+    nrowB = size(B, 1);         %% number of original quadratic constraints
+    if isempty(uqcn)            %% By default, quadratic inequalities are ...
+        uqcn = Inf(nrowB, 1);   %% ... unbounded above and ...
     end
-    if isempty(l1)
-        l1 = -Inf(nrowC, 1);        %% ... unbounded below.
+    if isempty(lqcn)
+        lqcn = -Inf(nrowB, 1);  %% ... unbounded below.
     end
 else
     [nrowQ, ncolQ] = size(Q);
@@ -155,30 +191,30 @@ else
             end
             nx = size(H, 1);
         else
-            if abs(sum((1/nrowQ)*size_Q(:,2)) - length(b))  > 1e-10
-                error('qcqp_gurobi: Dimensions of matrices Q{i}, i=1,2,...,%d and vector b must agree.', nrowQ)
+            if abs(sum((1/nrowQ)*size_Q(:,2)) - length(c))  > 1e-10
+                error('qcqp_gurobi: Dimensions of matrices Q{i}, i=1,2,...,%d and vector c must agree.', nrowQ)
             end
-            nx = length(b);
+            nx = length(c);
         end
     else
         error('qcqp_gurobi: Input argument Q must be an N x 1 cell array')
     end
 end
-if isempty(b)
-    b = zeros(nx, 1);
+if isempty(c)
+    c = zeros(nx, 1);
 end
-nrowA = size(A, 1);                %% number of original linear constraints
-if isempty(u2)                   %% By default, linear inequalities are ...
-    u2 = Inf(nrowA, 1);             %% ... unbounded above and ...
+nrowA = size(A, 1);         %% number of original linear constraints
+if isempty(u)               %% By default, linear inequalities are ...
+    u = Inf(nrowA, 1);      %% ... unbounded above and ...
 end
-if isempty(l2)
-    l2 = -Inf(nrowA, 1);            %% ... unbounded below.
+if isempty(l)
+    l = -Inf(nrowA, 1);     %% ... unbounded below.
 end
-if isempty(xmin)                %% By default, optimization variables are ...
-    xmin = -Inf(nx, 1);             %% ... unbounded below and ...
+if isempty(xmin)            %% By default, optimization variables are ...
+    xmin = -Inf(nx, 1);     %% ... unbounded below and ...
 end
 if isempty(xmax)
-    xmax = Inf(nx, 1);              %% ... unbounded above.
+    xmax = Inf(nx, 1);      %% ... unbounded above.
 end
 if isempty(x0)
     x0 = zeros(nx, 1);
@@ -216,17 +252,18 @@ if ~issparse(A)
     A = sparse(A);
 end
 if isempty(A)
-   A = spalloc(1, nx, 0);
+   A = sparse(1, nx);
 end
-if issparse(b)
-    b = full(b);
+if issparse(c)
+    c = full(c);
 end
 
 %% split up quadratic constraints
-[ieq_quad, igt_quad, ilt_quad, Q_quad, C_quad, b_quad] = convert_quad_constraint(Q, C, l1, u1);
+[ieq_quad, igt_quad, ilt_quad, Q_quad, C_quad, b_quad] = ...
+    convert_quad_constraint(Q, B, lqcn, uqcn);
 
 %% split up linear constraints
-[ieq_lin, igt_lin, ilt_lin, A_lin, b_lin] = convert_lin_constraint(A, l2, u2);
+[ieq_lin, igt_lin, ilt_lin, A_lin, b_lin] = convert_lin_constraint(A, l, u);
 
 %% grab some dimensions
 neq_quad = length(ieq_quad);                       %% number of quadratic equalities
@@ -251,7 +288,7 @@ m.rhs       = b_lin;
 m.sense     = char([ double('=')*ones(1,neq_lin) double('<')*ones(1,niq_lin) ]);
 m.lb        = xmin;
 m.ub        = xmax;
-m.obj       = b;
+m.obj       = c;
 
 %% Call the solver
 isemptyQ = cell2mat(cellfun(@(x)(isempty(x) || ~any(any(x))), Q_quad, 'UniformOutput', false));
@@ -369,7 +406,10 @@ lam.upper(ku)   = -rc(ku);
 
 if ~isempty(Q_quad)
     if ~isfield(results, 'qcpi') || isempty(results.qcpi)
-        qcpi = NaN(length(m.quadcon), 1); % Current version of Gurobi (11.0.3) does not return multipliers for non-convex qcqp. See https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/constraintquadratic.html#qcpi
+        qcpi = NaN(length(m.quadcon), 1);
+        % Current version of Gurobi (11.0.3) does not return multipliers for
+        % non-convex qcqp. See
+        % https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/constraintquadratic.html#qcpi
     else
         qcpi = results.qcpi;
     end
