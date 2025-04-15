@@ -282,7 +282,7 @@ if vnum < 12.003
 end
 
 %% repackage lambdas
-[mu_l, mu_u] = convert_lin_constraint_multipliers(lam.eqlin, lam.ineqlin, ieq, igt, ilt);
+[mu_l, mu_u] = convert_constraint_multipliers(lam.eqlin, lam.ineqlin, ieq, igt, ilt);
 
 lambda = struct( ...
     'mu_l', mu_l, ...

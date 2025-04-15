@@ -3645,12 +3645,20 @@ A = [Ae; Ai]
 b = [be; bi]
 \end{Code}
 
+\subsection{\tt convert\_constraint\_multipliers}
+\begin{Code}
+  [mu_l, mu_u] = convert_constraint_multipliers(lam, mu, ieq, igt, ilt)
+\end{Code}
+
+This function converts the multipliers on linear or quadratic constraints from separate sets for equality and upper-bounded inequality constraints to those for doubly-bounded inequality constraints.
+
+
 \subsection{\tt convert\_lin\_constraint\_multipliers}
 \begin{Code}
   [mu_l, mu_u] = convert_lin_constraint_multipliers(lam, mu, ieq, igt, ilt)
 \end{Code}
 
-This function converts the multipliers on linear constraints from separate sets for equality and upper-bounded inequality constraints to those for doubly-bounded inequality constraints.
+This function is deprecated. Instead, please use \code{convert\_constraint\_multipliers}.
 
 
 \subsection{\tt have\_fcn}
@@ -4690,6 +4698,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
 \item New functions:
     \begin{itemize}
     \item \code{artelys\_knitro\_options()} sets options for \knitro{}.
+    \item \code{convert\_constraint\_multipliers} replaces \code{convert\_lin\_constraint\_multipliers}.
     \item \code{knitrover()} displays version of installed \knitro{}.
     \item \code{qps\_knitro()} provides provides standardized interface for using \knitro{} to solve LP/QP problems.
     \end{itemize}
@@ -4743,6 +4752,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-4.3.pdf}{\mpom{} 4.3 Use
     \end{itemize}
 \item Update \code{mosek\_options()} for MOSEK 11.x compatibility.
 \item Update \code{miqps\_<solver>()} functions to avoid changing MIP solution values in price computation stage. It was rounding integer variables, potentionally causing a small discrepancy between the objective value reported by the solver and the value obtained by computing directly from the returned solution $x$.
+\item Deprecate the \code{convert\_lin\_constraint\_multipliers} in favor of \code{convert\_constraint\_multipliers}. 
 \end{itemize}
 
 \subsubsection*{Incompatible Changes}

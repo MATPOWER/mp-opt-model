@@ -341,7 +341,7 @@ else
     lam.upper(ku)   = -rc(ku);
 end
 
-[mu_l, mu_u] = convert_lin_constraint_multipliers(-pi(1:neq), -pi(neq+(1:niq)), ieq, igt, ilt);
+[mu_l, mu_u] = convert_constraint_multipliers(-pi(1:neq), -pi(neq+(1:niq)), ieq, igt, ilt);
 
 lambda = struct( ...
     'mu_l', mu_l, ...

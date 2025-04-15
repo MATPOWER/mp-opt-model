@@ -221,7 +221,7 @@ if verbose
         vn, output.algorithm, lpqp);
 end
 
-[mu_l, mu_u] = convert_lin_constraint_multipliers(Lambda.eqlin, Lambda.ineqlin, ieq, igt, ilt);
+[mu_l, mu_u] = convert_constraint_multipliers(Lambda.eqlin, Lambda.ineqlin, ieq, igt, ilt);
 
 if eflag == 0
     eflag = 1;       %% success is 1 (not zero), all other values are Knitro return codes

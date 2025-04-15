@@ -334,7 +334,7 @@ Lambda.lower(ku) = -Lambda.upper(ku);
 Lambda.upper(ku) = 0;
 
 %% package up results
-[mu_l, mu_u] = convert_lin_constraint_multipliers(Lambda.eqlin, Lambda.ineqlin, ieq, igt, ilt);
+[mu_l, mu_u] = convert_constraint_multipliers(Lambda.eqlin, Lambda.ineqlin, ieq, igt, ilt);
 
 lambda = struct( ...
     'lower', Lambda.lower, ...

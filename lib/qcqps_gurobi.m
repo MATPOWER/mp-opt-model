@@ -364,7 +364,8 @@ ku = find(rc < 0);   %% upper bound binding
 lam.lower(kl)   =  rc(kl);
 lam.upper(ku)   = -rc(ku);
 
-[mu_l, mu_u] = convert_lin_constraint_multipliers(-pi(1:neq_lin), -pi(neq_lin+(1:niq_lin)), ieq_lin, igt_lin, ilt_lin);
+[mu_l, mu_u] = convert_constraint_multipliers( ...
+    -pi(1:neq_lin), -pi(neq_lin+(1:niq_lin)), ieq_lin, igt_lin, ilt_lin);
 
 if ~isempty(Q_quad)
     if ~isfield(results, 'qcpi') || isempty(results.qcpi)
@@ -372,7 +373,9 @@ if ~isempty(Q_quad)
     else
         qcpi = results.qcpi;
     end
-    [mu_l_quad, mu_u_quad] = convert_lin_constraint_multipliers(-qcpi(1:neq_quad), -qcpi(neq_quad+(1:niq_quad)), ieq_quad, igt_quad, ilt_quad);  % WGV: we reuse the function for linear constraints, but a 'convert_quad_constraint_multipliers' is intended here
+    [mu_l_quad, mu_u_quad] = convert_constraint_multipliers( ...
+        -qcpi(1:neq_quad), -qcpi(neq_quad+(1:niq_quad)), ...
+        ieq_quad, igt_quad, ilt_quad);
 
     lambda = struct( ...
     'mu_l'      , mu_l, ...

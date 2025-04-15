@@ -309,7 +309,7 @@ ku = find(rc < 0);   %% upper bound binding
 lam.lower(kl)   =  rc(kl);
 lam.upper(ku)   = -rc(ku);
 
-[mu_l, mu_u] = convert_lin_constraint_multipliers(-pi(1:neq), -pi(neq+(1:niq)), ieq, igt, ilt);
+[mu_l, mu_u] = convert_constraint_multipliers(-pi(1:neq), -pi(neq+(1:niq)), ieq, igt, ilt);
 
 lambda = struct( ...
     'mu_l', mu_l, ...

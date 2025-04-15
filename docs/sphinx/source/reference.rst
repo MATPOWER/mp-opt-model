@@ -46,10 +46,11 @@ The |MPOM| master functions provide unified interfaces to multiple solvers for l
 Utility Functions
 ^^^^^^^^^^^^^^^^^
 
-Use these functions to convert linear constraints or to copy data from one struct to another.
+Use these functions to convert constraints or to copy data from one struct to another.
 
 .. toctree::
 
+   functions/convert_constraint_multipliers
    functions/convert_lin_constraint_multipliers
    functions/convert_lin_constraint
    functions/convert_quad_constraint

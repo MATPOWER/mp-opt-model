@@ -53,7 +53,7 @@ function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C,
 %   C (double)    : stacked constraint matrix of linear parameters
 %   b (double)    : stacked RHS
 %
-% See also convert_quad_constraint_multipliers.
+% See also convert_constraint_multipliers.
 
 %   MP-Opt-Model
 %   Copyright (c) 2019-2023, Power Systems Engineering Research Center (PSERC)
