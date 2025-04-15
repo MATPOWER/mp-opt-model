@@ -25,7 +25,7 @@ does_nonconv = [1 1 1 1 1 1 1];
 
 nlp = 8;
 nqp = 28;
-nqcqp_convex = 18;
+nqcqp_convex = 27;
 nqcqp_nonconvex = 9;
 n = nlp+nqp+nqcqp_convex+nqcqp_nonconvex;
 
@@ -201,7 +201,22 @@ for k = 1:length(algs)
         t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
         t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
 
-        %% 8) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
+        %% 8) Same previous passing a struct
+        t = sprintf('%s - (struct) constrained 4-d convex QP : ', names{k});
+        p = struct('H', H, 'c', c, 'Q', {Q}, 'B', B, 'lqcn', lqcn, 'uqcn', uqcn, ...
+            'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
+        [x, f, s, out, lam] = qcqps_master(p);
+        t_is(s, 1, 12, [t 'success']);
+        t_is(x, [3.91577; 1.78203; 4.3022]*1e-1, 6, [t 'x']);
+        t_is(f, -0.391577, 6, [t 'f']);
+        t_is(lam.lower, [0.0482;0.0092;0.1658]*1e-8, 6, [t 'lam.lower']);
+        t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
+        t_is(lam.mu_l, 0, 6, [t 'lam.mu_l']);
+        t_is(lam.mu_u, 0.391577, 6, [t 'lam.mu_u']);
+        t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
+        t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
+
+        %% 9) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
         t = sprintf('%s - convex 3-d QCQP with quad objective: ', names{k});
         H = sparse([2 0 -1; 0 0.2 0; -1 0 2]);
         c = [0;-1;0];
@@ -223,7 +238,7 @@ for k = 1:length(algs)
         t_is(lam.mu_l_quad, 0.9419, 4, [t 'lam.mu_l_quad']);
         t_is(lam.mu_u_quad, 0, 4, [t 'lam.mu_l_quad']);
 
-        %% 9) From "examples" folder of Knitro (exampleQCQP1)
+        %% 10) From "examples" folder of Knitro (exampleQCQP1)
         t = sprintf('%s - nonconvex 3-d QCQP : ', names{k});
         if does_nonconv(k)
             H = sparse([-2 -1 -1; -1 -4 0; -1 0 -2]);
