@@ -1,9 +1,9 @@
-function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
+function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
 % qcqps_master - Quadratically Constrained Quadratic Program Solver wrapper function.
 % ::
 %
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
-%       QCQPS_MASTER(H, C, Q, B, LQCN, UQCN, A, L, U, XMIN, XMAX, X0, OPT)
+%       QCQPS_MASTER(H, C, Q, B, LQ, UQ, A, L, U, XMIN, XMAX, X0, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QCQPS_MASTER(PROBLEM)
 %   A common wrapper function for various QCQP solvers.
 %   Solves the following QCQP (quadratically constrained quadratic programming)
@@ -14,17 +14,17 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lqcn, uqcn, A,
 %
 %   subject to
 %
-%       LQCN(i) <= 1/2 X'*Q{i}*X + B(i,:)*X <= UQCN(i), i = 1,2,...,nq
+%       LQ(i) <= 1/2 X'*Q{i}*X + B(i,:)*X <= UQ(i), i = 1,2,...,nq
 %                           (quadratic constraints)
 %       L <= A*X <= U       (linear constraints)
 %       XMIN <= X <= XMAX   (variable bounds)
 %
-%   Inputs (all optional except H, C, Q, B, LQCN, and UQCN):
+%   Inputs (all optional except H, C, Q, B, LQ, and UQ):
 %       H : matrix (possibly sparse) of quadratic cost coefficients
 %       C : vector of linear cost coefficients
 %       Q : nq x 1 cell array of sparse quadratic matrices for quadratic constraints
 %       B : matrix (possibly sparse) of linear term of quadratic constraints
-%       LQCN, UQCN: define the lower an upper bounds on the quadratic constraints
+%       LQ, UQ: define the lower an upper bounds on the quadratic constraints
 %       A, L, U : define the optional linear constraints. Default
 %           values for the elements of L and U are -Inf and Inf,
 %           respectively.
@@ -57,7 +57,7 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lqcn, uqcn, A,
 %           mips_opt    - options struct for QCQPS_MIPS
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
-%           described above: H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt
+%           described above: H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt
 %
 %   Outputs:
 %       X : solution vector
@@ -79,15 +79,15 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lqcn, uqcn, A,
 %
 %   Calling syntax options:
 %       [x, f, exitflag, output, lambda] = ...
-%           qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
+%           qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
 %
-%       x = qcqps_master(H, c, Q, B, lqcn, uqcn)
-%       x = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u)
-%       x = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax)
-%       x = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0)
-%       x = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt)
+%       x = qcqps_master(H, c, Q, B, lq, uq)
+%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u)
+%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax)
+%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0)
+%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
 %       x = qcqps_master(problem), where problem is a struct with fields:
-%                       H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt
+%                       H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt
 %                       all fields except 'c', are optional, and problem with
 %                       linear costs must include constraints
 %       x = qcqps_master(...)
@@ -102,8 +102,8 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lqcn, uqcn, A,
 %       Q = { sparse([2 0 0; 0 2 0; 0 0 -2]), ...
 %             sparse([2 0 0; 0 0 -2; 0 -2 0]) };
 %       B = zeros(2,3);
-%       lqcn = [-Inf;-Inf];
-%       uqcn = [0; 0];
+%       lq = [-Inf;-Inf];
+%       uq = [0; 0];
 %       A = [1 1 1];
 %       l = 1;
 %       u = 1;
@@ -112,7 +112,7 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lqcn, uqcn, A,
 %       x0 = zeros(3,1);
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = ...
-%           qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
+%           qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
 
 %   MP-Opt-Model
 %   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
@@ -134,8 +134,8 @@ if nargin == 1 && isstruct(H)       %% problem struct
     if isfield(p, 'u'),     u = p.u;        else,   u = [];     end
     if isfield(p, 'l'),     l = p.l;        else,   l = [];     end
     if isfield(p, 'A'),     A = p.A;        else,   A = [];     end
-    if isfield(p, 'uqcn'),  uqcn = p.uqcn;  else,   uqcn = [];  end
-    if isfield(p, 'lqcn'),  lqcn = p.lqcn;  else,   lqcn = [];  end
+    if isfield(p, 'uq'),    uq = p.uq;      else,   uq = [];    end
+    if isfield(p, 'lq'),    lq = p.lq;      else,   lq = [];    end
     if isfield(p, 'B'),     B = p.B;        else,   B = [];     end
     if isfield(p, 'Q'),     Q = p.Q;        else,   Q = {};     end
     if isfield(p, 'c'),     c = p.c;        else,   c = [];     end
@@ -215,13 +215,13 @@ if is_qcqp
     switch alg
         case 'GUROBI'
             [x, f, eflag, output, lambda] = ...
-                qcqps_gurobi(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
+                qcqps_gurobi(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
         case 'KNITRO'
             [x, f, eflag, output, lambda] = ...
-                qcqps_knitro(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
-        case {'MOSEK'}
-            [x, f, eflag, output, lambda] = ...
-                qcqps_mosek(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
+                qcqps_knitro(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+%         case {'MOSEK'}
+%             [x, f, eflag, output, lambda] = ...
+%                 qcqps_mosek(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
         otherwise
             id_ = find(alg == '_');
             if ~isempty(id_)         %% QCQP treated as a general nonlinear program
@@ -232,7 +232,7 @@ if is_qcqp
 
             % compute parameters for constraints function evaluation
             [ieq_quad, igt_quad, ilt_quad, Qe, Ce, lbe, Qi, Ci, lbi] = ...
-                convert_quad_constraint(Q, B, lqcn, uqcn);
+                convert_quad_constraint(Q, B, lq, uq);
             if isempty(Qe)
                 blkQe = [];
             else
@@ -277,7 +277,7 @@ if is_qcqp
                 'mu_u_quad' , mu_u_quad, ...
                 'lower'     , Lambda.lower, ...
                 'upper'     , Lambda.upper ...
-                 );
+            );
     end
 else
     [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x0, opt);

@@ -809,7 +809,7 @@ t_is(l_g, lq1-(0.5*diag(blkx*Qblk*blkx')+B1*X), 14, [t ' : l_g']);
 
 for i = 1:2
     for j = 1:2
-        t = sprintf('om.qcn.add(om.var, ''myqcn'', {%d,%d}, B, lq, uq, vs)', i,j);
+        t = sprintf('om.qcn.eval(om.var, ''myqcn'', {%d,%d})', i,j);
         Q3 = repmat({sparse([1:(i+j) (i+j)+1], [1:(i+j) (i+j)+1], [ones(1,i+j) -1] , 3+2+(i==2 && j==1), 3+2+(i==2 && j==1))}, i+j, 1);
         B3 = sparse([1:(i+j) 1:(i+j)]', [1:(i+j) 5*ones(1,i+j)]', ...
             [ones(i+j,1);-ones(i+j,1)], i+j, 3+2+(i==2 && j==1));
@@ -1621,8 +1621,8 @@ if have_feature('isequaln')
     val = {Q(2:3), B(2:3,:), lq(2:3), uq(2:3), vs};
     s.qcn.data.Q.Pmis = val{1};
     s.qcn.data.C.Pmis = val{2};  %% to be modified as s.qcn.data.B.Pmis
-    s.qcn.data.l.Pmis = val{3};  %% to be modified as s.qcn.data.lq.Pmis
-    s.qcn.data.u.Pmis = val{4};  %% to be modified as s.qcn.data.uq.Pmis
+    s.qcn.data.l.Pmis = val{3};
+    s.qcn.data.u.Pmis = val{4};
     dN = -1;
     s.qcn.idx.N.Pmis    = s.qcn.idx.N.Pmis + dN;
     s.qcn.idx.iN.Pmis   = s.qcn.idx.iN.Pmis + dN;
@@ -1638,9 +1638,9 @@ if have_feature('isequaln')
 
     t = 'om.qcn.set_params(om.var, name, idx, ...) : ';
     val = {-Inf(3,1), ones(3,1)};
-    s.qcn.data.u.myqcn{2,1} = val{1}; %% to be modified as s.qcn.data.uq.myqcn{2,1}
-    s.qcn.data.l.myqcn{2,1} = val{2}; %% to be modified as s.qcn.data.lq.myqcn{2,1}
-    om.qcn.set_params(om.var, 'myqcn', {2,1}, {'u', 'l'}, val); %% to be modified as om.qcn.set_params(om.var, 'myqcn', {2,1}, {'uq', 'lq'}, val)
+    s.qcn.data.u.myqcn{2,1} = val{1};
+    s.qcn.data.l.myqcn{2,1} = val{2};
+    om.qcn.set_params(om.var, 'myqcn', {2,1}, {'u', 'l'}, val);
     t_ok(isequaln(struct(om), s), [t 'myqcn{2,1}, {uq,lq}']);
 
     [Q, B, lq, uq, vs] = om.qcn.params(om.var, 'myqcn', {2,2});
@@ -1657,8 +1657,8 @@ if have_feature('isequaln')
     val = {Q(2:3), B(2:3,:), lq(2:3), uq(2:3), vs};
     s.qcn.data.Q.myqc{2,2} = val{1};
     s.qcn.data.C.myqcn{2,2} = val{2}; %% to be modified as s.qcn.data.B.myqcn{2,2}
-    s.qcn.data.l.myqcn{2,2} = val{3}; %% to be modified as s.qcn.data.lq.myqcn{2,2}
-    s.qcn.data.u.myqcn{2,2} = val{4}; %% to be modified as s.qcn.data.uq.myqcn{2,2}
+    s.qcn.data.l.myqcn{2,2} = val{3};
+    s.qcn.data.u.myqcn{2,2} = val{4};
     dN = -2;
     s.qcn.idx.N.myqcn(2,2)  = s.qcn.idx.N.myqcn(2,2) + dN;
     s.qcn.idx.iN.myqcn(2,2)  = s.qcn.idx.iN.myqcn(2,2) + dN;

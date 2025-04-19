@@ -182,15 +182,15 @@ for k = 1:length(algs)
         Q{1} = sparse([2 0 0; 0 2 0; 0 0 -2]);
         Q{2} = sparse([2 0 0; 0 0 -2; 0 -2 0]);
         B = zeros(2,3);
-        lqcn = [-Inf;-Inf];
-        uqcn = [0; 0];
+        lq = [-Inf;-Inf];
+        uq = [0; 0];
         A = [1 1 1];
         l = 1;
         u = 1;
         xmin = zeros(3,1);
         xmax = Inf(3,1);
         x0 = zeros(3,1);
-        [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
+        [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [3.91577; 1.78203; 4.3022]*1e-1, 6, [t 'x']);
         t_is(f, -0.391577, 6, [t 'f']);
@@ -203,7 +203,7 @@ for k = 1:length(algs)
 
         %% 8) Same previous passing a struct
         t = sprintf('%s - (struct) constrained 4-d convex QP : ', names{k});
-        p = struct('H', H, 'c', c, 'Q', {Q}, 'B', B, 'lqcn', lqcn, 'uqcn', uqcn, ...
+        p = struct('H', H, 'c', c, 'Q', {Q}, 'B', B, 'lq', lq, 'uq', uq, ...
             'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
         [x, f, s, out, lam] = qcqps_master(p);
         t_is(s, 1, 12, [t 'success']);
@@ -222,12 +222,12 @@ for k = 1:length(algs)
         c = [0;-1;0];
         Q = {sparse([-2 0 0.2; 0 -2 0; 0.2 0 -0.2])};
         B = [1 1 1];
-        lqcn = 1;
-        uqcn = Inf;
+        lq = 1;
+        uq = Inf;
         xmin = zeros(3,1);
         xmax = Inf(3,1);
         x0 = zeros(3,1);
-        [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lqcn, uqcn, [], [], [], xmin, xmax, x0, opt);
+        [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lq, uq, [], [], [], xmin, xmax, x0, opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4.4880; 9.3192; 6.7411]*1e-1, 4, [t 'x']);
         t_is(f, -0.4918, 4, [t 'f']);
@@ -245,15 +245,15 @@ for k = 1:length(algs)
             c = zeros(3,1);
             Q = {-2*speye(3)};
             B = sparse(1,3);
-            lqcn = -Inf;
-            uqcn = -25;
+            lq = -Inf;
+            uq = -25;
             A = [8 14 7];
             l = 56;
             u = 56;
             xmin = zeros(3,1);
             xmax = Inf(3,1);
             x0 = [0;0;20];
-            [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lqcn, uqcn, A, l, u, xmin, xmax, x0, opt);
+            [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [0; 0; 8], 5, [t 'x']);
             t_is(f, -64, 4, [t 'f']);
