@@ -190,16 +190,12 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
 
             if isempty(l)
                 l = -Inf(MC, 1);
-            elseif numel(l) ~= MC
-                error('mp.sm_quad_constraint.add: l (%d x 1) must be a column vector with %d elements \n', length(l), MC);
             elseif MC > 1 && numel(l) == 1
                 l = l*ones(MC, 1);
             end
 
             if isempty(u)
                 u = Inf(MC, 1);
-            elseif numel(u) ~= MC
-                error('mp.sm_quad_constraint.add: l (%d x 1) must be a column vector with %d elements \n', length(u), MC);
             elseif MC > 1 && numel(u) == 1
                 u = u*ones(MC, 1);
             end
@@ -502,10 +498,10 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 u.Q = 1;            %% always update Q
                 u.C = 1;            %% always update C
                 u.l = 1;            %% always update l
-                if np < 6
+                if np < 5
                     p.vs = {};
                     u.vs = 1;       %% update vs
-                    if np < 5
+                    if np < 4
                         p.u = Inf(MC, 1);
                         u.u = 1;    %% update u
                     end
@@ -513,9 +509,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             end
 
             %% check consistency of parameters
-            %% Q must be a MQ x 1 cell array
-            if MQ ~= MC || NQ ~= 1
-                error('mp.sm_quad_constraint.set_params : dimension mismatch between rows/cols of ''C'' and ''Q''');
+            % Q must be a MQ x 1 cell array
+            if NQ ~= 1
+                error('mp.sm_quad_constraint.set_params: ''Q'' must be column vector cell array');
             end
 
             %% no dimension change unless 'all'
@@ -544,24 +540,24 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 end
             end
 
-            %% check consistency of C and vs
+            %% check consistency of Q and vs
             p.vs = mp.sm_variable.varsets_cell2struct(p.vs);
             nv = var.varsets_len(p.vs);     %% number of variables
-            if u.C || u.vs
-                if NC ~= nv
-                    error('mp.sm_quad_constraint.set_params: for ''%s'' number of columns of ''C'' (%d) must be consistent with ''vs'' (%d)', obj.nameidxstr(name, idx), MC, nv);
-                end
-            end
-
-            %% check consistency of Q
             if u.Q
                 if iscell(p.Q)
                     sz = cellfun(@(x)(size(x)), p.Q, 'UniformOutput', false);
                 else
-                    error('mp.sm_quad_constraint.set_pamars: paramer ''Q'' must be a %d x 1 cell array', MQ);
+                    error('mp.sm_quad_constraint.set_params: parameter ''Q'' must be a %d x 1 cell array', MQ);
                 end
                 if sum(sum(cell2mat(sz)))/(2*MQ) ~= nv
-                    error('mp.sm_quad_constraint.set_params: for ''%s'' number of columns of ''Q'' (%d) must be consistent with ''vs'' (%d)', obj.nameidxstr(name, idx), MQ, nv);
+                    error('mp.sm_quad_constraint.set_params: for ''%s'' number of columns of ''Q'' (%d) must be consistent with ''vs'' (%d)', obj.nameidxstr(name, idx), sum(sum(cell2mat(sz)))/(2*MQ) , nv);
+                end
+            end
+
+            %% check consistency of C and vs
+            if u.C || u.vs
+                if NC ~= nv
+                    error('mp.sm_quad_constraint.set_params: for ''%s'' number of columns of ''C'' (%d) must be consistent with ''vs'' (%d)', obj.nameidxstr(name, idx), MC, nv);
                 end
             end
 
