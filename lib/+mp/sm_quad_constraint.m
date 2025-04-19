@@ -592,16 +592,16 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             end
         end
 
-        function [QFx_u, JQF, QFx, l_QFx] = eval(obj, var, x, name, idx)
+        function [g_u, J, g, l_g] = eval(obj, var, x, name, idx)
             % Evaluate individual or full set of quadratic constraints.
             % ::
             %
-            %   QFx_u = qcn.eval(var, x)
-            %   QFx_u = qcn.eval(var, x, name)
-            %   QFx_u = qcn.eval(var, x, name, idx_list)
-            %   [QFx_u, JQF] = qcn.eval(...)
-            %   [QFx_u, JQF, QFx] = qcn.eval(...)
-            %   [QFx_u, JQF, QFx, l_QFx] = qcn.eval(...)
+            %   g_u = qcn.eval(var, x)
+            %   g_u = qcn.eval(var, x, name)
+            %   g_u = qcn.eval(var, x, name, idx_list)
+            %   [g_u, J] = qcn.eval(...)
+            %   [g_u, J, g] = qcn.eval(...)
+            %   [g_u, J, g, l_g] = qcn.eval(...)
             %
             % For a given value of the variable vector :math:`\x`, this method
             % evaluates the quadratic constraints for an individual subset, if
@@ -641,7 +641,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %           \diag{\{\x\}_{\times n_q}}\right) + \Cc \x
             %
             % Returns :math:`\g(\x) - \u`, and optionally the jacobian
-            % :math:`\rmat{J}_{QF}`, the contraint function :math:`\g(\x)`, and
+            % :math:`\rmat{J}`, the contraint function :math:`\g(\x)`, and
             % :math:`\l - \g(\x)`.
             %
             % Inputs:
@@ -653,20 +653,20 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %       of quadratic constraints to evaluate (for an indexed subset)
             %
             % Outputs:
-            %   QFx_u (double) : value of :math:`\g(\x) - \u`
-            %   JQF (double) : *(optional)* constraint Jacobian
-            %       :math:`\rmat{J}_{QF} = \der{\g}{\x}`
-            %   QFx (double) : *(optional)* value of :math:`\g(\x)`
-            %   l_QFx (double) : *(optional)* value of :math:`\l - \g(\x)`
+            %   g_u (double) : value of :math:`\g(\x) - \u`
+            %   J (double) : *(optional)* constraint Jacobian
+            %       :math:`\rmat{J} = \der{\g}{\x}`
+            %   g (double) : *(optional)* value of :math:`\g(\x)`
+            %   l_g (double) : *(optional)* value of :math:`\l - \g(\x)`
             %
             % Examples::
             %
-            %   QFx_u = qcn.eval(var, x)
-            %   [QFx_u, JQF] = qcn.eval(var, x)
-            %   [QFx_u, JQF, QFx] = qcn.eval(var, x)
-            %   [QFx_u, JQF, QFx, l_QFx] = qcn.eval(var, x)
-            %   [QFx_u, JQF, QFx, l_QFx] = qcn.eval(var, x, 'my_set')
-            %   [QFx_u, JQF, QFx, l_QFx] = qcn.eval(var, x, 'my_set', {3,2})
+            %   g_u = qcn.eval(var, x)
+            %   [g_u, J] = qcn.eval(var, x)
+            %   [g_u, J, g] = qcn.eval(var, x)
+            %   [g_u, J, g, l_g] = qcn.eval(var, x)
+            %   [g_u, J, g, l_g] = qcn.eval(var, x, 'my_set')
+            %   [g_u, J, g, l_g] = qcn.eval(var, x, 'my_set', {3,2})
             %
             % See also add, params.
 
@@ -696,31 +696,31 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
 
                 %% Compute quadratic constraints
                 if isempty(C)
-                    QFX = 1/2 * diag(blkx * Qblk * blkx');
-                    QFx_u = QFX - u;
+                    gg = 1/2 * diag(blkx * Qblk * blkx');
+                    g_u = gg - u;
                 else
-                    QFX = 1/2 * diag(blkx * Qblk * blkx') + C * x;
-                    QFx_u = QFX - u;
+                    gg = 1/2 * diag(blkx * Qblk * blkx') + C * x;
+                    g_u = gg - u;
                 end
 
                 if nargout > 1 %% Jacobian is requested
                     Qx = obj.blkprod2vertcat(blkx, Qblk, length(x));
-                    JQF = Qx + C;
+                    J = Qx + C;
                     if nargout > 2
-                        QFx = QFX;
+                        g = gg;
                         if nargout > 3
-                            l_QFx = l - QFX;
+                            l_g = l - gg;
                         end
                     end
                 end
             else
-                QFx_u = [];
+                g_u = [];
                 if nargout > 1
-                    JQF = [];
+                    J = [];
                     if nargout > 2
-                        QFx = [];
+                        g = [];
                         if nargout > 3
-                            l_QFx = [];
+                            l_g = [];
                         end
                     end
                 end
@@ -876,9 +876,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %             respectively, where :math:`\g(\x)` is the quadratic
             %             form shown in :eq:`eq_qcn_eval_g` for the quadratic
             %             constraints specified
-            %           - ``'QFx_u'`` or ``'f'`` - constraint values
+            %           - ``'g_u'`` or ``'f'`` - constraint values
             %             :math:`\g(\x) - \u`
-            %           - ``'l_QFx'`` - constraint values :math:`\l - \g(\x)`
+            %           - ``'l_g'`` - constraint values :math:`\l - \g(\x)`
             %           - ``'mu_l'`` - shadow price on :math:`\l - \g(\x)`
             %           - ``'mu_u'`` - shadow price on :math:`\g(\x) - \u`
             %   name (char array) : name of the subset
@@ -906,7 +906,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %% get outputs
             varargout = cell(1, nargout);
             if N && ~isempty(soln.eflag)
-                if any(ismember({'g', 'QFx_u', 'l_QFx'}, tags(1:nargout)))
+                if any(ismember({'g', 'g_u', 'l_g'}, tags(1:nargout)))
                     g = cell(1,4);
                     [g{:}] = obj.eval(var, soln.x, name, idx);
                 end
@@ -914,9 +914,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     switch tags{k}
                         case 'g'
                             varargout{k} = g;
-                        case 'QFx_u'
+                        case 'g_u'
                             varargout{k} = g{1};
-                        case 'l_QFx'
+                        case 'l_g'
                             varargout{k} = g{4};
                         case 'f'
                             varargout{k} = soln.f(i1:iN);

@@ -89,7 +89,7 @@ for k = 1:length(algs)
         om.init_set_types();
         om.var.add('x', 3, x0, xmin, xmax);
         om.qdc.add(om.var, 'cost', H, c);
-        om.qcn.add(om.var, 'QFx', Q, B, lqcn, uqcn);
+        om.qcn.add(om.var, 'g', Q, B, lqcn, uqcn);
         om.lin.add(om.var, 'Ax', A, l, u);
         [x, f, s, out, lam] = om.solve(opt);
         t_is(s, 1, 12, [t 'success']);
@@ -117,7 +117,7 @@ for k = 1:length(algs)
         om.init_set_types();
         om.var.add('x', 3, x0, xmin, xmax);
         om.qdc.add(om.var, 'cost', H, c);
-        om.qcn.add(om.var, 'QFx', Q, B, lqcn, uqcn);
+        om.qcn.add(om.var, 'g', Q, B, lqcn, uqcn);
         [x, f, s, out, lam] = om.solve(opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4.4880; 9.3192; 6.7411]*1e-1, 4, [t 'x']);
@@ -148,7 +148,7 @@ for k = 1:length(algs)
             om.init_set_types();
             om.var.add('x', 3, x0, xmin, xmax);
             om.qdc.add(om.var, 'cost', H, c);
-            om.qcn.add(om.var, 'QFx', Q, B, lqcn, uqcn);
+            om.qcn.add(om.var, 'g', Q, B, lqcn, uqcn);
             om.lin.add(om.var, 'Ax', A, l, u);
             [x, f, s, out, lam] = om.solve(opt);
             t_is(s, 1, 12, [t 'success']);
@@ -188,7 +188,7 @@ om = opt_model();
 om.init_set_types();
 om.var.add('x', 3, x0, xmin, xmax);
 om.qdc.add(om.var, 'cost', H, c);
-om.qcn.add(om.var, 'QFx', Q, B, lqcn, uqcn);
+om.qcn.add(om.var, 'g', Q, B, lqcn, uqcn);
 opt.parse_soln = 1;
 [x, f, s, out, lam] = om.solve(opt);
 t_is(om.soln.x, x, 4, [t 'x']);
@@ -211,15 +211,15 @@ t_is(mu_u, lam.upper, 6, [t 'mu_u']);
 t = sprintf('%s - om.var.get_soln(soln, ''mu_l'', ''x'') : ', opt.alg);
 t_is(om.var.get_soln(om.soln, 'mu_l', 'x'), lam.lower, 6, [t 'mu_l']);
 
-t = sprintf('%s - om.qcn.get_soln(var, soln, ''QFx'') : ', opt.alg);
-[g, mu_l] = om.qcn.get_soln(om.var, om.soln, 'QFx');
+t = sprintf('%s - om.qcn.get_soln(var, soln, ''g'') : ', opt.alg);
+[g, mu_l] = om.qcn.get_soln(om.var, om.soln, 'g');
 %t_is(g{1}, 1/2*x'*Q{:}*x+B*x-uqcn, 8, [t '1/2*x''*Q*x + B*x - uqcn']);
 t_ok(isequal(g{1}, 1/2*x'*Q{:}*x+B*x-uqcn), [t '1/2*x''*Q*x + B*x - uqcn']);
 t_is(g{4}, lqcn-(1/2*x'*Q{:}*x+B*x), 8, [t 'lqcn - (1/2*x''*Q*x + B*x)']);
 t_is(mu_l, lam.mu_l_quad, 8, [t 'mu_l_quad']);
 
-t = sprintf('%s - om.qcn.get_soln(var, soln, {''mu_u_quad'', ''mu_l_quad'', ''QFx_u''}, ''QFx'') : ', opt.alg);
-[mu_u, mu_l, g] = om.qcn.get_soln(om.var, om.soln, {'mu_u', 'mu_l', 'QFx_u'}, 'QFx');
+t = sprintf('%s - om.qcn.get_soln(var, soln, {''mu_u_quad'', ''mu_l_quad'', ''g_u''}, ''g'') : ', opt.alg);
+[mu_u, mu_l, g] = om.qcn.get_soln(om.var, om.soln, {'mu_u', 'mu_l', 'g_u'}, 'g');
 %t_is(g, 1/2*x'*Q{:}*x+B*x-uqcn, 8, [t '1/2*x''*Q*x + B*x - uqcn']);
 t_ok(isequal(g, 1/2*x'*Q{:}*x+B*x-uqcn), [t '1/2*x''*Q*x + B*x - uqcn']);
 t_is(mu_l, lam.mu_l_quad, 8, [t 'mu_l_quad']);
@@ -229,8 +229,8 @@ t = sprintf('%s - parse_soln : ', opt.alg);
 t_ok(om.has_parsed_soln(), [t 'has_parsed_soln() is true']);
 t_is(om.var.soln.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
 if om.has_parsed_soln()
-    t_is(om.qcn.soln.mu_l.QFx, mu_l, 14, [t 'mu_l_quad']);
-    t_is(om.qcn.soln.mu_u.QFx, mu_u, 14, [t 'mu_u_quad']);
+    t_is(om.qcn.soln.mu_l.g, mu_l, 14, [t 'mu_l_quad']);
+    t_is(om.qcn.soln.mu_u.g, mu_u, 14, [t 'mu_u_quad']);
 else
     t_skip(2, [t 'has_parsed_soln() is false'])
 end
