@@ -1,41 +1,41 @@
-function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, l, u)
+function [ieq, igt, ilt, Qe, Be, de, Qi, Bi, di] = convert_quad_constraint(Q, B, l, u)
 % convert_quad_constraint - Convert quadratic constraints from bounded to equality/inequality pair.
 % ::
 %
-%   [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C, l, u)
-%   [ieq, igt, ilt, Q, C, b] = convert_quad_constraint(Q, C, l, u)
+%   [ieq, igt, ilt, Qe, Be, de, Qi, Bi, di] = convert_quad_constraint(Q, B, l, u)
+%   [ieq, igt, ilt, Q, B, d] = convert_quad_constraint(Q, B, l, u)
 %
 % Convert a set of constraints of the form::
 %
-%       l(j) <= x'*Q{j}*x + C(j,:)*x <= u(j),  j = 1,2,...,nq
+%       l(j) <= x'*Q{j}*x + B(j,:)*x <= u(j),  j = 1,2,...,nq
 %
 % to::
 %
-%       x'*Qe{j}*x + Ce(j,:)*x  =  be(j),  j = 1,2,...,nqe
-%       x'*Qi{j}*x + Ci(j,:)*x  <= bi(j),  j = 1,2,...,nqi   , nq = nqe+nqi
+%       x'*Qe{j}*x + Be(j,:)*x  =  de(j),  j = 1,2,...,nqe
+%       x'*Qi{j}*x + Bi(j,:)*x  <= di(j),  j = 1,2,...,nqi   , nq = nqe+nqi
 %
 % where::
 %
 %       Qe = Q(ieq)
-%       Ce = C(ieq,:)
-%       be = u(ieq)
+%       Be = B(ieq,:)
+%       de = u(ieq)
 %       Qi = [Q(ilt); -Q(igt)]
-%       Ci = [C(ilt,:); -C(igt,:)]
-%       bi = [u(ilt);  -l(igt)]
+%       Bi = [B(ilt,:); -B(igt,:)]
+%       di = [u(ilt);  -l(igt)]
 %
 % Alternatively, the returned cell arrays, matrices, and RHS vectors can be
 % stacked into a single set with the equalities first, then the inequalities.
 % ::
 %
 %       Q = [Qe; Qi]
-%       C = [Ce; Ci]
-%       b = [be; bi]
+%       B = [Be; Bi]
+%       d = [de; di]
 %
 % Inputs:
 %   Q (double) : :math:`n_q \times 1`, cell array with sparse :math:`n \times n`
 %       symmetric matrices holding the quadratic parameters of the quadratic
 %       constraints
-%   C (double) : :math:`n_q \times n`, matrix whose rows represent the linear
+%   B (double) : :math:`n_q \times n`, matrix whose rows represent the linear
 %                parameters of the quadratic constraints
 %   l (double) : :math:`n_q \times 1`, quadratic constraint lower bound vector
 %   u (double) : :math:`n_q \times 1`, quadratic constraint upper bound vector
@@ -46,13 +46,13 @@ function [ieq, igt, ilt, Qe, Ce, be, Qi, Ci, bi] = convert_quad_constraint(Q, C,
 %   ilt (integer) : vector of indices of upper bounded inequality constraints
 %   Qe (double)   : cell array of quadratic parameters for equality constraints
 %   Ae (double)   : matrix of linear parameters for equality constraints
-%   be (double)   : equality constraint RHS
+%   de (double)   : equality constraint RHS
 %   Qi (double)   : cell array of quadratic parameters for inequality constraints
 %   Ai (double)   : matrix of linear terms for inequality constraints
-%   bi (double)   : inequality constraint RHS
+%   di (double)   : inequality constraint RHS
 %   Q (double)    : stacked cell of quadratic parameters
-%   C (double)    : stacked constraint matrix of linear parameters
-%   b (double)    : stacked RHS
+%   B (double)    : stacked constraint matrix of linear parameters
+%   d (double)    : stacked RHS
 %
 % See also convert_constraint_multipliers.
 
@@ -72,13 +72,13 @@ ilt = find( u <  1e10 & ~eq );  %% inequality w/finite upper bound
 
 if nargout < 9      %% stacked case
     Qe = [Q([ieq; ilt]); cellfun(@(x)(-1*x), Q(igt), 'UniformOutput', false)];
-    Ce = [C([ieq; ilt],:); -C(igt,:)];
-    be = [u([ieq; ilt]);  -l(igt)];
+    Be = [B([ieq; ilt],:); -B(igt,:)];
+    de = [u([ieq; ilt]);  -l(igt)];
 else                %% equality/inequality pairs
     Qe = Q(ieq);
-    Ce = C(ieq,:);
-    be = u(ieq);
+    Be = B(ieq,:);
+    de = u(ieq);
     Qi = [Q(ilt); cellfun(@(x)(-1*x), Q(igt), 'UniformOutput', false)];
-    Ci = [C(ilt,:); -C(igt,:)];
-    bi = [u(ilt);  -l(igt)];
+    Bi = [B(ilt,:); -B(igt,:)];
+    di = [u(ilt);  -l(igt)];
 end

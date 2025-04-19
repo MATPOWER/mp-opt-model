@@ -1,16 +1,16 @@
-function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
+function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, BB, dd)
 % qcqp_nlp_consfcn - Evaluates quadratic constraints and their Jacobian for NLP solver.
 % ::
 %
-%   [H, G] = QCQP_NLP_CONSFCN(X, QQ, CC, BB)
-%   [H, G, DH, DG] = QCQP_NLP_CONSFCN(X, QQ, CC, BB)
+%   [H, G] = QCQP_NLP_CONSFCN(X, QQ, BB, DD)
+%   [H, G, DH, DG] = QCQP_NLP_CONSFCN(X, QQ, BB, DD)
 %
 %   Constraint evaluation function for quadratic constraints, suitable
 %   for use with MIPS, FMINCON, etc. Computes constraint vectors and their
 %   gradients for a set of quadratic constraints of the form:
 %
-%       1/2 Xblk' * blkQe * Xblk + Ce * X == be
-%       1/2 Xblk' * blkQi * Xblk + Ci * X == bi
+%       1/2 Xblk' * blkQe * Xblk + Be * X == de
+%       1/2 Xblk' * blkQi * Xblk + Bi * X <= di
 %
 %   where Xblk is formed by creating a block diagonal matrix with X repeated
 %   along the block diagonal.
@@ -23,14 +23,14 @@ function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
 %                 of sparse quadratic matrices for inequaliy constraints
 %         blkQe : block diagonal matrix formed from the nqe x 1 cell array
 %                 of sparse quadratic matrices for equaliy constraints
-%     CC : struct with the matrices (possibly sparse) of linear parameters
+%     BB : struct with the matrices (possibly sparse) of linear parameters
 %          of equality/inequality constraints with the following fields:
-%         Ci : matrix with linear parameters for inequality constraints
-%         Ce : matrix with linear parameters for equality constraints
-%     BB : struct with the vector of constant terms of equality/inequality
+%         Bi : matrix with linear parameters for inequality constraints
+%         Be : matrix with linear parameters for equality constraints
+%     DD : struct with the vector of constant terms of equality/inequality
 %          constraints with the following fields:
-%         bi : vector with constant terms for inequality constraints
-%         be : vector with constant terms for equality constraints
+%         di : vector with constant terms for inequality constraints
+%         de : vector with constant terms for equality constraints
 %
 %   Outputs:
 %     H  : vector of inequality constraint values
@@ -40,8 +40,8 @@ function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
 %     DG : (optional) equality constraint gradients
 %
 %   Examples:
-%       [h, g] = qcqp_nlp_consfcn(x, QQ, CC, bb);
-%       [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb);
+%       [h, g] = qcqp_nlp_consfcn(x, QQ, BB, dd);
+%       [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, BB, dd);
 %
 % See also qcqp_nlp_costfcn, qcqp_nlp_hessfcn, qcqps_master.
 
@@ -56,27 +56,27 @@ function [h, g, dh, dg] = qcqp_nlp_consfcn(x, QQ, CC, bb)
 
 %% gather parameters for equality/inequality quadratic constraints
 blkQe = QQ.blkQe; blkQi = QQ.blkQi;
-Ce = CC.Ce; Ci = CC.Ci;
-be = bb.be; bi = bb.bi;
+Be = BB.Be; Bi = BB.Bi;
+de = dd.de; di = dd.di;
 
 %% assess constraints and (possibly) their derivatives
 if nargout > 1       %% constraints
     if isempty(blkQi) || isempty(x)         %% inequalities
         h = [];
     else
-        nin = size(Ci,1);
+        nin = size(Bi,1);
         xxineq = mat2cell(repmat(sparse(x), nin, 1), length(x)*ones(nin,1));
         blkxineq = blkdiag(xxineq{:});
-        h = 1/2 * diag(blkxineq' * blkQi * blkxineq) + Ci * x - bi;
+        h = 1/2 * diag(blkxineq' * blkQi * blkxineq) + Bi * x - di;
     end
 
     if isempty(blkQe) || isempty(x)         %% equalities
         g = [];
     else
-        neq = size(Ce,1);
+        neq = size(Be,1);
         xxeq = mat2cell(repmat(sparse(x), neq, 1), length(x)*ones(neq,1));
         blkxeq = blkdiag(xxeq{:});
-        g = 1/2 * diag(blkxeq' * blkQe * blkxeq) + Ce * x - be;
+        g = 1/2 * diag(blkxeq' * blkQe * blkxeq) + Be * x - de;
     end
 end
 
@@ -94,7 +94,7 @@ if nargout > 2       %% derivatives
         id_end   = mat2cell(id_end(:), 2*ones(N,1));
         Qix = cellfun(@(x,y)(blkprod(x(1):y(1), x(2):y(2))), id_start, id_end, 'UniformOutput', false);
         Qix = cell2mat(Qix);
-        dh = (Qix + Ci)';
+        dh = (Qix + Bi)';
     end
 
     if isempty(blkQe) || isempty(x)                       %% equalities
@@ -110,6 +110,6 @@ if nargout > 2       %% derivatives
         id_end   = mat2cell(id_end(:), 2*ones(N,1));
         Qex = cellfun(@(x,y)(blkprod(x(1):y(1), x(2):y(2))), id_start, id_end, 'UniformOutput', false);
         Qex = cell2mat(Qex);
-        dg = (Qex + Ce)';
+        dg = (Qex + Be)';
     end
 end

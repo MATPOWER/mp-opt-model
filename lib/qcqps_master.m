@@ -231,7 +231,7 @@ if is_qcqp
             end
 
             % compute parameters for constraints function evaluation
-            [ieq_quad, igt_quad, ilt_quad, Qe, Ce, lbe, Qi, Ci, lbi] = ...
+            [ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
                 convert_quad_constraint(Q, B, lq, uq);
             if isempty(Qe)
                 blkQe = [];
@@ -244,8 +244,8 @@ if is_qcqp
                 blkQi = blkdiag(Qi{:});
             end
             QQ = struct('blkQe', blkQe, 'blkQi', blkQi);
-            CC = struct('Ce', Ce, 'Ci', Ci);
-            bb = struct('be', lbe, 'bi', lbi);
+            BB = struct('Be', Be, 'Bi', Bi);
+            dd = struct('de', de, 'di', di);
 
             % compute parameters for Hessian evaluation
             matQi = cell2mat(Qi);
@@ -253,16 +253,16 @@ if is_qcqp
 
             %% run solver
             f_fcn = @(x)qcqp_nlp_costfcn(x, H, c);
-            gh_fcn = @(x)qcqp_nlp_consfcn(x, QQ, CC, bb);
+            gh_fcn = @(x)qcqp_nlp_consfcn(x, QQ, BB, dd);
             hess_fcn = @(x, lambda, cost_mult)qcqp_nlp_hessfcn(x, lambda, H, matQi, matQe, cost_mult);
             [x, f, eflag, output, Lambda] = ...
                 nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
 
             if ~isfield(Lambda, 'eqnonlin')
-                Lambda.eqnonlin =  zeros(length(lbe), 1);
+                Lambda.eqnonlin =  zeros(length(de), 1);
             end
             if ~isfield(Lambda, 'ineqnonlin')
-                Lambda.ineqnonlin = zeros(length(lbi), 1);
+                Lambda.ineqnonlin = zeros(length(di), 1);
             end
 
             % gather multipliers for quadratic constraints

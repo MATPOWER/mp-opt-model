@@ -1620,7 +1620,7 @@ if have_feature('isequaln')
     [Q, B, lq, uq, vs] = om.qcn.params(om.var, 'Pmis');
     val = {Q(2:3), B(2:3,:), lq(2:3), uq(2:3), vs};
     s.qcn.data.Q.Pmis = val{1};
-    s.qcn.data.C.Pmis = val{2};  %% to be modified as s.qcn.data.B.Pmis
+    s.qcn.data.B.Pmis = val{2};
     s.qcn.data.l.Pmis = val{3};
     s.qcn.data.u.Pmis = val{4};
     dN = -1;
@@ -1656,7 +1656,7 @@ if have_feature('isequaln')
     end
     val = {Q(2:3), B(2:3,:), lq(2:3), uq(2:3), vs};
     s.qcn.data.Q.myqc{2,2} = val{1};
-    s.qcn.data.C.myqcn{2,2} = val{2}; %% to be modified as s.qcn.data.B.myqcn{2,2}
+    s.qcn.data.B.myqcn{2,2} = val{2};
     s.qcn.data.l.myqcn{2,2} = val{3};
     s.qcn.data.u.myqcn{2,2} = val{4};
     dN = -2;

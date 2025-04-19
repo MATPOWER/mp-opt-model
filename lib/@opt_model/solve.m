@@ -219,7 +219,7 @@ switch pt
     otherwise
         %% get parameters
         [HH, CC, C0] = om.params_quad_cost();
-        [Q, C, ll, uu] = om.qcn.params(om.var);
+        [Q, B, ll, uu] = om.qcn.params(om.var);
         [A, l, u] = om.params_lin_constraint();
         mixed_integer = strcmp(pt(1:2), 'MI') && ...
             (~isfield(opt, 'relax_integer') || ~opt.relax_integer);
@@ -238,7 +238,7 @@ switch pt
             else                   %% MIQCQP - mixed integer quadratically constrained quadratic program
                 % To be implemented ...
                 % [x, f, eflag, output, lambda] = ...
-                %    miqcqps_master(HH, CC, Q, C, k, ll, uu, A, l, u, xmin, xmax, x0, vtype, opt);
+                %    miqcqps_master(HH, CC, Q, B, k, ll, uu, A, l, u, xmin, xmax, x0, vtype, opt);
             end
         else                %% LP, QP - linear/quadratic program
             %% optimization vars, bounds, types
@@ -253,7 +253,7 @@ switch pt
                     qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
             else                   %% QCQP - quadratically constrained quadratic program
                 [x, f, eflag, output, lambda] = ...
-                    qcqps_master(HH, CC, Q, C, ll, uu, A, l, u, xmin, xmax, x0, opt);
+                    qcqps_master(HH, CC, Q, B, ll, uu, A, l, u, xmin, xmax, x0, opt);
             end
         end
         f = f + C0;

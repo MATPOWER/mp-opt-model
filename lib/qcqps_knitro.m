@@ -270,7 +270,7 @@ if issparse(c)
 end
 
 %% split up quadratic constraints
-[ieq_quad, igt_quad, ilt_quad, Qe, Ce, sc, Qi, Ci, ubi] = ...
+[ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
     convert_quad_constraint(Q, B, lq, uq);
 
 %% split up linear constraints
@@ -284,10 +284,10 @@ niq_lin = length(ilt_lin) + length(igt_lin);       %% number of linear inequalit
 
 Qi_quad  = vertcat(cell(niq_lin,1), Qi);    % both linear/quadratic constraints must be passed as quadratic constraints of the form:
 Qeq_quad = vertcat(cell(neq_lin,1), Qe);    %
-A_quad   = [Ai; Ci];                        %          1/2 * x' * Qi_quad * x + A_quad * x <= b_quad      (inequality constraints)
-Aeq_quad = [Ae, Ce];                        %          1/2 * x' * Qeq_quad * x + Aeq_quad * x = be_quad   (equality constraints)
-b_quad   = [bi; ubi];                       %
-beq_quad = [be; sc];                        %
+A_quad   = [Ai; Bi];                        %          1/2 * x' * Qi_quad * x + A_quad * x <= b_quad      (inequality constraints)
+Aeq_quad = [Ae, Be];                        %          1/2 * x' * Qeq_quad * x + Aeq_quad * x = be_quad   (equality constraints)
+b_quad   = [bi; di];                        %
+beq_quad = [be; de];                        %
 
 %% Call the solver
 [x, f, exitflag, output, Lambda] = ...
