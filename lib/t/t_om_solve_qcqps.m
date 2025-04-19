@@ -99,8 +99,8 @@ for k = 1:length(algs)
         t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
         t_is(lam.mu_l, 0, 6, [t 'lam.mu_l']);
         t_is(lam.mu_u, 0.391577, 6, [t 'lam.mu_u']);
-        t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
-        t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
+        t_is(lam.mu_lq, [0; 0], 5, [t 'lam.mu_lq']);
+        t_is(lam.mu_uq, [0.227544; 0.549342], 5, [t 'lam.mu_uq']);
 
         %% 2) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
         t = sprintf('%s - convex 3-d QCQP with quad objective: ', names{k});
@@ -126,8 +126,8 @@ for k = 1:length(algs)
         t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
         t_ok(isempty(lam.mu_l), [t 'lam.mu_l']);
         t_ok(isempty(lam.mu_u), [t 'lam.mu_u']);
-        t_is(lam.mu_l_quad, 0.9419, 4, [t 'lam.mu_l_quad']);
-        t_is(lam.mu_u_quad, 0, 4, [t 'lam.mu_l_quad']);
+        t_is(lam.mu_lq, 0.9419, 4, [t 'lam.mu_lq']);
+        t_is(lam.mu_uq, 0, 4, [t 'lam.mu_uq']);
 
         %% 3) From "examples" folder of Knitro (exampleQCQP1)
         t = sprintf('%s - nonconvex 3-d QCQP : ', names{k});
@@ -162,8 +162,8 @@ for k = 1:length(algs)
                 t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
                 t_is(lam.mu_l, 0, 5, [t 'lam.mu_l']);
                 t_is(lam.mu_u, 2.28571, 5, [t 'lam.mu_u']);
-                t_is(lam.mu_l_quad, 0, 4, [t 'lam.mu_l_quad']);
-                t_is(lam.mu_u_quad, 0, 4, [t 'lam.mu_u_quad']);
+                t_is(lam.mu_lq, 0, 4, [t 'lam.mu_lq']);
+                t_is(lam.mu_uq, 0, 4, [t 'lam.mu_uq']);
             end
         else
             t_skip(nqcqp_nonconvex, sprintf('%s does not handle nonconvex QCQP problems', names{k}));
@@ -199,8 +199,8 @@ t_is(om.soln.lambda.lower, lam.lower, 6, [t 'lam.lower'])
 t_is(om.soln.lambda.upper, lam.upper, 6, [t 'lam.upper']);
 t_ok(isempty(om.soln.lambda.mu_l), [t 'lam.mu_l']);
 t_ok(isempty(om.soln.lambda.mu_u), [t 'lam.mu_u']);
-t_is(om.soln.lambda.mu_l_quad, lam.mu_l_quad, 4, [t 'lam.mu_l_quad']);
-t_is(om.soln.lambda.mu_u_quad, lam.mu_u_quad, 4, [t 'lam.mu_l_quad']);
+t_is(om.soln.lambda.mu_lq, lam.mu_lq, 4, [t 'lam.mu_lq']);
+t_is(om.soln.lambda.mu_uq, lam.mu_uq, 4, [t 'lam.mu_uq']);
 
 t = sprintf('%s - om.var.get_soln(soln, ''x'') : ', opt.alg);
 [x1, mu_l, mu_u] = om.var.get_soln(om.soln, 'x');
@@ -216,21 +216,21 @@ t = sprintf('%s - om.qcn.get_soln(var, soln, ''g'') : ', opt.alg);
 %t_is(g{1}, 1/2*x'*Q{:}*x+B*x-uq, 8, [t '1/2*x''*Q*x + B*x - uq']);
 t_ok(isequal(g{1}, 1/2*x'*Q{:}*x+B*x-uq), [t '1/2*x''*Q*x + B*x - uq']);
 t_is(g{4}, lq-(1/2*x'*Q{:}*x+B*x), 8, [t 'lq - (1/2*x''*Q*x + B*x)']);
-t_is(mu_l, lam.mu_l_quad, 8, [t 'mu_l_quad']);
+t_is(mu_l, lam.mu_lq, 8, [t 'mu_lq']);
 
-t = sprintf('%s - om.qcn.get_soln(var, soln, {''mu_u_quad'', ''mu_l_quad'', ''g_u''}, ''g'') : ', opt.alg);
+t = sprintf('%s - om.qcn.get_soln(var, soln, {''mu_uq'', ''mu_lq'', ''g_u''}, ''g'') : ', opt.alg);
 [mu_u, mu_l, g] = om.qcn.get_soln(om.var, om.soln, {'mu_u', 'mu_l', 'g_u'}, 'g');
 %t_is(g, 1/2*x'*Q{:}*x+B*x-uq, 8, [t '1/2*x''*Q*x + B*x - uq']);
 t_ok(isequal(g, 1/2*x'*Q{:}*x+B*x-uq), [t '1/2*x''*Q*x + B*x - uq']);
-t_is(mu_l, lam.mu_l_quad, 8, [t 'mu_l_quad']);
-t_is(mu_u, lam.mu_u_quad, 8, [t 'mu_u_quad']);
+t_is(mu_l, lam.mu_lq, 8, [t 'mu_lq']);
+t_is(mu_u, lam.mu_uq, 8, [t 'mu_uq']);
 
 t = sprintf('%s - parse_soln : ', opt.alg);
 t_ok(om.has_parsed_soln(), [t 'has_parsed_soln() is true']);
 t_is(om.var.soln.val.x, om.get_soln('var', 'x'), 14, [t 'var.val.x']);
 if om.has_parsed_soln()
-    t_is(om.qcn.soln.mu_l.g, mu_l, 14, [t 'mu_l_quad']);
-    t_is(om.qcn.soln.mu_u.g, mu_u, 14, [t 'mu_u_quad']);
+    t_is(om.qcn.soln.mu_l.g, mu_l, 14, [t 'mu_lq']);
+    t_is(om.qcn.soln.mu_u.g, mu_u, 14, [t 'mu_uq']);
 else
     t_skip(2, [t 'has_parsed_soln() is false'])
 end

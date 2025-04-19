@@ -756,8 +756,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %               - ``ineqnonlin`` - nonlinear inequality constraints
             %               - ``mu_l`` - linear constraint lower bounds
             %               - ``mu_u`` - linear constraint upper bounds
-            %               - ``mu_l_quad`` - quadratic constraint lower bounds
-            %               - ``mu_u_quad`` - quadratic constraint upper bounds
+            %               - ``mu_lq`` - quadratic constraint lower bounds
+            %               - ``mu_uq`` - quadratic constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
             %   fid (fileID) : fileID of open file to write to (default is
@@ -780,8 +780,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     mu_l = NaN(size(v));
                     mu_u = mu_l;
                 else
-                    mu_l = soln.lambda.mu_l_quad;
-                    mu_u = soln.lambda.mu_u_quad;
+                    mu_l = soln.lambda.mu_lq;
+                    mu_u = soln.lambda.mu_uq;
                 end
 
                 %% print header rows
@@ -863,8 +863,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %               - ``ineqnonlin`` - nonlinear inequality constraints
             %               - ``mu_l`` - linear constraint lower bounds
             %               - ``mu_u`` - linear constraint upper bounds
-            %               - ``mu_l_quad`` - quadratic constraint lower bounds
-            %               - ``mu_u_quad`` - quadratic constraint upper bounds
+            %               - ``mu_lq`` - quadratic constraint lower bounds
+            %               - ``mu_uq`` - quadratic constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
             %   tags (char array or cell array of char arrays) : names of
@@ -893,7 +893,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % Example::
             %
             %     [g, mu_l, mu_u] = qcn.get_soln(var, soln, 'flow');
-            %     mu_l_quad_Pmis_5_3 = qcn.get_soln(var, soln, 'mu_l', 'Pmis', {5,3});
+            %     mu_lq_Pmis_5_3 = qcn.get_soln(var, soln, 'mu_l', 'Pmis', {5,3});
             %
             % For a complete set of solution values, using the parse_soln()
             % method may be more efficient.
@@ -921,9 +921,9 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                         case 'f'
                             varargout{k} = soln.f(i1:iN);
                         case 'mu_l'
-                            varargout{k} = soln.lambda.mu_l_quad(i1:iN);
+                            varargout{k} = soln.lambda.mu_lq(i1:iN);
                         case 'mu_u'
-                            varargout{k} = soln.lambda.mu_u_quad(i1:iN);
+                            varargout{k} = soln.lambda.mu_uq(i1:iN);
                         otherwise
                             error('mp.sm_quad_constraint.get_soln: unknown tag ''%s''', tags{k});
                     end
@@ -952,8 +952,8 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %               - ``ineqnonlin`` - nonlinear inequality constraints
             %               - ``mu_l`` - linear constraint lower bounds
             %               - ``mu_u`` - linear constraint upper bounds
-            %               - ``mu_l_quad`` - quadratic constraint lower bounds
-            %               - ``mu_u_quad`` - quadratic constraint upper bounds
+            %               - ``mu_lq`` - quadratic constraint lower bounds
+            %               - ``mu_uq`` - quadratic constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
             %   stash (boolean) : if true, store return value in :attr:`soln`
@@ -970,16 +970,16 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
 
             ps = [];
             if obj.get_N()
-                if isfield(soln.lambda, 'mu_l_quad')
-                    if isfield(soln.lambda, 'mu_u_quad')
-                        params = struct('src', {soln.lambda.mu_l_quad, soln.lambda.mu_u_quad}, ...
+                if isfield(soln.lambda, 'mu_lq')
+                    if isfield(soln.lambda, 'mu_uq')
+                        params = struct('src', {soln.lambda.mu_lq, soln.lambda.mu_uq}, ...
                                         'dst', {'mu_l', 'mu_u'});
                     else
-                        params = struct('src', soln.lambda.mu_l_quad, 'dst', 'mu_l');
+                        params = struct('src', soln.lambda.mu_lq, 'dst', 'mu_l');
                     end
                 else
-                    if isfield(soln.lambda, 'mu_u_quad')
-                        params = struct('src', soln.lambda.mu_u_quad, 'dst', 'mu_u');
+                    if isfield(soln.lambda, 'mu_uq')
+                        params = struct('src', soln.lambda.mu_uq, 'dst', 'mu_u');
                     else
                         params = [];
                     end

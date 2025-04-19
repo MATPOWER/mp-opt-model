@@ -198,8 +198,8 @@ for k = 1:length(algs)
         t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
         t_is(lam.mu_l, 0, 6, [t 'lam.mu_l']);
         t_is(lam.mu_u, 0.391577, 6, [t 'lam.mu_u']);
-        t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
-        t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
+        t_is(lam.mu_lq, [0; 0], 5, [t 'lam.mu_lq']);
+        t_is(lam.mu_uq, [0.227544; 0.549342], 5, [t 'lam.mu_uq']);
 
         %% 8) Same previous passing a struct
         t = sprintf('%s - (struct) constrained 4-d convex QP : ', names{k});
@@ -213,8 +213,8 @@ for k = 1:length(algs)
         t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
         t_is(lam.mu_l, 0, 6, [t 'lam.mu_l']);
         t_is(lam.mu_u, 0.391577, 6, [t 'lam.mu_u']);
-        t_is(lam.mu_l_quad, [0; 0], 5, [t 'lam.mu_l_quad']);
-        t_is(lam.mu_u_quad, [0.227544; 0.549342], 5, [t 'lam.mu_u_quad']);
+        t_is(lam.mu_lq, [0; 0], 5, [t 'lam.mu_lq']);
+        t_is(lam.mu_uq, [0.227544; 0.549342], 5, [t 'lam.mu_uq']);
 
         %% 9) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
         t = sprintf('%s - convex 3-d QCQP with quad objective: ', names{k});
@@ -235,8 +235,8 @@ for k = 1:length(algs)
         t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
         t_ok(isempty(lam.mu_l), [t 'lam.mu_l']);
         t_ok(isempty(lam.mu_u), [t 'lam.mu_u']);
-        t_is(lam.mu_l_quad, 0.9419, 4, [t 'lam.mu_l_quad']);
-        t_is(lam.mu_u_quad, 0, 4, [t 'lam.mu_l_quad']);
+        t_is(lam.mu_lq, 0.9419, 4, [t 'lam.mu_lq']);
+        t_is(lam.mu_uq, 0, 4, [t 'lam.mu_uq']);
 
         %% 10) From "examples" folder of Knitro (exampleQCQP1)
         t = sprintf('%s - nonconvex 3-d QCQP : ', names{k});
@@ -265,8 +265,8 @@ for k = 1:length(algs)
                 t_is(lam.upper, [0;0;0], 6, [t 'lam.upper']);
                 t_is(lam.mu_l, 0, 5, [t 'lam.mu_l']);
                 t_is(lam.mu_u, 2.28571, 5, [t 'lam.mu_u']);
-                t_is(lam.mu_l_quad, 0, 4, [t 'lam.mu_l_quad']);
-                t_is(lam.mu_u_quad, 0, 4, [t 'lam.mu_u_quad']);
+                t_is(lam.mu_lq, 0, 4, [t 'lam.mu_lq']);
+                t_is(lam.mu_uq, 0, 4, [t 'lam.mu_uq']);
             end
         else
             t_skip(nqcqp_nonconvex, sprintf('%s does not handle nonconvex QCQP problems', names{k}));
