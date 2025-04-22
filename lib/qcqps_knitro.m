@@ -40,8 +40,8 @@ function [x, f, eflag, output, lambda] = qcqps_knitro(H, c, Q, B, lq, uq, A, l, 
 %               1 = some progress output
 %               2 = verbose progress output
 %               3 = even more verbose progress output
-%           grb_opt - options struct for GUROBI, value in verbose
-%                   overrides these options
+%           knitro_opt - options struct for Artelys Knitro, value in verbose
+%                        overrides these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt
@@ -243,23 +243,24 @@ else
     kn_opt = knitro_options;
 end
 if verbose > 1
-    opt.outlev = 3;
+    kn_opt.outlev = 3;
     if verbose > 2
-        opt.outlev = 4;
+        kn_opt.outlev = 4;
     end
 else
-    opt.outlev = 0;
+    kn_opt.outlev = 0;
 end
 if verbose
     alg_names = {
         'automatic',
         'interior point direct',
+        'interior point conjugate gradient'
         'active set',
         'sequential QP'
     };
     vn = knitrover;
-    fprintf('Artelys Knitro Version %s -- %s %s solver\n', ...
-        vn, alg_names{kn_opt.Method+1}, lpqcqp);
+    fprintf('Artelys Knitro Version %s -- %s QCQP solver\n', ...
+        vn, alg_names{kn_opt.algorithm+1});
 end
 
 if ~issparse(A)
