@@ -31,7 +31,7 @@ Use :class:`opt_model` to build and solve your mathematical programming and opti
 Master Functions
 ^^^^^^^^^^^^^^^^
 
-The |MPOM| master functions provide unified interfaces to multiple solvers for linear program (LP), quadratic program (QP), quadratically constrained quadratic program (QCQP), nonlinear program (NLP), mixed-integer program (MILP/MIQP) optimization, as well as nonlinear equation (NLEQ) solving and parameterized nonlinear equation (PNE) solution tracing.
+The |MPOM| master functions provide unified interfaces to multiple solvers for linear program (LP), quadratic program (QP), quadratically-constrained quadratic program (QCQP), nonlinear program (NLP), mixed-integer program (MILP/MIQP) optimization, as well as nonlinear equation (NLEQ) solving and parameterized nonlinear equation (PNE) solution tracing.
 
 .. toctree::
 
@@ -194,6 +194,7 @@ These are examples of using |MPOM| to solve a NLP.
    functions/nlps_master_ex1
    functions/nlps_master_ex2
    functions/pne_ex1
+   functions/qcqp_ex1
    functions/qp_ex1
 
 
