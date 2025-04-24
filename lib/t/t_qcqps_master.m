@@ -202,7 +202,7 @@ for k = 1:length(algs)
         t_is(lam.mu_uq, [0.227544; 0.549342], 5, [t 'lam.mu_uq']);
 
         %% 8) Same previous passing a struct
-        t = sprintf('%s - (struct) constrained 4-d convex QP : ', names{k});
+        t = sprintf('%s - (struct) convex 3-d QCQP with lin objective : ', names{k});
         p = struct('H', H, 'c', c, 'Q', {Q}, 'B', B, 'lq', lq, 'uq', uq, ...
             'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
         [x, f, s, out, lam] = qcqps_master(p);
