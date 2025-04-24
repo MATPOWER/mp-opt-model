@@ -35,18 +35,22 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, 
 %           all of which are also optional (default values shown in
 %           parentheses)
 %           alg ('DEFAULT') : determines which solver to use
-%               'DEFAULT' :  automatic, first available of Gurobi,
-%                       KNITRO, IPOPT, MIPS
+%               'DEFAULT' :  automatic, first available of IPOPT, Artelys
+%                   Knitro, FMINCON, MIPS
+%               'FMINCON' : FMINCON, MATLAB Optimization Toolbox
+%               'GUROBI'  : Gurobi, requires Gurobi solver
+%                           https://www.gurobi.com
+%               'IPOPT'   : IPOPT, requires MEX interface to IPOPT
+%                           solver, https://github.com/coin-or/Ipopt
+%               'KNITRO'  : Artelys Knitro, requires Artelys Knitro solver
+%                           https://www.artelys.com/solvers/knitro/
+%               'KNITRO_NLP' : Artelys Knitro, via NLPS_MASTER, requires
+%                           Artelys Knitro solver
+%                           https://www.artelys.com/solvers/knitro/
 %               'MIPS'    : MIPS, MATPOWER Interior Point Solver
 %                        pure MATLAB implementation of a primal-dual
 %                        interior point method, if mips_opt.step_control = 1
-%                        (or alg=250) it uses MIPS-sc, a step controlled
-%                        variant of MIPS
-%               'GUROBI'  : Gurobi
-%               'KNITRO'  : Artelys Knitro, requires Artelys Knitro solver
-%                           https://www.artelys.com/solvers/knitro/
-%               'IPOPT'   : IPOPT, requires MEX interface to IPOPT
-%                           solver, https://github.com/coin-or/Ipopt
+%                        it uses MIPS-sc, a step controlled variant of MIPS
 %           verbose (0) - controls level of progress output displayed
 %               0 = no progress output
 %               1 = some progress output
@@ -166,45 +170,16 @@ is_qcqp = ~isempty(Q);
 %% default options
 if ~isempty(opt) && isfield(opt, 'alg') && ~isempty(opt.alg)
     alg = opt.alg;
-    %% convert integer codes to string values
-    if ~ischar(alg)
-        switch alg
-            case 0
-                alg = 'DEFAULT';
-            case 100
-                alg = 'BPMPD';
-            case 200
-                alg = 'MIPS';
-                opt.mips_opt.step_control = 0;
-            case 250
-                alg = 'MIPS';
-                opt.mips_opt.step_control = 1;
-            case 300
-                alg = 'OT';
-            case 400
-                alg = 'IPOPT';
-            case 500
-                alg = 'CPLEX';
-            case 600
-                alg = 'MOSEK';
-            case 700
-                alg = 'GUROBI';
-            otherwise
-                error('qcqps_master: %d is not a valid algorithm code', alg);
-        end
-    end
 else
     alg = 'DEFAULT';
 end
 if strcmp(alg, 'DEFAULT')
     if have_feature('ipopt')
         alg = 'IPOPT';
-    elseif have_feature('gurobi')       %% use Gurobi by default, if available
-        alg = 'GUROBI';
     elseif have_feature('knitromatlab') %% if not, then Artelys Knitro, if available
         alg = 'KNITRO';
     elseif have_feature('fmincon') && have_feature('matlab')    %% if not, then Opt Tbx, if available in MATLAB
-        alg = 'OT';
+        alg = 'FMINCON';
     else                                %% otherwise MIPS
         alg = 'MIPS';
     end
