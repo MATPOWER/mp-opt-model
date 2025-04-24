@@ -10,26 +10,27 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
 % .. math::
 %    :label: eq_qcn_form
 %
-%    l_i \le \frac{1}{2}\trans{\x} \QQ_i \x + \b_i \x \le u_i, \ \ \ 
+%    \li \le \frac{1}{2}\trans{\x} \QQ_i \x + \b_i \x \le \ui, \ \ \ 
 %    i = 1,2,..., n_q
 %
 % Manages quadratic constraint sets and their indexing.
 %
 % The parameters defining the set of constraints are
 % :math:`\QQ_1, \dots, \QQ_{n_q}, \Bb, \l, \u`, where :math:`\b_i` in
-% :eq:`eq_qcn_form` is row :math:`i` of matrix :math:`\Bb`, :math:`l_i`
-% and :math:`u_i` are the :math:`i`-th elements of vectors :math:`\l` and
+% :eq:`eq_qcn_form` is row :math:`i` of matrix :math:`\Bb`, :math:`\li`
+% and :math:`\ui` are the :math:`i`-th elements of vectors :math:`\l` and
 % :math:`\u`, respectively, and :math:`n_q` is the number of quadratic
 % constraints.
 %
-% Let :math:`\{\AA\}_{\times n}` denote the set :math:`\{\AA, \AA, \dots, \AA\}`
-% where :math:`\AA` is repeated :math:`n` times, let :math:`\mathcal{A} =
-% \{\AA_i\}_{i=1}^n` be a set of :math:`n` matrices indexed by :math:`i`, and
-% let :math:`\textrm{diag}(\AA) = \trans{\left[a_{11} a_{22} \dots
+% Let :math:`\{\rmat{A}\}_{\times n}` denote the set :math:`\{\rmat{A},
+% \rmat{A}, \dots, \rmat{A}\}` where :math:`\rmat{A}` is repeated :math:`n`
+% times, let :math:`\mathcal{A} = \{\rmat{A}_i\}_{i=1}^n` be a set of :math:`n`
+% matrices or vectors indexed by :math:`i`, and let
+% :math:`\textrm{diag}(\rmat{A}) = \trans{\left[a_{11} \ a_{22} \ \dots \
 % a_{nn}\right]}` denote the matrix-to-vector diagonal operator. If we also let
-% :math:`\diag{\mathcal{A}}` denote a block diagonal matrix with the set of
-% matrices :math:`\mathcal{A}` on the block diagonal, then :eq:`eq_qcn_form` can
-% be expressed in matrix form as:
+% :math:`\diag{\mathcal{A}}` denote a block diagonal matrix with the set
+% :math:`\mathcal{A}` of matrices or vectors on the block diagonal, then
+% :eq:`eq_qcn_form` can be expressed in matrix form as:
 %
 % .. math::
 %    :label: eq_qcn_matform
@@ -613,7 +614,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             % .. math::
             %    :label: eq_qcn_eval_1
             %
-            %    l_i \le g_i(\x) \le u_i, \ \ \ i = 1,2,..., n_q
+            %    \li \le g_i(\x) \le \ui, \ \ \ i = 1,2,..., n_q
             %
             % or in matrix form for a subset or full set of constraints
             %

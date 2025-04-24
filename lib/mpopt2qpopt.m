@@ -2,6 +2,7 @@ function qpopt = mpopt2qpopt(mpopt, model, alg)
 % mpopt2qpopt - Create/modify qps_master/miqps_master options struct from ``mpopt``.
 % ::
 %
+%   QPOPT = MPOPT2QPOPT(MPOPT)
 %   QPOPT = MPOPT2QPOPT(MPOPT, MODEL)
 %   QPOPT = MPOPT2QPOPT(MPOPT, MODEL, ALG)
 %
