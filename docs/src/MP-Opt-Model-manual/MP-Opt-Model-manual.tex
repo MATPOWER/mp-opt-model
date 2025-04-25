@@ -3278,7 +3278,7 @@ set type & valid tag values & description \\
 &\codeq{l\_Ax} & lower constraint value, $l - Ax$ \\
 &\codeq{mu\_l} & shadow price on constraint lower bound \\
 &\codeq{mu\_u} & shadow price on constraint upper bound \\
-\codeq{qcn} && default \code{tags} =  \{\codeq{f}\} for QEQ problems, \{\codeq{g}, \codeq{mu\_l}, \codeq{mu\_u}\} otherwise \\
+\codeq{qcn} && default \code{tags} =  \{\codeq{f}\} for NLEQ problems, \{\codeq{g}, \codeq{mu\_l}, \codeq{mu\_u}\} otherwise \\
 &\codeq{f}\tnote{\dag} & equality constraint values, $g(x) - u$ \\
 &\codeq{g} & $1 \times 2$ cell array of upper and lower constraint values, \\
 &&\{$g(x) - u$, $l - g(x)$\} \\
@@ -3302,7 +3302,7 @@ set type & valid tag values & description \\
 \end{tabular}
 \begin{tablenotes}
  \scriptsize
- \item [\dag] {For LEQ/QEQ problems only.}
+ \item [\dag] {For LEQ/NLEQ problems only.}
  \item [\ddag] {For \codeq{qdc}, $f(x)$ can return be a vector.}
 \end{tablenotes}
 \end{threeparttable}
@@ -3536,7 +3536,6 @@ The \code{prob\_type} string is one of the following:
 \begin{itemize}
 \setlength{\parskip}{-6pt}%
 \item \codeq{LEQ} – linear equation
-\item \codeq{QEQ} – quadratic equation
 \item \codeq{NLEQ} – nonlinear equation
 \item \codeq{LP} – linear program
 \item \codeq{QP} – quadratic program
