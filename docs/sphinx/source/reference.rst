@@ -180,6 +180,7 @@ QCQP Solver
    functions/qcqp_nlp_hessfcn
    functions/qcqps_gurobi
    functions/qcqps_knitro
+   functions/qcqps_nlps
 
 
 |MPOM| Examples

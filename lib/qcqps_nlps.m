@@ -1,13 +1,13 @@
-function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
-% qcqps_master - Quadratically Constrained Quadratic Program Solver wrapper function.
+function [x, f, eflag, output, lambda] = qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
+% qcqps_nlps - Quadratically Constrained Quadratic Program Solver based on NLPS_MASTER.
 % ::
 %
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = ...
-%       QCQPS_MASTER(H, C, Q, B, LQ, UQ, A, L, U, XMIN, XMAX, X0, OPT)
-%   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QCQPS_MASTER(PROBLEM)
-%   A common wrapper function for various QCQP solvers.
-%   Solves the following QCQP (quadratically constrained quadratic programming)
-%   problem:
+%       QCQPS_NLPS(H, C, Q, B, LQ, UQ, A, L, U, XMIN, XMAX, X0, OPT)
+%   [X, F, EXITFLAG, OUTPUT, LAMBDA] = QCQPS_NLPS(PROBLEM)
+%   A wrapper function providing a standardized interface for using
+%   NLPS_MASTER to solve the following (possibly non-convex) QCQP (quadratically
+%   constrained quadratic programming) problem:
 %
 %       min 1/2 X'*H*X + C'*X
 %        X
@@ -18,6 +18,9 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, 
 %                           (quadratic constraints)
 %       L <= A*X <= U       (linear constraints)
 %       XMIN <= X <= XMAX   (variable bounds)
+%
+%   Used by QCQPS_MASTER to solve QCQP problems via FMINCON, IPOPT, MIPS,
+%   and, optionally, Artelys Knitro (by setting ALG to 'KNITRO_NLP').
 %
 %   Inputs (all optional except H, C, Q, B, LQ, and UQ):
 %       H : matrix (possibly sparse) of quadratic cost coefficients
@@ -35,29 +38,23 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, 
 %           all of which are also optional (default values shown in
 %           parentheses)
 %           alg ('DEFAULT') : determines which solver to use
-%               'DEFAULT' :  automatic, first available of IPOPT, Artelys
-%                   Knitro, FMINCON, MIPS
-%               'FMINCON' : FMINCON, MATLAB Optimization Toolbox
-%               'GUROBI'  : Gurobi, requires Gurobi solver
-%                           https://www.gurobi.com
-%               'IPOPT'   : IPOPT, requires MEX interface to IPOPT
-%                           solver, https://github.com/coin-or/Ipopt
-%               'KNITRO'  : Artelys Knitro, requires Artelys Knitro solver
-%                           https://www.artelys.com/solvers/knitro/
-%               'KNITRO_NLP' : Artelys Knitro, via NLPS_MASTER, requires
-%                           Artelys Knitro solver
-%                           https://www.artelys.com/solvers/knitro/
+%               'DEFAULT' : automatic, current default is MIPS
 %               'MIPS'    : MIPS, MATPOWER Interior Point Solver
 %                        pure MATLAB implementation of a primal-dual
 %                        interior point method, if mips_opt.step_control = 1
 %                        it uses MIPS-sc, a step controlled variant of MIPS
+%               'FMINCON' : FMINCON, MATLAB Optimization Toolbox
+%               'IPOPT'   : IPOPT, requires MEX interface to IPOPT solver
+%                           https://github.com/coin-or/Ipopt
+%               'KNITRO'  : Artelys Knitro, requires Artelys Knitro solver
+%                           https://www.artelys.com/solvers/knitro/
 %           verbose (0) - controls level of progress output displayed
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
-%           grb_opt     - options struct for GUROBI
-%           knitro_opt  - options struct for Artelys Knitro
+%           fmincon_opt - options struct for FMINCON
 %           ipopt_opt   - options struct for IPOPT
+%           knitro_opt  - options struct for Artelys Knitro
 %           mips_opt    - options struct for MIPS
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
@@ -83,22 +80,22 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, 
 %
 %   Calling syntax options:
 %       [x, f, exitflag, output, lambda] = ...
-%           qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
+%           qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
 %
-%       x = qcqps_master(H, c, Q, B, lq, uq)
-%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u)
-%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax)
-%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0)
-%       x = qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
-%       x = qcqps_master(problem), where problem is a struct with fields:
+%       x = qcqps_nlps(H, c, Q, B, lq, uq)
+%       x = qcqps_nlps(H, c, Q, B, lq, uq, A, l, u)
+%       x = qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax)
+%       x = qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0)
+%       x = qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt)
+%       x = qcqps_nlps(problem), where problem is a struct with fields:
 %                       H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt
 %                       all fields except 'c', are optional, and problem with
 %                       linear costs must include constraints
-%       x = qcqps_master(...)
-%       [x, f] = qcqps_master(...)
-%       [x, f, exitflag] = qcqps_master(...)
-%       [x, f, exitflag, output] = qcqps_master(...)
-%       [x, f, exitflag, output, lambda] = qcqps_master(...)
+%       x = qcqps_nlps(...)
+%       [x, f] = qcqps_nlps(...)
+%       [x, f, exitflag] = qcqps_nlps(...)
+%       [x, f, exitflag, output] = qcqps_nlps(...)
+%       [x, f, exitflag, output, lambda] = qcqps_nlps(...)
 %
 %   Example: (problem from https://docs.gurobi.com/projects/examples/en/current/examples/matlab/qcp.html)
 %       H = [];
@@ -116,7 +113,10 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, 
 %       x0 = zeros(3,1);
 %       opt = struct('verbose', 2);
 %       [x, f, s, out, lambda] = ...
-%           qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+%           qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+%
+% See also qcqps_master, nlps_master, qcqp_nlp_costfcn, qcqp_nlp_consfcn,
+% qcqp_nlp_hessfcn.
 
 %   MP-Opt-Model
 %   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
@@ -164,49 +164,51 @@ else                                %% individual args
     end
 end
 
-%% check for quadratic constraints
-is_qcqp = ~isempty(Q);
-
-%% default options
-if ~isempty(opt) && isfield(opt, 'alg') && ~isempty(opt.alg)
-    alg = opt.alg;
+% compute parameters for constraints function evaluation
+[ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
+    convert_quad_constraint(Q, B, lq, uq);
+if isempty(Qe)
+    blkQe = [];
 else
-    alg = 'DEFAULT';
+    blkQe = blkdiag(Qe{:});
 end
-if strcmp(alg, 'DEFAULT')
-    if have_feature('ipopt')
-        alg = 'IPOPT';
-    elseif have_feature('knitromatlab') %% if not, then Artelys Knitro, if available
-        alg = 'KNITRO';
-    elseif have_feature('fmincon') && have_feature('matlab')    %% if not, then Opt Tbx, if available in MATLAB
-        alg = 'FMINCON';
-    else                                %% otherwise MIPS
-        alg = 'MIPS';
-    end
-end
-
-%%----- call the appropriate solver  -----
-if is_qcqp
-    switch alg
-        case 'GUROBI'
-            [x, f, eflag, output, lambda] = ...
-                qcqps_gurobi(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-        case 'KNITRO'
-            [x, f, eflag, output, lambda] = ...
-                qcqps_knitro(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-%         case {'MOSEK'}
-%             [x, f, eflag, output, lambda] = ...
-%                 qcqps_mosek(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-        otherwise
-            %% strip trailing '_NLP' from alg, if present
-            opt.alg = regexprep(alg, '_NLP$', '');
-
-            [x, f, eflag, output, lambda] = ...
-                qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-    end
+if isempty(Qi)
+    blkQi = [];
 else
-    [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x0, opt);
+    blkQi = blkdiag(Qi{:});
 end
-if ~isfield(output, 'alg') || isempty(output.alg)
-    output.alg = alg;
+QQ = struct('blkQe', blkQe, 'blkQi', blkQi);
+BB = struct('Be', Be, 'Bi', Bi);
+dd = struct('de', de, 'di', di);
+
+% compute parameters for Hessian evaluation
+matQi = cell2mat(Qi);
+matQe = cell2mat(Qe);
+
+%% run solver
+f_fcn = @(x)qcqp_nlp_costfcn(x, H, c);
+gh_fcn = @(x)qcqp_nlp_consfcn(x, QQ, BB, dd);
+hess_fcn = @(x, lambda, cost_mult)qcqp_nlp_hessfcn(x, lambda, H, matQi, matQe, cost_mult);
+[x, f, eflag, output, Lambda] = ...
+    nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
+
+if ~isfield(Lambda, 'eqnonlin')
+    Lambda.eqnonlin =  zeros(length(de), 1);
 end
+if ~isfield(Lambda, 'ineqnonlin')
+    Lambda.ineqnonlin = zeros(length(di), 1);
+end
+
+% gather multipliers for quadratic constraints
+[mu_lq, mu_uq] = convert_constraint_multipliers( ...
+    Lambda.eqnonlin, Lambda.ineqnonlin, ...
+    ieq_quad, igt_quad, ilt_quad);
+
+lambda = struct( ...
+    'mu_l'      , Lambda.mu_l, ...
+    'mu_u'      , Lambda.mu_u, ...
+    'mu_lq'     , mu_lq, ...
+    'mu_uq'     , mu_uq, ...
+    'lower'     , Lambda.lower, ...
+    'upper'     , Lambda.upper ...
+);

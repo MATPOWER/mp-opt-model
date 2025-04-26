@@ -1036,7 +1036,7 @@ name & default & description \\
 \end{threeparttable}
 \end{table}
 
-The \code{qcqps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{qcqps\_gurobi}, and \code{qcqps\_knitro}. Each of these functions has an interface identical to that of \code{qcqps\_master}. \ipopt{}, \mipslink{}, and \code{fmincon} are supported by passing the problem to \code{nlps\_master} with the appropriate \code{alg} option.
+The \code{qcqps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{qcqps\_gurobi}, \code{qcqps\_knitro}, and \code{qcqps\_nlps}. Each of these functions has an interface identical to that of \code{qcqps\_master}. \ipopt{}, \mipslink{}, \code{fmincon}, and optionally \knitro{}, are handled by \code{qcqps\_nlps} which calls \code{nlps\_master} with the appropriate \code{alg} option to solve the problem.
 
 \clearpage
 \subsubsection{QCQP Example}
@@ -4278,6 +4278,7 @@ name & description \\
 \midrule
 \code{qcqps\_gurobi}	& QCQP solver API implementation for \gurobi{}\tnote{\dag}	\\
 \code{qcqps\_knitro}	& QCQP solver API implementation for \knitro{}\tnote{\dag}	\\
+\code{qcqps\_nlps}	& QCQP solver API implementation for \code{nlps\_master} (e.g. supports \code{fmincon}, \ipopt{}, \knitro{}, \mips{})	\\
 \midrule
 \code{qps\_bpmpd}	& QP/LP solver API implementation for BPMPD\_MEX\tnote{\dag}	\\
 \code{qps\_clp}	& QP/LP solver API implementation for \clp{}\tnote{\dag}	\\
@@ -5019,7 +5020,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
 
 \subsubsection*{New Features}
 \begin{itemize}
-\item Support for quadratic constraints in \code{opt\_model} and quadratically-constrained quadratic programming (QCQP) problems, including functions \code{qcqps\_master()}, \code{qcqps\_gurobi()}, \code{qcqps\_knitro()}, and more.
+\item Support for quadratic constraints in \code{opt\_model} and quadratically-constrained quadratic programming (QCQP) problems, including functions \code{qcqps\_master()}, \code{qcqps\_gurobi()}, \code{qcqps\_knitro()}, \code{qcqps\_nlps()}, and more.
 \emph{Thanks to Wilson Gonz{\'a}lez Vanegas.}
 \item New \code{relax\_integer} option for \code{opt\_model.solve()}. Set to true to easily solve the LP or QP relaxation of a mixed integer LP or QP.
 \item Support for \href{https://www.artelys.com/solvers/knitro/}{\knitro{}} solver for LP and QP problems, including functions \code{qps\_knitro()}, \code{knitrover()}, and \code{artelys\_knitro\_options()}.
@@ -5045,6 +5046,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
     \item \code{mpopt2qcqpopt()} creates/modifies \code{qcqps\_master} options struct from \matpower{} options struct
     \item \code{qcqps\_gurobi()} provides standardized interface for using \gurobi{} to solve QCQP problems.
     \item \code{qcqps\_knitro()} provides standardized interface for using \knitro{} to solve QCQP problems.
+    \item \code{qcqps\_nlps()} provides standardized interface for using \code{nlps\_master} to solve QCQP problems via \code{fmincon}, \ipopt{}, \knitro{}, or \mips{}.
     \item \code{qcqps\_master()} provides a single wrapper function for calling any of \mpom{}'s QCQP solvers.
     \item \code{qps\_knitro()} provides standardized interface for using \knitro{} to solve LP/QP problems.
     \end{itemize}
