@@ -9,11 +9,11 @@ since 4.2
   - Add support for quadratic constraint and QCQP (quadratically-
     constrained quadratic programming) problems.
     *Thanks to Wilson Gonzalez Vanegas.*
-    - Add new top-level wrapper function `qcps_master()` to provide
+    - Add new top-level wrapper function `qcqps_master()` to provide
       a standard unified interface quadratically-constrained quadratic
       programming (QCQP) problems, with the ability to provide solver-
       specific input options.
-    - Add `qcps_gurobi()`, `qcqps_knitro()`, `qcqps_nlps()` with
+    - Add `qcqps_gurobi()`, `qcqps_knitro()`, `qcqps_nlps()` with
       interface that matches `qcqps_master()` to handle implementation
       for Gurobi, Artelys Knitro, `fmincon`, IPOPT, and MIPS  solvers.
     - Add `mpopt2qcqpopt()` to set up an options struct for
