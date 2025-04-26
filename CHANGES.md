@@ -5,6 +5,25 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 4/26/25
+  - Add support for quadratic constraint and QCQP (quadratically-
+    constrained quadratic programming) problems.
+    *Thanks to Wilson Gonzalez Vanegas.*
+    - Add new top-level wrapper function `qcps_master()` to provide
+      a standard unified interface quadratically-constrained quadratic
+      programming (QCQP) problems, with the ability to provide solver-
+      specific input options.
+    - Add `qcps_gurobi()`, `qcqps_knitro()`, `qcqps_nlps()` with
+      interface that matches `qcqps_master()` to handle implementation
+      for Gurobi, Artelys Knitro, `fmincon`, IPOPT, and MIPS  solvers.
+    - Add `mpopt2qcqpopt()` to set up an options struct for
+      `qcqps_master()` based on a MATPOWER options struct.
+    - Add `mp.sm_quad_constraint` class to handle quadratic
+      constraints in `opt_model`.
+    - Add `qcn` property to `opt_model` for quadratic constraints
+      and automatic detection of a new `QCQP` problem type that is
+      sent to `qcqps_master()` to solve.
+
 #### 3/19/25
   - Update `miqps_<solver>()` functions to avoid changing MIP solution
     values in price computation stage. It was rounding integer variables,
