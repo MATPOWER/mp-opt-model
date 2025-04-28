@@ -151,14 +151,17 @@ end
 %% define nx, set default values for missing optional inputs
 if isempty(Q)
     if isempty(H) || ~any(any(H))
+        if isempty(c)
+            error('qcqps_gurobi: H or c could be empty, but not both.')
+        end
         if isempty(B) && isempty(A) && isempty(xmin) && isempty(xmax)
-            error('qcqps_gurobi: LP problem must include constraints or variable bounds');
+            error('qcqps_gurobi: LP problem must include constraints or variable bounds.');
         else
             if ~isempty(A) && ~isempty(B)
                 if size(A,2) == size(B,2)
                     nx = size(A, 2);
                 else
-                    error('qcqp_gubori: number of columns of A and B must agree')
+                    error('qcqps_gurobi: number of columns of A and B must agree.')
                 end
             elseif ~isempty(xmin)
                 nx = length(xmin);
@@ -185,19 +188,58 @@ else
     [nrowQ, ncolQ] = size(Q);
     if isa(Q,'cell') && ncolQ == 1
         size_Q  = cell2mat(cellfun(@(x)(size(x)), Q, 'UniformOutput', false));
-        if ~isempty(H)
-            if abs(sum((1/nrowQ)*size_Q(:)) - sum(size(H)))  > 1e-10
-                error('qcqp_gurobi: Dimensions of matrices H and Q{i}, i=1,2,...,%d must agree.', nrowQ)
-            end
-            nx = size(H, 1);
-        else
-            if abs(sum((1/nrowQ)*size_Q(:,2)) - length(c))  > 1e-10
-                error('qcqp_gurobi: Dimensions of matrices Q{i}, i=1,2,...,%d and vector c must agree.', nrowQ)
-            end
-            nx = length(c);
+        if sum(size_Q(:)) ~= 2*size_Q(1,1)*nrowQ
+            error('qcqps_gurobi: All matrices Q{i}, i=1,...,%d must be square of the same size.', nrowQ)
         end
+        if ~isempty(B)
+            [nrowB, ncolB] = size(B);
+            if nrowB ~= nrowQ
+                error('qcqps_gurobi: Dimension mismatch between rows of Q (%d) and B (%d).', nrowQ, nrowB)
+            end
+            if size_Q(1,1) ~= ncolB
+                error('qcqps_gurobi: Dimension mismatch between columns of Q{i} (%d) and B (%d).', size_Q(1,1), ncolB)
+            end
+        else
+            B = sparse(nrowQ, size_Q(1,1));
+        end
+        if isempty(H) && isempty(c)
+            error('qcqps_gurobi: H or c could be empty, but not both.')
+        else
+            if ~isempty(H)
+                if abs(sum((1/nrowQ)*size_Q(:)) - sum(size(H)))  > 1e-10
+                    error('qcqps_gurobi: Dimensions of matrices Q{i}, i=1,...,%d and H must agree.', nrowQ)
+                end
+            else
+                H = sparse(size_Q(1,1), size_Q(1,2));
+            end
+            if ~isempty(c)
+                if size_Q(1,1) ~= numel(c)
+                    error('qcqps_gurobi: Dimensions of matrices Q{i}, i=1,...,%d and vector c must agree.', nrowQ)
+                end
+            else
+                c = sparse(1, size_Q(1,1));
+            end            
+        end
+        if ~isempty(A)
+            if size_Q(1,1) ~= size(A,2)
+                error('qcqps_gurobi: Dimensions of matrices Q{i}, i=1,...,%d and matrix A must agree.', nrowQ)
+            end
+        else
+            A = sparse(0, size_Q(1,1));
+        end
+        if ~isempty(xmin)
+            if size_Q(1,1) ~= numel(xmin)
+                error('qcqps_gurobi: Dimensions of matrices Q{i}, i=1,...,%d and lower bound must agree.', nrowQ)
+            end
+        end
+        if ~isempty(xmax)
+            if size_Q(1,1) ~= numel(xmax)
+                error('qcqps_gurobi: Dimensions of matrices Q{i}, i=1,...,%d and upper bound must agree.', nrowQ)
+            end
+        end
+        nx = size_Q(1,1);
     else
-        error('qcqp_gurobi: Input argument Q must be an N x 1 cell array')
+        error('qcqps_gurobi: Input argument Q must be column vector cell array.')
     end
 end
 if isempty(c)
@@ -325,6 +367,13 @@ if verbose
     fprintf('Gurobi Version %s -- %s %s solver\n', ...
         vn, alg_names{g_opt.Method+2}, lpqcqp);
 end
+
+if strcmp(lpqcqp, 'QCQP')
+
+else
+    fprintf('')
+end
+
 results = gurobi(m, g_opt);
 
 %% Check for status of the optimization run and prepare output
