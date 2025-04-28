@@ -164,6 +164,120 @@ else                                %% individual args
     end
 end
 
+%% define nx, set default values for missing optional inputs
+if isempty(Q)
+    if isempty(H) || ~any(any(H))
+        if isempty(c)
+            error('qcqps_knitro: H or c could be empty, but not both.')
+        end
+        if isempty(B) && isempty(A) && isempty(xmin) && isempty(xmax)
+            error('qcqps_knitro: LP problem must include constraints or variable bounds.');
+        else
+            if ~isempty(A) && ~isempty(B)
+                if size(A,2) == size(B,2)
+                    nx = size(A, 2);
+                else
+                    error('qcqps_knitro: number of columns of A and B must agree.')
+                end
+            elseif ~isempty(xmin)
+                nx = length(xmin);
+            else    % if ~isempty(xmax)
+                nx = length(xmax);
+            end
+        end
+        H = sparse(nx,nx);
+    else
+        nx = size(H, 1);
+    end
+    if isempty(B) || (~isempty(B) && (isempty(lq) || all(lq == -Inf)) && ...
+                                     (isempty(uq) || all(uq == Inf)))
+        B = sparse(0,nx);       %% no lq & uq limits => no quadratic constraints
+    end
+    nrowB = size(B, 1);         %% number of original quadratic constraints
+    if isempty(uq)              %% By default, quadratic inequalities are ...
+        uq = Inf(nrowB, 1);     %% ... unbounded above and ...
+    end
+    if isempty(lq)
+        lq = -Inf(nrowB, 1);    %% ... unbounded below.
+    end
+else
+    [nrowQ, ncolQ] = size(Q);
+    if isa(Q,'cell') && ncolQ == 1
+        size_Q  = cell2mat(cellfun(@(x)(size(x)), Q, 'UniformOutput', false));
+        if sum(size_Q(:)) ~= 2*size_Q(1,1)*nrowQ
+            error('qcqps_knitro: All matrices Q{i}, i=1,...,%d must be square of the same size.', nrowQ)
+        end
+        if ~isempty(B)
+            [nrowB, ncolB] = size(B);
+            if nrowB ~= nrowQ
+                error('qcqps_knitro: Dimension mismatch between rows of Q (%d) and B (%d).', nrowQ, nrowB)
+            end
+            if size_Q(1,1) ~= ncolB
+                error('qcqps_knitro: Dimension mismatch between columns of Q{i} (%d) and B (%d).', size_Q(1,1), ncolB)
+            end
+        else
+            B = sparse(nrowQ, size_Q(1,1));
+        end
+        if isempty(H) && isempty(c)
+            error('qcqps_knitro: H or c could be empty, but not both.')
+        else
+            if ~isempty(H)
+                if abs(sum((1/nrowQ)*size_Q(:)) - sum(size(H)))  > 1e-10
+                    error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and H must agree.', nrowQ)
+                end
+            else
+                H = sparse(size_Q(1,1), size_Q(1,2));
+            end
+            if ~isempty(c)
+                if size_Q(1,1) ~= numel(c)
+                    error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and vector c must agree.', nrowQ)
+                end
+            else
+                c = sparse(1, size_Q(1,1));
+            end            
+        end
+        if ~isempty(A)
+            if size_Q(1,1) ~= size(A,2)
+                error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and matrix A must agree.', nrowQ)
+            end
+        else
+            A = sparse(0, size_Q(1,1));
+        end
+        if ~isempty(xmin)
+            if size_Q(1,1) ~= numel(xmin)
+                error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and lower bound must agree.', nrowQ)
+            end
+        end
+        if ~isempty(xmax)
+            if size_Q(1,1) ~= numel(xmax)
+                error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and upper bound must agree.', nrowQ)
+            end
+        end
+        nx = size_Q(1,1);
+    else
+        error('qcqps_knitro: Input argument Q must be column vector cell array.')
+    end
+end
+if isempty(c)
+    c = zeros(nx, 1);
+end
+nrowA = size(A, 1);         %% number of original linear constraints
+if isempty(u)               %% By default, linear inequalities are ...
+    u = Inf(nrowA, 1);      %% ... unbounded above and ...
+end
+if isempty(l)
+    l = -Inf(nrowA, 1);     %% ... unbounded below.
+end
+if isempty(xmin)            %% By default, optimization variables are ...
+    xmin = -Inf(nx, 1);     %% ... unbounded below and ...
+end
+if isempty(xmax)
+    xmax = Inf(nx, 1);      %% ... unbounded above.
+end
+if isempty(x0)
+    x0 = zeros(nx, 1);
+end
+
 % compute parameters for constraints function evaluation
 [ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
     convert_quad_constraint(Q, B, lq, uq);
