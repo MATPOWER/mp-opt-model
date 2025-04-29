@@ -164,118 +164,126 @@ else                                %% individual args
     end
 end
 
-%% define nx, set default values for missing optional inputs
-if isempty(Q)
-    if isempty(H) || ~any(any(H))
-        if isempty(c)
-            error('qcqps_knitro: H or c could be empty, but not both.')
-        end
-        if isempty(B) && isempty(A) && isempty(xmin) && isempty(xmax)
-            error('qcqps_knitro: LP problem must include constraints or variable bounds.');
-        else
-            if ~isempty(A) && ~isempty(B)
-                if size(A,2) == size(B,2)
-                    nx = size(A, 2);
-                else
-                    error('qcqps_knitro: number of columns of A and B must agree.')
-                end
-            elseif ~isempty(xmin)
-                nx = length(xmin);
-            else    % if ~isempty(xmax)
-                nx = length(xmax);
-            end
-        end
-        H = sparse(nx,nx);
-    else
-        nx = size(H, 1);
+%% define nx, nq, nlin, and set default values for missing optional inputs
+if ~isempty(Q)
+    [nq, ncolQ] = size(Q);    
+    if ~iscell(Q) || ncolQ ~= 1        
+        error('qcqps_gurobi: Q must be column vector cell array.')        
     end
-    if isempty(B) || (~isempty(B) && (isempty(lq) || all(lq == -Inf)) && ...
-                                     (isempty(uq) || all(uq == Inf)))
-        B = sparse(0,nx);       %% no lq & uq limits => no quadratic constraints
-    end
-    nrowB = size(B, 1);         %% number of original quadratic constraints
-    if isempty(uq)              %% By default, quadratic inequalities are ...
-        uq = Inf(nrowB, 1);     %% ... unbounded above and ...
-    end
-    if isempty(lq)
-        lq = -Inf(nrowB, 1);    %% ... unbounded below.
+    sizeQi  = cell2mat(cellfun(@(x)(size(x)), Q, 'UniformOutput', false));
+    if sum(sizeQi(:)) ~= 2*sizeQi(1,1)*nq
+        error('qcqps_gurobi: All matrices Q{i}, i=1,...,%d must be square of the same size.', nq)
     end
 else
-    [nrowQ, ncolQ] = size(Q);
-    if isa(Q,'cell') && ncolQ == 1
-        size_Q  = cell2mat(cellfun(@(x)(size(x)), Q, 'UniformOutput', false));
-        if sum(size_Q(:)) ~= 2*size_Q(1,1)*nrowQ
-            error('qcqps_knitro: All matrices Q{i}, i=1,...,%d must be square of the same size.', nrowQ)
-        end
-        if ~isempty(B)
-            [nrowB, ncolB] = size(B);
-            if nrowB ~= nrowQ
-                error('qcqps_knitro: Dimension mismatch between rows of Q (%d) and B (%d).', nrowQ, nrowB)
-            end
-            if size_Q(1,1) ~= ncolB
-                error('qcqps_knitro: Dimension mismatch between columns of Q{i} (%d) and B (%d).', size_Q(1,1), ncolB)
-            end
-        else
-            B = sparse(nrowQ, size_Q(1,1));
-        end
-        if isempty(H) && isempty(c)
-            error('qcqps_knitro: H or c could be empty, but not both.')
-        else
-            if ~isempty(H)
-                if abs(sum((1/nrowQ)*size_Q(:)) - sum(size(H)))  > 1e-10
-                    error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and H must agree.', nrowQ)
-                end
-            else
-                H = sparse(size_Q(1,1), size_Q(1,2));
-            end
-            if ~isempty(c)
-                if size_Q(1,1) ~= numel(c)
-                    error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and vector c must agree.', nrowQ)
-                end
-            else
-                c = sparse(1, size_Q(1,1));
-            end            
-        end
-        if ~isempty(A)
-            if size_Q(1,1) ~= size(A,2)
-                error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and matrix A must agree.', nrowQ)
-            end
-        else
-            A = sparse(0, size_Q(1,1));
-        end
-        if ~isempty(xmin)
-            if size_Q(1,1) ~= numel(xmin)
-                error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and lower bound must agree.', nrowQ)
-            end
-        end
-        if ~isempty(xmax)
-            if size_Q(1,1) ~= numel(xmax)
-                error('qcqps_knitro: Dimensions of matrices Q{i}, i=1,...,%d and upper bound must agree.', nrowQ)
-            end
-        end
-        nx = size_Q(1,1);
+    nq = 0;
+end
+
+if ~isempty(H)
+    [nrowH, ncolH] = size(H);
+    if nrowH ~= ncolH
+        error('qcqps_gurobi: H must be a square matrix.')
+    end
+    nx = nrowH;    
+else
+    if ~isempty(c)
+        nx = length(c);
     else
-        error('qcqps_knitro: Input argument Q must be column vector cell array.')
+        if nq
+            nx = size(Q{1},2);
+        else
+            if ~isempty(B)
+                nx = size(B,2);
+            else
+                if ~isempty(A)
+                    nx = size(A,2);
+                else
+                    error('qcqps_gurobi: inputs arguments H, c, Q, B, and A can not be all empty.')
+                end
+            end
+        end
     end
 end
-if isempty(c)
-    c = zeros(nx, 1);
+
+if isempty(H) && isempty(c) && isempty(B) && isempty(A)
+    error('qcqps_gurobi: Problem is incomplete: H, c, B and A can not be all empty.')
 end
-nrowA = size(A, 1);         %% number of original linear constraints
-if isempty(u)               %% By default, linear inequalities are ...
-    u = Inf(nrowA, 1);      %% ... unbounded above and ...
+if isempty(H)
+    H = sparse(nx,nx);
+end
+if isempty(c)
+    c = sparse(nx,1);
+elseif length(c) ~= nx
+    error('qcqps_gurobi: Dimension of c (%d) must be iqual to the number of variables (%d).', length(c), nx)
+end
+
+if nq
+    if isempty(B)
+        B = sparse(nq,nx);
+    else
+        [nrowB, ncolB] = size(B);
+        if nrowB ~= nq || ncolB ~= nx
+            error('qcqps_gurobi: Dimension of B (%dx%d) should be number of quad constraints times number of variables (%dx%d).', nrowB, ncolB, nq, nx);
+        end
+    end    
+else
+    Q = {};
+    if ~isempty(B)
+        [~, ncolB] = size(B);
+        if ncolB ~= nx
+            error('qcqps_gurobi: The number of columns of matrix B (%d) must be equal to the number of variables (%d).', ncolB, nx);
+        end
+    else
+        B = sparse(nq,nx);
+        if ~isempty(lq) ||  ~isempty(uq)
+            error('qcqps_gurobi: No quadratic constraints were found. Inputs lq and uq should be empty.')
+        end
+    end
+end
+
+if ~isempty(A)
+    [nlin, ncolA] = size(A);
+    if ncolA ~= nx
+        error('qcqps_gurobi: The number of columns of matrix A (%d) must be equal to the number of variables (%d).', ncolA, nx);
+    end    
+else
+    nlin = 0;
+    A = sparse(nlin,nx);
+end
+
+if isempty(uq)          %% By default, quadratic inequalities are ...
+    uq = Inf(nq, 1);        %% ... unbounded above and ...
+elseif length(uq) ~= size(B,1)
+    error('qcqps_gurobi: Dimension mismatch between uq, Q, and B.')
+end
+if isempty(lq)
+    lq = -Inf(nq, 1);       %% ... unbounded below.
+elseif length(lq) ~= size(B,1)
+    error('qcqps_gurobi: Dimension mismatch between lq, Q, and B.')
+end
+if isempty(u)           %% By default, linear inequalities are ...
+    u = Inf(nlin, 1);       %% ... unbounded above and ...
+elseif length(u) ~= nlin
+    error('qcqps_gurobi: Dimension of u (%d) must be iqual to the number of linear constraints (%d).', length(u), nlin')
 end
 if isempty(l)
-    l = -Inf(nrowA, 1);     %% ... unbounded below.
+    l = -Inf(nlin, 1);      %% ... unbounded below.
+elseif length(l) ~= nlin
+    error('qcqps_gurobi: Dimension of l (%d) must be iqual to the number of linear constraints (%d).', length(l), nlin')
 end
-if isempty(xmin)            %% By default, optimization variables are ...
+if isempty(xmin)        %% By default, optimization variables are ...
     xmin = -Inf(nx, 1);     %% ... unbounded below and ...
+elseif length(xmin) ~= nx
+    error('qcqps_gurobi: Dimension of xmin (%d) must be iqual to the number of variables (%d).', length(xmin), nx')
 end
 if isempty(xmax)
     xmax = Inf(nx, 1);      %% ... unbounded above.
+elseif length(xmax) ~= nx
+    error('qcqps_gurobi: Dimension of xmax (%d) must be iqual to the number of variables (%d).', length(xmax), nx')
 end
 if isempty(x0)
     x0 = zeros(nx, 1);
+elseif length(x0) ~= nx
+    error('qcqps_gurobi: Dimension of x0 (%d) must be iqual to the number of variables (%d).', length(x0), nx')
 end
 
 % compute parameters for constraints function evaluation
