@@ -164,9 +164,6 @@ else                                %% individual args
     end
 end
 
-%% check for quadratic constraints
-is_qcqp = ~isempty(Q);
-
 %% default options
 if ~isempty(opt) && isfield(opt, 'alg') && ~isempty(opt.alg)
     alg = opt.alg;
@@ -186,26 +183,22 @@ if strcmp(alg, 'DEFAULT')
 end
 
 %%----- call the appropriate solver  -----
-if is_qcqp
-    switch alg
-        case 'GUROBI'
-            [x, f, eflag, output, lambda] = ...
-                qcqps_gurobi(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-        case 'KNITRO'
-            [x, f, eflag, output, lambda] = ...
-                qcqps_knitro(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-%         case {'MOSEK'}
-%             [x, f, eflag, output, lambda] = ...
-%                 qcqps_mosek(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-        otherwise
-            %% strip trailing '_NLP' from alg, if present
-            opt.alg = regexprep(alg, '_NLP$', '');
+switch alg
+    case 'GUROBI'
+        [x, f, eflag, output, lambda] = ...
+            qcqps_gurobi(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+    case 'KNITRO'
+        [x, f, eflag, output, lambda] = ...
+            qcqps_knitro(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+%    case {'MOSEK'}
+%        [x, f, eflag, output, lambda] = ...
+%            qcqps_mosek(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+    otherwise
+        %% strip trailing '_NLP' from alg, if present
+        opt.alg = regexprep(alg, '_NLP$', '');
 
-            [x, f, eflag, output, lambda] = ...
-                qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
-    end
-else
-    [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x0, opt);
+        [x, f, eflag, output, lambda] = ...
+            qcqps_nlps(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
 end
 if ~isfield(output, 'alg') || isempty(output.alg)
     output.alg = alg;

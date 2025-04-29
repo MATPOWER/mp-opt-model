@@ -301,15 +301,24 @@ if issparse(c)
 end
 
 %% split up quadratic constraints
-[ieq_quad, igt_quad, ilt_quad, Q_quad, B_quad, d_quad] = ...
-    convert_quad_constraint(Q, B, lq, uq);
-
+if ~isempty(Q)
+    [ieq_quad, igt_quad, ilt_quad, Q_quad, B_quad, d_quad] = ...
+        convert_quad_constraint(Q, B, lq, uq);
+    %% grab some dimensions
+    neq_quad = length(ieq_quad);                       %% number of quadratic equalities
+    niq_quad = length(ilt_quad) + length(igt_quad);    %% number of quadratic inequalities
+else
+    Q_quad = {};
+    neq_quad = 0; niq_quad = 0;
+end
+   
 %% split up linear constraints
-[ieq_lin, igt_lin, ilt_lin, A_lin, b_lin] = convert_lin_constraint(A, l, u);
-
+if isempty(Q) && ~isempty(B)
+    [ieq_lin, igt_lin, ilt_lin, A_lin, b_lin] = convert_lin_constraint([A; B], [l; lq], [u; uq]);
+else
+    [ieq_lin, igt_lin, ilt_lin, A_lin, b_lin] = convert_lin_constraint(A, l, u);
+end
 %% grab some dimensions
-neq_quad = length(ieq_quad);                       %% number of quadratic equalities
-niq_quad = length(ilt_quad) + length(igt_quad);    %% number of quadratic inequalities
 neq_lin = length(ieq_lin);                         %% number of linear equalities
 niq_lin = length(ilt_lin) + length(igt_lin);       %% number of linear inequalities
 
@@ -362,16 +371,10 @@ if verbose
         'concurrent',
         'deterministic concurrent',
         'deterministic concurrent simplex'
-    };
+        };
     vn = gurobiver;
     fprintf('Gurobi Version %s -- %s %s solver\n', ...
         vn, alg_names{g_opt.Method+2}, lpqcqp);
-end
-
-if strcmp(lpqcqp, 'QCQP')
-
-else
-    fprintf('')
 end
 
 results = gurobi(m, g_opt);

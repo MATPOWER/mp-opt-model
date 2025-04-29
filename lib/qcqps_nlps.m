@@ -279,8 +279,21 @@ if isempty(x0)
 end
 
 % compute parameters for constraints function evaluation
-[ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
-    convert_quad_constraint(Q, B, lq, uq);
+Alin = A; llin = l; ulin = u;
+if ~isempty(Q)
+    [ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
+        convert_quad_constraint(Q, B, lq, uq);
+else
+    Qe = {}; Qi = {};
+    if ~isempty(B)
+        Alin = [A; B]; llin = [l; lq]; ulin = [u; uq];
+        [ieq_lin, igt_lin, ilt_lin, Be, de, Bi, di] = convert_lin_constraint(Alin, llin, ulin);
+    else
+        Be = []; Bi = []; 
+        de = []; di = []; 
+    end
+end
+
 if isempty(Qe)
     blkQe = [];
 else
@@ -304,7 +317,7 @@ f_fcn = @(x)qcqp_nlp_costfcn(x, H, c);
 gh_fcn = @(x)qcqp_nlp_consfcn(x, QQ, BB, dd);
 hess_fcn = @(x, lambda, cost_mult)qcqp_nlp_hessfcn(x, lambda, H, matQi, matQe, cost_mult);
 [x, f, eflag, output, Lambda] = ...
-    nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
+    nlps_master(f_fcn, x0, Alin, llin, ulin, xmin, xmax, gh_fcn, hess_fcn, opt);
 
 if ~isfield(Lambda, 'eqnonlin')
     Lambda.eqnonlin =  zeros(length(de), 1);
@@ -314,9 +327,19 @@ if ~isfield(Lambda, 'ineqnonlin')
 end
 
 % gather multipliers for quadratic constraints
-[mu_lq, mu_uq] = convert_constraint_multipliers( ...
-    Lambda.eqnonlin, Lambda.ineqnonlin, ...
-    ieq_quad, igt_quad, ilt_quad);
+if ~isempty(Q)
+    [mu_lq, mu_uq] = convert_constraint_multipliers( ...
+        Lambda.eqnonlin, Lambda.ineqnonlin, ...
+        ieq_quad, igt_quad, ilt_quad);
+else    
+    if ~isempty(B)
+        [mu_lq, mu_uq] = convert_constraint_multipliers( ...
+            Lambda.eqnonlin, Lambda.ineqnonlin, ...
+            ieq_lin, igt_lin, ilt_lin);
+    else
+        mu_lq = []; mu_uq = [];
+    end
+end
 
 lambda = struct( ...
     'mu_l'      , Lambda.mu_l, ...

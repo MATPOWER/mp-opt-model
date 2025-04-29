@@ -276,6 +276,7 @@ if ~isempty(opt) && isfield(opt, 'knitro_opt') && ~isempty(opt.knitro_opt)
 else
     kn_opt = knitro_options;
 end
+
 if verbose > 1
     kn_opt.outlev = 3;
     if verbose > 2
@@ -283,18 +284,6 @@ if verbose > 1
     end
 else
     kn_opt.outlev = 0;
-end
-if verbose
-    alg_names = {
-        'automatic',
-        'interior point direct',
-        'interior point conjugate gradient'
-        'active set',
-        'sequential QP'
-    };
-    vn = knitrover;
-    fprintf('Artelys Knitro Version %s -- %s QCQP solver\n', ...
-        vn, alg_names{kn_opt.algorithm+1});
 end
 
 if ~issparse(A)
@@ -305,27 +294,30 @@ if issparse(c)
 end
 
 %% split up quadratic constraints
-[ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
-    convert_quad_constraint(Q, B, lq, uq);
+if ~isempty(Q)
+    [ieq_quad, igt_quad, ilt_quad, Qe, Be, de, Qi, Bi, di] = ...
+        convert_quad_constraint(Q, B, lq, uq);
+    %% grab some dimensions
+    neq_quad = length(ieq_quad);                       %% number of quadratic equalities
+    niq_quad = length(ilt_quad) + length(igt_quad);    %% number of quadratic inequalities
+else
+    Qi = {}; Qe = {};
+    neq_quad = 0; niq_quad = 0;
+end
 
 %% split up linear constraints
-[ieq_lin, igt_lin, ilt_lin, Ae, be, Ai, bi] = convert_lin_constraint(A, l, u);
-
-%% grab some dimensions and adjust constraints
-neq_quad = length(ieq_quad);                       %% number of quadratic equalities
-niq_quad = length(ilt_quad) + length(igt_quad);    %% number of quadratic inequalities
+if isempty(Q) && ~isempty(B)
+    [ieq_lin, igt_lin, ilt_lin, Ae, be, Ai, bi] = convert_lin_constraint([A; B], [l; lq], [u; uq]);
+else
+    [ieq_lin, igt_lin, ilt_lin, Ae, be, Ai, bi] = convert_lin_constraint(A, l, u);
+end
+%% grab some dimensions
 neq_lin = length(ieq_lin);                         %% number of linear equalities
 niq_lin = length(ilt_lin) + length(igt_lin);       %% number of linear inequalities
 
-Qi_quad  = vertcat(cell(niq_lin,1), Qi);    % both linear/quadratic constraints must be passed as quadratic constraints of the form:
-Qeq_quad = vertcat(cell(neq_lin,1), Qe);    %
-A_quad   = [Ai; Bi];                        %          1/2 * x' * Qi_quad * x + A_quad * x <= b_quad      (inequality constraints)
-Aeq_quad = [Ae, Be];                        %          1/2 * x' * Qeq_quad * x + Aeq_quad * x = be_quad   (equality constraints)
-b_quad   = [bi; di];                        %
-beq_quad = [be; de];                        %
 
 %% Call the solver
-isemptyQ = cell2mat(cellfun(@(x)(isempty(x) || ~any(any(x))), Q_quad, 'UniformOutput', false));
+isemptyQ = cell2mat(cellfun(@(x)(isempty(x) || ~any(any(x))), [Qe; Qi], 'UniformOutput', false));
 if sum(isemptyQ) == (neq_quad + niq_quad)   %% No quadratic terms in quadratic constraints (linear constraints)
     if isempty(H) || ~any(any(H))
         lpqcqp = 'LP';
@@ -343,10 +335,38 @@ else
         end
     end
 end
+if verbose
+    alg_names = {
+        'automatic',
+        'interior point direct',
+        'interior point conjugate gradient',
+        'active set',
+        'sequential QP'
+        };
+    vn = knitrover;
+    fprintf('Artelys Knitro Version %s -- %s %s solver\n', ...
+        vn, alg_names{kn_opt.algorithm+1}, lpqcqp);
+end
 
-[x, f, exitflag, output, Lambda] = ...
-    knitro_qcqp(H, c, Qi_quad, A_quad, b_quad, Qeq_quad, Aeq_quad, beq_quad, ...
-        xmin, xmax, x0, [], kn_opt);
+switch lpqcqp
+    case {'QCQP'}
+        Qi_quad  = vertcat(cell(niq_lin,1), Qi);    % both linear/quadratic constraints must be passed as quadratic constraints of the form:
+        Qeq_quad = vertcat(cell(neq_lin,1), Qe);    %
+        A_quad   = [Ai; Bi];                        %          1/2 * x' * Qi_quad * x + A_quad * x <= b_quad      (inequality constraints)
+        Aeq_quad = [Ae, Be];                        %          1/2 * x' * Qeq_quad * x + Aeq_quad * x = be_quad   (equality constraints)
+        b_quad   = [bi; di];                        %
+        beq_quad = [be; de];                        %
+
+        [x, f, exitflag, output, Lambda] = ...
+            knitro_qcqp(H, c, Qi_quad, A_quad, b_quad, Qeq_quad, Aeq_quad, beq_quad, ...
+            xmin, xmax, x0, [], kn_opt);
+    case {'QP'}
+        [x, f, exitflag, output, Lambda] = ...
+            knitro_qp(H, c, Ai, bi, Ae, be, xmin, xmax, x0, [], kn_opt);
+    case {'LP'}
+        [x, f, exitflag, output, Lambda] = ...
+            knitro_lp(c, Ai, bi, Ae, be, xmin, xmax, x0, [], kn_opt);
+end
 
 %% Extract multipliers
 [mu_l, mu_u] = convert_constraint_multipliers(Lambda.eqlin(1:neq_lin), ...
@@ -369,8 +389,8 @@ else
     lambda = struct( ...
     'mu_l'      , mu_l, ...
     'mu_u'      , mu_u, ...
-    'lower'     , -1 * lam.lower, ...
-    'upper'     , lam.upper ...
+    'lower'     , -1 * Lambda.lower, ...
+    'upper'     , Lambda.upper ...
      );
 end
 
