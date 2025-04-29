@@ -23,11 +23,12 @@ does_lp      = [1 1 1 0 1 1 0];
 does_qp      = [1 1 1 0 1 1 0];
 does_nonconv = [1 1 1 1 1 1 1];
 
-nlp = 8;
+nlp = 16;
 nqp = 28;
 nqcqp_convex = 27;
 nqcqp_nonconvex = 9;
-n = nlp+nqp+nqcqp_convex+nqcqp_nonconvex;
+nerrors = 13;
+n = nlp+nqp+nqcqp_convex+nqcqp_nonconvex+nerrors;
 
 t_begin(n * length(algs), quiet);
 
@@ -71,7 +72,7 @@ for k = 1:length(algs)
 
         if does_lp(k)
             t = sprintf('%s - 3-d LP : ', names{k});
-            %% 1) based on example from 'doc linprog'
+            %% 1) Based on example from 'doc linprog'
             b = [-5; -4; -6];
             A = [1 -1  1;
                 -3  -2  -4;
@@ -89,8 +90,20 @@ for k = 1:length(algs)
             t_is(lam.mu_u, [0;0;0.5], 7, [t 'lam.mu_u']);
             t_is(lam.lower, [1;0;0], 7, [t 'lam.lower']);
             t_is(lam.upper, zeros(size(x)), 7, [t 'lam.upper']);
+            
+            %% 2) Same previous passing linear constraints via A and B
+            t = sprintf('%s - 3-d LP using A and B: ', names{k});
+            [x2, f2, s2, out2, lam2] = qcqps_master([], b, [], A(end,:), l(end), u(end), A(1:2,:), l(1:2), u(1:2), xmin, xmax, x0, opt);
+            t_is(s2, s, 12, [t 'success']);
+            t_is(x2, x, 12, [t 'x']);
+            t_is(f2, f, 12, [t 'f']);
+            t_is(lam.mu_l, lam2.mu_l, 12, [t 'lam.mu_l']);
+            t_is(lam.mu_u, lam2.mu_u, 12, [t 'lam.mu_u']);
+            t_is(lam.lower, lam2.lower, 12, [t 'lam.lower']);
+            t_is(lam.upper, lam2.upper, 12, [t 'lam.upper']);
+            t_ok(isequal(fieldnames(out),fieldnames(out2)), [t 'out']);            
 
-            %% 2) Infeasible LP problem
+            %% 3) Infeasible LP problem
             t = sprintf('%s - infeasible LP : ', names{k});
             p = struct('A', sparse([1 1]), 'b', [1;1], 'u', -1, 'xmin', [0;0], 'opt', opt);
             [x, f, s, out, lam] = qcqps_master(p);
@@ -101,7 +114,7 @@ for k = 1:length(algs)
 
         if does_qp(k)
             t = sprintf('%s - unconstrained 3-d convex QP : ', names{k});
-            %% 3) From http://www.akiti.ca/QuadProgEx0Constr.html
+            %% 4) From http://www.akiti.ca/QuadProgEx0Constr.html
             H = [5 -2 -1; -2 4 3; -1 3 5];
             b = [2; -35; -47];
             x0 = [0; 0; 0];
@@ -115,7 +128,7 @@ for k = 1:length(algs)
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
 
             t = sprintf('%s - constrained 2-d convex QP : ', names{k});
-            %% 4) Example from 'doc quadprog'
+            %% 5) Example from 'doc quadprog'
             H = [   1   -1;
                     -1  2   ];
             b = [-2; -6];
@@ -137,7 +150,7 @@ for k = 1:length(algs)
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
 
             t = sprintf('%s - constrained 4-d convex QP : ', names{k});
-            %% 5) From https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm
+            %% 6) From https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm
             H = [   1003.1  4.3     6.3     5.9;
                     4.3     2.2     2.1     3.9;
                     6.3     2.1     3.5     4.8;
@@ -159,7 +172,7 @@ for k = 1:length(algs)
             t_is(lam.lower, [2.24;0;0;1.7667], 4, [t 'lam.lower']);
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
 
-            %% 6) Same previous passing a struct
+            %% 7) Same previous passing a struct
             t = sprintf('%s - (struct) constrained 4-d convex QP : ', names{k});
             p = struct('H', H, 'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
             [x, f, s, out, lam] = qcqps_master(p);
@@ -174,7 +187,7 @@ for k = 1:length(algs)
             t_skip(nqp, sprintf('%s does not handle QP problems', names{k}));
         end
 
-        %% 7) From https://docs.gurobi.com/projects/examples/en/current/examples/matlab/qcp.html
+        %% 8) From https://docs.gurobi.com/projects/examples/en/current/examples/matlab/qcp.html
         t = sprintf('%s - convex 3-d QCQP with lin objective: ', names{k});
         H = [];
         c = [-1;0;0];
@@ -201,7 +214,7 @@ for k = 1:length(algs)
         t_is(lam.mu_lq, [0; 0], 5, [t 'lam.mu_lq']);
         t_is(lam.mu_uq, [0.227544; 0.549342], 5, [t 'lam.mu_uq']);
 
-        %% 8) Same previous passing a struct
+        %% 9) Same previous passing a struct
         t = sprintf('%s - (struct) convex 3-d QCQP with lin objective : ', names{k});
         p = struct('H', H, 'c', c, 'Q', {Q}, 'B', B, 'lq', lq, 'uq', uq, ...
             'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
@@ -216,7 +229,7 @@ for k = 1:length(algs)
         t_is(lam.mu_lq, [0; 0], 5, [t 'lam.mu_lq']);
         t_is(lam.mu_uq, [0.227544; 0.549342], 5, [t 'lam.mu_uq']);
 
-        %% 9) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
+        %% 10) From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
         t = sprintf('%s - convex 3-d QCQP with quad objective: ', names{k});
         H = sparse([2 0 -1; 0 0.2 0; -1 0 2]);
         c = [0;-1;0];
@@ -238,7 +251,7 @@ for k = 1:length(algs)
         t_is(lam.mu_lq, 0.9419, 4, [t 'lam.mu_lq']);
         t_is(lam.mu_uq, 0, 4, [t 'lam.mu_uq']);
 
-        %% 10) From "examples" folder of Knitro (exampleQCQP1)
+        %% 11) From "examples" folder of Knitro (exampleQCQP1)
         t = sprintf('%s - nonconvex 3-d QCQP : ', names{k});
         if does_nonconv(k)
             H = sparse([-2 -1 -1; -1 -4 0; -1 0 -2]);
@@ -271,6 +284,105 @@ for k = 1:length(algs)
         else
             t_skip(nqcqp_nonconvex, sprintf('%s does not handle nonconvex QCQP problems', names{k}));
         end
+
+        %% 12) Errors handling
+        H = [];
+        c = [-1;0;0];
+        Q = cell(2,1);
+        Q{1} = sparse([2 0 0; 0 2 0; 0 0 -2]);
+        Q{2} = sparse([2 0 0; 0 0 -2; 0 -2 0]);
+        H2 = Q{1};
+        Q2 = Q; Q2{1} = Q{1}(2:end,2:end);
+        B = zeros(2,3);
+        B2 = zeros(3);
+        lq = [-Inf;-Inf];
+        uq = [0; 0];
+        A = [1 1 1];
+        l = 1;
+        u = 1;
+        xmin = zeros(3,1);
+        xmax = Inf(3,1);
+        x0 = zeros(3,1);
+
+        t = sprintf('%s - error : ', names{k});
+        try
+            [x, f, s, out, lam] = qcqps_master([], c, [Q Q2], [], lq, uq, [], l, u, [], [], x0, opt);
+        catch me
+            msg = 'Q must be column vector cell array.';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H2(:,1:2), c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'H must be a square matrix.';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H, c, Q2, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'All matrices Q{i}, i=1,...,2 must be square of the same size.';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master([], [], Q, [], lq, uq, [], l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'Problem is incomplete: H, c, B and A can not be all empty.';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H2, ones(1,2), Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'Dimension of c (2) must be iqual to the number of variables (3).';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H, c, Q, B2, lq, uq, A, l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'Dimension of B (3x3) should be number of quad constraints times number of variables (2x3).';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H, c, [], B(:,2:end), lq, uq, A, l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'The number of columns of matrix B (2) must be equal to the number of variables (3).';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master([], c, [], [], lq, uq, [], l, u, [], [], x0, opt);
+        catch me
+            msg = 'No quadratic constraints were found. Inputs lq and uq should be empty.';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H, c, [], B, lq, uq, A(:,2:end), l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'The number of columns of matrix A (2) must be equal to the number of variables (3)';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H, c, [], B, lq(2:end), uq(2:end), A, l, u, xmin, xmax, x0, opt);
+        catch me
+            msg = 'Dimension mismatch between uq, Q, and B.';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H, c, Q, B, lq, uq, A, lq, uq, xmin, xmax, x0, opt);
+        catch me
+            msg = 'Dimension of u (2) must be iqual to the number of linear constraints (1).';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H2, c, Q, B, lq, uq, A, l, u, xmin(2:end), xmax, x0, opt);
+        catch me
+            msg = 'Dimension of xmin (2) must be iqual to the number of variables (3).';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end
+        try
+            [x, f, s, out, lam] = qcqps_master(H2, c, Q, B, lq, uq, A, l, u, xmin, xmax(2:end), x0, opt);
+        catch me
+            msg = 'Dimension of xmax (2) must be iqual to the number of variables (3).';
+            t_ok(strfind(me.message, msg), [t msg]);
+        end       
     end
 end
 
