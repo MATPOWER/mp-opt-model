@@ -166,14 +166,16 @@ end
 
 %% define nx, nq, nlin, and set default values for missing optional inputs
 if ~isempty(Q)
-    [nq, ncolQ] = size(Q);    
-    if ~iscell(Q) || ncolQ ~= 1        
-        error('qcqps_gurobi: Q must be column vector cell array.')        
+    [nq, ncolQ] = size(Q);
+    if ~iscell(Q) || ncolQ ~= 1
+        error('qcqps_nlps: Q must be column vector cell array.')
     end
     sizeQi  = cell2mat(cellfun(@(x)(size(x)), Q, 'UniformOutput', false));
-    if sum(sizeQi(:)) ~= 2*sizeQi(1,1)*nq
-        error('qcqps_gurobi: All matrices Q{i}, i=1,...,%d must be square of the same size.', nq)
+    if any(sizeQi(:) - sizeQi(1))
+        error('qcqps_nlps: All matrices Q{i}, i=1,...,%d must be square of the same size.', nq)
     end
+elseif ~isempty(B)
+    nq = size(B, 1);
 else
     nq = 0;
 end
@@ -181,9 +183,9 @@ end
 if ~isempty(H)
     [nrowH, ncolH] = size(H);
     if nrowH ~= ncolH
-        error('qcqps_gurobi: H must be a square matrix.')
+        error('qcqps_nlps: H must be a square matrix.')
     end
-    nx = nrowH;    
+    nx = nrowH;
 else
     if ~isempty(c)
         nx = length(c);
@@ -197,7 +199,7 @@ else
                 if ~isempty(A)
                     nx = size(A,2);
                 else
-                    error('qcqps_gurobi: inputs arguments H, c, Q, B, and A can not be all empty.')
+                    error('qcqps_nlps: inputs arguments H, c, Q, B, and A can not be all empty.')
                 end
             end
         end
@@ -205,7 +207,7 @@ else
 end
 
 if isempty(H) && isempty(c) && isempty(B) && isempty(A)
-    error('qcqps_gurobi: Problem is incomplete: H, c, B and A can not be all empty.')
+    error('qcqps_nlps: Problem is incomplete: H, c, B and A can not be all empty.')
 end
 if isempty(H)
     H = sparse(nx,nx);
@@ -213,7 +215,7 @@ end
 if isempty(c)
     c = sparse(nx,1);
 elseif length(c) ~= nx
-    error('qcqps_gurobi: Dimension of c (%d) must be iqual to the number of variables (%d).', length(c), nx)
+    error('qcqps_nlps: Dimension of c (%d) must be iqual to the number of variables (%d).', length(c), nx)
 end
 
 if nq
@@ -222,20 +224,20 @@ if nq
     else
         [nrowB, ncolB] = size(B);
         if nrowB ~= nq || ncolB ~= nx
-            error('qcqps_gurobi: Dimension of B (%dx%d) should be number of quad constraints times number of variables (%dx%d).', nrowB, ncolB, nq, nx);
+            error('qcqps_nlps: Dimension of B (%dx%d) should be number of quad constraints times number of variables (%dx%d).', nrowB, ncolB, nq, nx);
         end
-    end    
+    end
 else
     Q = {};
     if ~isempty(B)
         [~, ncolB] = size(B);
         if ncolB ~= nx
-            error('qcqps_gurobi: The number of columns of matrix B (%d) must be equal to the number of variables (%d).', ncolB, nx);
+            error('qcqps_nlps: The number of columns of matrix B (%d) must be equal to the number of variables (%d).', ncolB, nx);
         end
     else
         B = sparse(nq,nx);
         if ~isempty(lq) ||  ~isempty(uq)
-            error('qcqps_gurobi: No quadratic constraints were found. Inputs lq and uq should be empty.')
+            error('qcqps_nlps: No quadratic constraints were found. Inputs lq and uq should be empty.')
         end
     end
 end
@@ -243,8 +245,8 @@ end
 if ~isempty(A)
     [nlin, ncolA] = size(A);
     if ncolA ~= nx
-        error('qcqps_gurobi: The number of columns of matrix A (%d) must be equal to the number of variables (%d).', ncolA, nx);
-    end    
+        error('qcqps_nlps: The number of columns of matrix A (%d) must be equal to the number of variables (%d).', ncolA, nx);
+    end
 else
     nlin = 0;
     A = sparse(nlin,nx);
@@ -253,37 +255,37 @@ end
 if isempty(uq)          %% By default, quadratic inequalities are ...
     uq = Inf(nq, 1);        %% ... unbounded above and ...
 elseif length(uq) ~= size(B,1)
-    error('qcqps_gurobi: Dimension mismatch between uq, Q, and B.')
+    error('qcqps_nlps: Dimension mismatch between uq, Q, and B.')
 end
 if isempty(lq)
     lq = -Inf(nq, 1);       %% ... unbounded below.
 elseif length(lq) ~= size(B,1)
-    error('qcqps_gurobi: Dimension mismatch between lq, Q, and B.')
+    error('qcqps_nlps: Dimension mismatch between lq, Q, and B.')
 end
 if isempty(u)           %% By default, linear inequalities are ...
     u = Inf(nlin, 1);       %% ... unbounded above and ...
 elseif length(u) ~= nlin
-    error('qcqps_gurobi: Dimension of u (%d) must be iqual to the number of linear constraints (%d).', length(u), nlin')
+    error('qcqps_nlps: Dimension of u (%d) must be iqual to the number of linear constraints (%d).', length(u), nlin')
 end
 if isempty(l)
     l = -Inf(nlin, 1);      %% ... unbounded below.
 elseif length(l) ~= nlin
-    error('qcqps_gurobi: Dimension of l (%d) must be iqual to the number of linear constraints (%d).', length(l), nlin')
+    error('qcqps_nlps: Dimension of l (%d) must be iqual to the number of linear constraints (%d).', length(l), nlin')
 end
 if isempty(xmin)        %% By default, optimization variables are ...
     xmin = -Inf(nx, 1);     %% ... unbounded below and ...
 elseif length(xmin) ~= nx
-    error('qcqps_gurobi: Dimension of xmin (%d) must be iqual to the number of variables (%d).', length(xmin), nx')
+    error('qcqps_nlps: Dimension of xmin (%d) must be iqual to the number of variables (%d).', length(xmin), nx')
 end
 if isempty(xmax)
     xmax = Inf(nx, 1);      %% ... unbounded above.
 elseif length(xmax) ~= nx
-    error('qcqps_gurobi: Dimension of xmax (%d) must be iqual to the number of variables (%d).', length(xmax), nx')
+    error('qcqps_nlps: Dimension of xmax (%d) must be iqual to the number of variables (%d).', length(xmax), nx')
 end
 if isempty(x0)
     x0 = zeros(nx, 1);
 elseif length(x0) ~= nx
-    error('qcqps_gurobi: Dimension of x0 (%d) must be iqual to the number of variables (%d).', length(x0), nx')
+    error('qcqps_nlps: Dimension of x0 (%d) must be iqual to the number of variables (%d).', length(x0), nx')
 end
 
 % compute parameters for constraints function evaluation
@@ -297,8 +299,8 @@ else
         Alin = [A; B]; llin = [l; lq]; ulin = [u; uq];
         [ieq_lin, igt_lin, ilt_lin, Be, de, Bi, di] = convert_lin_constraint(Alin, llin, ulin);
     else
-        Be = []; Bi = []; 
-        de = []; di = []; 
+        Be = []; Bi = [];
+        de = []; di = [];
     end
 end
 
@@ -339,7 +341,7 @@ if ~isempty(Q)
     [mu_lq, mu_uq] = convert_constraint_multipliers( ...
         Lambda.eqnonlin, Lambda.ineqnonlin, ...
         ieq_quad, igt_quad, ilt_quad);
-else    
+else
     if ~isempty(B)
         [mu_lq, mu_uq] = convert_constraint_multipliers( ...
             Lambda.eqnonlin, Lambda.ineqnonlin, ...

@@ -150,14 +150,16 @@ end
 
 %% define nx, nq, nlin, and set default values for missing optional inputs
 if ~isempty(Q)
-    [nq, ncolQ] = size(Q);    
-    if ~iscell(Q) || ncolQ ~= 1        
-        error('qcqps_gurobi: Q must be column vector cell array.')        
+    [nq, ncolQ] = size(Q);
+    if ~iscell(Q) || ncolQ ~= 1
+        error('qcqps_gurobi: Q must be column vector cell array.')
     end
     sizeQi  = cell2mat(cellfun(@(x)(size(x)), Q, 'UniformOutput', false));
-    if sum(sizeQi(:)) ~= 2*sizeQi(1,1)*nq
+    if any(sizeQi(:) - sizeQi(1))
         error('qcqps_gurobi: All matrices Q{i}, i=1,...,%d must be square of the same size.', nq)
     end
+elseif ~isempty(B)
+    nq = size(B, 1);
 else
     nq = 0;
 end
@@ -167,7 +169,7 @@ if ~isempty(H)
     if nrowH ~= ncolH
         error('qcqps_gurobi: H must be a square matrix.')
     end
-    nx = nrowH;    
+    nx = nrowH;
 else
     if ~isempty(c)
         nx = length(c);
@@ -208,7 +210,7 @@ if nq
         if nrowB ~= nq || ncolB ~= nx
             error('qcqps_gurobi: Dimension of B (%dx%d) should be number of quad constraints times number of variables (%dx%d).', nrowB, ncolB, nq, nx);
         end
-    end    
+    end
 else
     Q = {};
     if ~isempty(B)
@@ -228,7 +230,7 @@ if ~isempty(A)
     [nlin, ncolA] = size(A);
     if ncolA ~= nx
         error('qcqps_gurobi: The number of columns of matrix A (%d) must be equal to the number of variables (%d).', ncolA, nx);
-    end    
+    end
 else
     nlin = 0;
     A = sparse(nlin,nx);
@@ -316,7 +318,7 @@ else
     Q_quad = {};
     neq_quad = 0; niq_quad = 0;
 end
-   
+
 %% split up linear constraints
 if isempty(Q) && ~isempty(B)
     [ieq_lin, igt_lin, ilt_lin, A_lin, b_lin] = convert_lin_constraint([A; B], [l; lq], [u; uq]);

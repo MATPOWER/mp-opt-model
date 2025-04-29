@@ -344,7 +344,7 @@ for k = 1:length(algs)
         try
             [x, f, s, out, lam] = qcqps_master(H, c, [], B(:,2:end), lq, uq, A, l, u, xmin, xmax, x0, opt);
         catch me
-            msg = 'The number of columns of matrix B (2) must be equal to the number of variables (3).';
+            msg = 'Dimension of B (2x2) should be number of quad constraints times number of variables (2x3).';
             t_ok(strfind(me.message, msg), [t msg]);
         end
         try
