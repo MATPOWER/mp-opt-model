@@ -25,6 +25,19 @@ function qcqp_ex1
 %
 % .. math::
 %
+%   \Hh = \left[\begin{array}{ccc}
+%            0 & 0 & 0 \\
+%            0 & 0 & 0 \\
+%            0 & 0 & 0
+%       \end{array}\right], 
+%   \c = \left[\begin{array}{c}
+%            0 \\
+%            0 \\
+%            -1
+%       \end{array}\right]
+%
+% .. math::
+%
 %   \QQ_1 = \left[\begin{array}{ccc}
 %            2 & 0 & 0 \\
 %            0 & 2 & 0 \\
@@ -99,15 +112,7 @@ om.qdc.add(om.var, 'cost', H, c);
 %% print results
 fprintf('\n-----  METHOD 1 -----');
 fprintf('\nf = %g      exitflag = %d\n', f, exitflag);
-fprintf('\n             var bound shadow prices\n');
-fprintf('     x     lambda.lower  lambda.upper\n');
-fprintf('%8.4f  %10.4f  %12.4f\n', [x lambda.lower lambda.upper]');
-fprintf('\nquadratic constraint shadow prices\n');
-fprintf('lambda.mu_lq  lambda.mu_uq\n');
-fprintf('%8.4f  %11.4f\n', [lambda.mu_lq lambda.mu_uq]');
-fprintf('\nlinear constraint shadow prices\n');
-fprintf('lambda.mu_l  lambda.mu_u\n');
-fprintf('%8.4f  %11.4f\n', [lambda.mu_l lambda.mu_u]');
+om.display_soln();
 
 %%-----  METHOD 2  -----
 %% assemble model parameters manually
