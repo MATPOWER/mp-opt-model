@@ -184,54 +184,56 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 end
             end
 
-            %% check bounds
-            [MQ, NQ] = size(Q);
-            [MQi, NQi] = size(Q{1});
-            [MB, NB] = size(B);
-
-            if isempty(l)
-                l = -Inf(MB, 1);
-            elseif MB > 1 && numel(l) == 1
-                l = l*ones(MB, 1);
-            end
-
-            if isempty(u)
-                u = Inf(MB, 1);
-            elseif MB > 1 && numel(u) == 1
-                u = u*ones(MB, 1);
-            end
-
             %% convert varsets from cell to struct array if necessary
             vs = mp.sm_variable.varsets_cell2struct(vs);
             nv = var.varsets_len(vs);   %% number of variables
 
-            %% check parameters
-            if MQi ~= NQi
-                error('mp.sm_quad_constraint.add: Q_i (%d x %d) must be a square matrix', MQi, NQi);
+            %% get sizes
+            [MQ, NQ] = size(Q);
+            [MB, NB] = size(B);
+            if ~isempty(Q)
+                N = MQ;
+            elseif ~isempty(B)
+                N = MB;
+            elseif nv
+                error('mp.sm_quad_constraint.add: Q and B cannot both be empty');
             end
-            if MQ
+
+            %% check parameters and assign defaults
+            if ~isempty(Q)
                 if NQ ~= 1
                     error('mp.sm_quad_constraint.add: Q (%d x %d) must be a column cell array (or empty)', MQ, NQ);
                 end
-            end
-            if MB && NB ~= nv
-                error('mp.sm_quad_constraint.add: B (%d x %d) must be a matrix with %d columns', MB, NB, nv);
-            end
-            if MQ
-                if NB && NB ~= MQi
-                    error('mp.sm_quad_constraint.add: dimensions of Q (%d x %d) and B (%d x %d) are not compatible', MQ, NQ, MB, NB);
+                for k = 1:N
+                    [MQi, NQi] = size(Q{k});
+                    if MQi ~= nv || NQi ~= nv
+                        error('mp.sm_quad_constraint.add: Q{%d} (%d x %d) be a square matrix matching the number of variables (%d)', k, MQi, NQi, nv);
+                    end
                 end
-                nx = MQi;
+            end
+            if ~isempty(B)
+                if MB ~= N
+                    error('mp.sm_quad_constraint.add: number of rows in Q (%d) and B (%d) must match', N, MB);
+                end
+                if NB ~= nv
+                    error('mp.sm_quad_constraint.add: number of columns in B (%d) must match the number of variables (%d)', NB, nv);
+                end
             else
-                if nv && ~MB
-                    error('mp.sm_quad_constraint.add: Q and B cannot both be empty');
-                end
-                nx = MB;
+                B = sparse(N, nv);
             end
-            N = MB;
-
-            if nx ~= nv
-                error('mp.sm_quad_constraint.add: dimensions of Q (%d x %d), B (%d x %d), and K (%d x %d) do not match\nnumber of variables (%d)\n', MQ, NQ, MB, NB, MK, NK, nv);
+            if isempty(l)
+                l = -Inf(N, 1);
+            elseif N > 1 && numel(l) == 1
+                l = l*ones(N, 1);
+            elseif numel(l) ~= N
+                error('mp.sm_quad_constraint.add: l (%d x %d) must (%d x 1), a scalar, or empty', size(l, 1), size(l, 2), N);
+            end
+            if isempty(u)
+                u = Inf(N, 1);
+            elseif N > 1 && numel(u) == 1
+                u = u*ones(N, 1);
+            elseif numel(u) ~= N
+                error('mp.sm_quad_constraint.add: u (%d x %d) must (%d x 1), a scalar, or empty', size(u, 1), size(u, 2), N);
             end
 
             %% call parent to handle standard indexing

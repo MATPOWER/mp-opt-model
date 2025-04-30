@@ -5,7 +5,7 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
-#### 4/29/25
+#### 4/30/25
   - Add support for quadratic constraint and QCQP (quadratically-
     constrained quadratic programming) problems.
     *Thanks to Wilson Gonzalez Vanegas.*
