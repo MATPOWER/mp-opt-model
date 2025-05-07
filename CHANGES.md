@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 5/7/25
+  - Fix crash in `mp.sm_quad_cost.display_soln()` when linear
+    coefficient is empty.
+
 #### 4/30/25
   - Add support for quadratic constraint and QCQP (quadratically-
     constrained quadratic programming) problems.

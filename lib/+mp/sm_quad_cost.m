@@ -765,14 +765,22 @@ classdef sm_quad_cost < mp.set_manager_opt_model
                     len = length(c_total);
                     if len == 1
                         c_constant = kk;
-                        c_linear = cc' * xx;
+                        if isempty(cc)
+                            c_linear = 0;
+                        else
+                            c_linear = cc' * xx;
+                        end
                         if abs(sum(xx)) > 1e-9
                             c_average = c_total / sum(xx);
                         else
                             c_average = NaN;
                         end
                     else
-                        c_linear = cc .* xx;
+                        if isempty(cc)
+                            c_linear = 0;
+                        else
+                            c_linear = cc .* xx;
+                        end
                         c_average = c_total ./ xx;
                         c_average(isinf(c_average)) = NaN;
                         if isscalar(kk)
