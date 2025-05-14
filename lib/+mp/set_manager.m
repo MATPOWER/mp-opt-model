@@ -346,7 +346,7 @@ classdef set_manager < handle
                         vsidx = obj.order(k).idx;
                         str = '%d'; for m = 2:length(vsidx), str = [str ',%d']; end
                         s = substruct('.', name, '()', vsidx);
-                        nname = sprintf(['%s(' str, ')'], name, vsidx{:});
+                        nname = sprintf(['%s{' str, '}'], name, vsidx{:});
                         fprintf(fmt, k, nname, ...
                                 subsref(idx.i1, s), subsref(idx.iN, s), subsref(idx.N, s));
                     end
