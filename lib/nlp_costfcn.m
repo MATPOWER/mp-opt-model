@@ -34,24 +34,24 @@ function [f, df, d2f] = nlp_costfcn(om, x)
 %%----- evaluate objective function -----
 %% general nonlinear costs
 if nargout == 3
-    [f, df, d2f]    = om.eval_nln_cost(x);
+    [f, df, d2f]    = om.nlc.eval(om.var, x);
     if om.qdc.NS
-        [fq, dfq, d2fq] = om.eval_quad_cost(x);
+        [fq, dfq, d2fq] = om.qdc.eval(om.var, x);
         f = f + sum(fq);
         df = df + dfq;
         d2f = d2f + d2fq;
     end
 elseif nargout == 2
-    [f, df]   = om.eval_nln_cost(x);
+    [f, df]   = om.nlc.eval(om.var, x);
     if om.qdc.NS
-        [fq, dfq] = om.eval_quad_cost(x);
+        [fq, dfq] = om.qdc.eval(om.var, x);
         f = f + sum(fq);
         df = df + dfq;
     end
 else
-    f  = om.eval_nln_cost(x);
+    f  = om.nlc.eval(om.var, x);
     if om.qdc.NS
-        fq = om.eval_quad_cost(x);
+        fq = om.qdc.eval(om.var, x);
         f = f + sum(fq);
     end
 end

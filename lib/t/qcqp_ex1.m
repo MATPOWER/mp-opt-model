@@ -1,8 +1,8 @@
 function qcqp_ex1
 % qcqp_ex1 - Example of quadratically-constrained quadratic program (QCQP) optimization.
 %
-% Example of solving the following QCQP problem, first using opt_model and
-% opt_model.solve, then directly using qcqps_master.
+% Example of solving the following QCQP problem, first using mp.opt_model and
+% mp.opt_model.solve, then directly using qcqps_master.
 %
 % .. math:: \min_{\x} \frac{1}{2} \trans{\x} \Hh \x + \trans{\c} \x
 %
@@ -98,7 +98,7 @@ opt = struct('verbose', 2, 'alg', 'MIPS');
 
 %%-----  METHOD 1  -----
 %% build model
-om = opt_model().init_set_types();
+om = mp.opt_model;
 om.var.add('y', 2, y0, ymin);
 om.var.add('z', 1, z0, zmin);
 om.qcn.add(om.var, 'quadcon', Q, B, lq, uq);

@@ -41,11 +41,11 @@ function [h, g, dh, dg] = nlp_consfcn(om, x, dhs, dgs)
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
 if nargout == 2     %% contraints only
-    g = om.eval_nln_constraint(x, 1);       %% equalities
-    h = om.eval_nln_constraint(x, 0);       %% inequalities
+    g = om.nle.eval(om.var, x);         %% equalities
+    h = om.nli.eval(om.var, x);         %% inequalities
 else                %% constraints and derivatives
-    [g, dg] = om.eval_nln_constraint(x, 1); %% equalities
-    [h, dh] = om.eval_nln_constraint(x, 0); %% inequalities
+    [g, dg] = om.nle.eval(om.var, x);   %% equalities
+    [h, dh] = om.nli.eval(om.var, x);   %% inequalities
     dg = dg';
     dh = dh';
 

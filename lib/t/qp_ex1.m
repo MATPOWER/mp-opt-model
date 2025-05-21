@@ -1,8 +1,8 @@
 function qp_ex1
 % qp_ex1 - Example of quadratic program (QP) optimization.
 %
-% Example of solving the following QP problem, first using opt_model and
-% opt_model.solve, then directly using qps_master.
+% Example of solving the following QP problem, first using mp.opt_model and
+% mp.opt_model.solve, then directly using qps_master.
 %
 % .. math:: \min_{\x} \frac{1}{2} \trans{\x} \QQ \x
 %
@@ -59,12 +59,12 @@ opt = struct('verbose', 2, 'alg', 'MIPS');
 
 %%-----  METHOD 1  -----
 %% build model
-om = opt_model;
-om.add_var('y', 2, y0, ymin);
-om.add_var('z', 2, z0, [], zmax);
-om.add_lin_constraint('lincon1', A1, b1, b1);
-om.add_lin_constraint('lincon2', A2, [], u2, {'y'});
-om.add_quad_cost('cost', Q, []);
+om = mp.opt_model;
+om.var.add('y', 2, y0, ymin);
+om.var.add('z', 2, z0, [], zmax);
+om.lin.add(om.var, 'lincon1', A1, b1, b1);
+om.lin.add(om.var, 'lincon2', A2, [], u2, {'y'});
+om.qdc.add(om.var, 'cost', Q, []);
 
 %% solve model
 [x, f, exitflag, output, lambda] = om.solve();
@@ -73,12 +73,13 @@ om.add_quad_cost('cost', Q, []);
 %% print results
 fprintf('\n-----  METHOD 1 -----');
 fprintf('\nf = %g      exitflag = %d\n', f, exitflag);
-fprintf('\n             var bound shadow prices\n');
-fprintf('     x     lambda.lower  lambda.upper\n');
-fprintf('%8.4f  %10.4f  %12.4f\n', [x lambda.lower lambda.upper]');
-fprintf('\nconstraint shadow prices\n');
-fprintf('lambda.mu_l  lambda.mu_u\n');
-fprintf('%8.4f  %11.4f\n', [lambda.mu_l lambda.mu_u]');
+om.display_soln();
+% fprintf('\n             var bound shadow prices\n');
+% fprintf('     x     lambda.lower  lambda.upper\n');
+% fprintf('%8.4f  %10.4f  %12.4f\n', [x lambda.lower lambda.upper]');
+% fprintf('\nconstraint shadow prices\n');
+% fprintf('lambda.mu_l  lambda.mu_u\n');
+% fprintf('%8.4f  %11.4f\n', [lambda.mu_l lambda.mu_u]');
 
 %%-----  METHOD 2  -----
 %% assemble model parameters manually

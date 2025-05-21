@@ -2,7 +2,7 @@ function pne_ex1
 % pne_ex1 - Example of parameterized nonlinear equation solution tracing.
 %
 % Example of tracing the solution of the following set of parameterized
-% nonlinear equations, first using opt_model and opt_model.solve, then
+% nonlinear equations, first using mp.opt_model and mp.opt_model.solve, then
 % directly using pnes_master.
 %
 % .. math::
@@ -30,10 +30,10 @@ opt = struct( ...
 %%-----  METHOD 1  -----
 fprintf('\n-----  METHOD 1 -----\n');
 %% build model
-om = opt_model;
-om.add_var('y', 2, y0);
-om.add_var('lam', 1, lam0);
-om.add_nln_constraint('f', 2, 1, @f1p, [], {'y', 'lam'});
+om = mp.opt_model;
+om.var.add('y', 2, y0);
+om.var.add('lam', 1, lam0);
+om.nle.add(om.var, 'f', 2, @f1p, [], {'y', 'lam'});
 
 %% solve model
 [x, f, exitflag, output, jac] = om.solve(opt);

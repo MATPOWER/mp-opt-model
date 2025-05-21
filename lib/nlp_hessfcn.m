@@ -40,10 +40,10 @@ function Lxx = nlp_hessfcn(om, x, lambda, cost_mult, Hs)
 d2f = d2f * cost_mult;
 
 %%----- evaluate Hessian of equality constraints -----
-d2G = om.eval_nln_constraint_hess(x, lambda.eqnonlin, 1);
+d2G = om.nle.eval_hess(om.var, x, lambda.eqnonlin);
 
 %%----- evaluate Hessian of inequality constraints -----
-d2H = om.eval_nln_constraint_hess(x, lambda.ineqnonlin, 0);
+d2H = om.nli.eval_hess(om.var, x, lambda.ineqnonlin);
 
 %%-----  do numerical check using (central) finite differences  -----
 if 0

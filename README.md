@@ -109,21 +109,21 @@ Q = [ 8  1 -3 -4;
 ```
 
 Below, we will show two approaches to construct and solve the problem.
-The first method, based on the the Optimization Model class `opt_model`,
+The first method, based on the the Optimization Model class `mp.opt_model`,
 allows you to add variables, constraints and costs to the model
-individually. Then `opt_model` automatically assembles and solves the
+individually. Then `mp.opt_model` automatically assembles and solves the
 full model automatically.
 
 
 ```matlab
 %%-----  METHOD 1  -----
 %% build model
-om = opt_model;
-om.add_var('y', 2, y0, ymin);
-om.add_var('z', 2, z0, [], zmax);
-om.add_lin_constraint('lincon1', A1, b1, b1);
-om.add_lin_constraint('lincon2', A2, [], u2, {'y'});
-om.add_quad_cost('cost', Q, []);
+om = mp.opt_model;
+om.var.add('y', 2, y0, ymin);
+om.var.add('z', 2, z0, [], zmax);
+om.lin.add(om.var, 'lincon1', A1, b1, b1);
+om.lin.add(om.var, 'lincon2', A2, [], u2, {'y'});
+om.qdc.add(om.var, 'cost', Q, []);
 
 %% solve model
 [x, f, exitflag, output, lambda] = om.solve();
