@@ -153,7 +153,8 @@ else                                %% individual args
 end
 
 %% define nx, set default values for missing optional inputs
-if isempty(H) || ~any(any(H))
+if ~nnz(H)
+    isLP = 1;   %% it's an LP
     if isempty(A) && isempty(xmin) && isempty(xmax)
         error('miqps_ot: LP problem must include constraints or variable bounds');
     else
@@ -166,6 +167,7 @@ if isempty(H) || ~any(any(H))
         end
     end
 else
+    isLP = 0;   %% nope, it's a QP
     nx = size(H, 1);
 end
 if isempty(c)
@@ -190,11 +192,6 @@ if isempty(xmax)
 end
 if isempty(x0)
     x0 = zeros(nx, 1);
-end
-if isempty(H) || ~any(any(H))
-    isLP = 1;   %% it's an LP
-else
-    isLP = 0;   %% nope, it's a QP
 end
 
 %% default options

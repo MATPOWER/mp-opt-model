@@ -132,7 +132,7 @@ else                                %% individual args
 end
 
 %% define nx, set default values for missing optional inputs
-if isempty(H) || ~any(any(H))
+if ~nnz(H)
     if isempty(A) && isempty(xmin) && isempty(xmax)
         error('qps_knitro: LP problem must include constraints or variable bounds');
     else
@@ -204,7 +204,7 @@ end
 [ieq, igt, ilt, Ae, be, Ai, bi] = convert_lin_constraint(A, l, u);
 
 %% call the solver
-if isempty(H) || ~any(any(H))
+if ~nnz(H)
     lpqp = 'LP';
     [x, f, eflag, output, Lambda] = knitro_lp(c, Ai, bi, Ae, be, xmin, xmax, x0, [], knitro_opt);
 else

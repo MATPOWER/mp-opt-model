@@ -134,7 +134,7 @@ else                                %% individual args
 end
 
 %% define nx, set default values for missing optional inputs
-if isempty(H) || ~any(any(H))
+if ~nnz(H)
     if isempty(A) && isempty(xmin) && isempty(xmax)
         error('qps_cplex: LP problem must include constraints or variable bounds');
     else
@@ -224,7 +224,7 @@ if verbose
         'concurrent'
     };
 end
-if isempty(H) || ~any(any(H))
+if ~nnz(H)
     if verbose
         fprintf('CPLEX Version %s -- %s LP solver\n', ...
             vstr, alg_names{cplex_opt.lpmethod+1});

@@ -61,7 +61,7 @@ if isempty(om.prob_type) || nargin > 1 && recheck
         else                    %% linear constraints, no general nonlinear costs
             %% get quadratic cost coefficients
             H = om.params_quad_cost();
-            if isempty(H) || ~any(any(H))
+            if ~nnz(H)
                 prob = 'LP';        %% linear program
             else
                 prob = 'QP';        %% quadratic program

@@ -193,7 +193,7 @@ if strcmp(alg, 'DEFAULT')
     elseif have_feature('mosek')    %% if not, then MOSEK, if available
         alg = 'MOSEK';
     else
-        if isempty(H) || ~any(any(H))   %% if not, and linear objective
+        if ~nnz(H)                  %% if not, and linear objective
             if have_feature('intlinprog')   %% then Optimization Tbx, if available
                 alg = 'OT';
             elseif have_feature('glpk')     %% if not, and then GLPK, if available

@@ -136,7 +136,7 @@ else                                %% individual args
 end
 
 %% define nx, set default values for missing optional inputs
-if isempty(H) || ~any(any(H))
+if ~nnz(H)
     if isempty(A) && isempty(xmin) && isempty(xmax)
         error('qps_clp: LP problem must include constraints or variable bounds');
     else
@@ -259,7 +259,7 @@ else
         x = NaN(nx, 1);
         f = NaN;
     else
-        if isempty(H) || ~any(any(H))
+        if ~nnz(H)
             f = c'*x;
         else
             f = 0.5 * x'*H*x + c'*x;

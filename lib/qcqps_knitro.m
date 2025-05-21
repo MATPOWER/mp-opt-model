@@ -327,9 +327,9 @@ niq_lin = length(ilt_lin) + length(igt_lin);       %% number of linear inequalit
 
 
 %% Call the solver
-isemptyQ = cell2mat(cellfun(@(x)(isempty(x) || ~any(any(x))), [Qe; Qi], 'UniformOutput', false));
+isemptyQ = cell2mat(cellfun(@(x)(~nnz(x)), [Qe; Qi], 'UniformOutput', false));
 if sum(isemptyQ) == (neq_quad + niq_quad)   %% No quadratic terms in quadratic constraints (linear constraints)
-    if isempty(H) || ~any(any(H))
+    if ~nnz(H)
         lpqcqp = 'LP';
     else
         lpqcqp = 'QP';
@@ -339,10 +339,8 @@ if sum(isemptyQ) == (neq_quad + niq_quad)   %% No quadratic terms in quadratic c
     end
 else
     lpqcqp = 'QCQP';
-    if ~isempty(H) || any(any(H))
-        if ~issparse(H)
-            H = sparse(H);
-        end
+    if ~isempty(H) && ~issparse(H)
+        H = sparse(H);
     end
 end
 if verbose

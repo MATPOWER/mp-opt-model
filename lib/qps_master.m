@@ -209,7 +209,7 @@ if strcmp(alg, 'DEFAULT')
         alg = 'OT';
     elseif have_feature('knitro')   %% if not, then Artelys Knitro, if available
         alg = 'KNITRO';
-    elseif (isempty(H) || ~any(any(H))) && have_feature('glpk') %% if not, and
+    elseif ~nnz(H) && have_feature('glpk')  %% if not, and
         alg = 'GLPK';               %% prob is LP (not QP), then GLPK, if available
     elseif have_feature('bpmpd')    %% if not, then BPMPD_MEX, if available
         alg = 'BPMPD';

@@ -137,7 +137,7 @@ else                                %% individual args
 end
 
 %% define nx, set default values for missing optional inputs
-if isempty(H) || ~any(any(H))
+if ~nnz(H)
     lpqp = 'LP';
     if isempty(A) && isempty(xmin) && isempty(xmax)
         error('qps_osqp: LP problem must include constraints or variable bounds');

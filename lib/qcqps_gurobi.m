@@ -349,9 +349,9 @@ m.ub        = xmax;
 m.obj       = c;
 
 %% Call the solver
-isemptyQ = cell2mat(cellfun(@(x)(isempty(x) || ~any(any(x))), Q_quad, 'UniformOutput', false));
+isemptyQ = cell2mat(cellfun(@(x)(~nnz(x)), Q_quad, 'UniformOutput', false));
 if sum(isemptyQ) == (neq_quad + niq_quad)   %% No quadratic terms in quadratic constraints (linear constraints)
-    if isempty(H) || ~any(any(H))
+    if ~nnz(H)
         lpqcqp = 'LP';
     else
         lpqcqp = 'QP';
@@ -362,7 +362,7 @@ if sum(isemptyQ) == (neq_quad + niq_quad)   %% No quadratic terms in quadratic c
     end
 else
     lpqcqp = 'QCQP';
-    if ~isempty(H) || any(any(H))
+    if nnz(H)
         if ~issparse(H)
             H = sparse(H);
         end
