@@ -7,12 +7,12 @@ Reference
 |MPOM| Classes
 --------------
 
-Use :class:`opt_model` to build and solve your mathematical programming and optimization models.
+Use :class:`mp.opt_model` to build and solve your mathematical programming and optimization models.
 
 .. toctree::
 
-   classes/opt_model
-   classes/mp_idx_manager
+   classes/mp/opt_model
+   classes/mp/idx_manager
    classes/mp/set_manager
    classes/mp/set_manager_opt_model
    classes/mp/sm_variable
@@ -21,6 +21,15 @@ Use :class:`opt_model` to build and solve your mathematical programming and opti
    classes/mp/sm_nln_cost
    classes/mp/sm_quad_cost
    classes/mp/sm_quad_constraint
+   classes/mp/sm_quad_cost_legacy
+
+Deprecated:
+
+.. toctree::
+
+   classes/opt_model
+   classes/mp_idx_manager
+   classes/mp/sm_quad_cost_legacy
 
 
 |MPOM| Functions
