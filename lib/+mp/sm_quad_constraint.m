@@ -243,7 +243,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                 add@mp.set_manager_opt_model(obj, name, idx, N, args{:});
             end
 
-            %% assign data (wgv: this replaces the old add_named_set method)
+            %% assign data
             if isempty(idx)
                 obj.data.Q.(name)  = Q;
                 obj.data.B.(name)  = B;

@@ -462,7 +462,7 @@ classdef sm_nln_cost < mp.set_manager_opt_model
                     done = 0;
                     f = 0;          %% initialize cumulative cost
                     idx = num2cell(ones(size(dims))); %% initialize idx
-                    while ~done     %% call eval_nln_cost() recursively
+                    while ~done     %% call eval() recursively
                         f = f + sum(obj.eval(var, x, name, idx));
 
                         %% increment idx

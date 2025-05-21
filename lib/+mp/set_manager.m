@@ -21,7 +21,7 @@ classdef set_manager < handle
 % mp.set_manager Methods:
 %   * set_manager - constructor
 %   * copy - make a duplicate (shallow copy) of the object
-%   * add - a named (and optionally indexed) subset of entities
+%   * add - add a named (and optionally indexed) subset of entities
 %   * describe_idx - provide/display name and index label for given indices
 %   * display - display summary of indexing of subsets in object
 %   * get_N - return the number of elements in the set
@@ -254,7 +254,7 @@ classdef set_manager < handle
                 if subsref(obj.idx.i1, sn) ~= 0
                     str = '%d'; for m = 2:length(idx), str = [str ',%d']; end
                     nname = sprintf(['%s(' str, ')'], name, idx{:});
-                    error('mp_idx_manager.add_named_set: %s set named ''%s'' already exists', obj.label, nname);
+                    error('mp.set_manager.add: %s set named ''%s'' already exists', obj.label, nname);
                 end
 
                 %% add indexing info about this set
@@ -426,7 +426,7 @@ classdef set_manager < handle
 
             %% prevent duplicate name in set of specified type
             if isfield(obj.idx.N, name)
-                error('mp_idx_manager.init_indexed_name: %s set named ''%s'' already exists', ...
+                error('mp.set_manager.init_indexed_name: %s set named ''%s'' already exists', ...
                     st_label, name);
             end
 
@@ -489,7 +489,7 @@ classdef set_manager < handle
             %     s = var.set_type_idx_map());
             %     s = lin.set_type_idx_map([], 1));
             %
-            % See also describe_idx, mp_idx_manager.
+            % See also describe_idx, mp.idx_manager.
 
             %% default args
             if nargin < 3
@@ -533,10 +533,10 @@ classdef set_manager < handle
 
                 %% check for invalid idxs
                 if any(idxs > obj.N)
-                    error('mp_idx_manager.set_type_idx_map: IDXS must not exceed maximum index (%d)', obj.N);
+                    error('mp.set_manager.set_type_idx_map: IDXS must not exceed maximum index (%d)', obj.N);
                 end
                 if any(idxs < 1)
-                    error('mp_idx_manager.set_type_idx_map: IDXS must be positive');
+                    error('mp.set_manager.set_type_idx_map: IDXS must be positive');
                 end
 
                 %% pre-allocate return struct

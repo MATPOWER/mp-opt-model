@@ -1,11 +1,11 @@
 classdef set_manager_opt_model < mp.set_manager
-% mp.set_manager_opt_model -  MP Set Manager base class for opt_model fields.
+% mp.set_manager_opt_model -  MP Set Manager base class for mp.opt_model fields.
 % ::
 %
 %   sm = mp.set_manager_opt_model(label)
 %
 % Implements functionality to handle parameters and solution data for
-% set types used to implement properties of the opt_model class.
+% set types used to implement properties of the mp.opt_model class.
 %
 % mp.set_manager_opt_model Properties:
 %   * soln - struct for storing parsed solution values
