@@ -68,6 +68,7 @@ Use these functions to set up input options for individual solvers.
    functions/cplex_options
    functions/glpk_options
    functions/gurobi_options
+   functions/highs_options
    functions/ipopt_options
    functions/mosek_options
    functions/mosek_symbcon
@@ -82,11 +83,12 @@ Use these functions to set up input options for individual solvers.
 Version Information Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use these functions to check the version of the installed |MPOM|, Gurobi, and OSQP.
+Use these functions to check the version of the installed |MPOM|, Gurobi, HiGHS, and OSQP.
 
 .. toctree::
 
    functions/gurobiver
+   functions/highsver
    functions/knitrover
    functions/mpomver
    functions/osqpver
@@ -105,6 +107,7 @@ MIQP Solver
    functions/miqps_cplex
    functions/miqps_glpk
    functions/miqps_gurobi
+   functions/miqps_highs
    functions/miqps_mosek
    functions/miqps_ot
 
@@ -163,6 +166,7 @@ LP/QP Solver
    functions/qps_cplex
    functions/qps_glpk
    functions/qps_gurobi
+   functions/qps_highs
    functions/qps_ipopt
    functions/qps_knitro
    functions/qps_mosek
@@ -243,6 +247,7 @@ rather are used to extend the capabilities of :func:`have_feature`.
    functions/have_feature_fsolve
    functions/have_feature_glpk
    functions/have_feature_gurobi
+   functions/have_feature_highs
    functions/have_feature_intlinprog
    functions/have_feature_ipopt_auxdata
    functions/have_feature_ipopt
