@@ -6,7 +6,7 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 %       MIQPS_GLPK(H, C, A, L, U, XMIN, XMAX, X0, VTYPE, OPT)
 %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = MIQPS_GLPK(PROBLEM)
 %   A wrapper function providing a standardized interface for using
-%   GLKP to solve the following MILP (mixed integer linear programming)
+%   GLPK to solve the following MILP (mixed integer linear programming)
 %   problem:
 %
 %       min C'*X
@@ -110,11 +110,6 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 %   This file is part of MP-Opt-Model.
 %   Covered by the 3-clause BSD License (see LICENSE file for details).
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
-
-%% check for Optimization Toolbox
-% if ~have_feature('quadprog')
-%     error('miqps_glpk: requires the MEX interface to GLPK');
-% end
 
 %%----- input argument handling  -----
 %% gather inputs

@@ -9,7 +9,7 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %   QUADPROG or LINPROG from the Optimization Toolbox to solve the
 %   following QP (quadratic programming) problem:
 %
-%       min 1/2 X'*H*X + C'*X
+%       min C'*X
 %        X
 %
 %   subject to
@@ -18,7 +18,8 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %       XMIN <= X <= XMAX   (variable bounds)
 %
 %   Inputs (all optional except H, C, A and L):
-%       H : matrix (possibly sparse) of quadratic cost coefficients
+%       H : dummy matrix (possibly sparse) of quadratic cost coefficients
+%           for QP problems, which INTLINPROG does not handle
 %       C : vector of linear cost coefficients
 %       A, L, U : define the optional linear constraints. Default
 %           values for the elements of L and U are -Inf and Inf,
@@ -66,7 +67,7 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %           lower - lower bound on optimization variables
 %           upper - upper bound on optimization variables
 %
-%   Note the calling syntax is almost identical to that of QUADPROG
+%   Note the calling syntax is almost identical to that of INTLINPROG
 %   from MathWorks' Optimization Toolbox. The main difference is that
 %   the linear constraints are specified with A, L, U instead of
 %   A, B, Aeq, Beq.

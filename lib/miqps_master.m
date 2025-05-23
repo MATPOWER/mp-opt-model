@@ -39,10 +39,12 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %           alg ('DEFAULT') : determines which solver to use, can be either
 %                   a string (new-style) or a numerical alg code (old-style)
 %               'DEFAULT' : (or 0) automatic, first available of Gurobi,
-%                       CPLEX, MOSEK, Opt Tbx (MILPs only), GLPK (MILPs only)
+%                       CPLEX, MOSEK, Opt Tbx (MILPs only), HIGHS (MILPs only),
+%                       GLPK (MILPs only)
 %               'CPLEX'   : (or 500) CPLEX
 %               'GLPK'    : GLPK, (MILP problems only, i.e. empty H matrix)
 %               'GUROBI'  : (or 700) Gurobi
+%               'HIGHS'   : HiGHS, https://highs.dev
 %               'MOSEK'   : (or 600) MOSEK
 %               'OT'      : (or 300) Optimization Toolbox, INTLINPROG
 %                           (MILP problems only, i.e. empty H matrix)
@@ -60,6 +62,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %           cplex_opt - options struct for CPLEX
 %           glpk_opt    - options struct for GLPK
 %           grb_opt   - options struct for GUROBI
+%           highs_opt   - options struct for HIGHS
 %           intlinprog_opt - options struct for INTLINPROG
 %           linprog_opt - options struct for LINPROG
 %           mosek_opt - options struct for MOSEK
@@ -118,7 +121,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %       [x, f, s, out, lam] = miqps_master(p);
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -196,6 +199,8 @@ if strcmp(alg, 'DEFAULT')
         if ~nnz(H)                  %% if not, and linear objective
             if have_feature('intlinprog')   %% then Optimization Tbx, if available
                 alg = 'OT';
+            elseif have_feature('highs')    %% if not, then HiGHS, if available
+                alg = 'HIGHS';
             elseif have_feature('glpk')     %% if not, and then GLPK, if available
                 alg = 'GLPK';
             else
@@ -224,6 +229,9 @@ switch alg
     case 'OT'
         [x, f, eflag, output, lambda] = ...
             miqps_ot(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+    case 'HIGHS'
+        [x, f, eflag, output, lambda] = ...
+            miqps_highs(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
     otherwise
         fcn = ['miqps_' lower(alg)];
         if exist([fcn '.m']) == 2
