@@ -62,8 +62,9 @@ classdef idx_manager < handle
 %
 %       get - Return the value of any individual field.
 %
-%       params_<SET-TYPE> - (must be implemented in the subclass)
-%           Returns set-type-specific data for a given type.
+%       get_set_types - (must be implemented in the subclass)
+%           Returns a cell array of set types, that is, the names of the
+%           properties containing the mp.set_manager objects.
 %
 %   The following is the structure of the data in the object, using a set
 %   type named 'var' for illustration. Each field of .idx or .data is a

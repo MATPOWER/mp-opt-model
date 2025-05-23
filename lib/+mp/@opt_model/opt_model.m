@@ -240,12 +240,25 @@ classdef opt_model < mp.idx_manager
                 );
         end
 
+        function st = get_set_types(om)
+            % List of names of properties of set types managed by this class.
+            % ::
+            %
+            %   st = om.get_set_types();
+            %
+            % Output:
+            %   st (cell array) : list of set types, namely:
+            %       ``{'var', 'lin', 'qcn', 'nle', 'nli', 'qdc', 'nlc'}``
+
+            st = {'var', 'lin', 'qcn', 'nle', 'nli', 'qdc', 'nlc'};
+        end
+
         function new_om = copy(om)
             % Duplicate the object.
 
             %% delete old 'params' (cached parameters) fields
             %% to avoid clash with newer params() method
-            fn = fieldnames(om.set_types);
+            fn = om.get_set_types();
             for f = 1:length(fn)
                 if isfield(om.(fn{f}), 'params')
                     om.(fn{f}) = rmfield(om.(fn{f}), 'params');

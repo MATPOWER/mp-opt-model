@@ -76,7 +76,7 @@ end
 %% print header
 if om.is_solved()
     if strcmp(set_type, 'all')
-        set_types = fieldnames(om.set_types);   %% all set types
+        set_types = om.get_set_types(); %% all set types
     elseif ~iscell(set_type)
         set_types = {set_type}; %% make set_type a cell array of char arrays
     else
