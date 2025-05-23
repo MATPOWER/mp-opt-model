@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 5/23/25
+  - Add support to `qps_master()` and `miqps_master()` for the open-source
+    [HiGHS][15] solver for LP, QP and MILP problems, including functions
+    `miqps_highs()`, `qps_highs()`, `have_feature_highs()`, `highsver()`, and
+    `highs_options()`. Uses the [HiGHSMEX][15] interface for HiGHS.
+
 #### 5/7/25
   - Fix crash in `mp.sm_quad_cost.display_soln()` when linear
     coefficient is empty.
@@ -615,3 +621,5 @@ Version 0.7.0 - *Jun 20, 2019*
 [12]: https://github.com/ebertolazzi/mexIPOPT
 [13]: https://matpower.org/doc/mpom/
 [14]: https://www.artelys.com/solvers/knitro/
+[15]: https://highs.dev
+[16]: https://github.com/savyasachi/HiGHSMEX

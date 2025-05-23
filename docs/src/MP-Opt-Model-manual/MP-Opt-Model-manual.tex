@@ -172,6 +172,7 @@
 \newcommand{\clp}[0]{{CLP}}
 \newcommand{\cplex}[0]{{CPLEX}}
 \newcommand{\glpk}[0]{{GLPK}}
+\newcommand{\highs}[0]{{HiGHS}}
 \newcommand{\gurobi}[0]{{Gurobi}}
 \newcommand{\mosek}[0]{{MOSEK}}
 \newcommand{\osqp}[0]{{OSQP}}
@@ -668,12 +669,13 @@ name & default & description \\
 \midrule
 \code{alg}	& \codeq{DEFAULT}	& determines which solver to use \\
 && \begin{tabular}{c @{ -- } p{0.5\textwidth}}
-\codeq{DEFAULT} & automatic, first available of \gurobi{}, \cplex{}, \mosek{}, \ot{} (if \matlab{}), \glpk{} (LP only), BPMPD, \mips{} \\
+\codeq{DEFAULT} & automatic, first available of \gurobi{}, \cplex{}, \mosek{}, \ot{} (if \matlab{}), \highs{}, \glpk{} (LP only), BPMPD, \mips{} \\
 \codeq{BPMPD} & BPMPD\tnote{*} \\
 \codeq{CLP} & \clp{}\tnote{*} \\
 \codeq{CPLEX} & \cplex{}\tnote{*} \\
 \codeq{GLPK} & \glpk{}\tnote{*} \emph{(LP only)} \\
 \codeq{GUROBI} & \gurobi{}\tnote{*} \\
+\codeq{HIGHS} & \highs{}\tnote{*} \\
 \codeq{IPOPT} & \ipopt{}\tnote{*} \\
 \codeq{MIPS} & \mipslink{}, \mipsname{} \\
 \codeq{MOSEK} & \mosek{}\tnote{*} \\
@@ -691,6 +693,7 @@ name & default & description \\
 \code{cplex\_opt}	& \emph{empty}	& options struct for \cplex{}\tnote{*} \\
 \code{glpk\_opt}	& \emph{empty}	& options struct for \glpk{}\tnote{*} \\
 \code{grb\_opt}	& \emph{empty}	& options struct for \gurobi{}\tnote{*} \\
+\code{highs\_opt}	& \emph{empty}	& options struct for \highs{}\tnote{*} \\
 \code{ipopt\_opt}	& \emph{empty}	& options struct for \ipopt{}\tnote{*} \\
 \code{linprog\_opt}	& \emph{empty}	& options struct for \code{linprog}\tnote{*} \\
 \code{mips\_opt}	& \emph{empty}	& options struct for \mips{} \\
@@ -705,7 +708,7 @@ name & default & description \\
 \end{threeparttable}
 \end{table}
 
-The \code{qps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{qps\_bpmpd}, \code{qps\_clp}, \code{qps\_cplex}, \code{qps\_glpk}, \code{qps\_gurobi}, \code{qps\_ipopt}, \code{qps\_knitro}, \code{qps\_mips}, \code{qps\_mosek}, and \code{qps\_ot}. Each of these functions has an interface identical to that of \code{qps\_master}, with the exception of the options struct for \code{qps\_mips}, which is a simple \mips{} options struct.
+The \code{qps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{qps\_bpmpd}, \code{qps\_clp}, \code{qps\_cplex}, \code{qps\_glpk}, \code{qps\_gurobi}, \code{qps\_highs}, \code{qps\_ipopt}, \code{qps\_knitro}, \code{qps\_mips}, \code{qps\_mosek}, and \code{qps\_ot}. Each of these functions has an interface identical to that of \code{qps\_master}, with the exception of the options struct for \code{qps\_mips}, which is a simple \mips{} options struct.
 
 \clearpage
 \subsubsection{QP Example}
@@ -837,10 +840,11 @@ name & default & description \\
 % & \\
 \code{alg}	& \codeq{DEFAULT}	& determines which solver to use \\
 && \begin{tabular}{c @{ -- } p{0.5\textwidth}}
-\codeq{DEFAULT} & automatic, first available of \gurobi{}, \cplex{}, \mosek{}, \ot{} (if \matlab{}, MILP only), \glpk{} (MILP only) \\
+\codeq{DEFAULT} & automatic, first available of \gurobi{}, \cplex{}, \mosek{}, \ot{} (if \matlab{}, MILP only), \highs{} (MILP only), \glpk{} (MILP only) \\
 \codeq{CPLEX} & \cplex{}\tnote{*} \\
 \codeq{GLPK} & \glpk{}\tnote{*} \emph{(LP only)} \\
 \codeq{GUROBI} & \gurobi{}\tnote{*} \\
+\codeq{HIGHS} & \highs{}\tnote{*} \\
 \codeq{MOSEK} & \mosek{}\tnote{*} \\
 \codeq{OT} & \matlab{} Opt Toolbox, \code{intlinprog} \\
 \end{tabular}	\\
@@ -856,6 +860,7 @@ name & default & description \\
 \code{cplex\_opt}	& \emph{empty}	& options struct for \cplex{}\tnote{*} \\
 \code{glpk\_opt}	& \emph{empty}	& options struct for \glpk{}\tnote{*} \\
 \code{grb\_opt}	& \emph{empty}	& options struct for \gurobi{}\tnote{*} \\
+\code{highs\_opt}	& \emph{empty}	& options struct for \highs{}\tnote{*} \\
 \code{intlinprog\_opt}	& \emph{empty}	& options struct for \code{intlinprog}\tnote{*} \\
 \code{mosek\_opt}	& \emph{empty}	& options struct for \mosek{}\tnote{*} \\
 \bottomrule
@@ -869,7 +874,7 @@ name & default & description \\
 
 By default, unless the \code{skip\_prices} option is set to 1, once \code{miqps\_master} has found the integer solution, it constrain the integer variables to their solved values and call \code{qps\_matpower} on the resulting problem to determine the shadow prices in \code{lambda}.
 
-The \code{miqps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{miqps\_cplex}, \code{miqps\_glpk}, \code{miqps\_gurobi}, \code{miqps\_mosek}, and \code{miqps\_ot}. Each of these functions has an interface identical to that of \code{miqps\_master}.
+The \code{miqps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{miqps\_cplex}, \code{miqps\_glpk}, \code{miqps\_gurobi}, \code{miqps\_highs}, \code{miqps\_mosek}, and \code{miqps\_ot}. Each of these functions has an interface identical to that of \code{miqps\_master}.
 
 \clearpage
 \subsubsection{MILP Example}
@@ -2692,9 +2697,9 @@ property of the field type objects \\
 \code{alg} value & problem type(s) & description \\
 \midrule
 \codeq{DEFAULT} & \emph{all} & automatic, depends on problem type, uses first available of: \\
-& LP & \gurobi{}, \cplex{}, \mosek{}, \code{linprog}\tnote{\P}, \glpk{}, BPMPD, \mips{} \\
-& QP & \gurobi{}, \cplex{}, \mosek{}, \code{quadprog}\tnote{\P}, BPMPD, \mips{} \\
-& MILP & \gurobi{}, \cplex{}, \mosek{}, \code{intlinprog}, \glpk{} \\
+& LP & \gurobi{}, \cplex{}, \mosek{}, \code{linprog}\tnote{\P}, \highs{}, \glpk{}, BPMPD, \mips{} \\
+& QP & \gurobi{}, \cplex{}, \mosek{}, \code{quadprog}\tnote{\P}, \highs{}, BPMPD, \mips{} \\
+& MILP & \gurobi{}, \cplex{}, \mosek{}, \code{intlinprog}, \highs{}, \glpk{} \\
 & MIQP & \gurobi{}, \cplex{}, \mosek{} \\
 & QCQP & \ipopt{}, \knitro{}, \code{fmincon}\tnote{\P}, \mips{} \\
 & NLP & \mips{} \\
@@ -2711,6 +2716,7 @@ property of the field type objects \\
 \codeq{GLPK} & LP, MILP & \glpk{}\tnote{*} \emph{(LP only)} \\
 \codeq{GS} & NLEQ & Gauss-Seidel method\tnote{\ddag} \\
 \codeq{GUROBI} & LP, QP, MILP, MIQP, QCQP & \gurobi{}\tnote{*} \\
+\codeq{HIGHS} & LP, QP, MILP & \highs{}\tnote{*} \\
 \codeq{IPOPT} & LP, QP, QCQP, NLP & \ipopt{}\tnote{*} \\
 \codeq{KNITRO} & QCQP, NLP, MINLP & \knitro{}\tnote{*} \\
 \codeq{MIPS} & LP, QP, QCQP, NLP & \mipslink{}, \mipsname{} \\
@@ -4016,6 +4022,11 @@ This function implements the \codeq{glpk} tag for \code{have\_feature} to detect
 
 This function implements the \codeq{gurobi} tag for \code{have\_feature} to detect availability/version of \code{gurobi}, Gurobi optimizer. See also Appendix~\ref{app:gurobi}.
 
+\subsubsection{\tt have\_feature\_highs}
+\label{sec:have_feature_highs}
+
+This function implements the \codeq{highs} tag for \code{have\_feature} to detect availability/version of \code{callhighs}, \highs{} optimizer. See also Appendix~\ref{app:gurobi}.
+
 \subsubsection{\tt have\_feature\_intlinprog}
 \label{sec:have_feature_intlinprog}
 
@@ -4143,7 +4154,7 @@ When the solver is set to \codeq{DEFAULT}, this function currently defaults to  
 
 The \code{mpopt2qpopt} function returns an options struct suitable for \code{qps\_master}, \code{miqps\_master} or one of the solver specific equivalents. It is constructed from the relevant portions of \code{mpopt}, a \matpower{} options struct. The \code{model} argument specifies whether the problem to be solved is an LP, QP, MILP or MIQP problem to allow for the selection of a suitable default solver. The final \code{alg} argument allows the solver to be set explicitly (in \code{qpopt.alg}). By default this value is taken from \code{mpopt.opf.dc.solver}.
 
-When the solver is set to \codeq{DEFAULT}, this function also selects the best available solver that is applicable\footnote{\glpk{} is not available for problems with quadratic costs (QP and MIQP), BPMPD and \mips{} are not available for mixed-integer problems (MILP and MIQP), and the \ot{} is not an option for problems that combine the two (MIQP).} to the specific problem class, based on the following precedence: \gurobi{}, \cplex{}, \mosek{}, \ot{}, \glpk{}, BPMPD, \mips{}.
+When the solver is set to \codeq{DEFAULT}, this function also selects the best available solver that is applicable\footnote{\glpk{} is not available for problems with quadratic costs (QP and MIQP), BPMPD and \mips{} are not available for mixed-integer problems (MILP and MIQP), and the \ot{} and \highs{} are not options for problems that combine the two (MIQP).} to the specific problem class, based on the following precedence: \gurobi{}, \cplex{}, \mosek{}, \ot{}, \highs{}, \glpk{}, BPMPD, \mips{}.
 
 
 \subsubsection{\tt mpopt2qcqpopt}
@@ -4263,6 +4274,7 @@ name & description \\
 \code{miqps\_cplex}	& MIQP/MILP solver API implementation for CPLEX (\code{cplexmiqp} and \code{cplexmilp})\tnote{\dag}	\\
 \code{miqps\_glpk}	& MILP solver API implementation for \glpk{}\tnote{\dag}	\\
 \code{miqps\_gurobi}	& MIQP/MILP solver API implementation for \gurobi{}\tnote{\dag}	\\
+\code{miqps\_highs}	& MILP solver API implementation for \highs{}\tnote{\dag}	\\
 \code{miqps\_mosek}	& MIQP/MILP solver API implementation for \mosek{} (\code{mosekopt})\tnote{\dag}	\\
 \code{miqps\_ot}	& QP/MILP solver API implementation for \matlab{} Opt Toolbox's \code{intlinprog}, \code{quadprog}, \code{linprog}	\\
 \midrule
@@ -4285,6 +4297,7 @@ name & description \\
 \code{qps\_cplex}	& QP/LP solver API implementation for CPLEX (\code{cplexqp} and \code{cplexlp})\tnote{\dag}	\\
 \code{qps\_glpk}	& QP/LP solver API implementation for \glpk{}\tnote{\dag}	\\
 \code{qps\_gurobi}	& QP/LP solver API implementation for \gurobi{}\tnote{\dag}	\\
+\code{qps\_highs}	& QP/LP solver API implementation for \highs{}\tnote{\dag}	\\
 \code{qps\_ipopt}	& QP/LP solver API implementation for \ipopt{}-based solver\tnote{\dag}	\\
 \code{qps\_knitro}	& QP/LP solver API implementation for \knitro{}-based solver\tnote{\dag}	\\
 \code{qps\_mosek}	& QP/LP solver API implementation for \mosek{} (\code{mosekopt})\tnote{\dag}	\\
@@ -4349,7 +4362,9 @@ name & description \\
 \code{cplex\_options}	& default options for \cplex{} solver\tnote{\dag}	\\
 \code{glpk\_options}	& default options for \glpk{} solver\tnote{\dag}	\\
 \code{gurobi\_options}	& default options for \gurobi{} solver\tnote{\dag}	\\
+\code{highs\_options}	& default options for \highs{} solver\tnote{\dag}	\\
 \code{gurobiver}	& prints version information for \gurobi{}/Gurobi\_MEX	\\
+\code{highsver}	& prints version information for \highs{}	\\
 \code{knitrover}	& prints version information for \knitro{}	\\
 \code{ipopt\_options}	& default options for \ipopt{} solver\tnote{\dag}	\\
 \code{mosek\_options}	& default options for \mosek{} solver\tnote{\dag}	\\
@@ -4531,6 +4546,7 @@ name & description \\
 \code{have\_feature\_fsolve}	& \code{fsolve}, nonlinear equation solver from \ot{}	\\
 \code{have\_feature\_glpk}	& \code{glpk}, GNU Linear Programming Kit, LP/MILP solver	\\
 \code{have\_feature\_gurobi}	& \code{gurobi}, Gurobi solver, \url{https://www.gurobi.com/}	\\
+\code{have\_feature\_highs}	& \code{callhighs}, \highs{} solver, LP/QP/MILP solver	\\
 \code{have\_feature\_intlinprog}	& \code{intlinprog}, MILP solver from \ot{} 7.0 (R2014a)+	\\
 \code{have\_feature\_ipopt}	& \ipopt{}, NLP solver, \url{https://github.com/coin-or/Ipopt}	\\
 \code{have\_feature\_ipopt\_auxdata}	& support for \code{ipopt\_auxdata()}, required by \ipopt{} 3.11 and later	\\
@@ -4661,6 +4677,15 @@ When \glpk{} is installed, either as part of Octave or with a MEX interface for 
 Although \gurobi{} is a commercial package, at the time of this writing their is a free academic license available. See \url{https://www.gurobi.com/academia/for-universities} for more details.
 
 When \gurobi{} is installed, it can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master}, or MILP and MIQP problems via \code{miqps\_master}, with the algorithm option set to \codeq{GUROBI}, or by calling \code{qps\_gurobi} or \code{miqps\_gurobi} directly.
+
+\subsection{\highs{} -- High Performance Open-Source LP/QP/MILP Solvers}
+\label{app:highs}
+
+\highs{}\footnote{\url{https://highs.dev}}~\cite{highs} is high performance serial and parallel software for solving large-scale sparse linear programming (LP), mixed-integer programming (MIP) and quadratic programming (QP) models, developed in C++11, with interfaces to C, C\#, FORTRAN, Julia and Python. \highs{} is freely available under the MIT licence, and is downloaded from GitHub.\footnote{\url{https://github.com/ERGO-Code/HiGHS}}
+
+To use \highs{} with \mpom{}, a MEX interface is required. MEX source and pre-compiled binaries for Mac and Windows platforms are available from the HiGHSMEX project.\footnote{\url{https://github.com/savyasachi/HiGHSMEX}}
+
+When \highs{} and it's MEX interface is installed, it can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master}, or MILP problems via \code{miqps\_master}, with the algorithm option set to \codeq{HIGHS}, or by calling \code{qps\_highs} or \code{miqps\_highs} directly.
 
 \subsection{\ipopt{} -- Interior Point Optimizer}
 \label{app:ipopt}
@@ -5022,6 +5047,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
 \begin{itemize}
 \item Support for quadratic constraints in \code{opt\_model} and quadratically-constrained quadratic programming (QCQP) problems, including functions \code{qcqps\_master()}, \code{qcqps\_gurobi()}, \code{qcqps\_knitro()}, \code{qcqps\_nlps()}, and more.
 \emph{Thanks to Wilson Gonz{\'a}lez Vanegas.}
+\item Support for the open-source \href{https://highs.dev}{\highs{}}\footnote{\url{https://highs.dev}} solver for LP, QP and MILP problems, including functions \code{miqps\_highs()}, \code{qps\_highs()}, \code{have\_feature\_highs()}, \code{highsver()}, and \code{highs\_options()}. Uses the \href{https://github.com/savyasachi/HiGHSMEX}{HiGHSMEX}\footnote{\url{https://github.com/savyasachi/HiGHSMEX}} interface for HiGHS.
 \item New \code{relax\_integer} option for \code{opt\_model.solve()}. Set to true to easily solve the LP or QP relaxation of a mixed integer LP or QP.
 \item Support for \href{https://www.artelys.com/solvers/knitro/}{\knitro{}} solver for LP and QP problems, including functions \code{qps\_knitro()}, \code{knitrover()}, and \code{artelys\_knitro\_options()}.
 \emph{Thanks to Wilson Gonz{\'a}lez Vanegas.}
@@ -5042,12 +5068,17 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
     \item \code{artelys\_knitro\_options()} sets options for \knitro{}.
     \item \code{convert\_constraint\_multipliers()} replaces \code{convert\_lin\_constraint\_multipliers()}.
     \item \code{convert\_quad\_constraint()} converts bounded quadratic constraints to equality/inequality pairs.
+    \item \code{have\_feature\_highs()} feature detection function for \highs{} solver.
+    \item \code{highsver()} displays version of installed \highs{}.
+    \item \code{highs\_options()} sets options for \highs{}.
     \item \code{knitrover()} displays version of installed \knitro{}.
+    \item \code{miqps\_highs()} provides standardized interface for using \highs{} to solve MILP problems.
     \item \code{mpopt2qcqpopt()} creates/modifies \code{qcqps\_master} options struct from \matpower{} options struct
     \item \code{qcqps\_gurobi()} provides standardized interface for using \gurobi{} to solve QCQP problems.
     \item \code{qcqps\_knitro()} provides standardized interface for using \knitro{} to solve QCQP problems.
     \item \code{qcqps\_nlps()} provides standardized interface for using \code{nlps\_master} to solve QCQP problems via \code{fmincon}, \ipopt{}, \knitro{}, or \mips{}.
     \item \code{qcqps\_master()} provides a single wrapper function for calling any of \mpom{}'s QCQP solvers.
+    \item \code{qps\_highs()} provides standardized interface for using \highs{} to solve LP/QP problems.
     \item \code{qps\_knitro()} provides standardized interface for using \knitro{} to solve LP/QP problems.
     \end{itemize}
 \end{itemize}
@@ -5212,6 +5243,9 @@ Gurobi Optimization, Inc., ``Gurobi Optimizer Reference Manual,'' 2016. [Online]
 
 \bibitem{ipopt}
 A.~W\"achter and L.~T.~Biegler, ``On the implementation of a primal-dual interior point filter line search algorithm for large-scale nonlinear programming,'' \emph{Mathematical Programming}, 106(1):25–-57,~2006.
+
+\bibitem{highs}
+Q.~Huangfu and J.~A.~J.~Hall, ``Parallelizing the dual revised simplex method'', \emph{Mathematical Programming Computation}, 10 (1), 119--142, 2018. doi:~\href{https://doi.org/10.1007/s12532-017-0130-5}{10.1007/s12532-017-0130-5}
 
 \bibitem{pardiso}
 O.~Shenk and K.~G\"artner, ``Solving unsymmetric sparse systems of linear equations with PARDISO,'' \emph{Journal of Future Generation Computer Systems}, 20(3):475--487,~2004.
