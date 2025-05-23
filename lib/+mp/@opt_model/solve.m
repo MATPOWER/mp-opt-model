@@ -21,11 +21,12 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %                   problem types are listed in parens next to each
 %               'DEFAULT' : automatic, depending on problem type, uses the
 %                       the first available of:
-%                   LP - Gurobi, CPLEX, MOSEK, linprog (if MATLAB), GLPK,
+%                   LP - Gurobi, CPLEX, MOSEK, linprog (if MATLAB), HIGHS, GLPK,
 %                           BPMPD, MIPS
-%                   QP - Gurobi, CPLEX, MOSEK, quadprog (if MATLAB), BPMPD,
-%                           MIPS
-%                   MILP - Gurobi, CPLEX, MOSEK, Opt Tbx (intlingprog), GLPK
+%                   QP - Gurobi, CPLEX, MOSEK, quadprog (if MATLAB), HIGHS,
+%                           BPMPD, MIPS
+%                   MILP - Gurobi, CPLEX, MOSEK, Opt Tbx (intlingprog), HIGHS,
+%                           GLPK
 %                   MIQP - Gurobi, CPLEX, MOSEK
 %                   NLP - MIPS
 %                   MINLP - Artelys Knitro (not yet implemented)
@@ -40,6 +41,7 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %               'GLPK'    : (LP, MILP) GLPK
 %               'GS'      : (NLEQ) Gauss-Seidel
 %               'GUROBI'  : (LP, QP, MILP, MIQP) Gurobi
+%               'HIGHS'   : (LP, QP, MILP) HiGHS, https://highs.dev
 %               'IPOPT'   : (LP, QP, NLP) IPOPT, requires MEX interface to IPOPT solver
 %                           https://github.com/coin-or/Ipopt
 %               'KNITRO'  : (NLP, MINLP) Artelys Knitro, requires Artelys Knitro solver
@@ -68,6 +70,7 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %           grb_opt     - options struct for GUROBI
 %           gs_opt      - options struct for Gauss-Seidel method,
 %                           nleqs_gauss_seidel()
+%           highs_opt   - options struct for HIGHS
 %           intlinprog_opt - options struct for INTLINPROG
 %           ipopt_opt   - options struct for IPOPT
 %           knitro_opt  - options struct for Artelys Knitro
