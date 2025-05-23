@@ -224,20 +224,15 @@ classdef opt_model < mp.idx_manager
 
             %% call parent constructor
             om@mp.idx_manager(varargin{:});
-        end
-
-        function om = def_set_types(om)
-            % Define set types ``var``, ``lin``, ``qcn``, ``nle``, ``nli``, ``qdc``, ``nlc``.
-
-            om.set_types = struct(...
-                    'var', mp.sm_variable('VARIABLES'), ...
-                    'lin', mp.sm_lin_constraint('LINEAR CONSTRAINTS'), ...
-                    'qcn', mp.sm_quad_constraint('QUADRATIC CONSTRAINTS'), ...
-                    'nle', mp.sm_nln_constraint('NONLIN EQ CONSTRAINTS'), ...
-                    'nli', mp.sm_nln_constraint('NONLIN INEQ CONSTRAINTS'), ...
-                    'qdc', mp.sm_quad_cost('QUADRATIC COSTS'), ...
-                    'nlc', mp.sm_nln_cost('GEN NONLIN COSTS') ...
-                );
+            if isempty(om.var)      %% skip for copy constructor
+                om.var = mp.sm_variable('VARIABLES');
+                om.lin = mp.sm_lin_constraint('LINEAR CONSTRAINTS');
+                om.qcn = mp.sm_quad_constraint('QUADRATIC CONSTRAINTS');
+                om.nle = mp.sm_nln_constraint('NONLIN EQ CONSTRAINTS');
+                om.nli = mp.sm_nln_constraint('NONLIN INEQ CONSTRAINTS');
+                om.qdc = mp.sm_quad_cost_legacy('QUADRATIC COSTS');
+                om.nlc = mp.sm_nln_cost('GEN NONLIN COSTS');
+            end
         end
 
         function st = get_set_types(om)

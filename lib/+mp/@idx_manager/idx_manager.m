@@ -7,42 +7,8 @@ classdef idx_manager < handle
 %   constraints, etc. This class helps keep track of the ordering and
 %   indexing of the various blocks as they are added to the object.
 %
-%   The types of named sets to be managed by the class are defined by the
-%   DEF_SET_TYPES method, which assigns a struct to the 'set_types' field.
-%
 %   Properties
-%       set_types   - a struct defined by DEF_SET_TYPES method
 %       userdata    - a struct containing arbitrary data added by the user
-%
-%   Private Methods
-%       def_set_types - (must be implemented in the subclass) Returns a
-%           struct defining the various set types, where the key is the
-%           set type name, which must also be declared as a property in
-%           the object's class, and the value is a string name used for
-%           display purposes or a mp.set_manager object.
-%
-%           E.g.
-%               function obj = def_set_types(obj)
-%                   obj.set_types = struct(...
-%                           'var', 'variable', ...
-%                           'lin', 'linear constraint' ...
-%                       );
-%               end
-%
-%       init_set_types - Initializes the structures needed to track the
-%           ordering and indexing of each set type and can be overridden
-%           to initialize any additional data to be stored with each block
-%           of each set type. Ideally, this would be called at the end
-%           of the MP_IDX_MANAGER constructor, but this is not possible
-%           in Octave 5.2 and earlier due to a bug related to altering
-%           fields of an object not yet fully constructed.
-%           Fixed in Octave v6.x: https://savannah.gnu.org/bugs/?52614
-%           The workaround is to be sure that this method is called by
-%           some subclass method(s) after object construction, but before
-%           any other use (e.g. in display() and add_*() methods).
-%
-%       valid_named_set_type - Returns a label for the given named set
-%           type if valid, empty otherwise.
 %
 %   Public Methods
 %       copy - Makes a shallow copy of the object.
@@ -104,7 +70,6 @@ classdef idx_manager < handle
 
     properties
         userdata = struct();
-        set_types
     end     %% properties
 
     methods
@@ -129,8 +94,6 @@ classdef idx_manager < handle
                     if have_feature('octave')
                         warning(s1.state, 'Octave:classdef-to-struct');
                     end
-                    [~, k] = ismember('set_types', props);
-                    props(k) = [];  %% remove 'set_types'
                     for k = 1:length(props)
                         obj = copy_prop(s, obj, props{k});
                     end
@@ -145,29 +108,6 @@ classdef idx_manager < handle
                     error('mp.idx_manager.idx_manager: input must be an ''mp.idx_manager'' object or a struct');
                 end
             end
-
-            %% define and initialize set types
-            obj.def_set_types();
-            ff = fieldnames(obj.set_types);
-            if isempty(obj.(ff{1}))     %% skip if already initialized (e.g.
-                obj.init_set_types();   %% constructed from existing object)
-            end
-        end
-
-        function obj = init_set_types(obj)
-            % Initialize indexing structures for each set type.
-
-            %% Can allow def_set_types() to return a struct whose values
-            %% are either char arrays or mp.set_manager objects.
-
-            %% initialize each (set_type) field with base data structure
-            for f = fieldnames(obj.set_types)'
-                nis = obj.set_types.(f{1});
-                if ischar(nis)
-                    nis = mp.set_manager(nis);
-                end
-                obj.(f{1}) = nis;
-            end
         end
 
         function new_obj = copy(obj)
@@ -175,7 +115,6 @@ classdef idx_manager < handle
 
             %% initialize copy
             new_obj = eval(class(obj));  %% create new object
-            new_obj.init_set_types();
 
             %% copy properties/fields
             if have_feature('octave')
@@ -186,8 +125,6 @@ classdef idx_manager < handle
             if have_feature('octave')
                 warning(s1.state, 'Octave:classdef-to-struct');
             end
-            [~, k] = ismember('set_types', props);
-            props(k) = [];  %% remove 'set_types'
             for k = 1:length(props)
                 new_obj = copy_prop(obj, new_obj, props{k});
             end
@@ -204,8 +141,6 @@ classdef idx_manager < handle
         rv = get_userdata(obj, name)
 
         val = get(obj, varargin)
-
-        str = valid_named_set_type(obj, set_type)
     end     %% methods
 end         %% classdef
 
