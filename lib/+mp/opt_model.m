@@ -1,4 +1,4 @@
-classdef opt_model < mp.idx_manager
+classdef opt_model < handle
 % mp.opt_model - MP-Opt-Model optimization model class.
 % ::
 %
@@ -183,7 +183,7 @@ classdef opt_model < mp.idx_manager
 %       .userdata   - any user defined data
 %           .(user defined fields)
 %
-% See also mp.idx_manager.
+% See also mp.set_manager.
 
 %   MP-Opt-Model
 %   Copyright (c) 2008-2025, Power Systems Engineering Research Center (PSERC)
@@ -202,6 +202,7 @@ classdef opt_model < mp.idx_manager
         qdc             %% quadratic costs
         nlc             %% general nonlinear costs
         prob_type = ''; %% problem type
+        userdata = struct();
 
         %% results of solve()
         soln = struct( ...
@@ -222,8 +223,32 @@ classdef opt_model < mp.idx_manager
             %   om = mp.opt_model(a_struct)
             %   om = mp.opt_model(an_om)
 
-            %% call parent constructor
-            om@mp.idx_manager(varargin{:});
+            if nargin > 0
+                s = varargin{1};
+                if isa(s, 'mp.opt_model')
+                    if have_feature('octave')
+                        s1 = warning('query', 'Octave:classdef-to-struct');
+                        warning('off', 'Octave:classdef-to-struct');
+                    end
+                    props = fieldnames(s);
+                    if have_feature('octave')
+                        warning(s1.state, 'Octave:classdef-to-struct');
+                    end
+                    for k = 1:length(props)
+                        om = copy_prop(s, om, props{k});
+                    end
+                elseif isstruct(s)
+                    props = fieldnames(om);
+                    for k = 1:length(props)
+                        if isfield(s, props{k})
+                            om = copy_prop(s, om, props{k});
+                        end
+                    end
+                else
+                    error('mp.opt_model: input must be an ''mp.opt_model'' object or a struct');
+                end
+            end
+
             if isempty(om.var)      %% skip for copy constructor
                 om.var = mp.sm_variable('VARIABLES');
                 om.lin = mp.sm_lin_constraint('LINEAR CONSTRAINTS');
@@ -260,8 +285,21 @@ classdef opt_model < mp.idx_manager
                 end
             end
 
-            %% call parent to make the copy
-            new_om = copy@mp.idx_manager(om);
+            %% initialize copy
+            new_om = eval(class(om));   %% create new object
+
+            %% copy properties/fields
+            if have_feature('octave')
+                s1 = warning('query', 'Octave:classdef-to-struct');
+                warning('off', 'Octave:classdef-to-struct');
+            end
+            props = fieldnames(om);
+            if have_feature('octave')
+                warning(s1.state, 'Octave:classdef-to-struct');
+            end
+            for k = 1:length(props)
+                new_om = copy_prop(om, new_om, props{k});
+            end
         end
 
         function varargout = get_idx(om, varargin)
@@ -349,8 +387,34 @@ classdef opt_model < mp.idx_manager
                     end
                 end
             else
-                %% call parent method
-                [varargout{1:nargout}] = get_idx@mp.idx_manager(om, varargin{:});
+                for k = nargout:-1:1
+                    varargout{k} = om.(varargin{k}).idx;
+                end
+            end
+        end
+
+        function rv = get_userdata(om, name)
+            % get_userdata - Used to retrieve values of user data.
+            % ::
+            %
+            %   VAL = OM.GET_USERDATA(NAME) returns the value specified by the given name
+            %   or an empty matrix if userdata with NAME does not exist.
+            %
+            %   This function allows the user to retrieve any arbitrary data that was
+            %   saved in the object for later use. Data for a given NAME is saved by
+            %   assigning it to OM.userdata.(NAME).
+            %
+            %   This can be useful, for example, when using a user function to add
+            %   variables or constraints, etc. Suppose some special indexing is
+            %   constructed when adding some variables or constraints. This indexing data
+            %   can be stored and used later to "unpack" the results of the solved case.
+            %
+            % See also mp.opt_model.
+
+            if isfield(om.userdata, name)
+                rv = om.userdata.(name);
+            else
+                rv = [];
             end
         end
 
@@ -994,6 +1058,17 @@ classdef opt_model < mp.idx_manager
         end
     end     %% methods
 end         %% classdef
+
+function d = copy_prop(s, d, prop)
+    if isa(s.(prop), 'mp.set_manager')
+        d.(prop) = s.(prop).copy();
+    elseif isa(d.(prop), 'mp.set_manager')
+        d.(prop) = nested_struct_copy( ...
+            d.(prop), s.(prop));
+    else
+        d.(prop) = s.(prop);
+    end
+end
 
 %% system of nonlinear and linear equations
 function [f, J] = nleq_fcn_(om, x)
