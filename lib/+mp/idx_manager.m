@@ -136,11 +136,113 @@ classdef idx_manager < handle
             obj.(stype).display(stype);
         end
 
-        varargout = get_idx(obj, varargin)
+        function varargout = get_idx(obj, varargin)
+            % get_idx - Returns the idx struct for the various set types.
+            % ::
+            %
+            %   IDX = OBJ.GET_IDX(SET_TYPE)
+            %   [IDX1, IDX2, ...] = OBJ.GET_IDX(SET_TYPE1, SET_TYPE2, ...)
+            %
+            %   Returns a structure for each set type with the beginning and ending
+            %   index value and the number of elements for each named block. The 'i1'
+            %   field (that's a one) is a struct with all of the starting indices, 'iN'
+            %   contains all the ending indices and 'N' contains all the sizes. Each is
+            %   a struct whose fields are the named blocks.
+            %
+            %   For example, if 'var' is the set type used for a vector x of optimization
+            %   variables, and 'lin' is for a set of linear constraints, then the
+            %   following examples illustrate how GET_IDX might be used.
+            %
+            %   Examples:
+            %       [vv, ll] = obj.get_idx('var', 'lin');
+            %
+            %       For a variable block named 'z' we have ...
+            %           vv.i1.z - starting index for 'z' in optimization vector x
+            %           vv.iN.z - ending index for 'z' in optimization vector x
+            %           vv.N.z  - number of elements in 'z'
+            %
+            %       To extract a 'z' variable from x:
+            %           z = x(vv.i1.z:vv.iN.z);
+            %
+            %       To extract the multipliers on a linear constraint set
+            %       named 'foo', where mu_l and mu_u are the full set of
+            %       linear constraint multipliers:
+            %           mu_l_foo = mu_l(ll.i1.foo:ll.iN.foo);
+            %           mu_u_foo = mu_u(ll.i1.foo:ll.iN.foo);
+            %
+            %       The number of linear constraints in a set named 'bar':
+            %           nbar = ll.N.bar;
+            %         (note: the following is preferable ...
+            %           nbar = obj.lin.get_N('bar');
+            %         ... if you haven't already called get_idx to get ll.)
+            %
+            %       If 'z', 'foo' and 'bar' are indexed sets, then you can
+            %       replace them with something like 'z(i,j)', 'foo(i,j,k)'
+            %       or 'bar(i)' in the examples above.
+            %
+            %   The GET_IDX method can be overridden to also return the idx structs of
+            %   set types in a pre-specified order when called without input arguments.
+            %
+            %   E.g.
+            %       vv = obj.get_idx()          % for variables
+            %       [vv, ll] = obj.get_idx()    % for linear constraints
+            %
+            %   See OPT_MODEL, and its methods GET_IDX, ADD_VAR,
+            %           ADD_LIN_CONSTRAINT, ADD_NLN_CONSTRAINT, ADD_QUAD_COST and
+            %           ADD_NLN_COST.
 
-        rv = get_userdata(obj, name)
+            if nargin ~= 1
+                for k = nargout:-1:1
+                    varargout{k} = obj.(varargin{k}).idx;
+                end
+            end
+        end
 
-        val = get(obj, varargin)
+        function rv = get_userdata(obj, name)
+            % get_userdata - Used to retrieve values of user data.
+            % ::
+            %
+            %   VAL = OBJ.GET_USERDATA(NAME) returns the value specified by the given name
+            %   or an empty matrix if userdata with NAME does not exist.
+            %
+            %   This function allows the user to retrieve any arbitrary data that was
+            %   saved in the object for later use. Data for a given NAME is saved by
+            %   assigning it to OBJ.userdata.(NAME).
+            %
+            %   This can be useful, for example, when using a user function to add
+            %   variables or constraints, etc. Suppose some special indexing is
+            %   constructed when adding some variables or constraints. This indexing data
+            %   can be stored and used later to "unpack" the results of the solved case.
+            %
+            % See also mp.opt_model.
+
+            if isfield(obj.userdata, name)
+                rv = obj.userdata.(name);
+            else
+                rv = [];
+            end
+        end
+
+        function val = get(obj, varargin)
+            % get - Returns the value of a field.
+            % ::
+            %
+            %   VAL = OBJ.GET(FIELD1, FIELD2, ...)
+            %
+            %   Example:
+            %       var_order = obj.get('var', 'order');
+            %
+            % See also mp.opt_model.
+
+            val = obj;
+            for k = 1:length(varargin)
+                if ischar(varargin{k})
+                    val = val.(varargin{k});
+                else
+                    val = val(varargin{k});
+                end
+            end
+        end
     end     %% methods
 end         %% classdef
 
