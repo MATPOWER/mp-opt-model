@@ -27,7 +27,7 @@ t = 'var.add';
 vN = 0;
 vNS = 0;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''Va'', 4)';
 nVa = 4;
@@ -35,14 +35,14 @@ om = mp.opt_model;
 om.var.add('Va', nVa);
 vNS = vNS + 1; vN = vN + nVa;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''Pg'', 3, Pg0, Pgmin, Pgmax)';
 nPg = 3;
 om.var.add('Pg', nPg, [2;4;6], [1;2;3], [10;20;30]);
 vNS = vNS + 1; vN = vN + nPg;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''Vm1'', 5, V0, Vmin, Vmax, ''I'')';
 V0 = 1;             %% should get expanded to ones(5, 1)
@@ -52,7 +52,7 @@ vt = 'I';
 om.var.add('Vm1', 5, V0, Vmin, Vmax, vt);
 vNS = vNS + 1; vN = vN + 5;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''Vm2'', 5, V0, Vmin, Vmax, ''CIBIC'')';
 nVm2 = 5;
@@ -60,36 +60,36 @@ vt = 'CIBIC';
 om.var.add('Vm2', nVm2, V0, Vmin, Vmax, vt);
 vNS = vNS + 1; vN = vN + nVm2;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.init_indexed_name(''x'', dims)';
 om.var.init_indexed_name('x', {2,2});
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''x'', {1,1}, 2)';
 om.var.add('x', {1,1}, 2);
 vNS = vNS + 1; vN = vN + 2;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''x'', {1,2}, 2, x0(1,2))';
 om.var.add('x', {1,2}, 2, [-1;-2]);
 vNS = vNS + 1; vN = vN + 2;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''x'', {2,1}, 3)';
 om.var.add('x', {2,1}, 3);
 vNS = vNS + 1; vN = vN + 3;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.add(''x'', {2,2}, 2, x0(2,2), xmin(2,2), xmax(2,2))';
 om.var.add('x', {2,2}, 2, [1;0],[0;-1],[2;1]);
 vNS = vNS + 1; vN = vN + 2;
 t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
 
 t = 'om.var.init_indexed_name(''y'', {2,3,4})';
 om.var.init_indexed_name('y', {2,3,4});
@@ -109,7 +109,7 @@ for i = 1:2
             om.var.add('y', {i,j,k}, n, 10*(n:-1:1)', -1*(n:-1:1)', 100+(n:-1:1)', vt);
             vNS = vNS + 1; vN = vN + n;
             t_ok(om.var.get_N() == vN, sprintf('%s : var.N  = %d', t, vN));
-            t_ok(om.get('var', 'NS') == vNS, sprintf('%s : var.NS = %d', t, vNS));
+            t_ok(om.var.NS == vNS, sprintf('%s : var.NS = %d', t, vNS));
         end
     end
 end
@@ -371,7 +371,7 @@ t = 'lin.add';
 lN = 0;
 lNS = 0;
 t_ok(om.lin.get_N() == lN, sprintf('%s : lin.N  = %d', t, lN));
-t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
+t_ok(om.lin.NS == lNS, sprintf('%s : lin.NS = %d', t, lNS));
 
 t = 'om.lin.add(om.var, ''Pmis'', A, l, u, {''Va'', ''Pg''})';
 A1 = sparse([1:3 1:3 1:3]', [1:3 4:6 7 7 7]', [1 1 1 -1 -1 -1 2 3 4]', 3, 7);
@@ -379,19 +379,19 @@ l1 = -(1:3)'; u1 = (1:3)';
 om.lin.add(om.var, 'Pmis', A1, l1, u1, {'Va', 'Pg'});
 lNS = lNS + 1; lN = lN + 3;
 t_ok(om.lin.get_N() == lN, sprintf('%s : lin.N  = %d', t, lN));
-t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
+t_ok(om.lin.NS == lNS, sprintf('%s : lin.NS = %d', t, lNS));
 
 t = 'om.lin.add(om.var, ''Qmis'', A, l, u)';
 A2 = sparse([1:3 1:3 1:3]', [1:3 4:6 7 7 7]', [1 1 1 -1 -1 -1 2 3 4]', 3, vN);
 om.lin.add(om.var, 'Qmis', A2, l1, u1);
 lNS = lNS + 1; lN = lN + 3;
 t_ok(om.lin.get_N() == lN, sprintf('%s : lin.N  = %d', t, lN));
-t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
+t_ok(om.lin.NS == lNS, sprintf('%s : lin.NS = %d', t, lNS));
 
 t = 'om.lin.init_indexed_name(''mylin'', {2, 2})';
 om.lin.init_indexed_name('mylin', {2, 2});
 t_ok(om.lin.get_N() == lN, sprintf('%s : lin.N  = %d', t, lN));
-t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
+t_ok(om.lin.NS == lNS, sprintf('%s : lin.NS = %d', t, lNS));
 
 for i = 1:2
     for j = 1:2
@@ -403,7 +403,7 @@ for i = 1:2
         om.lin.add(om.var, 'mylin', {i, j}, A', l, u, vs, 1);
         lNS = lNS + 1; lN = lN + i+j;
         t_ok(om.lin.get_N() == lN, sprintf('%s : lin.N  = %d', t, lN));
-        t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
+        t_ok(om.lin.NS == lNS, sprintf('%s : lin.NS = %d', t, lNS));
     end
 end
 
@@ -412,14 +412,14 @@ A4 = sparse([1 1 1]', [1:3]', [-1 -2 -3]', 1, vN);
 om.lin.add(om.var, 'onerow', A4, 0, Inf);
 lNS = lNS + 1; lN = lN + 1;
 t_ok(om.lin.get_N() == lN, sprintf('%s : lin.N  = %d', t, lN));
-t_ok(om.get('lin', 'NS') == lNS, sprintf('%s : lin.NS = %d', t, lNS));
+t_ok(om.lin.NS == lNS, sprintf('%s : lin.NS = %d', t, lNS));
 
 %%-----  om.qcn.add (quadratic constraints) -----
 t = 'om.qcn.add';
 qN = 0;
 qNS = 0;
 t_ok(om.qcn.get_N() == qN, sprintf('%s : qcn.N  = %d', t, qN));
-t_ok(om.get('qcn', 'NS') == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
+t_ok(om.qcn.NS == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
 
 t = 'om.qcn.add(om.var,''Pmis'', Q, B, lq, uq, {''Va'', ''Pg''})';
 Q1 = repmat({sparse([1:6 1:6], [1:3 1:3 4:6 4:6], [ones(1,6) -ones(1,6)], 7, 7)}, 3, 1);
@@ -428,7 +428,7 @@ lq1 = -(1:3)'; uq1 = (1:3)';
 om.qcn.add(om.var, 'Pmis', Q1, B1, lq1, uq1, {'Va', 'Pg'});
 qNS = qNS + 1; qN = qN + 3;
 t_ok(om.qcn.get_N() == qN, sprintf('%s : qcn.N  = %d', t, qN));
-t_ok(om.get('qcn', 'NS') == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
+t_ok(om.qcn.NS == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
 
 t = 'om.qcn.add(om.var,''Qmis'', Q, B, lq, uq)';
 Q2 = repmat({sparse([1:6 1:6], [1:3 1:3 4:6 4:6], [ones(1,6) -ones(1,6)], vN, vN)}, 3, 1);
@@ -436,12 +436,12 @@ B2 = sparse([1:3 1:3 1:3]', [1:3 4:6 7 7 7]', [1 1 1 -1 -1 -1 2 3 4]', 3, vN);
 om.qcn.add(om.var, 'Qmis', Q2, B2, lq1, uq1);
 qNS = qNS + 1; qN = qN + 3;
 t_ok(om.qcn.get_N() == qN, sprintf('%s : qcn.N  = %d', t, qN));
-t_ok(om.get('qcn', 'NS') == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
+t_ok(om.qcn.NS == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
 
 t = 'om.qcn.init_indexed_name(''myqcn'', {2, 2})';
 om.qcn.init_indexed_name('myqcn', {2,2});
 t_ok(om.qcn.get_N() == qN, sprintf('%s : qcn.N  = %d', t, qN));
-t_ok(om.get('qcn', 'NS') == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
+t_ok(om.qcn.NS == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
 
 for i = 1:2
     for j = 1:2
@@ -454,7 +454,7 @@ for i = 1:2
         om.qcn.add(om.var, 'myqcn', {i,j}, Q3, B3, lq3, uq3, vs);
         qNS = qNS + 1; qN = qN + i+j;
         t_ok(om.qcn.get_N() == qN, sprintf('%s : qcn.N  = %d', t, qN));
-        t_ok(om.get('qcn', 'NS') == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
+        t_ok(om.qcn.NS == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
     end
 end
 
@@ -464,14 +464,14 @@ B4 = sparse([1 1 1], [1:3], [-1 -2 -3], 1, vN);
 om.qcn.add(om.var, 'onerow', Q4, B4, 0, Inf);
 qNS = qNS + 1; qN = qN + 1;
 t_ok(om.qcn.get_N() == qN, sprintf('%s : qcn.N  = %d', t, qN));
-t_ok(om.get('qcn', 'NS') == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
+t_ok(om.qcn.NS == qNS, sprintf('%s : qcn.NS = %d', t, qNS));
 
 %%-----  add_nln_constraint (equality)  -----
 t = 'add_nln_constraint (equality)';
 neN = 0;
 neNS = 0;
 t_ok(om.nle.get_N() == neN, sprintf('%s : nle.N  = %d', t, neN));
-t_ok(om.get('nle', 'NS') == neNS, sprintf('%s : nle.NS = %d', t, neNS));
+t_ok(om.nle.NS == neNS, sprintf('%s : nle.NS = %d', t, neNS));
 
 t = 'om.nle.add(om.var, ''Pmise'', N, fcn, hess, {''Pg'', ''Va''})';
 N = 4;
@@ -480,7 +480,7 @@ hess = @(x, lam)my_hess(x, lam, 10);
 om.nle.add(om.var, 'Pmise', N, fcn, hess, {'Pg', 'Va'});
 neNS = neNS + 1; neN = neN + N;
 t_ok(om.nle.get_N() == neN, sprintf('%s : nle.N  = %d', t, neN));
-t_ok(om.get('nle', 'NS') == neNS, sprintf('%s : nle.NS = %d', t, neNS));
+t_ok(om.nle.NS == neNS, sprintf('%s : nle.NS = %d', t, neNS));
 
 t = 'om.nle.add(om.var, ''Qmise'', N, fcn, hess)';
 N = 3;
@@ -489,7 +489,7 @@ hess = @(x, lam)my_hess(x, lam, 10);
 om.nle.add(om.var, 'Qmise', N, fcn, hess);
 neNS = neNS + 1; neN = neN + N;
 t_ok(om.nle.get_N() == neN, sprintf('%s : nle.N  = %d', t, neN));
-t_ok(om.get('nle', 'NS') == neNS, sprintf('%s : nle.NS = %d', t, neNS));
+t_ok(om.nle.NS == neNS, sprintf('%s : nle.NS = %d', t, neNS));
 
 t = 'om.nle.add(om.var, {''P'',''Q'',''R''}, [3;2;1], fcn, hess, {''Pg'', ''Va''})';
 N = [3;2;1];
@@ -498,12 +498,12 @@ hess = @(x, lam)my_hess(x, lam, 10);
 om.nle.add(om.var, {'P', 'Q', 'R'}, N, fcn, hess, {'Pg', 'Va'});
 neNS = neNS + length(N); neN = neN + sum(N);
 t_ok(om.nle.get_N() == neN, sprintf('%s : nle.N  = %d', t, neN));
-t_ok(om.get('nle', 'NS') == neNS, sprintf('%s : nle.NS = %d', t, neNS));
+t_ok(om.nle.NS == neNS, sprintf('%s : nle.NS = %d', t, neNS));
 
 t = 'om.nle.init_indexed_name(''mynle'', {2, 2})';
 om.nle.init_indexed_name('mynle', {2, 2});
 t_ok(om.nle.get_N() == neN, sprintf('%s : nle.N  = %d', t, neN));
-t_ok(om.get('nle', 'NS') == neNS, sprintf('%s : nle.NS = %d', t, neNS));
+t_ok(om.nle.NS == neNS, sprintf('%s : nle.NS = %d', t, neNS));
 
 for i = 1:2
     for j = 1:2
@@ -515,7 +515,7 @@ for i = 1:2
         om.nle.add(om.var, 'mynle', {i, j}, N, fcn, hess, vs);
         neNS = neNS + 1; neN = neN + N;
         t_ok(om.nle.get_N() == neN, sprintf('%s : nle.N  = %d', t, neN));
-        t_ok(om.get('nle', 'NS') == neNS, sprintf('%s : nle.NS = %d', t, neNS));
+        t_ok(om.nle.NS == neNS, sprintf('%s : nle.NS = %d', t, neNS));
     end
 end
 
@@ -524,7 +524,7 @@ t = 'add_nln_constraint (inequality)';
 niN = 0;
 niNS = 0;
 t_ok(om.nli.get_N() == niN, sprintf('%s : nli.N  = %d', t, niN));
-t_ok(om.get('nli', 'NS') == niNS, sprintf('%s : nli.NS = %d', t, niNS));
+t_ok(om.nli.NS == niNS, sprintf('%s : nli.NS = %d', t, niNS));
 
 t = 'om.nli.add(om.var, ''Pmisi'', N, fcn, hess, {''Pg'', ''Va''})';
 N = 3;
@@ -533,7 +533,7 @@ hess = @(x, lam)my_hess(x, lam, -10);
 om.nli.add(om.var, 'Pmisi', N, fcn, hess, {'Pg', 'Va'});
 niNS = niNS + 1; niN = niN + N;
 t_ok(om.nli.get_N() == niN, sprintf('%s : nli.N  = %d', t, niN));
-t_ok(om.get('nli', 'NS') == niNS, sprintf('%s : nli.NS = %d', t, niNS));
+t_ok(om.nli.NS == niNS, sprintf('%s : nli.NS = %d', t, niNS));
 
 t = 'om.nli.add(om.var, ''Qmisi'', N, fcn, hess)';
 N = 2;
@@ -542,12 +542,12 @@ hess = @(x, lam)my_hess(x, lam, -10);
 om.nli.add(om.var, 'Qmisi', N, fcn, hess);
 niNS = niNS + 1; niN = niN + N;
 t_ok(om.nli.get_N() == niN, sprintf('%s : nli.N  = %d', t, niN));
-t_ok(om.get('nli', 'NS') == niNS, sprintf('%s : nli.NS = %d', t, niNS));
+t_ok(om.nli.NS == niNS, sprintf('%s : nli.NS = %d', t, niNS));
 
 t = 'om.nli.init_indexed_name(''mynli'', {2, 2})';
 om.nli.init_indexed_name('mynli', {2, 2});
 t_ok(om.nli.get_N() == niN, sprintf('%s : nli.N  = %d', t, niN));
-t_ok(om.get('nli', 'NS') == niNS, sprintf('%s : nli.NS = %d', t, niNS));
+t_ok(om.nli.NS == niNS, sprintf('%s : nli.NS = %d', t, niNS));
 
 for i = 1:2
     for j = 1:2
@@ -559,7 +559,7 @@ for i = 1:2
         om.nli.add(om.var, 'mynli', {i, j}, N, fcn, hess, vs);
         niNS = niNS + 1; niN = niN + N;
         t_ok(om.nli.get_N() == niN, sprintf('%s : nli.N  = %d', t, niN));
-        t_ok(om.get('nli', 'NS') == niNS, sprintf('%s : nli.NS = %d', t, niNS));
+        t_ok(om.nli.NS == niNS, sprintf('%s : nli.NS = %d', t, niNS));
     end
 end
 
@@ -1063,7 +1063,7 @@ t = 'qdc.add';
 qcN = 0;
 qcNS = 0;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 t = 'om.qdc.add(om.var, ''qc1'', <mat>Q, c, k, {''Pg'', ''Va''})';
 n = nVa + nPg;
@@ -1073,7 +1073,7 @@ k1 = n;
 om.qdc.add(om.var, 'qc1', Q1, c1, k1, {'Pg', 'Va'});
 qcNS = qcNS + 1; qcN = qcN + 1;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 t = 'om.qdc.add(om.var, ''qc2'', <mat>Q, c)';
 n = om.var.get_N();
@@ -1082,7 +1082,7 @@ c2 = 10*(n:-1:1)';
 om.qdc.add(om.var, 'qc2', Q2, c2);
 qcNS = qcNS + 1; qcN = qcN + 1;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 t = 'om.qdc.add(om.var, ''qc3'', <vec>Q, c, k, {''Vm2'', ''Pg''})';
 n = nVm2 + nPg;
@@ -1092,7 +1092,7 @@ k3 = -n;
 om.qdc.add(om.var, 'qc3', Q3, c3, k3, {'Vm2', 'Pg'});
 qcNS = qcNS + 1; qcN = qcN + n;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 t = 'om.qdc.add(om.var, ''qc4'', <vec>Q, [], 0, vs)';
 n = om.var.get_N('x', {2,1}) + om.var.get_N('y', {1,1,1});
@@ -1101,7 +1101,7 @@ vs = struct('name', {'x', 'y'}, 'idx', {{2,1}, {1,1,1}});
 om.qdc.add(om.var, 'qc4', Q4, [], 0, vs);
 qcNS = qcNS + 1; qcN = qcN + n;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 t = 'om.qdc.add(om.var, ''qc5'', [], c, k, {''Pg'', ''Va''})';
 n = nVa + nPg;
@@ -1110,7 +1110,7 @@ k5 = (1:n)';
 om.qdc.add(om.var, 'qc5', [], c5, k5, {'Pg', 'Va'});
 qcNS = qcNS + 1; qcN = qcN + n;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 t = 'om.qdc.add(om.var, ''qc6'', [], c, <sclr>k)';
 n = om.var.get_N();
@@ -1119,12 +1119,12 @@ k6 = 3;
 om.qdc.add(om.var, 'qc6', [], c6, k6);
 qcNS = qcNS + 1; qcN = qcN + n;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 t = 'om.qdc.init_indexed_name(''qc'', {2,2})';
 om.qdc.init_indexed_name('qc', {2,2});
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
 for i = 1:2
     for j = 1:2
@@ -1137,7 +1137,7 @@ for i = 1:2
         om.qdc.add(om.var, 'qc', {i, j}, QQ, cc, kk, vs);
         qcNS = qcNS + 1; qcN = qcN + 1;
         t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
-        t_ok(om.get('qdc', 'NS') == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
+        t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
     end
 end
 
@@ -1315,7 +1315,7 @@ t = 'add_nln_cost';
 nlcN = 0;
 nlcNS = 0;
 t_ok(om.nlc.get_N() == nlcN, sprintf('%s : nlc.N  = %d', t, nlcN));
-t_ok(om.get('nlc', 'NS') == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
+t_ok(om.nlc.NS == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
 
 t = 'om.nlc.add(om.var, ''ucost'', 1, fcn, {''Va'', ''Pg''})';
 cp = struct('N', sparse([1:2 1:2 1:2]', [1:4 5 7]', [1 1 -1 -1 2 2]', 2,7), ...
@@ -1324,7 +1324,7 @@ fcn = @(x)my_legacy_cost_fcn(x, cp, om, {'Va', 'Pg'});
 om.nlc.add(om.var, 'ucost', 1, fcn, {'Va', 'Pg'});
 nlcNS = nlcNS + 1; nlcN = nlcN + 1;
 t_ok(om.nlc.get_N() == nlcN, sprintf('%s : nlc.N  = %d', t, nlcN));
-t_ok(om.get('nlc', 'NS') == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
+t_ok(om.nlc.NS == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
 
 t = 'om.nlc.add(om.var, ''vcost'', cp)';
 cp = struct('N', sparse([1:2 1:2 1:2]', [1:4 5 7]', [1 1 -1 -1 2 2]', 2, vN), ...
@@ -1333,12 +1333,12 @@ fcn = @(x)my_legacy_cost_fcn(x, cp, om);
 om.nlc.add(om.var, 'vcost', 1, fcn);
 nlcNS = nlcNS + 1; nlcN = nlcN + 1;
 t_ok(om.nlc.get_N() == nlcN, sprintf('%s : nlc.N  = %d', t, nlcN));
-t_ok(om.get('nlc', 'NS') == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
+t_ok(om.nlc.NS == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
 
 t = 'om.nlc.init_indexed_name(''wc'', {2,2})';
 om.nlc.init_indexed_name('wc', {2,2});
 t_ok(om.nlc.get_N() == nlcN, sprintf('%s : nlc.N  = %d', t, nlcN));
-t_ok(om.get('nlc', 'NS') == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
+t_ok(om.nlc.NS == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
 
 for i = 1:2
     for j = 1:2
@@ -1354,7 +1354,7 @@ for i = 1:2
         om.nlc.add(om.var, 'wc', {i, j}, 1, fcn, vs);
         nlcNS = nlcNS + 1; nlcN = nlcN + 1;
         t_ok(om.nlc.get_N() == nlcN, sprintf('%s : nlc.N  = %d', t, nlcN));
-        t_ok(om.get('nlc', 'NS') == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
+        t_ok(om.nlc.NS == nlcNS, sprintf('%s : nlc.NS = %d', t, nlcNS));
     end
 end
 

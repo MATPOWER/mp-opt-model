@@ -17,9 +17,6 @@ classdef idx_manager < handle
 %           object (called automatically when you omit the semicolon at
 %           the command-line).
 %
-%       display_set - Prints to screen the indexing details for the
-%           specified set type. Intended to be called by DISPLAY method.
-%
 %       get_idx - Returns index structure(s) for specified set type(s),
 %           with starting/ending indices and number of elements for
 %           each named (and optionally indexed) block.
@@ -130,12 +127,6 @@ classdef idx_manager < handle
             end
         end
 
-        function display_set(obj, stype, sname)
-            % Display indexing information for a given set type.
-
-            obj.(stype).display(stype);
-        end
-
         function varargout = get_idx(obj, varargin)
             % get_idx - Returns the idx struct for the various set types.
             % ::
@@ -220,27 +211,6 @@ classdef idx_manager < handle
                 rv = obj.userdata.(name);
             else
                 rv = [];
-            end
-        end
-
-        function val = get(obj, varargin)
-            % get - Returns the value of a field.
-            % ::
-            %
-            %   VAL = OBJ.GET(FIELD1, FIELD2, ...)
-            %
-            %   Example:
-            %       var_order = obj.get('var', 'order');
-            %
-            % See also mp.opt_model.
-
-            val = obj;
-            for k = 1:length(varargin)
-                if ischar(varargin{k})
-                    val = val.(varargin{k});
-                else
-                    val = val(varargin{k});
-                end
             end
         end
     end     %% methods
