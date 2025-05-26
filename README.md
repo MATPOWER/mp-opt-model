@@ -76,7 +76,7 @@ and two constraints, one equality and the other inequality, along with
 lower bounds on all of the variables.
 
 ```
-  min  1/2 [y; z]' * Q * [y; z]
+  min  1/2 [y; z]' * H * [y; z]
   y,z
 
 subject to:
@@ -102,7 +102,7 @@ A1 = [ 6 1 5 -4 ];  b1 = 4;
 A2 = [ 4 9 ];       u2 = 2;
 
 %% quadratic cost coefficients
-Q = [ 8  1 -3 -4;
+H = [ 8  1 -3 -4;
       1  4 -2 -1;
      -3 -2  5  4;
      -4 -1  4  12  ];
@@ -123,7 +123,7 @@ om.var.add('y', 2, y0, ymin);
 om.var.add('z', 2, z0, [], zmax);
 om.lin.add(om.var, 'lincon1', A1, b1, b1);
 om.lin.add(om.var, 'lincon2', A2, [], u2, {'y'});
-om.qdc.add(om.var, 'cost', Q, []);
+om.qdc.add(mm.var, 'cost', H, []);
 
 %% solve model
 [x, f, exitflag, output, lambda] = om.solve();
@@ -143,7 +143,7 @@ l = [ b1; -Inf ];
 u = [ b1;  u2  ];
 
 %% solve model
-[x, f, exitflag, output, lambda] = qps_master(Q, [], A, l, u, xmin, xmax, x0);
+[x, f, exitflag, output, lambda] = qps_master(H, [], A, l, u, xmin, xmax, x0);
 ```
 
 The above examples are included in `<MPOM>/lib/t/qp_ex1.m` along with

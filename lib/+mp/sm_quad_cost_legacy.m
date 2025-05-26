@@ -4,7 +4,7 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
 % .. note::
 %    .. deprecated:: 5.0 For use only with deprecated opt_model. Please
 %       use mp.opt_model instead, which uses mp.sm_quad_cost with the ``Q``
-%       parameter renaed to ``H`` for consistency.
+%       parameter renamed to ``H`` for consistency.
 %
 % ::
 %
@@ -15,12 +15,12 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
 % forms, either a scalar cost function of the form
 %
 % .. math:: f(\x) = \frac{1}{2}\trans{\x} \QQ \x + \trans{\c} \x + \param{k}
-%   :label: eq_qdc_form_1
+%   :label: eq_qdc_form_1_legacy
 %
 % or a vector cost function of the form
 %
 % .. math:: \rvec{f}(\x) = \frac{1}{2} \diag{\q} \x^2 + \diag{\c} \x + \k
-%   :label: eq_qdc_form_2
+%   :label: eq_qdc_form_2_legacy
 %
 % where :math:`\x` is an :math:`n_x \times 1` vector, and the corresponding
 % coefficient parameters are conformable.
@@ -73,6 +73,29 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
                 'vs', es );
         end
 
+        function new_obj = copy(obj, varargin)
+            % Duplicate the object.
+            % ::
+            %
+            %   new_sm = sm.copy()
+            %   new_sm = sm.copy(new_class)
+            %
+            % Input:
+            %   new_class (char array) : *(default = same class)* name of class
+            %       to use for new object
+            %
+            % Make a shallow copy of the object by copying each of the
+            % top-level properties. Parent method makes the copy, then
+            % the ``Q`` parameter is renamed to ``H`` if the new class is
+            % mp.sm_quad_cost.
+
+            new_obj = copy@mp.set_manager_opt_model(obj, varargin{:});
+            if isa(new_obj, 'mp.sm_quad_cost')
+                new_obj.data.H = new_obj.data.Q;
+                new_obj.data = rmfield(new_obj.data, 'Q');
+            end
+        end
+
         function obj = add(obj, var, name, idx, varargin)
             % Add a subset of quadratic costs.
             % ::
@@ -86,13 +109,13 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
             %   qdc.add(var, name, idx_list, Q, c, k, vs);
             %
             % Add a named, and possibly indexed, subset of quadratic costs
-            % of form :eq:`eq_qdc_form_1` or :eq:`eq_qdc_form_2` to the set
-            % where :math:`\x` is an :math:`n_x \times 1` vector made up of the
-            % variables specified in the optional ``vs`` *(in the order
-            % given)*. This allows the :math:`\QQ`, :math:`\q`, :math:`\c`,
-            % and/or :math:`\k` parameters to be defined in terms of only the
-            % relevant variables without the need to manually create a lot of
-            % properly located zero rows/columns.
+            % of form :eq:`eq_qdc_form_1_legacy` or :eq:`eq_qdc_form_2_legacy`
+            % to the set where :math:`\x` is an :math:`n_x \times 1` vector made
+            % up of the variables specified in the optional ``vs`` *(in the
+            % order given)*. This allows the :math:`\QQ`, :math:`\q`,
+            % :math:`\c`, and/or :math:`\k` parameters to be defined in terms of
+            % only the relevant variables without the need to manually create a
+            % lot of properly located zero rows/columns.
             %
             % Inputs:
             %   var (mp.sm_variable) : corresponding mp.sm_variable object
@@ -232,8 +255,8 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
             % added using add(). The values of these parameters are cached
             % for subsequent calls. The parameters are :math:`\QQ, \c`, and
             % optionally :math:`\param{k}` for the scalar cost form in
-            % :eq:`eq_qdc_form_1`, or :math:`\q, \c`, and optionally
-            % :math:`\k` for the vector cost form in :eq:`eq_qdc_form_2`.
+            % :eq:`eq_qdc_form_1_legacy`, or :math:`\q, \c`, and optionally
+            % :math:`\k` for the vector cost form in :eq:`eq_qdc_form_2_legacy`.
             %
             % If a name or name and index list are provided, then it simply
             % returns the parameters for the corresponding set. It can also
@@ -598,14 +621,17 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
             %       of quadratic costs to evaluate (for an indexed subset)
             %
             % Outputs:
-            %   f (double) : scalar cost :math:`f(\x)` for :eq:`eq_qdc_form_1`,
-            %       or vector cost :math:`\rvec{f}(\x)` for :eq:`eq_qdc_form_2`
+            %   f (double) : scalar cost :math:`f(\x)` for
+            %       :eq:`eq_qdc_form_1_legacy`, or vector cost
+            %       :math:`\rvec{f}(\x)` for :eq:`eq_qdc_form_2_legacy`
             %   df (double) : *(optional)* cost first derivatives, gradient of
-            %       scalar cost :math:`\der{f}{\x}` for :eq:`eq_qdc_form_1`,
-            %       or vector of cost first derivatives for :eq:`eq_qdc_form_2`
+            %       scalar cost :math:`\der{f}{\x}` for
+            %       :eq:`eq_qdc_form_1_legacy`, or vector of cost first
+            %       derivatives for :eq:`eq_qdc_form_2_legacy`
             %   d2f (double) : *(optional)* second derivative of costs,
-            %       :math:`\der{^2 f}{\x^2}` for :eq:`eq_qdc_form_1`, or vector
-            %       of cost second derivatives for :eq:`eq_qdc_form_2`
+            %       :math:`\der{^2 f}{\x^2}` for :eq:`eq_qdc_form_1_legacy`, or
+            %       vector of cost second derivatives for
+            %       :eq:`eq_qdc_form_2_legacy`
             %
             % See also add, params.
 
@@ -873,16 +899,16 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
             %       valid values:
             %
             %           - ``'f'`` - scalar cost :math:`f(\x)` for
-            %             :eq:`eq_qdc_form_1`, or vector cost
-            %             :math:`\rvec{f}(\x)` for :eq:`eq_qdc_form_2`
+            %             :eq:`eq_qdc_form_1_legacy`, or vector cost
+            %             :math:`\rvec{f}(\x)` for :eq:`eq_qdc_form_2_legacy`
             %           - ``'df'`` - cost first derivatives, gradient of
             %             scalar cost :math:`\der{f}{\x}` for
-            %             :eq:`eq_qdc_form_1`, or vector of cost first
-            %             derivatives for :eq:`eq_qdc_form_2`
+            %             :eq:`eq_qdc_form_1_legacy`, or vector of cost first
+            %             derivatives for :eq:`eq_qdc_form_2_legacy`
             %           - ``'d2f'`` - second derivative of costs,
-            %             :math:`\der{^2 f}{\x^2}` for :eq:`eq_qdc_form_1`, or
-            %             vector of cost second derivatives for
-            %             :eq:`eq_qdc_form_2`
+            %             :math:`\der{^2 f}{\x^2}` for
+            %             :eq:`eq_qdc_form_1_legacy`, or vector of cost second
+            %             derivatives for :eq:`eq_qdc_form_2_legacy`
             %   name (char array) : name of the subset
             %   idx_list (cell array) : *(optional)* indices of the subset
             %

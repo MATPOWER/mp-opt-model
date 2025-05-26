@@ -1065,40 +1065,40 @@ qcNS = 0;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
 t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
-t = 'om.qdc.add(om.var, ''qc1'', <mat>Q, c, k, {''Pg'', ''Va''})';
+t = 'om.qdc.add(om.var, ''qc1'', <mat>H, c, k, {''Pg'', ''Va''})';
 n = nVa + nPg;
-Q1 = sparse(1:n, 1:n, 1:n, n, n) + sparse(1:n, n:-1:1, 1:n, n, n);
+H1 = sparse(1:n, 1:n, 1:n, n, n) + sparse(1:n, n:-1:1, 1:n, n, n);
 c1 = 10*(1:n)';
 k1 = n;
-om.qdc.add(om.var, 'qc1', Q1, c1, k1, {'Pg', 'Va'});
+om.qdc.add(om.var, 'qc1', H1, c1, k1, {'Pg', 'Va'});
 qcNS = qcNS + 1; qcN = qcN + 1;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
 t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
-t = 'om.qdc.add(om.var, ''qc2'', <mat>Q, c)';
+t = 'om.qdc.add(om.var, ''qc2'', <mat>H, c)';
 n = om.var.get_N();
-Q2 = sparse(1, 1:n, 1:n, n, n) + sparse(1:n, 1, n:-1:1, n, n);
+H2 = sparse(1, 1:n, 1:n, n, n) + sparse(1:n, 1, n:-1:1, n, n);
 c2 = 10*(n:-1:1)';
-om.qdc.add(om.var, 'qc2', Q2, c2);
+om.qdc.add(om.var, 'qc2', H2, c2);
 qcNS = qcNS + 1; qcN = qcN + 1;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
 t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
-t = 'om.qdc.add(om.var, ''qc3'', <vec>Q, c, k, {''Vm2'', ''Pg''})';
+t = 'om.qdc.add(om.var, ''qc3'', <vec>H, c, k, {''Vm2'', ''Pg''})';
 n = nVm2 + nPg;
-Q3 = 2*(1:n)';
+H3 = 2*(1:n)';
 c3 = -1*(1:n)';
 k3 = -n;
-om.qdc.add(om.var, 'qc3', Q3, c3, k3, {'Vm2', 'Pg'});
+om.qdc.add(om.var, 'qc3', H3, c3, k3, {'Vm2', 'Pg'});
 qcNS = qcNS + 1; qcN = qcN + n;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
 t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
-t = 'om.qdc.add(om.var, ''qc4'', <vec>Q, [], 0, vs)';
+t = 'om.qdc.add(om.var, ''qc4'', <vec>H, [], 0, vs)';
 n = om.var.get_N('x', {2,1}) + om.var.get_N('y', {1,1,1});
-Q4 = 1./(1:n)';
+H4 = 1./(1:n)';
 vs = struct('name', {'x', 'y'}, 'idx', {{2,1}, {1,1,1}});
-om.qdc.add(om.var, 'qc4', Q4, [], 0, vs);
+om.qdc.add(om.var, 'qc4', H4, [], 0, vs);
 qcNS = qcNS + 1; qcN = qcN + n;
 t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
 t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
@@ -1130,11 +1130,11 @@ for i = 1:2
     for j = 1:2
         t = 'om.qdc.add(om.var, ''qc'', {i, j}, cp, vs)';
         n = nPg + om.var.get_N('x', {i,j});
-        QQ = sparse(1:n, 1:n, 1:n, n, n) + sparse(1:n, n*ones(n,1), 1:n, n, n);
+        HH = sparse(1:n, 1:n, 1:n, n, n) + sparse(1:n, n*ones(n,1), 1:n, n, n);
         cc = -2*(1:n)';
         kk = 1000;
         vs = struct('name', {'Pg', 'x'}, 'idx', {{}, {i,j}});
-        om.qdc.add(om.var, 'qc', {i, j}, QQ, cc, kk, vs);
+        om.qdc.add(om.var, 'qc', {i, j}, HH, cc, kk, vs);
         qcNS = qcNS + 1; qcN = qcN + 1;
         t_ok(om.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
         t_ok(om.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
@@ -1143,41 +1143,41 @@ end
 
 %%-----  qdc.params  -----
 t = 'om.qdc.params(om.var, ''qc1'')';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc1');
-t_is(Q, Q1, 14, [t, ' : Q']);
+[H, c, k, vs] = om.qdc.params(om.var, 'qc1');
+t_is(H, H1, 14, [t, ' : H']);
 t_is(c, c1, 14, [t, ' : c']);
 t_is(k, k1, 14, [t, ' : k']);
 vs1 = struct('name', {'Pg', 'Va'}, 'idx', {{}, {}});
 t_ok(isequal(vs, vs1), [t, ' : vs']);
 
 t = 'om.qdc.params(om.var, ''qc2'')';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc2');
-t_is(Q, Q2, 14, [t, ' : Q']);
+[H, c, k, vs] = om.qdc.params(om.var, 'qc2');
+t_is(H, H2, 14, [t, ' : H']);
 t_is(c, c2, 14, [t, ' : c']);
 t_is(k, 0, 14, [t, ' : k']);
 t_ok(isequal(vs, {}), [t, ' : vs']);
 
 t = 'om.qdc.params(om.var, ''qc3'')';
-[Q, c, k] = om.qdc.params(om.var, 'qc3');
-t_is(Q, Q3, 14, [t, ' : Q']);
+[H, c, k] = om.qdc.params(om.var, 'qc3');
+t_is(H, H3, 14, [t, ' : H']);
 t_is(c, c3, 14, [t, ' : c']);
 t_is(k, k3, 14, [t, ' : k']);
 
 t = 'om.qdc.params(om.var, ''qc4'')';
-[Q, c] = om.qdc.params(om.var, 'qc4');
-t_is(Q, Q4, 14, [t, ' : Q']);
+[H, c] = om.qdc.params(om.var, 'qc4');
+t_is(H, H4, 14, [t, ' : H']);
 t_ok(isempty(c), [t, ' : c']);
 % t_is(k, 0, 14, [t, ' : k']);
 
 t = 'om.qdc.params(om.var, ''qc5'')';
-[Q, c, k] = om.qdc.params(om.var, 'qc5');
-t_ok(isempty(Q), [t, ' : Q']);
+[H, c, k] = om.qdc.params(om.var, 'qc5');
+t_ok(isempty(H), [t, ' : H']);
 t_is(c, c5, 14, [t, ' : c']);
 t_is(k, k5, 14, [t, ' : k']);
 
 t = 'om.qdc.params(om.var, ''qc6'')';
-[Q, c, k] = om.qdc.params(om.var, 'qc6');
-t_ok(isempty(Q), [t, ' : Q']);
+[H, c, k] = om.qdc.params(om.var, 'qc6');
+t_ok(isempty(H), [t, ' : H']);
 t_is(c, c6, 14, [t, ' : c']);
 t_is(k, k6, 14, [t, ' : k']);
 
@@ -1185,35 +1185,35 @@ for i = 1:2
     for j = 1:2
         t = sprintf('om.qdc.params(om.var, ''qc'', {%d, %d})', i, j);
         n = nPg + om.var.get_N('x', {i,j});
-        QQ = sparse(1:n, 1:n, 1:n, n, n) + sparse(1:n, n*ones(n,1), 1:n, n, n);
+        HH = sparse(1:n, 1:n, 1:n, n, n) + sparse(1:n, n*ones(n,1), 1:n, n, n);
         cc = -2*(1:n)';
         kk = 1000;
-        [Q, c, k] = om.qdc.params(om.var, 'qc', {i,j});
-        t_is(Q, QQ, 14, [t, ' : Q']);
+        [H, c, k] = om.qdc.params(om.var, 'qc', {i,j});
+        t_is(H, HH, 14, [t, ' : H']);
         t_is(c, cc, 14, [t, ' : c']);
         t_is(k, kk, 14, [t, ' : k']);
     end
 end
 
 t = 'om.qdc.params(om.var)';
-[Q, c, k] = om.qdc.params(om.var);
-% [ii, jj, ss] = find(Q)
+[H, c, k] = om.qdc.params(om.var);
+% [ii, jj, ss] = find(H)
 ii = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 1 2 7 1 3 6 1 4 5 1 4 5 1 3 6 1 2 7 1 1 1 1 1 1 13 1 14 1 15 1 16 1 17 1 18 1 5 6 7 18 19 1 20 1 5 6 7 20 21 1 22 1 23 1 5 6 7 22 23 24 1 25 1 5 6 7 25 26 1 27 1 28 1 29 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]';
 jj = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 9 10 11 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 19 19 19 19 20 20 21 21 21 21 21 21 22 22 23 23 24 24 24 24 24 24 24 25 25 26 26 26 26 26 26 27 27 28 28 29 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170]';
 ss = [179 169 168 167 166 165 164 163 162 161 160 159 158 157 156 155 154 153 152 151 150 149 148 147 146 145 144 143 142 141 140 139 138 137 136 135 134 133 132 131 130 129 128 127 126 125 124 123 122 121 120 119 118 117 116 115 114 113 112 111 110 109 108 107 106 105 104 103 102 101 100 99 98 97 96 95 94 93 92 91 90 89 88 87 86 85 84 83 82 81 80 79 78 77 76 75 74 73 72 71 70 69 68 67 66 65 64 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 2 5 3 3 6 2 4 7 1 5 7 17 6 6 24 7 5 31 8 9 10 11 12 13 2 14 4 15 6 16 8 17 10 18 4 19 1 2 3 4 10 20 4 21 1 2 3 4 10 22 5 23 5.5 24 1 2 3 4 5 12.3333333333333333 25 4 26 1 2 3 4 10 27 0.25 28 0.2 29 0.1666666666666667 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170];
-QQ = sparse(ii, jj, ss, om.var.N, om.var.N);
+HH = sparse(ii, jj, ss, om.var.N, om.var.N);
 cc = [ 2139 2238 2337 2436 1751 1841 1931 1622 1611 1600 1589 1578 1566 1554 1542 1530 1518 1504 1491 1482 1469 1460 1447 1434 1427 1414 1413 1402 1391 1380 1369 1358 1347 1336 1325 1314 1303 1292 1281 1270 1259 1248 1237 1226 1215 1204 1193 1182 1171 1160 1149 1138 1127 1116 1105 1094 1083 1072 1061 1050 1039 1028 1017 1006 995 984 973 962 951 940 929 918 907 896 885 874 863 852 841 830 819 808 797 786 775 764 753 742 731 720 709 698 687 676 665 654 643 632 621 610 599 588 577 566 555 544 533 522 511 500 489 478 467 456 445 434 423 412 401 390 379 368 357 346 335 324 313 302 291 280 269 258 247 236 225 214 203 192 181 170 159 148 137 126 115 104 93 82 71 60 49 38 27 16 5 -6 -17 -28 -39 -50 -61 -72 -83 -94 -105 -116 -127 -138 -149 -160]';
-t_is(Q, QQ, 14, [t, ' : Q']);
+t_is(H, HH, 14, [t, ' : H']);
 t_is(c, cc, 14, [t, ' : c']);
-t_is(k, k1+k3*length(Q3)+sum(k5)+k6*length(c6)+4000, 14, [t, ' : k']);
+t_is(k, k1+k3*length(H3)+sum(k5)+k6*length(c6)+4000, 14, [t, ' : k']);
 
 %%-----  qdc.eval  -----
 t = 'om.qdc.eval(om.var, x, ''qc1'')';
 x = (1:om.var.N)';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc1');
+[H, c, k, vs] = om.qdc.params(om.var, 'qc1');
 xx = om.var.varsets_x(x, vs, 'vector');
-ef = 1/2 * xx'*Q*xx + c'*xx + k;
-edf = Q*xx + c;
+ef = 1/2 * xx'*H*xx + c'*xx + k;
+edf = H*xx + c;
 f = om.qdc.eval(om.var, x, 'qc1');
 t_is(f, ef, 14, [t, ' : f']);
 [f, df] = om.qdc.eval(om.var, x, 'qc1');
@@ -1222,40 +1222,40 @@ t_is(df, edf, 14, [t, ' : df']);
 [f, df, d2f] = om.qdc.eval(om.var, x, 'qc1');
 t_is(f, ef, 14, [t, ' : f']);
 t_is(df, edf, 14, [t, ' : df']);
-t_is(d2f, Q, 14, [t, ' : d2f']);
+t_is(d2f, H, 14, [t, ' : d2f']);
 
 t = 'om.qdc.eval(om.var, x, ''qc2'')';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc2');
+[H, c, k, vs] = om.qdc.params(om.var, 'qc2');
 xx = om.var.varsets_x(x, vs, 'vector');
-ef = 1/2 * xx'*Q*xx + c'*xx + k;
-edf = Q*xx + c;
+ef = 1/2 * xx'*H*xx + c'*xx + k;
+edf = H*xx + c;
 [f, df, d2f] = om.qdc.eval(om.var, x, 'qc2');
 t_is(f, ef, 14, [t, ' : f']);
 t_is(df, edf, 14, [t, ' : df']);
-t_is(d2f, Q, 14, [t, ' : d2f']);
+t_is(d2f, H, 14, [t, ' : d2f']);
 
 t = 'om.qdc.eval(om.var, x, ''qc3'')';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc3');
+[H, c, k, vs] = om.qdc.params(om.var, 'qc3');
 xx = om.var.varsets_x(x, vs, 'vector');
-ef = 1/2 * Q.*xx.^2 + c.*xx + k;
-edf = Q.*xx + c;
+ef = 1/2 * H.*xx.^2 + c.*xx + k;
+edf = H.*xx + c;
 [f, df, d2f] = om.qdc.eval(om.var, x, 'qc3');
 t_is(f, ef, 14, [t, ' : f']);
 t_is(df, edf, 14, [t, ' : df']);
-t_is(d2f, Q, 14, [t, ' : d2f']);
+t_is(d2f, H, 14, [t, ' : d2f']);
 
 t = 'om.qdc.eval(om.var, x, ''qc4'')';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc4');
+[H, c, k, vs] = om.qdc.params(om.var, 'qc4');
 xx = om.var.varsets_x(x, vs, 'vector');
-ef = 1/2 * Q.*xx.^2 + k;
-edf = Q.*xx;
+ef = 1/2 * H.*xx.^2 + k;
+edf = H.*xx;
 [f, df, d2f] = om.qdc.eval(om.var, x, 'qc4');
 t_is(f, ef, 14, [t, ' : f']);
 t_is(df, edf, 14, [t, ' : df']);
-t_is(d2f, Q, 14, [t, ' : d2f']);
+t_is(d2f, H, 14, [t, ' : d2f']);
 
 t = 'om.qdc.eval(om.var, x, ''qc5'')';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc5');
+[H, c, k, vs] = om.qdc.params(om.var, 'qc5');
 xx = om.var.varsets_x(x, vs, 'vector');
 ef = c.*xx + k;
 edf = c;
@@ -1265,7 +1265,7 @@ t_is(df, edf, 14, [t, ' : df']);
 t_is(d2f, sparse(length(xx), 1), 14, [t, ' : d2f']);
 
 t = 'om.qdc.eval(om.var, x, ''qc6'')';
-[Q, c, k, vs] = om.qdc.params(om.var, 'qc6');
+[H, c, k, vs] = om.qdc.params(om.var, 'qc6');
 xx = x;
 ef = c.*xx + k;
 edf = c;
@@ -1277,26 +1277,26 @@ t_is(d2f, sparse(length(x), 1), 14, [t, ' : d2f']);
 for i = 1:2
     for j = 1:2
         t = sprintf('om.qdc.eval(om.var, x, ''qc'', {%d, %d})', i, j);
-        [Q, c, k, vs] = om.qdc.params(om.var, 'qc', {i,j});
+        [H, c, k, vs] = om.qdc.params(om.var, 'qc', {i,j});
         xx = om.var.varsets_x(x, vs, 'vector');
-        ef = 1/2 * xx'*Q*xx + c'*xx + k;
-        edf = Q*xx + c;
+        ef = 1/2 * xx'*H*xx + c'*xx + k;
+        edf = H*xx + c;
         [f, df, d2f] = om.qdc.eval(om.var, x, 'qc', {i,j});
         t_is(f, ef, 14, [t, ' : f']);
         t_is(df, edf, 14, [t, ' : df']);
-        t_is(d2f, Q, 14, [t, ' : d2f']);
+        t_is(d2f, H, 14, [t, ' : d2f']);
     end
 end
 
 t = 'om.qdc.eval(om.var, x)';
-[Q, c, k] = om.qdc.params(om.var);
+[H, c, k] = om.qdc.params(om.var);
 xx = x;
-ef = 1/2 * xx'*Q*xx + c'*xx + k;
-edf = Q*xx + c;
+ef = 1/2 * xx'*H*xx + c'*xx + k;
+edf = H*xx + c;
 [f, df, d2f] = om.qdc.eval(om.var, x);
 t_is(f, ef, 14, [t, ' : f']);
 t_is(df, edf, 14, [t, ' : df']);
-t_is(d2f, Q, 14, [t, ' : d2f']);
+t_is(d2f, H, 14, [t, ' : d2f']);
 
 %%-----  get_idx  -----
 t = 'get_idx(''var'', ''lin'')';
@@ -1802,34 +1802,34 @@ if have_feature('isequaln')
     t_ok(isequaln(struct(om), s), [t 'mynli{2,2}, all']);
 
     t = 'om.qdc.set_params(om.var, name, ...) : ';
-    [m, n] = size(s.qdc.data.Q.qc1);
+    [m, n] = size(s.qdc.data.H.qc1);
     val = sparse(m+1, n+1);
     try
-        om.qdc.set_params(om.var, 'qc1', 'Q', val);
-        t_ok(0, [t 'qc1, Q (wrong size)']);
+        om.qdc.set_params(om.var, 'qc1', 'H', val);
+        t_ok(0, [t 'qc1, H (wrong size)']);
     catch me
         TorF = strfind(me.message, 'dimension change for ''qc1'' not allowed except for ''all''');
-        t_ok(TorF, [t 'qc1, Q (wrong size)']);
+        t_ok(TorF, [t 'qc1, H (wrong size)']);
         if ~TorF
             me.message
         end
     end
 
     val = sparse(m, n);
-    s.qdc.data.Q.qc1 = val;
+    s.qdc.data.H.qc1 = val;
     s.qdc.cache = [];   % remove cache, as set_params() does
-    om.qdc.set_params(om.var, 'qc1', 'Q', val);
-    t_ok(isequaln(struct(om), s), [t 'qc1, Q']);
+    om.qdc.set_params(om.var, 'qc1', 'H', val);
+    t_ok(isequaln(struct(om), s), [t 'qc1, H']);
 
     val = {'Pg', 'Vm1'};
     s.qdc.data.vs.qc3 = mp.sm_variable.varsets_cell2struct(val);
     om.qdc.set_params(om.var, 'qc3', 'vs', val);
     t_ok(isequaln(struct(om), s), [t 'qc3, vs']);
 
-    [Q, c, k, vs] = om.qdc.params(om.var, 'qc4');
+    [H, c, k, vs] = om.qdc.params(om.var, 'qc4');
     vs(2) = [];
-    val = {Q(2:2:6, :), c, k, vs};
-    s.qdc.data.Q.qc4 = val{1};
+    val = {H(2:2:6, :), c, k, vs};
+    s.qdc.data.H.qc4 = val{1};
     s.qdc.data.vs.qc4 = val{4};
     dN = -3;
     s.qdc.idx.N.qc4    = s.qdc.idx.N.qc4 + dN;
@@ -1851,21 +1851,21 @@ if have_feature('isequaln')
     om.qdc.set_params(om.var, 'qc', {2,1}, {'c', 'k'}, val);
     t_ok(isequaln(struct(om), s), [t 'qc{2,1}, {u,l}']);
 
-    [Q, c, k, vs] = om.qdc.params(om.var, 'qc', {2,2});
-    val = {Q(1:3, 1:3), c(1:3), k};
+    [H, c, k, vs] = om.qdc.params(om.var, 'qc', {2,2});
+    val = {H(1:3, 1:3), c(1:3), k};
     try
         om.qdc.set_params(om.var, 'qc', {2,2}, 'all', val);
         t_ok(0, [t 'qc{2,2}, all (wrong size)']);
     catch me
-        TorF = strfind(me.message, 'for ''qc(2,2)'' dimensions of ''Q'', ''c'', ''k'' (3) must be consistent with ''vs'' (170)');
+        TorF = strfind(me.message, 'for ''qc(2,2)'' dimensions of ''H'', ''c'', ''k'' (3) must be consistent with ''vs'' (170)');
         t_ok(TorF, [t 'qc{2,2}, all (wrong size)']);
         if ~TorF
             me.message
         end
     end
     vs(2) = [];
-    val = {Q(1:3, 1:3), c(1:3), k, vs};
-    s.qdc.data.Q.qc{2,2} = val{1};
+    val = {H(1:3, 1:3), c(1:3), k, vs};
+    s.qdc.data.H.qc{2,2} = val{1};
     s.qdc.data.c.qc{2,2} = val{2};
     s.qdc.data.k.qc{2,2} = val{3};
     s.qdc.data.vs.qc{2,2} = val{4};
@@ -1942,6 +1942,8 @@ if isfield(om0_struct, 'set_types')
 end
 om0_struct.qdc = struct(om0_struct.qdc);
 om_struct.qdc = struct(om_struct.qdc);
+om_struct.qdc.data.Q = om_struct.qdc.data.H;
+om_struct.qdc.data = rmfield(om_struct.qdc.data, 'H');
 t_str_match(class(om0.qdc), 'mp.sm_quad_cost_legacy', [t 'class(om.qdc)']);
 t_ok(isequal(om0_struct, om_struct), [t 'opt_model identical']);
 om2 = mp.opt_model(om0);
