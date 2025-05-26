@@ -44,13 +44,13 @@ for k = 1:length(cfg)
             'nose_tol', 1e-6, ...
             'adapt_step_tol', 1e-2 );
 %         opt.plot = struct('level', 2, 'idx', 2);
-        om = mp.opt_model;
-        om.var.add('y', 2, y0);
-        om.var.add('lam', 1, 0);
-        om.nle.add(om.var, 'f', 2, @f1p, [], {'y', 'lam'});
+        mm = mp.opt_model;
+        mm.var.add('y', 2, y0);
+        mm.var.add('lam', 1, 0);
+        mm.nle.add(mm.var, 'f', 2, @f1p, [], {'y', 'lam'});
 
         t = sprintf('%s - TARGET_LAM = 0.7 (natural) : ', name);
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 14;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-1.931782106; -1.268217894; 0.7], 6, [t 'x - final']);
@@ -75,7 +75,7 @@ for k = 1:length(cfg)
         t = sprintf('%s - TARGET_LAM = 0.7 (arc len) : ', name);
         opt.adapt_step = 1;
         opt.parameterization = 2;
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 9;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-1.931782106; -1.268217894; 0.7], 6, [t 'x - final']);
@@ -96,7 +96,7 @@ for k = 1:length(cfg)
 
         t = sprintf('%s - TARGET_LAM = 0.7 (pseudo arc len) : ', name);
         opt.parameterization = 3;
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 9;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-1.931782106; -1.268217894; 0.7], 6, [t 'x - final']);
@@ -117,7 +117,7 @@ for k = 1:length(cfg)
 
         t = sprintf('%s - FULL : ', name);
         opt.stop_at = 'FULL';
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 34;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [2;-1;0], 10, [t 'x - final']);
@@ -138,7 +138,7 @@ for k = 1:length(cfg)
 
         t = sprintf('%s - FULL (max_it) : ', name);
         opt.max_it = 25;
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         opt.max_it = 2000;
         it = 25;
         t_is(e, 1, 12, [t 'exitflag']);
@@ -158,7 +158,7 @@ for k = 1:length(cfg)
         t = sprintf('%s - NOSE (arc len): ', name);
         opt.stop_at = 'NOSE';
         opt.parameterization = 2;
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 18;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-0.5; -4.75; 1.04166667], 6, [t 'x - final']);
@@ -179,7 +179,7 @@ for k = 1:length(cfg)
 
         t = sprintf('%s - NOSE (pseudo arc len): ', name);
         opt.parameterization = 3;
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 18;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-0.5; -4.75; 1.04166667], 6, [t 'x - final']);
@@ -200,8 +200,8 @@ for k = 1:length(cfg)
 
         t = sprintf('%s - NOSE (opp dir) : ', name);
         y0 = [1;-1];
-        om.var.set_params('y', 'v0', y0);
-        [x, f, e, out, jac] = om.solve(opt);
+        mm.var.set_params('y', 'v0', y0);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 20;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-0.5; -4.75; 1.04166667], 5, [t 'x - final']);
@@ -232,8 +232,8 @@ for k = 1:length(cfg)
         % opt.verbose = 4;
         % opt.plot = struct('level', 2, 'yname', 'y', 'idx', [1;2]);
         y0 = [-1;0];
-        om.var.set_params('y', 'v0', y0);
-        [x, f, e, out, jac] = om.solve(opt);
+        mm.var.set_params('y', 'v0', y0);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 10;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [-2; -1; 2/3], 6, [t 'x - final']);
@@ -270,12 +270,12 @@ for k = 1:length(cfg)
 
         t = sprintf('%s - FULL warmstart, after SWITCH : ', name);
         y0 = [-1;0];
-        om = mp.opt_model;
-        om.var.add('z', 1, 0);
-        om.var.add('y', 2, y0);
-        om.var.add('lam', 1, 0);
-        om.nle.add(om.var, 'f', 2, @f2p, [], {'y', 'lam'});
-        om.nle.add(om.var, 'g', 1, @g2p, [], {'z', 'lam'});
+        mm = mp.opt_model;
+        mm.var.add('z', 1, 0);
+        mm.var.add('y', 2, y0);
+        mm.var.add('lam', 1, 0);
+        mm.nle.add(mm.var, 'f', 2, @f2p, [], {'y', 'lam'});
+        mm.nle.add(mm.var, 'g', 1, @g2p, [], {'z', 'lam'});
         ws = out.warmstart;
         ws.x  = [ws.x(end)/2;  ws.x];
         ws.xp = [ws.xp(end)/2; ws.xp];
@@ -285,7 +285,7 @@ for k = 1:length(cfg)
         opt.warmstart = ws;
         opt.events = {{'SNOUT!', @pne_event_test2, 1e-6}};
         opt.callbacks = {};
-        [x, f, e, out, jac] = om.solve(opt);
+        [x, f, e, out, jac] = mm.solve(opt);
         it = 49;
         t_is(e, 1, 12, [t 'exitflag']);
         t_is(x, [0; 6; -5; 0], 6, [t 'x - final']);

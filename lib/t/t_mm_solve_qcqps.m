@@ -26,11 +26,11 @@ show_diff_on_fail = false;
 nqcqp_convex = 18;
 nqcqp_nonconvex = 9;
 n = nqcqp_convex+nqcqp_nonconvex;
-ntests_om_mthds = 25;
+ntests_mm_mthds = 25;
 
 reps = {};
 
-t_begin(n * length(algs) + ntests_om_mthds, quiet);
+t_begin(n * length(algs) + ntests_mm_mthds, quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
@@ -85,12 +85,12 @@ for k = 1:length(algs)
         xmin = zeros(3,1);
         xmax = Inf(3,1);
         x0 = zeros(3,1);
-        om = mp.opt_model();
-        om.var.add('x', 3, x0, xmin, xmax);
-        om.qdc.add(om.var, 'cost', H, c);
-        om.qcn.add(om.var, 'g', Q, B, lq, uq);
-        om.lin.add(om.var, 'Ax', A, l, u);
-        [x, f, s, out, lam] = om.solve(opt);
+        mm = mp.opt_model();
+        mm.var.add('x', 3, x0, xmin, xmax);
+        mm.qdc.add(mm.var, 'cost', H, c);
+        mm.qcn.add(mm.var, 'g', Q, B, lq, uq);
+        mm.lin.add(mm.var, 'Ax', A, l, u);
+        [x, f, s, out, lam] = mm.solve(opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [3.91577; 1.78203; 4.3022]*1e-1, 6, [t 'x']);
         t_is(f, -0.391577, 6, [t 'f']);
@@ -112,11 +112,11 @@ for k = 1:length(algs)
         xmin = zeros(3,1);
         xmax = Inf(3,1);
         x0 = zeros(3,1);
-        om = mp.opt_model();
-        om.var.add('x', 3, x0, xmin, xmax);
-        om.qdc.add(om.var, 'cost', H, c);
-        om.qcn.add(om.var, 'g', Q, B, lq, uq);
-        [x, f, s, out, lam] = om.solve(opt);
+        mm = mp.opt_model();
+        mm.var.add('x', 3, x0, xmin, xmax);
+        mm.qdc.add(mm.var, 'cost', H, c);
+        mm.qcn.add(mm.var, 'g', Q, B, lq, uq);
+        [x, f, s, out, lam] = mm.solve(opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4.4880; 9.3192; 6.7411]*1e-1, 4, [t 'x']);
         t_is(f, -0.4918, 4, [t 'f']);
@@ -142,12 +142,12 @@ for k = 1:length(algs)
             xmin = zeros(3,1);
             xmax = Inf(3,1);
             x0 = [0;0;20];
-            om = mp.opt_model();
-            om.var.add('x', 3, x0, xmin, xmax);
-            om.qdc.add(om.var, 'cost', H, c);
-            om.qcn.add(om.var, 'g', Q, B, lq, uq);
-            om.lin.add(om.var, 'Ax', A, l, u);
-            [x, f, s, out, lam] = om.solve(opt);
+            mm = mp.opt_model();
+            mm.var.add('x', 3, x0, xmin, xmax);
+            mm.qdc.add(mm.var, 'cost', H, c);
+            mm.qcn.add(mm.var, 'g', Q, B, lq, uq);
+            mm.lin.add(mm.var, 'Ax', A, l, u);
+            [x, f, s, out, lam] = mm.solve(opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [0; 0; 8], 5, [t 'x']);
             t_is(f, -64, 4, [t 'f']);
@@ -171,7 +171,7 @@ end
 %% From https://docs.mosek.com/latest/toolbox/examples-list.html#doc-example-file-qcqo1-m
 opt.alg = 'MIPS';
 
-t = sprintf('%s - om.soln: ', opt.alg);
+t = sprintf('%s - mm.soln: ', opt.alg);
 H = sparse([2 0 -1; 0 0.2 0; -1 0 2]);
 c = [0;-1;0];
 Q = {sparse([-2 0 0.2; 0 -2 0; 0.2 0 -0.2])};
@@ -181,52 +181,52 @@ uq = Inf;
 xmin = zeros(3,1);
 xmax = Inf(3,1);
 x0 = zeros(3,1);
-om = mp.opt_model();
-om.var.add('x', 3, x0, xmin, xmax);
-om.qdc.add(om.var, 'cost', H, c);
-om.qcn.add(om.var, 'g', Q, B, lq, uq);
+mm = mp.opt_model();
+mm.var.add('x', 3, x0, xmin, xmax);
+mm.qdc.add(mm.var, 'cost', H, c);
+mm.qcn.add(mm.var, 'g', Q, B, lq, uq);
 opt.parse_soln = 1;
-[x, f, s, out, lam] = om.solve(opt);
-t_is(om.soln.x, x, 4, [t 'x']);
-t_is(om.soln.f, f, 4, [t 'f']);
-t_is(om.soln.eflag, s, 12, [t 'success']);
-t_str_match(om.soln.output.alg, out.alg, [t 'output.alg']);
-t_is(om.soln.lambda.lower, lam.lower, 6, [t 'lam.lower'])
-t_is(om.soln.lambda.upper, lam.upper, 6, [t 'lam.upper']);
-t_ok(isempty(om.soln.lambda.mu_l), [t 'lam.mu_l']);
-t_ok(isempty(om.soln.lambda.mu_u), [t 'lam.mu_u']);
-t_is(om.soln.lambda.mu_lq, lam.mu_lq, 4, [t 'lam.mu_lq']);
-t_is(om.soln.lambda.mu_uq, lam.mu_uq, 4, [t 'lam.mu_uq']);
+[x, f, s, out, lam] = mm.solve(opt);
+t_is(mm.soln.x, x, 4, [t 'x']);
+t_is(mm.soln.f, f, 4, [t 'f']);
+t_is(mm.soln.eflag, s, 12, [t 'success']);
+t_str_match(mm.soln.output.alg, out.alg, [t 'output.alg']);
+t_is(mm.soln.lambda.lower, lam.lower, 6, [t 'lam.lower'])
+t_is(mm.soln.lambda.upper, lam.upper, 6, [t 'lam.upper']);
+t_ok(isempty(mm.soln.lambda.mu_l), [t 'lam.mu_l']);
+t_ok(isempty(mm.soln.lambda.mu_u), [t 'lam.mu_u']);
+t_is(mm.soln.lambda.mu_lq, lam.mu_lq, 4, [t 'lam.mu_lq']);
+t_is(mm.soln.lambda.mu_uq, lam.mu_uq, 4, [t 'lam.mu_uq']);
 
-t = sprintf('%s - om.var.get_soln(soln, ''x'') : ', opt.alg);
-[x1, mu_l, mu_u] = om.var.get_soln(om.soln, 'x');
+t = sprintf('%s - mm.var.get_soln(soln, ''x'') : ', opt.alg);
+[x1, mu_l, mu_u] = mm.var.get_soln(mm.soln, 'x');
 t_is(x1, x, 4, [t 'x']);
 t_is(mu_l, lam.lower, 6, [t 'mu_l']);
 t_is(mu_u, lam.upper, 6, [t 'mu_u']);
 
-t = sprintf('%s - om.var.get_soln(soln, ''mu_l'', ''x'') : ', opt.alg);
-t_is(om.var.get_soln(om.soln, 'mu_l', 'x'), lam.lower, 6, [t 'mu_l']);
+t = sprintf('%s - mm.var.get_soln(soln, ''mu_l'', ''x'') : ', opt.alg);
+t_is(mm.var.get_soln(mm.soln, 'mu_l', 'x'), lam.lower, 6, [t 'mu_l']);
 
-t = sprintf('%s - om.qcn.get_soln(var, soln, ''g'') : ', opt.alg);
-[g, mu_l] = om.qcn.get_soln(om.var, om.soln, 'g');
+t = sprintf('%s - mm.qcn.get_soln(var, soln, ''g'') : ', opt.alg);
+[g, mu_l] = mm.qcn.get_soln(mm.var, mm.soln, 'g');
 %t_is(g{1}, 1/2*x'*Q{:}*x+B*x-uq, 8, [t '1/2*x''*Q*x + B*x - uq']);
 t_ok(isequal(g{1}, 1/2*x'*Q{:}*x+B*x-uq), [t '1/2*x''*Q*x + B*x - uq']);
 t_is(g{4}, lq-(1/2*x'*Q{:}*x+B*x), 8, [t 'lq - (1/2*x''*Q*x + B*x)']);
 t_is(mu_l, lam.mu_lq, 8, [t 'mu_lq']);
 
-t = sprintf('%s - om.qcn.get_soln(var, soln, {''mu_uq'', ''mu_lq'', ''g_u''}, ''g'') : ', opt.alg);
-[mu_u, mu_l, g] = om.qcn.get_soln(om.var, om.soln, {'mu_u', 'mu_l', 'g_u'}, 'g');
+t = sprintf('%s - mm.qcn.get_soln(var, soln, {''mu_uq'', ''mu_lq'', ''g_u''}, ''g'') : ', opt.alg);
+[mu_u, mu_l, g] = mm.qcn.get_soln(mm.var, mm.soln, {'mu_u', 'mu_l', 'g_u'}, 'g');
 %t_is(g, 1/2*x'*Q{:}*x+B*x-uq, 8, [t '1/2*x''*Q*x + B*x - uq']);
 t_ok(isequal(g, 1/2*x'*Q{:}*x+B*x-uq), [t '1/2*x''*Q*x + B*x - uq']);
 t_is(mu_l, lam.mu_lq, 8, [t 'mu_lq']);
 t_is(mu_u, lam.mu_uq, 8, [t 'mu_uq']);
 
 t = sprintf('%s - parse_soln : ', opt.alg);
-t_ok(om.has_parsed_soln(), [t 'has_parsed_soln() is true']);
-t_is(om.var.soln.val.x, om.var.get_soln(om.soln, 'x'), 14, [t 'var.val.x']);
-if om.has_parsed_soln()
-    t_is(om.qcn.soln.mu_l.g, mu_l, 14, [t 'mu_lq']);
-    t_is(om.qcn.soln.mu_u.g, mu_u, 14, [t 'mu_uq']);
+t_ok(mm.has_parsed_soln(), [t 'has_parsed_soln() is true']);
+t_is(mm.var.soln.val.x, mm.var.get_soln(mm.soln, 'x'), 14, [t 'var.val.x']);
+if mm.has_parsed_soln()
+    t_is(mm.qcn.soln.mu_l.g, mu_l, 14, [t 'mu_lq']);
+    t_is(mm.qcn.soln.mu_u.g, mu_u, 14, [t 'mu_uq']);
 else
     t_skip(2, [t 'has_parsed_soln() is false'])
 end
@@ -234,14 +234,14 @@ end
 t = 'disp_soln';
 rn = fix(1e9*rand);
 [pathstr, name, ext] = fileparts(which('t_opt_model'));
-fname = 't_om_solve_qcqps_display_soln';
+fname = 't_mm_solve_qcqps_display_soln';
 fname_e = fullfile(pathstr, 'display_soln', sprintf('%s.txt', fname));
 fname_g = sprintf('%s_%d.txt', fname, rn);
 [fd, msg] = fopen(fname_g, 'wt');   %% open solution file
 if fd == -1
-    error('t_om_solve_qps: could not create %d : %s', fname, msg);
+    error('t_mm_solve_qcqps: could not create %d : %s', fname, msg);
 end
-om.display_soln(fd);    %% write out solution
+mm.display_soln(fd);    %% write out solution
 fclose(fd);
 if ~t_file_match(fname_g, fname_e, t, reps, 1);
     fprintf('  compare these 2 files:\n    %s\n    %s\n', fname_g, fname_e);

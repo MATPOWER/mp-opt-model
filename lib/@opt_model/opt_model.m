@@ -5,10 +5,10 @@ classdef opt_model < mp_idx_manager
 %   OM = OPT_MODEL
 %   OM = OPT_MODEL(S)
 %
-%   This class implements the optimization model object used to encapsulate
-%   a given optimization problem formulation. It allows for access to
-%   optimization variables, constraints and costs in named blocks, keeping
-%   track of the ordering and indexing of the blocks as variables,
+%   This class implements the model object used to encapsulate a given
+%   mathematical programming or optimization problem formulation. It allows
+%   for access to optimization variables, constraints and costs in named blocks,
+%   keeping track of the ordering and indexing of the blocks as variables,
 %   constraints and costs are added to the problem.
 %
 %   Below are the list of available methods for use with the Opt Model class.

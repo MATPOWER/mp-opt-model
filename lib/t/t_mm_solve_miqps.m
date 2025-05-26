@@ -110,17 +110,17 @@ for k = 1:length(algs)
         u = [1365; 140];
         xmax = [4; Inf];
         vtype = 'I';
-        om = mp.opt_model;
-        om.var.add('x', 2, [], [], xmax, vtype);
-        om.qdc.add(om.var, 'c', [], c);
-        om.lin.add(om.var, 'Ax', A, [], u);
-        [x, f, s, out, lam] = om.solve(opt);
+        mm = mp.opt_model;
+        mm.var.add('x', 2, [], [], xmax, vtype);
+        mm.qdc.add(mm.var, 'c', [], c);
+        mm.lin.add(mm.var, 'Ax', A, [], u);
+        [x, f, s, out, lam] = mm.solve(opt);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [4; 2], 12, [t 'x']);
         t_is(f, -14, 12, [t 'f']);
-        t_ok(~om.has_parsed_soln(), [t 'has_parsed_soln() is false']);
+        t_ok(~mm.has_parsed_soln(), [t 'has_parsed_soln() is false']);
         t = sprintf('%s - 2-d ILP (integer relaxed) : ', names{k});
-        [x, f, s, out, lam] = om.solve(opt_r);
+        [x, f, s, out, lam] = mm.solve(opt_r);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [2.441860465; 3.255813953], 8, [t 'x']);
         t_is(f, -14.651162791, 8, [t 'f']);
@@ -134,18 +134,18 @@ for k = 1:length(algs)
         xmin = zeros(6, 1);
         xmax = 3 * ones(6, 1);
         vtype = 'I';
-        om = mp.opt_model;
-        om.var.add('x', 6, [], xmin, xmax, vtype);
-        om.qdc.add(om.var, 'c', [], c);
-        om.lin.add(om.var, 'Ax', A, l, u);
-        [x, f, s, out, lam] = om.solve(opt);
+        mm = mp.opt_model;
+        mm.var.add('x', 6, [], xmin, xmax, vtype);
+        mm.qdc.add(mm.var, 'c', [], c);
+        mm.lin.add(mm.var, 'Ax', A, l, u);
+        [x, f, s, out, lam] = mm.solve(opt);
         t_is(s, 1, 12, [t 'success']);
         t_ok(norm(x - [1; 0; 3; 0; 0; 2], Inf) < 1e-12 || ...
              norm(x - [0; 0; 3; 1; 0; 2], Inf) < 1e-12 || ...
              norm(x - [0; 0; 3; 0; 2; 1], Inf) < 1e-12, [t 'x']);
         t_is(f, 16, 12, [t 'f']);
         t = sprintf('%s - 6-d ILP (integer relaxed) : ', names{k});
-        [x, f, s, out, lam] = om.solve(opt_r);
+        [x, f, s, out, lam] = mm.solve(opt_r);
         t_is(s, 1, 12, [t 'success']);
         t_ok(norm(x - [0; 0; 2.7; 0; 0; 2.5], Inf) < 1e-12 || ...
              norm(x - [0; 0; 3.0; 0; 0; 2.2], Inf) < 1e-12, [t 'x']);
@@ -173,11 +173,11 @@ for k = 1:length(algs)
             l = [beq; -Inf; -Inf];
             u = [beq; bineq];
             vtype = 'CCCI';
-            om = mp.opt_model;
-            om.var.add('x', 4, [], xmin, xmax, vtype);
-            om.qdc.add(om.var, 'c', H, c);
-            om.lin.add(om.var, 'Ax', A, l, u);
-            [x, f, s, out, lam] = om.solve(opt);
+            mm = mp.opt_model;
+            mm.var.add('x', 4, [], xmin, xmax, vtype);
+            mm.qdc.add(mm.var, 'c', H, c);
+            mm.lin.add(mm.var, 'Ax', A, l, u);
+            [x, f, s, out, lam] = mm.solve(opt);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [7; 7; 0; 2], 7, [t 'x']);
             t_is(f, 1618.5, 4, [t 'f']);
@@ -186,7 +186,7 @@ for k = 1:length(algs)
             t_is(lam.lower, [0; 0; 349.5; 4350], 5, [t 'lam.lower']);
             t_is(lam.upper, [0; 0; 0; 0], 7, [t 'lam.upper']);
             t = sprintf('%s - 4-d MIQP (integer relaxed) : ', names{k});
-            [x, f, s, out, lam] = om.solve(opt_r);
+            [x, f, s, out, lam] = mm.solve(opt_r);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [7; 7; 0; 2], 7, [t 'x']);
             t_is(f, 1618.5, 4, [t 'f']);
@@ -203,18 +203,18 @@ for k = 1:length(algs)
             u = [-48; -250];
             xmin = zeros(6, 1);
             vtype = 'I';
-            om = mp.opt_model;
-            om.var.add('x', 6, [], xmin, [], vtype);
-            om.qdc.add(om.var, 'c', H, []);
-            om.lin.add(om.var, 'Ax', A, [], u);
-            [x, f, s, out, lam] = om.solve(opt);
+            mm = mp.opt_model;
+            mm.var.add('x', 6, [], xmin, [], vtype);
+            mm.qdc.add(mm.var, 'c', H, []);
+            mm.lin.add(mm.var, 'Ax', A, [], u);
+            [x, f, s, out, lam] = mm.solve(opt);
             t_is(s, 1, 12, [t 'success']);
             t_ok(norm(x - [16; 0; 17; 0; 17; 0], Inf) < 1e-7 || ...
                  norm(x - [17; 0; 16; 0; 17; 0], Inf) < 1e-7 || ...
                  norm(x - [17; 0; 17; 0; 16; 0], Inf) < 1e-7, [t 'x']);
             t_is(f, 417, 6, [t 'f']);
             t = sprintf('%s - 6-d IQP (integer relaxed) : ', names{k});
-            [x, f, s, out, lam] = om.solve(opt_r);
+            [x, f, s, out, lam] = mm.solve(opt_r);
             t_is(s, 1, 12, [t 'success']);
             t_is(x, [50;0;50;0;50;0]/3, 8, [t 'x']);
             t_is(f, 1250/3, 6, [t 'f']);
@@ -226,78 +226,78 @@ for k = 1:length(algs)
 end
 
 if have_milp_solver()
-    t = 'om.soln.';
+    t = 'mm.soln.';
     c = [-2; -3];
     A = sparse([195 273; 4 40]);
     u = [1365; 140];
     xmax = [4; Inf];
     vtype = 'I';
-    om = mp.opt_model;
-    om.var.add('x', 2, [], [], xmax, vtype);
-    om.qdc.add(om.var, 'c', [], c);
-    om.lin.add(om.var, 'Ax', A, [], u);
+    mm = mp.opt_model;
+    mm.var.add('x', 2, [], [], xmax, vtype);
+    mm.qdc.add(mm.var, 'c', [], c);
+    mm.lin.add(mm.var, 'Ax', A, [], u);
     opt.parse_soln = 1;
-    [x, f, s, out, lam] = om.solve(opt);
-    t_is(om.soln.x, x, 14, [t 'x']);
-    t_is(om.soln.f, f, 14, [t 'f']);
-    t_is(om.soln.eflag, s, 14, [t 'eflag']);
-    t_str_match(om.soln.output.alg, out.alg, [t 'output.alg']);
-    t_is(om.soln.lambda.lower, lam.lower, 14, [t 'om.soln.lambda.lower']);
-    t_is(om.soln.lambda.upper, lam.upper, 14, [t 'om.soln.lambda.upper']);
-    t_is(om.soln.lambda.mu_l, lam.mu_l, 14, [t 'om.soln.lambda.mu_l']);
-    t_is(om.soln.lambda.mu_u, lam.mu_u, 14, [t 'om.soln.lambda.mu_u']);
+    [x, f, s, out, lam] = mm.solve(opt);
+    t_is(mm.soln.x, x, 14, [t 'x']);
+    t_is(mm.soln.f, f, 14, [t 'f']);
+    t_is(mm.soln.eflag, s, 14, [t 'eflag']);
+    t_str_match(mm.soln.output.alg, out.alg, [t 'output.alg']);
+    t_is(mm.soln.lambda.lower, lam.lower, 14, [t 'mm.soln.lambda.lower']);
+    t_is(mm.soln.lambda.upper, lam.upper, 14, [t 'mm.soln.lambda.upper']);
+    t_is(mm.soln.lambda.mu_l, lam.mu_l, 14, [t 'mm.soln.lambda.mu_l']);
+    t_is(mm.soln.lambda.mu_u, lam.mu_u, 14, [t 'mm.soln.lambda.mu_u']);
 
-    t = 'om.var.get_soln(om.soln, ''x'') : ';
-    [x1, mu_l, mu_u] = om.var.get_soln(om.soln, 'x');
+    t = 'mm.var.get_soln(mm.soln, ''x'') : ';
+    [x1, mu_l, mu_u] = mm.var.get_soln(mm.soln, 'x');
     t_is(x1, x, 14, [t 'x']);
     t_is(mu_l, lam.lower, 14, [t 'mu_l']);
     t_is(mu_u, lam.upper, 14, [t 'mu_u']);
 
-    t = 'om.var.get_soln(om.soln, ''mu_u'', ''x'') : ';
-    t_is(om.var.get_soln(om.soln, 'mu_u', 'x'), lam.upper, 14, [t 'mu_l']);
+    t = 'mm.var.get_soln(mm.soln, ''mu_u'', ''x'') : ';
+    t_is(mm.var.get_soln(mm.soln, 'mu_u', 'x'), lam.upper, 14, [t 'mu_l']);
 
-    t = 'om.lin.get_soln(om.var, om.soln, ''Ax'') : ';
-    [g, mu_u] = om.lin.get_soln(om.var, om.soln, 'Ax');
+    t = 'mm.lin.get_soln(mm.var, mm.soln, ''Ax'') : ';
+    [g, mu_u] = mm.lin.get_soln(mm.var, mm.soln, 'Ax');
     t_is(g{1}, A*x-u, 14, [t 'A * x - u']);
     t_ok(all(isinf(g{2}) & g{2} < 0), [t 'l - A * x']);
     t_is(mu_u, lam.mu_u, 14, [t 'mu_u']);
 
-    t = 'om.lin.get_soln(om.var, om.soln, {''mu_u'', ''mu_l'', ''g''}, ''Ax'') : ';
-    [mu_u, mu_l, g] = om.lin.get_soln(om.var, om.soln, {'mu_u', 'mu_l', 'g'}, 'Ax');
+    t = 'mm.lin.get_soln(mm.var, mm.soln, {''mu_u'', ''mu_l'', ''g''}, ''Ax'') : ';
+    [mu_u, mu_l, g] = mm.lin.get_soln(mm.var, mm.soln, {'mu_u', 'mu_l', 'g'}, 'Ax');
     t_is(g{1}, A*x-u, 14, [t 'A * x - u']);
     t_ok(all(isinf(g{2}) & g{2} < 0), [t 'l - A * x']);
     t_is(mu_l, lam.mu_l, 14, [t 'mu_l']);
     t_is(mu_u, lam.mu_u, 14, [t 'mu_u']);
 
-    t = 'om.qdc.get_soln(om.var, om.soln, ''c'') : ';
-    [f1, df, d2f] = om.qdc.get_soln(om.var, om.soln, 'c');
+    t = 'mm.qdc.get_soln(mm.var, mm.soln, ''c'') : ';
+    [f1, df, d2f] = mm.qdc.get_soln(mm.var, mm.soln, 'c');
     t_is(sum(f1), f, 14, [t 'f']);
     t_is(df, c, 14, [t 'df']);
     t_is(d2f, zeros(2,1), 14, [t 'd2f']);
 
-    t = 'om.qdc.get_soln(om.var, om.soln, ''df'', ''c'') : ';
-    df = om.qdc.get_soln(om.var, om.soln, 'df', 'c');
+    t = 'mm.qdc.get_soln(mm.var, mm.soln, ''df'', ''c'') : ';
+    df = mm.qdc.get_soln(mm.var, mm.soln, 'df', 'c');
     t_is(df, c, 14, [t 'df']);
 
     t = 'parse_soln : ';
-    t_ok(om.has_parsed_soln(), [t 'has_parsed_soln() is true']);
-    t_is(om.var.soln.val.x, om.var.get_soln(om.soln, 'x'), 14, [t 'var.val.x']);
-    t_is(om.var.soln.mu_l.x, om.var.get_soln(om.soln, 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
-    t_is(om.var.soln.mu_u.x, om.var.get_soln(om.soln, 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
-    t_is(om.lin.soln.mu_l.Ax, om.lin.get_soln(om.var, om.soln, 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
-    t_is(om.lin.soln.mu_u.Ax, om.lin.get_soln(om.var, om.soln, 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
+    t_ok(mm.has_parsed_soln(), [t 'has_parsed_soln() is true']);
+    t_is(mm.var.soln.val.x, mm.var.get_soln(mm.soln, 'x'), 14, [t 'var.val.x']);
+    t_is(mm.var.soln.mu_l.x, mm.var.get_soln(mm.soln, 'mu_l', 'x'), 14, [t 'var.mu_l.x']);
+    t_is(mm.var.soln.mu_u.x, mm.var.get_soln(mm.soln, 'mu_u', 'x'), 14, [t 'var.mu_u.x']);
+    t_is(mm.lin.soln.mu_l.Ax, mm.lin.get_soln(mm.var, mm.soln, 'mu_l', 'Ax'), 14, [t 'lin.mu_l.Ax']);
+    t_is(mm.lin.soln.mu_u.Ax, mm.lin.get_soln(mm.var, mm.soln, 'mu_u', 'Ax'), 14, [t 'lin.mu_u.Ax']);
 
     t = 'disp_soln';
     rn = fix(1e9*rand);
     [pathstr, name, ext] = fileparts(which('t_opt_model'));
-    fname = 't_om_solve_miqps_display_soln';
+    fname = 't_mm_solve_miqps_display_soln';
     fname_e = fullfile(pathstr, 'display_soln', sprintf('%s.txt', fname));
     fname_g = sprintf('%s_%d.txt', fname, rn);
     [fd, msg] = fopen(fname_g, 'wt');   %% open solution file
     if fd == -1
-        error('t_om_solve_miqps: could not create %d : %s', fname, msg);
+        error('t_mm_solve_miqps: could not create %d : %s', fname, msg);
     end
-    om.display_soln(fd);    %% write out solution
+    mm.display_soln(fd);    %% write out solution
     fclose(fd);
     if ~t_file_match(fname_g, fname_e, t, reps, 1);
         fprintf('  compare these 2 files:\n    %s\n    %s\n', fname_g, fname_e);

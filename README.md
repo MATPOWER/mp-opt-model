@@ -118,15 +118,15 @@ full model automatically.
 ```matlab
 %%-----  METHOD 1  -----
 %% build model
-om = mp.opt_model;
-om.var.add('y', 2, y0, ymin);
-om.var.add('z', 2, z0, [], zmax);
-om.lin.add(om.var, 'lincon1', A1, b1, b1);
-om.lin.add(om.var, 'lincon2', A2, [], u2, {'y'});
-om.qdc.add(mm.var, 'cost', H, []);
+mm = mp.opt_model;
+mm.var.add('y', 2, y0, ymin);
+mm.var.add('z', 2, z0, [], zmax);
+mm.lin.add(mm.var, 'lincon1', A1, b1, b1);
+mm.lin.add(mm.var, 'lincon2', A2, [], u2, {'y'});
+mm.qdc.add(mm.var, 'cost', H, []);
 
 %% solve model
-[x, f, exitflag, output, lambda] = om.solve();
+[x, f, exitflag, output, lambda] = mm.solve();
 ```
 
 The second method requires you to construct the parameters for the full

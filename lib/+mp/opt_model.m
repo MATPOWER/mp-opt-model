@@ -1,14 +1,14 @@
 classdef opt_model < handle
-% mp.opt_model - MP-Opt-Model optimization model class.
+% mp.opt_model - Mathematical programming and optimization model class.
 % ::
 %
-%   OM = MP.OPT_MODEL
-%   OM = MP.OPT_MODEL(S)
+%   MM = MP.OPT_MODEL
+%   MM = MP.OPT_MODEL(S)
 %
-%   This class implements the optimization model object used to encapsulate
-%   a given optimization problem formulation. It allows for access to
-%   optimization variables, constraints and costs in named blocks, keeping
-%   track of the ordering and indexing of the blocks as variables,
+%   This class implements the model object used to encapsulate a given
+%   mathematical programming or optimization problem formulation. It allows
+%   for access to optimization variables, constraints and costs in named blocks,
+%   keeping track of the ordering and indexing of the blocks as variables,
 %   constraints and costs are added to the problem.
 %
 %   Below are the list of available methods for use with the Opt Model class.
@@ -41,15 +41,15 @@ classdef opt_model < handle
 %   Make a shallow copy of the object:
 %       copy
 %
-%   The following is the structure of the data in the Opt-Model object.
+%   The following is the structure of the data in the mp.opt_model object.
 %   Each field of .idx or .data is a struct whose field names are the names
 %   of the corresponding blocks of vars, constraints or costs (found in
 %   order in the corresponding .order field). The description next to these
 %   fields gives the meaning of the value for each named sub-field.
-%   E.g. om.var.data.v0.Pg contains a vector of initial values for the 'Pg'
+%   E.g. mm.var.data.v0.Pg contains a vector of initial values for the 'Pg'
 %   block of variables.
 %
-%   om
+%   mm
 %       .var        - data for optimization variable sets that make up
 %                     the full optimization variable x
 %           .idx
@@ -215,13 +215,13 @@ classdef opt_model < handle
     end     %% properties
 
     methods
-        function om = opt_model(varargin)
+        function mm = opt_model(varargin)
             % Constructor.
             % ::
             %
-            %   om = mp.opt_model()
-            %   om = mp.opt_model(a_struct)
-            %   om = mp.opt_model(an_om)
+            %   mm = mp.opt_model()
+            %   mm = mp.opt_model(a_struct)
+            %   mm = mp.opt_model(an_mm)
 
             if nargin > 0
                 s = varargin{1};
@@ -239,13 +239,13 @@ classdef opt_model < handle
                         props(k) = [];  %% remove 'set_types'
                     end
                     for k = 1:length(props)
-                        om = copy_prop(s, om, props{k});
+                        mm = copy_prop(s, mm, props{k});
                     end
                 elseif isstruct(s)
-                    props = fieldnames(om);
+                    props = fieldnames(mm);
                     for k = 1:length(props)
                         if isfield(s, props{k})
-                            om = copy_prop(s, om, props{k});
+                            mm = copy_prop(s, mm, props{k});
                         end
                     end
                 else
@@ -253,22 +253,22 @@ classdef opt_model < handle
                 end
             end
 
-            if isempty(om.var)      %% skip for copy constructor
-                om.var = mp.sm_variable('VARIABLES');
-                om.lin = mp.sm_lin_constraint('LINEAR CONSTRAINTS');
-                om.qcn = mp.sm_quad_constraint('QUADRATIC CONSTRAINTS');
-                om.nle = mp.sm_nln_constraint('NONLIN EQ CONSTRAINTS');
-                om.nli = mp.sm_nln_constraint('NONLIN INEQ CONSTRAINTS');
-                om.qdc = mp.sm_quad_cost('QUADRATIC COSTS');
-                om.nlc = mp.sm_nln_cost('GEN NONLIN COSTS');
+            if isempty(mm.var)      %% skip for copy constructor
+                mm.var = mp.sm_variable('VARIABLES');
+                mm.lin = mp.sm_lin_constraint('LINEAR CONSTRAINTS');
+                mm.qcn = mp.sm_quad_constraint('QUADRATIC CONSTRAINTS');
+                mm.nle = mp.sm_nln_constraint('NONLIN EQ CONSTRAINTS');
+                mm.nli = mp.sm_nln_constraint('NONLIN INEQ CONSTRAINTS');
+                mm.qdc = mp.sm_quad_cost('QUADRATIC COSTS');
+                mm.nlc = mp.sm_nln_cost('GEN NONLIN COSTS');
             end
         end
 
-        function st = get_set_types(om)
+        function st = get_set_types(mm)
             % List of names of properties of set types managed by this class.
             % ::
             %
-            %   st = om.get_set_types();
+            %   st = mm.get_set_types();
             %
             % Output:
             %   st (cell array) : list of set types, namely:
@@ -277,46 +277,46 @@ classdef opt_model < handle
             st = {'var', 'lin', 'qcn', 'nle', 'nli', 'qdc', 'nlc'};
         end
 
-        function new_om = copy(om)
+        function new_mm = copy(mm)
             % Duplicate the object.
 
             %% delete old 'params' (cached parameters) fields
             %% to avoid clash with newer params() method
-            fn = om.get_set_types();
+            fn = mm.get_set_types();
             for f = 1:length(fn)
-                if isfield(om.(fn{f}), 'params')
-                    om.(fn{f}) = rmfield(om.(fn{f}), 'params');
+                if isfield(mm.(fn{f}), 'params')
+                    mm.(fn{f}) = rmfield(mm.(fn{f}), 'params');
                 end
             end
 
             %% initialize copy
-            new_om = eval(class(om));   %% create new object
+            new_mm = eval(class(mm));   %% create new object
 
             %% copy properties/fields
             if have_feature('octave')
                 s1 = warning('query', 'Octave:classdef-to-struct');
                 warning('off', 'Octave:classdef-to-struct');
             end
-            props = fieldnames(om);
+            props = fieldnames(mm);
             if have_feature('octave')
                 warning(s1.state, 'Octave:classdef-to-struct');
             end
             for k = 1:length(props)
-                new_om = copy_prop(om, new_om, props{k});
+                new_mm = copy_prop(mm, new_mm, props{k});
             end
         end
 
-        function varargout = get_idx(om, varargin)
+        function varargout = get_idx(mm, varargin)
             % get_idx - Returns the idx struct for vars, lin/nonlin constraints, costs.
             % ::
             %
-            %   VV = OM.GET_IDX()
-            %   [VV, LL] = OM.GET_IDX()
-            %   [VV, LL, NNE] = OM.GET_IDX()
-            %   [VV, LL, NNE, NNI] = OM.GET_IDX()
-            %   [VV, LL, NNE, NNI, QQ] = OM.GET_IDX()
-            %   [VV, LL, NNE, NNI, QQ, NNC] = OM.GET_IDX()
-            %   [VV, LL, NNE, NNI, QQ, NNC, QQCN] = OM.GET_IDX()
+            %   VV = MM.GET_IDX()
+            %   [VV, LL] = MM.GET_IDX()
+            %   [VV, LL, NNE] = MM.GET_IDX()
+            %   [VV, LL, NNE, NNI] = MM.GET_IDX()
+            %   [VV, LL, NNE, NNI, QQ] = MM.GET_IDX()
+            %   [VV, LL, NNE, NNI, QQ, NNC] = MM.GET_IDX()
+            %   [VV, LL, NNE, NNI, QQ, NNC, QQCN] = MM.GET_IDX()
             %
             %   Returns a structure for each with the beginning and ending
             %   index value and the number of elements for each named block.
@@ -328,9 +328,9 @@ classdef opt_model < handle
             %   Alternatively, you can specify the type of named set(s) directly
             %   as inputs ...
             %
-            %   [IDX1, IDX2, ...] = OM.GET_IDX(SET_TYPE1, SET_TYPE2, ...);
-            %   VV = OM.GET_IDX('var');
-            %   [LL, NNE, NNI] = OM.GET_IDX('lin', 'nle', 'nli');
+            %   [IDX1, IDX2, ...] = MM.GET_IDX(SET_TYPE1, SET_TYPE2, ...);
+            %   VV = MM.GET_IDX('var');
+            %   [LL, NNE, NNI] = MM.GET_IDX('lin', 'nle', 'nli');
             %
             %   The specific type of named set being referenced is
             %   given by the SET_TYPE inputs, with the following valid options:
@@ -343,8 +343,8 @@ classdef opt_model < handle
             %       SET_TYPE = 'nnc'   => nonlinear cost set
             %
             %   Examples:
-            %       [vv, ll, nne] = om.get_idx();
-            %       [vv, ll, qq] = om.get_idx('var', 'lin', 'qdc');
+            %       [vv, ll, nne] = mm.get_idx();
+            %       [vv, ll, qq] = mm.get_idx('var', 'lin', 'qdc');
             %
             %       For a variable block named 'z' we have ...
             %           vv.i1.z - starting index for 'z' in optimization vector x
@@ -363,7 +363,7 @@ classdef opt_model < handle
             %       The number of nonlinear equality constraints in a set named 'bar':
             %           nbar = nne.N.bar;
             %         (note: the following is preferable ...
-            %           nbar = om.nle.get_N('bar');
+            %           nbar = mm.nle.get_N('bar');
             %         ... if you haven't already called get_idx to get nne.)
             %
             %       If 'z', 'foo' and 'bar' are indexed sets, then you can
@@ -371,19 +371,19 @@ classdef opt_model < handle
             %       or 'bar(i)' in the examples above.
 
             if nargin == 1
-                varargout{1} = om.var.idx;
+                varargout{1} = mm.var.idx;
                 if nargout > 1
-                    varargout{2} = om.lin.idx;
+                    varargout{2} = mm.lin.idx;
                     if nargout > 2
-                        varargout{3} = om.nle.idx;
+                        varargout{3} = mm.nle.idx;
                         if nargout > 3
-                            varargout{4} = om.nli.idx;
+                            varargout{4} = mm.nli.idx;
                             if nargout > 4
-                                varargout{5} = om.qdc.idx;
+                                varargout{5} = mm.qdc.idx;
                                 if nargout > 5
-                                    varargout{6} = om.nlc.idx;
+                                    varargout{6} = mm.nlc.idx;
                                     if nargout > 6
-                                        varargout{7} = om.qcn.idx;
+                                        varargout{7} = mm.qcn.idx;
                                     end
                                 end
                             end
@@ -392,21 +392,21 @@ classdef opt_model < handle
                 end
             else
                 for k = nargout:-1:1
-                    varargout{k} = om.(varargin{k}).idx;
+                    varargout{k} = mm.(varargin{k}).idx;
                 end
             end
         end
 
-        function rv = get_userdata(om, name)
+        function rv = get_userdata(mm, name)
             % get_userdata - Used to retrieve values of user data.
             % ::
             %
-            %   VAL = OM.GET_USERDATA(NAME) returns the value specified by the given name
+            %   VAL = MM.GET_USERDATA(NAME) returns the value specified by the given name
             %   or an empty matrix if userdata with NAME does not exist.
             %
             %   This function allows the user to retrieve any arbitrary data that was
             %   saved in the object for later use. Data for a given NAME is saved by
-            %   assigning it to OM.userdata.(NAME).
+            %   assigning it to MM.userdata.(NAME).
             %
             %   This can be useful, for example, when using a user function to add
             %   variables or constraints, etc. Suppose some special indexing is
@@ -415,19 +415,19 @@ classdef opt_model < handle
             %
             % See also mp.opt_model.
 
-            if isfield(om.userdata, name)
-                rv = om.userdata.(name);
+            if isfield(mm.userdata, name)
+                rv = mm.userdata.(name);
             else
                 rv = [];
             end
         end
 
-        function prob = problem_type(om, recheck)
+        function prob = problem_type(mm, recheck)
             % problem_type - Return a string identifying the type of mathematical program
             % ::
             %
-            %   PROB_TYPE = OM.PROBLEM_TYPE()
-            %   PROB_TYPE = OM.PROBLEM_TYPE(RECHECK)
+            %   PROB_TYPE = MM.PROBLEM_TYPE()
+            %   PROB_TYPE = MM.PROBLEM_TYPE(RECHECK)
             %
             %   Returns a string identifying the type of mathematical program
             %   represented by the current model, based on the variables, costs,
@@ -459,14 +459,14 @@ classdef opt_model < handle
             %
             % See also mp.opt_model.
             
-            if isempty(om.prob_type) || nargin > 1 && recheck
-                nleN = om.nle.get_N();      %% nonlinear equalities
-                nliN = om.nli.get_N();      %% nonlinear inequalities
-                nlcN = om.nlc.get_N();      %% general nonlinear costs
-                qdcN = om.qdc.get_N();      %% quadratic costs
-                qcnN = om.qcn.get_N();      %% quadratic constraints
-                linN = om.lin.get_N();      %% linear constraints
-                varN = om.var.get_N();      %% variables
+            if isempty(mm.prob_type) || nargin > 1 && recheck
+                nleN = mm.nle.get_N();      %% nonlinear equalities
+                nliN = mm.nli.get_N();      %% nonlinear inequalities
+                nlcN = mm.nlc.get_N();      %% general nonlinear costs
+                qdcN = mm.qdc.get_N();      %% quadratic costs
+                qcnN = mm.qcn.get_N();      %% quadratic constraints
+                linN = mm.lin.get_N();      %% linear constraints
+                varN = mm.var.get_N();      %% variables
                 if varN == 0
                     prob = '';
                 elseif nlcN || qdcN         %% problem has costs
@@ -476,7 +476,7 @@ classdef opt_model < handle
                         prob = 'QCQP';
                     else                    %% linear constraints, no general nonlinear costs
                         %% get quadratic cost coefficients
-                        H = om.qdc.params(om.var);
+                        H = mm.qdc.params(mm.var);
                         if isempty(H) || ~any(any(H))
                             prob = 'LP';        %% linear program
                         else
@@ -490,7 +490,7 @@ classdef opt_model < handle
                     if nleN + qcnN + linN == varN || nleN + qcnN + linN == varN - 1   %% square (or almost) system
                         if linN > 0
                             %% get lower & upper bounds
-                            [A, l, u] = om.lin.params(om.var);
+                            [A, l, u] = mm.lin.params(mm.var);
                             if any(l ~= u)
                                 error('mp.opt_model.problem_type: invalid problem - linear inequality constraints with no costs');
                             end
@@ -515,20 +515,20 @@ classdef opt_model < handle
                         error('mp.opt_model.problem_type: invalid problem - non-square system with no costs');
                     end
                 end
-                if om.is_mixed_integer() && ~strcmp(prob, 'NLEQ')
+                if mm.is_mixed_integer() && ~strcmp(prob, 'NLEQ')
                     prob = ['MI' prob];
                 end
-                om.prob_type = prob;    %% cache it
+                mm.prob_type = prob;    %% cache it
             else
-                prob = om.prob_type;    %% return cached type
+                prob = mm.prob_type;    %% return cached type
             end
         end
 
-        function TorF = is_mixed_integer(om)
+        function TorF = is_mixed_integer(mm)
             % is_mixed_integer - Return true if model is mixed integer, false otherwise.
             % ::
             %
-            %   TorF = OM.IS_MIXED_INTEGER()
+            %   TorF = MM.IS_MIXED_INTEGER()
             %
             %   Outputs:
             %       TorF : 1 or 0, indicating whether any of the variables are
@@ -537,9 +537,9 @@ classdef opt_model < handle
             % See also mp.opt_model.
 
             TorF = 0;
-            if om.var.get_N()
-                for k = 1:length(om.var.order)
-                    t = om.var.data.vt.(om.var.order(k).name);
+            if mm.var.get_N()
+                for k = 1:length(mm.var.order)
+                    t = mm.var.data.vt.(mm.var.order(k).name);
                     if iscell(t)
                         for j = 1:length(t(:))
                             if any(t{j} ~= 'C')
@@ -557,26 +557,27 @@ classdef opt_model < handle
             end
         end
 
-        function TorF = is_solved(om)
+        function TorF = is_solved(mm)
             % Return true if model has been solved.
 
-            TorF = ~isempty(om.soln.eflag);
+            TorF = ~isempty(mm.soln.eflag);
         end
 
-        function [x, f, eflag, output, lambda] = solve(om, opt)
-            % solve - Solve the optimization model.
+        function [x, f, eflag, output, lambda] = solve(mm, opt)
+            % solve - Solve the model.
             % ::
             %
-            %   X = OM.SOLVE()
-            %   [X, F] = OM.SOLVE()
-            %   [X, F, EXITFLAG] = OM.SOLVE()
-            %   [X, F, EXITFLAG, OUTPUT] = OM.SOLVE()
-            %   [X, F, EXITFLAG, OUTPUT, JAC] = OM.SOLVE()      (LEQ/NLEQ problems)
-            %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = OM.SOLVE()   (other problem types)
-            %   [X ...] = OM.SOLVE(OPT)
+            %   X = MM.SOLVE()
+            %   [X, F] = MM.SOLVE()
+            %   [X, F, EXITFLAG] = MM.SOLVE()
+            %   [X, F, EXITFLAG, OUTPUT] = MM.SOLVE()
+            %   [X, F, EXITFLAG, OUTPUT, JAC] = MM.SOLVE()      (LEQ/NLEQ problems)
+            %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = MM.SOLVE()   (other problem types)
+            %   [X ...] = MM.SOLVE(OPT)
             %
-            %   Solves the optimization model using one of the following, depending
-            %   on the problem type: QPS_MASTER, MIQPS_MASTER, NLPS_MASTER, NLEQS_MASTER.
+            %   Solves the model using one of the following, depending on the
+            %   problem type: MP_LINSOLVE, NLEQS_MASTER, PNES_MASTER,
+            %   QPS_MASTER, QCQPS_MASTER, MIQPS_MASTER, NLPS_MASTER.
             %
             %   Inputs:
             %       OPT : optional options structure with the following fields,
@@ -650,7 +651,7 @@ classdef opt_model < handle
             %           osqp_opt    - options struct for OSQP
             %           quadprog_opt - options struct for QUADPROG
             %           parse_soln (0) - flag that specifies whether or not to call
-            %               the PARSE_SOLN method and place the return values in OM.soln.
+            %               the PARSE_SOLN method and place the return values in MM.soln.
             %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
             %               value and primal variable relative match required to avoid
             %               mis-match warning message if mixed integer price computation
@@ -684,8 +685,8 @@ classdef opt_model < handle
             %           lower - lower bound on optimization variables
             %           upper - upper bound on optimization variables
             %
-            % See also mp.opt_model, qps_master, miqps_master, nlps_master, nleqs_master,
-            % pnes_master, mp_linsolve.
+            % See also mp_linsolve, nleqs_master, pnes_master, qps_master,
+            % qcqps_master, miqps_master, nlps_master.
             
             t0 = tic;       %% start timer
             if nargin < 2
@@ -694,7 +695,7 @@ classdef opt_model < handle
             % opt.parse_soln = 1;
             
             %% call appropriate solver
-            pt = om.problem_type();
+            pt = mm.problem_type();
             switch pt
                 case 'LEQ'          %% LEQ   - linear equations
                     if isfield(opt, 'leq_opt')
@@ -719,7 +720,7 @@ classdef opt_model < handle
                         leq_thresh = 0;
                     end
             
-                    [A, b] = om.lin.params(om.var);
+                    [A, b] = mm.lin.params(mm.var);
                     if leq_thresh           %% check for failure
                         %% set up to trap non-singular matrix warnings
                         [lastmsg, lastid] = lastwarn;
@@ -746,10 +747,10 @@ classdef opt_model < handle
                     if isfield(opt, 'x0')
                         x0 = opt.x0;
                     else
-                        x0 = om.var.params();
+                        x0 = mm.var.params();
                     end
             
-                    fcn = @(x)nleq_fcn_(om, x);
+                    fcn = @(x)nleq_fcn_(mm, x);
                     switch pt
                         case 'NLEQ' %% NLEQ - nonlinear equation
                             [x, f, eflag, output, lambda] = nleqs_master(fcn, x0, opt);
@@ -763,30 +764,30 @@ classdef opt_model < handle
                         error('mp.opt_model.solve: not yet implemented for ''MINLP'' problems.')
                     else                %% NLP   - nonlinear program
                         %% optimization vars, bounds, types
-                        [x0, xmin, xmax] = om.var.params();
+                        [x0, xmin, xmax] = mm.var.params();
                         if isfield(opt, 'x0')
                             x0 = opt.x0;
                         end
             
                         %% run solver
-                        [A, l, u] = om.lin.params(om.var);
-                        f_fcn = @(x)nlp_costfcn(om, x);
-                        gh_fcn = @(x)nlp_consfcn(om, x);
-                        hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(om, x, lambda, cost_mult);
+                        [A, l, u] = mm.lin.params(mm.var);
+                        f_fcn = @(x)nlp_costfcn(mm, x);
+                        gh_fcn = @(x)nlp_consfcn(mm, x);
+                        hess_fcn = @(x, lambda, cost_mult)nlp_hessfcn(mm, x, lambda, cost_mult);
                         [x, f, eflag, output, lambda] = ...
                             nlps_master(f_fcn, x0, A, l, u, xmin, xmax, gh_fcn, hess_fcn, opt);
                     end
                 otherwise
                     %% get parameters
-                    [HH, CC, C0] = om.qdc.params(om.var);
-                    [Q, B, ll, uu] = om.qcn.params(om.var);
-                    [A, l, u] = om.lin.params(om.var);
+                    [HH, CC, C0] = mm.qdc.params(mm.var);
+                    [Q, B, ll, uu] = mm.qcn.params(mm.var);
+                    [A, l, u] = mm.lin.params(mm.var);
                     mixed_integer = strcmp(pt(1:2), 'MI') && ...
                         (~isfield(opt, 'relax_integer') || ~opt.relax_integer);
             
                     if mixed_integer
                         %% optimization vars, bounds, types
-                        [x0, xmin, xmax, vtype] = om.var.params();
+                        [x0, xmin, xmax, vtype] = mm.var.params();
                         if isfield(opt, 'x0')
                             x0 = opt.x0;
                         end
@@ -802,7 +803,7 @@ classdef opt_model < handle
                         end
                     else                %% LP, QP - linear/quadratic program
                         %% optimization vars, bounds, types
-                        [x0, xmin, xmax] = om.var.params();
+                        [x0, xmin, xmax] = mm.var.params();
                         if isfield(opt, 'x0')
                             x0 = opt.x0;
                         end
@@ -820,36 +821,36 @@ classdef opt_model < handle
             end
             
             %% store solution
-            om.soln.eflag = eflag;
-            om.soln.x = x;
-            om.soln.f = f;
-            om.soln.output = output;
+            mm.soln.eflag = eflag;
+            mm.soln.x = x;
+            mm.soln.f = f;
+            mm.soln.output = output;
             if isstruct(lambda)
-                om.soln.lambda = lambda;
+                mm.soln.lambda = lambda;
             else
-                om.soln.jac = lambda;
+                mm.soln.jac = lambda;
             end
             
             %% parse solution
             if isfield(opt, 'parse_soln') && opt.parse_soln
-                om.parse_soln(true);
+                mm.parse_soln(true);
             end
-            om.soln.output.et = toc(t0);    %% stop timer
+            mm.soln.output.et = toc(t0);    %% stop timer
         end
-        function TorF = has_parsed_soln(om)
+        function TorF = has_parsed_soln(mm)
             % Return true if model has a parsed solution.
 
-            TorF = om.var.has_parsed_soln();
+            TorF = mm.var.has_parsed_soln();
         end
 
-        function ps = parse_soln(om, stash)
+        function ps = parse_soln(mm, stash)
             % parse_soln - Parse solution vector and shadow prices by all named sets.
             % ::
             %
-            %   PS = OM.PARSE_SOLN()
-            %   OM.PARSE_SOLN(STASH)
+            %   PS = MM.PARSE_SOLN()
+            %   MM.PARSE_SOLN(STASH)
             %
-            %   For a solved model, OM.PARSE_SOLN() returns a struct of parsed
+            %   For a solved model, MM.PARSE_SOLN() returns a struct of parsed
             %   solution vector and shadow price values for each named set of
             %   variables and constraints. The returned PS (parsed solution) struct
             %   has the following format, where each of the terminal elements is a
@@ -877,7 +878,7 @@ classdef opt_model < handle
             %   more efficient if a complete set of values is needed.
             %
             %   If the optional STASH input argument is present and true, the fields
-            %   of the return struct are copied to OM.SOLN.
+            %   of the return struct are copied to MM.SOLN.
             %
             % See also get_soln.
             
@@ -885,46 +886,46 @@ classdef opt_model < handle
                 stash = false;
             end
             
-            if ~om.is_solved()
+            if ~mm.is_solved()
                 error('mp.opt_model.parse_soln: model not solved');
             end
             
             %% var
-            ps = struct('var', om.var.parse_soln(om.soln, stash));
+            ps = struct('var', mm.var.parse_soln(mm.soln, stash));
             
             %% lin
-            ps_lin = om.lin.parse_soln(om.soln, stash);
+            ps_lin = mm.lin.parse_soln(mm.soln, stash);
             if ~isempty(ps_lin)
                 ps.lin = ps_lin;
             end
             
             %% qcn
-            ps_qcn = om.qcn.parse_soln(om.soln, stash);
+            ps_qcn = mm.qcn.parse_soln(mm.soln, stash);
             if ~isempty(ps_qcn)
                 ps.qcn = ps_qcn;
             end
             
             %% nle
-            ps_nle = om.nle.parse_soln(om.soln, true, stash);
+            ps_nle = mm.nle.parse_soln(mm.soln, true, stash);
             if ~isempty(ps_nle)
                 ps.nle = ps_nle;
             end
             
             %% nli
-            ps_nli = om.nli.parse_soln(om.soln, false, stash);
+            ps_nli = mm.nli.parse_soln(mm.soln, false, stash);
             if ~isempty(ps_nli)
                 ps.nli = ps_nli;
             end
             
             %%-----  DEPRECATED  -----
-            %% if requested, stash the result directly in om.soln
+            %% if requested, stash the result directly in mm.soln
             %% (they are already stashed in the soln property of each set type)
             % if stash
-            %     om.soln = nested_struct_copy(om.soln, ps, struct('copy_mode', '='));
+            %     mm.soln = nested_struct_copy(mm.soln, ps, struct('copy_mode', '='));
             % end
         end
 
-        function display(om, varargin)
+        function display(mm, varargin)
             % display - Displays the object.
             %
             % Called when semicolon is omitted at the command-line. Displays the details
@@ -939,23 +940,23 @@ classdef opt_model < handle
             end
             
             %% display details of each set type
-            set_types = om.get_set_types();
+            set_types = mm.get_set_types();
             set_types = horzcat(set_types, more_set_types);
             % set_types = {'var', 'nle', 'nli', 'lin', 'qcn', 'qdc', 'nlc', more_set_types{:}};
             fprintf('\n');
             for k = 1:length(set_types)
-                om.(set_types{k}).display(set_types{k});
+                mm.(set_types{k}).display(set_types{k});
             end
             
             %% user data
-            fields = fieldnames(om.userdata);
+            fields = fieldnames(mm.userdata);
             if ~isempty(fields)
                 fprintf('\nUSER DATA\n')
                 fprintf('=========\n')
                 fprintf('  name                               size       class\n');
                 fprintf(' ------------------------------   -----------  --------------------\n');
                 for k = 1:length(fields)
-                    f = om.userdata.(fields{k});
+                    f = mm.userdata.(fields{k});
                     [m, n] = size(f);
                     fprintf('  %-31s %5dx%-5d   %s\n', fields{k}, m, n, class(f));
                 end
@@ -964,18 +965,18 @@ classdef opt_model < handle
             end
         end
 
-        function om = display_soln(om, varargin)
+        function mm = display_soln(mm, varargin)
             % display_soln - Display solution values.
             % ::
             %
-            %   OM.DISPLAY_SOLN()
-            %   OM.DISPLAY_SOLN(SET_TYPE)
-            %   OM.DISPLAY_SOLN(SET_TYPE, NAME)
-            %   OM.DISPLAY_SOLN(SET_TYPE, NAME, IDX)
-            %   OM.DISPLAY_SOLN(FID)
-            %   OM.DISPLAY_SOLN(FID, SET_TYPE)
-            %   OM.DISPLAY_SOLN(FID, SET_TYPE, NAME)
-            %   OM.DISPLAY_SOLN(FID, SET_TYPE, NAME, IDX)
+            %   MM.DISPLAY_SOLN()
+            %   MM.DISPLAY_SOLN(SET_TYPE)
+            %   MM.DISPLAY_SOLN(SET_TYPE, NAME)
+            %   MM.DISPLAY_SOLN(SET_TYPE, NAME, IDX)
+            %   MM.DISPLAY_SOLN(FID)
+            %   MM.DISPLAY_SOLN(FID, SET_TYPE)
+            %   MM.DISPLAY_SOLN(FID, SET_TYPE, NAME)
+            %   MM.DISPLAY_SOLN(FID, SET_TYPE, NAME, IDX)
             %
             %   Displays the model solution, including values, bounds and shadow
             %   prices for variables and linear constraints, values and shadow
@@ -1000,11 +1001,11 @@ classdef opt_model < handle
             %       IDX  - (optional) cell array specifying the indices of the set
             %
             %   Examples:
-            %       om.display_soln('var');
-            %       om.display_soln({'nle', 'nli'});
-            %       om.display_soln('var', 'P');
-            %       om.display_soln('lin', 'lin_con_1');
-            %       om.display_soln('nle', 'nle_con_b', {2,3});
+            %       mm.display_soln('var');
+            %       mm.display_soln({'nle', 'nli'});
+            %       mm.display_soln('var', 'P');
+            %       mm.display_soln('lin', 'lin_con_1');
+            %       mm.display_soln('nle', 'nle_con_b', {2,3});
             %
             % See also get_soln, parse_soln.
 
@@ -1032,9 +1033,9 @@ classdef opt_model < handle
             end
             
             %% print header
-            if om.is_solved()
+            if mm.is_solved()
                 if strcmp(set_type, 'all')
-                    set_types = om.get_set_types(); %% all set types
+                    set_types = mm.get_set_types(); %% all set types
                 elseif ~iscell(set_type)
                     set_types = {set_type}; %% make set_type a cell array of char arrays
                 else
@@ -1043,17 +1044,17 @@ classdef opt_model < handle
             
                 for ss = 1:length(set_types)
                     st = set_types{ss};
-                    om_st = om.(st);
+                    sm = mm.(st);
             
                     switch st
                     case 'var'
-                        om_st.display_soln(om.soln, fid, args{2:end});
+                        sm.display_soln(mm.soln, fid, args{2:end});
                     case 'nle'
-                        om_st.display_soln(om.var, om.soln, 1, fid, args{2:end});
+                        sm.display_soln(mm.var, mm.soln, 1, fid, args{2:end});
                     case 'nli'
-                        om_st.display_soln(om.var, om.soln, 0, fid, args{2:end});
+                        sm.display_soln(mm.var, mm.soln, 0, fid, args{2:end});
                     otherwise
-                        om_st.display_soln(om.var, om.soln, fid, args{2:end});
+                        sm.display_soln(mm.var, mm.soln, fid, args{2:end});
                     end
                 end             %% loop over set types
             else
@@ -1077,27 +1078,27 @@ function d = copy_prop(s, d, prop)
 end
 
 %% system of nonlinear and linear equations
-function [f, J] = nleq_fcn_(om, x)
+function [f, J] = nleq_fcn_(mm, x)
     flin = []; Jlin = [];
     fqcn = []; Jqcn = [];
     fnln = []; Jnln = [];
-    if om.lin.get_N()
-        [flin, ~, Jlin] = om.lin.eval(om.var, x);
+    if mm.lin.get_N()
+        [flin, ~, Jlin] = mm.lin.eval(mm.var, x);
     end
     if nargout > 1
-        if om.qcn.get_N()
-            [fqcn, Jqcn] = om.qcn.eval(om.var, x);
+        if mm.qcn.get_N()
+            [fqcn, Jqcn] = mm.qcn.eval(mm.var, x);
         end
-        if om.nle.get_N()
-            [fnln, Jnln] = om.nle.eval(om.var, x);
+        if mm.nle.get_N()
+            [fnln, Jnln] = mm.nle.eval(mm.var, x);
         end
         J = [Jnln; Jqcn; Jlin];
     else
-        if om.qcn.get_N()
-            fqcn = om.qcn.eval(om.var, x);
+        if mm.qcn.get_N()
+            fqcn = mm.qcn.eval(mm.var, x);
         end
-        if om.nle.get_N()
-            fnln = om.nle.eval(om.var, x);
+        if mm.nle.get_N()
+            fnln = mm.nle.eval(mm.var, x);
         end
     end
     f = [fnln; fqcn; flin];

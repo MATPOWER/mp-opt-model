@@ -98,21 +98,21 @@ opt = struct('verbose', 2, 'alg', 'MIPS');
 
 %%-----  METHOD 1  -----
 %% build model
-om = mp.opt_model;
-om.var.add('y', 2, y0, ymin);
-om.var.add('z', 1, z0, zmin);
-om.qcn.add(om.var, 'quadcon', Q, B, lq, uq);
-om.lin.add(om.var, 'lincon', A, b, b);
-om.qdc.add(om.var, 'cost', H, c);
+mm = mp.opt_model;
+mm.var.add('y', 2, y0, ymin);
+mm.var.add('z', 1, z0, zmin);
+mm.qcn.add(mm.var, 'quadcon', Q, B, lq, uq);
+mm.lin.add(mm.var, 'lincon', A, b, b);
+mm.qdc.add(mm.var, 'cost', H, c);
 
 %% solve model
-[x, f, exitflag, output, lambda] = om.solve();
-% [x, f, exitflag, output, lambda] = om.solve(opt)
+[x, f, exitflag, output, lambda] = mm.solve();
+% [x, f, exitflag, output, lambda] = mm.solve(opt)
 
 %% print results
 fprintf('\n-----  METHOD 1 -----');
 fprintf('\nf = %g      exitflag = %d\n', f, exitflag);
-om.display_soln();
+mm.display_soln();
 
 %%-----  METHOD 2  -----
 %% assemble model parameters manually

@@ -278,7 +278,7 @@ t_is(om.nli.soln.mu.h, om.get_soln('nli', 'mu', 'h'), 14, [t 'nli.mu.h']);
 t = 'disp_soln';
 rn = fix(1e9*rand);
 [pathstr, name, ext] = fileparts(which('t_opt_model'));
-fname = 't_om_solve_nlps_display_soln';
+fname = 't_mm_solve_nlps_display_soln';
 fname_e = fullfile(pathstr, 'display_soln', sprintf('%s.txt', fname));
 fname_g = sprintf('%s_%d.txt', fname, rn);
 [fd, msg] = fopen(fname_g, 'wt');   %% open solution file
