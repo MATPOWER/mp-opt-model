@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 802;
+num_tests = 805;
 
 t_begin(num_tests, quiet);
 
@@ -1921,6 +1921,13 @@ end
 %% turn object to struct warnings back on
 warning(s1.state, warn_id);
 
+%%-----  get_userdata  -----
+om.userdata.foo = 'foo';
+om.userdata.bar = struct('baz', 1, 'buz', 2);
+t = 'get_userdata : ';
+t_str_match(om.get_userdata('foo'), 'foo', [t 'foo']);
+t_ok(isequal(om.get_userdata('bar'), struct('baz', 1, 'buz', 2)), [t 'bar']);
+t_ok(isequal(om.get_userdata('nothing'), []), [t 'nothing']);
 
 %%-----  copy  -----
 t = 'copy constructor';
