@@ -12,7 +12,6 @@ Use :class:`mp.opt_model` to build and solve your mathematical programming and o
 .. toctree::
 
    classes/mp/opt_model
-   classes/mp/idx_manager
    classes/mp/set_manager
    classes/mp/set_manager_opt_model
    classes/mp/sm_variable
@@ -21,7 +20,6 @@ Use :class:`mp.opt_model` to build and solve your mathematical programming and o
    classes/mp/sm_nln_cost
    classes/mp/sm_quad_cost
    classes/mp/sm_quad_constraint
-   classes/mp/sm_quad_cost_legacy
 
 Deprecated:
 
@@ -220,21 +218,38 @@ These functions test that |MPOM| is installed and functioning as expected.
 .. toctree::
 
    functions/test_mp_opt_model
-   functions/t_miqps_master
    functions/t_nested_struct_copy
    functions/t_nleqs_master
-   functions/t_nlps_master
-   functions/t_om_solve_leqs
-   functions/t_om_solve_miqps
-   functions/t_om_solve_nleqs
-   functions/t_om_solve_nlps
-   functions/t_om_solve_pne
-   functions/t_om_solve_qcqps
-   functions/t_om_solve_qps
-   functions/t_opt_model
    functions/t_pnes_master
-   functions/t_qcqps_master
    functions/t_qps_master
+   functions/t_qcqps_master
+   functions/t_miqps_master
+   functions/t_nlps_master
+   functions/t_mp_opt_model
+   functions/t_mm_solve_leqs
+   functions/t_mm_solve_nleqs
+   functions/t_mm_solve_pne
+   functions/t_mm_solve_qps
+   functions/t_mm_solve_qcqps
+   functions/t_mm_solve_miqps
+   functions/t_mm_solve_nlps
+
+Legacy Tests
+^^^^^^^^^^^^
+
+Tests of deprecated functionality.
+
+.. toctree::
+
+   functions/t_have_fcn
+   functions/t_opt_model
+   functions/t_om_solve_leqs
+   functions/t_om_solve_nleqs
+   functions/t_om_solve_pne
+   functions/t_om_solve_qps
+   functions/t_om_solve_qcqps
+   functions/t_om_solve_miqps
+   functions/t_om_solve_nlps
 
 
 Private Functions
