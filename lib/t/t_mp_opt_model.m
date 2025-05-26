@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 805;
+num_tests = 813;
 
 t_begin(num_tests, quiet);
 
@@ -1918,9 +1918,6 @@ else
     t_skip(40, 'om.set_params tests require ''isequaln()''');
 end
 
-%% turn object to struct warnings back on
-warning(s1.state, warn_id);
-
 %%-----  get_userdata  -----
 om.userdata.foo = 'foo';
 om.userdata.bar = struct('baz', 1, 'buz', 2);
@@ -1930,19 +1927,39 @@ t_ok(isequal(om.get_userdata('bar'), struct('baz', 1, 'buz', 2)), [t 'bar']);
 t_ok(isequal(om.get_userdata('nothing'), []), [t 'nothing']);
 
 %%-----  copy  -----
-t = 'copy constructor';
-if have_feature('octave') && have_feature('octave', 'vnum') < 5.003
-    t_skip(1, [t ' - https://savannah.gnu.org/bugs/?52614']);
-else
-    om1 = mp.opt_model(om);
-    om1.var.add('test', 10);
-    t_is(om1.var.N, om.var.N+10, 12, t);
-end
+t = 'copy constructor : ';
+om1 = mp.opt_model(om);
+t_ok(isequal(om1, om), [t 'identical']);
+om1.var.add('test', 10);
+t_is(om1.var.N, om.var.N+10, 12, [t 'orig not modified by copy']);
 
-t = 'copy';
-om2 = om.copy();
+t = 'copy constructor (opt_model) : ';
+om0 = opt_model(struct(om));
+om0_struct = struct(om0);
+om_struct = struct(om);
+if isfield(om0_struct, 'set_types')
+    om0_struct = rmfield(om0_struct, 'set_types');
+end
+om0_struct.qdc = struct(om0_struct.qdc);
+om_struct.qdc = struct(om_struct.qdc);
+t_str_match(class(om0.qdc), 'mp.sm_quad_cost_legacy', [t 'class(om.qdc)']);
+t_ok(isequal(om0_struct, om_struct), [t 'opt_model identical']);
+om2 = mp.opt_model(om0);
+om0.var.add('test0', 5);
+t_is(om0.var.N, om.var.N+5, 12, [t 'orig not modified by copy']);
+t_str_match(class(om2.qdc), 'mp.sm_quad_cost', [t 'class(om.qdc)']);
+t_ok(isequal(struct(om2), struct(om)), [t 'identical'])
 om2.var.add('test', 10);
-t_is(om2.var.N, om.var.N+10, 12, t);
+t_is(om2.var.N, om.var.N+10, 12, [t 'orig not modified by copy']);
+
+t = 'copy : ';
+om3 = om.copy();
+t_ok(isequal(struct(om3), struct(om)), [t 'identical'])
+om3.var.add('test', 10);
+t_is(om3.var.N, om.var.N+10, 12, [t 'orig not modified by copy']);
+
+%% turn object to struct warnings back on
+warning(s1.state, warn_id);
 
 %%-----  set_type_idx_map  -----
 t = 'set_type_idx_map : ';

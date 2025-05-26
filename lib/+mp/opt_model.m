@@ -225,7 +225,7 @@ classdef opt_model < handle
 
             if nargin > 0
                 s = varargin{1};
-                if isa(s, 'mp.opt_model')
+                if isa(s, 'mp.opt_model') || isa(s, 'opt_model')
                     if have_feature('octave')
                         s1 = warning('query', 'Octave:classdef-to-struct');
                         warning('off', 'Octave:classdef-to-struct');
@@ -233,6 +233,10 @@ classdef opt_model < handle
                     props = fieldnames(s);
                     if have_feature('octave')
                         warning(s1.state, 'Octave:classdef-to-struct');
+                    end
+                    [~, k] = ismember('set_types', props);
+                    if k
+                        props(k) = [];  %% remove 'set_types'
                     end
                     for k = 1:length(props)
                         om = copy_prop(s, om, props{k});
@@ -255,7 +259,7 @@ classdef opt_model < handle
                 om.qcn = mp.sm_quad_constraint('QUADRATIC CONSTRAINTS');
                 om.nle = mp.sm_nln_constraint('NONLIN EQ CONSTRAINTS');
                 om.nli = mp.sm_nln_constraint('NONLIN INEQ CONSTRAINTS');
-                om.qdc = mp.sm_quad_cost_legacy('QUADRATIC COSTS');
+                om.qdc = mp.sm_quad_cost('QUADRATIC COSTS');
                 om.nlc = mp.sm_nln_cost('GEN NONLIN COSTS');
             end
         end
@@ -1060,7 +1064,9 @@ classdef opt_model < handle
 end         %% classdef
 
 function d = copy_prop(s, d, prop)
-    if isa(s.(prop), 'mp.set_manager')
+    if isa(s.(prop), 'mp.sm_quad_cost_legacy')
+        d.(prop) = s.(prop).copy('mp.sm_quad_cost');
+    elseif isa(s.(prop), 'mp.set_manager')
         d.(prop) = s.(prop).copy();
     elseif isa(d.(prop), 'mp.set_manager')
         d.(prop) = nested_struct_copy( ...

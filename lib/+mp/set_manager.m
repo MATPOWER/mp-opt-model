@@ -160,17 +160,25 @@ classdef set_manager < handle
             obj.label = label;
         end
 
-        function new_obj = copy(obj)
+        function new_obj = copy(obj, cls)
             % Duplicate the object.
             % ::
             %
             %   new_sm = sm.copy()
+            %   new_sm = sm.copy(new_class)
+            %
+            % Input:
+            %   new_class (char array) : *(default = same class)* name of class
+            %       to use for new object
             %
             % Make a shallow copy of the object by copying each of the
             % top-level properties.
 
             %% create new object
-            new_obj = eval(sprintf('%s(''%s'')', class(obj), obj.label));
+            if nargin < 2
+                cls = class(obj);
+            end
+            new_obj = eval(sprintf('%s(''%s'')', cls, obj.label));
 
             %% get the names of the properties
             if have_feature('octave')
@@ -489,7 +497,7 @@ classdef set_manager < handle
             %     s = var.set_type_idx_map());
             %     s = lin.set_type_idx_map([], 1));
             %
-            % See also describe_idx, mp.idx_manager.
+            % See also describe_idx.
 
             %% default args
             if nargin < 3

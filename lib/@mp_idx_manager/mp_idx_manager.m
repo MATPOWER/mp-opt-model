@@ -245,7 +245,9 @@ classdef mp_idx_manager < handle
 end         %% classdef
 
 function d = copy_prop(s, d, prop)
-    if isa(s.(prop), 'mp.set_manager')
+    if isa(s.(prop), 'mp.sm_quad_cost')
+        d.(prop) = s.(prop).copy('mp.sm_quad_cost_legacy');
+    elseif isa(s.(prop), 'mp.set_manager')
         d.(prop) = s.(prop).copy();
     elseif isa(d.(prop), 'mp.set_manager')
         d.(prop) = nested_struct_copy( ...
