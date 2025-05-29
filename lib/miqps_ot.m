@@ -205,7 +205,7 @@ end
 [ieq, igt, ilt, Ae, be, Ai, bi] = convert_lin_constraint(A, l, u);
 
 %% mixed integer?
-if isempty(vtype) || isempty(find(vtype == 'B' | vtype == 'I'))
+if isempty(vtype) || isempty(find(vtype == 'B' | vtype == 'I', 1))
     mi = 0;
     vtype = repmat('C', 1, nx);
 else

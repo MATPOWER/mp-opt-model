@@ -199,7 +199,7 @@ niq = length(ilt) + length(igt);    %% number of inequalities
 
 ctype = [repmat('S', neq, 1); repmat('U', niq, 1)];
 
-if isempty(vtype) || isempty(find(vtype == 'B' | vtype == 'I'))
+if isempty(vtype) || isempty(find(vtype == 'B' | vtype == 'I', 1))
     mi = 0;
     vtype = repmat('C', nx, 1);
 else

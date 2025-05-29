@@ -241,7 +241,7 @@ if verbose
     };
 end
 if isempty(vtype) || isempty(find(vtype == 'B' | vtype == 'I' | ...
-        vtype == 'S' | vtype == 'N'))
+        vtype == 'S' | vtype == 'N', 1))
     mi = 0;
 else
     mi = 1;
