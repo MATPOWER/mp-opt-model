@@ -171,7 +171,7 @@ classdef set_manager < handle
             %   new_class (char array) : *(default = same class)* name of class
             %       to use for new object
             %
-            % Make a shallow copy of the object by copying each of the
+            % Make a shallow copy of the object by copying each of the
             % top-level properties.
 
             %% create new object
@@ -375,9 +375,9 @@ classdef set_manager < handle
             % get_N - Return the number of elements in the set.
             % ::
             %
-            %   N = obj.get_N()
-            %   N = obj.get_N(name)
-            %   N = obj.get_N(name, idx_list)
+            %   N = sm.get_N()
+            %   N = sm.get_N(name)
+            %   N = sm.get_N(name, idx_list)
             %
             % Returns either the total number of elements in the set or the
             % number corresponding to a specified named block, or indexed named
@@ -385,9 +385,9 @@ classdef set_manager < handle
             %
             % Examples::
             %
-            %   N = obj.get_N()             % total number of elements in set
-            %   N = obj.get_N(name)         % # of elements in named set
-            %   N = obj.get_N(name, idx)    % # of elements in indexed named set
+            %   N = sm.get_N()             % total number of elements in set
+            %   N = sm.get_N(name)         % # of elements in named set
+            %   N = sm.get_N(name, idx)    % # of elements in indexed named set
 
             if nargin < 2
                 N = obj.N;
@@ -461,9 +461,9 @@ classdef set_manager < handle
             % set_type_idx_map - Map index back to named subset & index within set.
             % ::
             %
-            %   s = obj.set_type_idx_map()
-            %   s = obj.set_type_idx_map(idxs)
-            %   s = obj.set_type_idx_map(idxs, group_by_name)
+            %   s = sm.set_type_idx_map()
+            %   s = sm.set_type_idx_map(idxs)
+            %   s = sm.set_type_idx_map(idxs, group_by_name)
             %
             % Returns a struct of same dimensions as ``idxs`` specifying, for
             % each index, the corresponding named set and element within the
