@@ -959,7 +959,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
             %               - ``mu_uq`` - quadratic constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
-            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %   stash (logical) : if true, store return value in :attr:`soln`
             %       property
             %
             % Output:

@@ -743,7 +743,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             %               - ``mu_u`` - linear constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
-            %   iseq (boolean) : true for equality constraints, false for
+            %   iseq (logical) : true for equality constraints, false for
             %       inequality constraints
             %   fid (fileID) : fileID of open file to write to (default is
             %       1 for standard output)
@@ -846,7 +846,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             %               - ``mu_u`` - linear constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
-            %   iseq (boolean) : true for equality constraints, false for
+            %   iseq (logical) : true for equality constraints, false for
             %       inequality constraints
             %   tags (char array or cell array of char arrays) : names of
             %       desired outputs, default is ``{'g', 'lam', 'dg'}`` with
@@ -929,9 +929,9 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
             %               - ``mu_u`` - linear constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
-            %   iseq (boolean) : true for equality constraints, false for
+            %   iseq (logical) : true for equality constraints, false for
             %       inequality constraints
-            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %   stash (logical) : if true, store return value in :attr:`soln`
             %       property
             %
             % Output:

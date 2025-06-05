@@ -167,7 +167,7 @@ classdef set_manager_opt_model < mp.set_manager
             %   TorF = sm.has_parsed_soln()
             %
             % Output:
-            %   TorF (boolean) : true if parsed solution is available in
+            %   TorF (logical) : true if parsed solution is available in
             %       :attr:`soln` property; format of :attr:`soln` depends
             %       on implementing subclass
 
@@ -197,7 +197,7 @@ classdef set_manager_opt_model < mp.set_manager
             %               - ``mu_u`` - linear constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
-            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %   stash (logical) : if true, store return value in :attr:`soln`
             %       property
             %
             % Output:

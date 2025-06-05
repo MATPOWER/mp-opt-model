@@ -103,7 +103,7 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             %       pairs of indexed named subsets of variables; order of
             %       ``vs`` determines order of blocks in :math:`\x`; if
             %       empty, :math:`\x` is assumed to be the full variable vector
-            %   tr (boolean) : *(optional, default* ``false`` *)* if true, it
+            %   tr (logical) : *(optional, default* ``false`` *)* if true, it
             %       means that :math:`\trans{\AA}` is supplied/stored rather
             %       than :math:`\AA`
             %
@@ -249,7 +249,7 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             %       order of blocks in :math:`\x`
             %   i1 (integer) : index of 1st row of specified subset in full set
             %   iN (integer) : index of last row of specified subset in full set
-            %   tr (boolean) : if true, it means that :math:`\trans{\AA}` was
+            %   tr (logical) : if true, it means that :math:`\trans{\AA}` was
             %       supplied/stored rather than :math:`\AA`
             %
             % Examples::
@@ -880,7 +880,7 @@ classdef sm_lin_constraint < mp.set_manager_opt_model
             %               - ``mu_u`` - linear constraint upper bounds
             %               - ``lower`` - variable lower bounds
             %               - ``upper`` - variable upper bounds
-            %   stash (boolean) : if true, store return value in :attr:`soln`
+            %   stash (logical) : if true, store return value in :attr:`soln`
             %       property
             %
             % Output:
