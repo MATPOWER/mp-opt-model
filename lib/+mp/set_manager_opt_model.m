@@ -11,10 +11,12 @@ classdef set_manager_opt_model < mp.set_manager
 %   * soln - struct for storing parsed solution values
 %
 % mp.set_manager_opt_model Methods:
+%   * set_manager_opt_model - constructor
 %   * params - *(abstract)* return set-type-specific parameter data
 %   * set_params - *(abstract)* modify set-type-specific parameter data
 %   * display_soln - display solution values
 %   * has_parsed_soln - return true if parsed solution is available
+%   * parse_soln - parse solution
 %
 % By convention, ``sm`` is the variable name used for mp.set_manager_opt_model
 % objects.
@@ -537,6 +539,7 @@ classdef set_manager_opt_model < mp.set_manager
         end
 
         function str = sprintf_num(obj, width, val)
+            %
             val = full(val);
             if all(isnan(val))
                 fmt = sprintf('%%%ds', width);
@@ -558,10 +561,12 @@ classdef set_manager_opt_model < mp.set_manager
         end
 
         function v = mu_thresh(obj)
+            %
             v = 1e-7;
         end
 
         function v = num_inf(obj)
+            %
             v = 1e10;
         end
     end     %% methods (Access=protected)

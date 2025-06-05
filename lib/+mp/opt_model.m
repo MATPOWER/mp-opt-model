@@ -2,186 +2,62 @@ classdef opt_model < handle
 % mp.opt_model - Mathematical programming and optimization model class.
 % ::
 %
-%   MM = MP.OPT_MODEL
-%   MM = MP.OPT_MODEL(S)
+%   mm = mp.opt_model
+%   mm = mp.opt_model(s)
+%   mm = mp.opt_model(mm0)
+%   mm = mp.opt_model(om)
 %
-%   This class implements the model object used to encapsulate a given
-%   mathematical programming or optimization problem formulation. It allows
-%   for access to optimization variables, constraints and costs in named blocks,
-%   keeping track of the ordering and indexing of the blocks as variables,
-%   constraints and costs are added to the problem.
+% This class implements the model object used to encapsulate a given
+% mathematical programming or optimization problem formulation. It allows
+% for access to variables, constraints and costs in named blocks,
+% keeping track of the ordering and indexing of the blocks as variables,
+% constraints and costs are added to the model.
 %
-%   Below are the list of available methods for use with the Opt Model class.
-%   Please see the help on each individual method for more details:
+% mp.opt_model Properties:
+%   * var - MP Set Manager for variables
+%   * lin - MP Set Manager for linear constraints
+%   * qcn - MP Set Manager for quadratic constraints
+%   * nle - MP Set Manager for nonlinear equality constraints
+%   * nli - MP Set Manager for nonlinear inequality constraints
+%   * qdc - MP Set Manager for quadratic costs
+%   * nlc - MP Set Manager for general nonlinear costs
+%   * prob_type - problem type, cached result of problem_type()
+%   * soln - results of solve()
+%   * userdata - arbitrary user data
 %
-%   Return index structure for variables, linear and nonlinear constraints
-%   and costs:
-%       get_idx
+% mp.opt_model Methods:
+%   * opt_model - constructor, optionally copying from struct or existing object
+%   * get_set_types - list of names of properties of set types managed by this class
+%   * copy - make a duplicate of the object
+%   * get_idx - return ``idx`` struct for vars, constraints, costs
+%   * get_user_data - used to retrieve values of user data
+%   * problem_type - return string identifying type of mathematical program
+%   * is_mixed_integer - return true if model is mixed integer, false otherwise
+%   * is_solved - return true if model has been solved
+%   * solve - solve the model
+%   * has_parsed_soln - return true if model has a parsed solution
+%   * parse_soln - parse solution vector and shadow prices by all named sets
+%   * display - display the object
+%   * display_soln - display solution values
 %
-%   Determine model type:
-%       problem_type
+% Example::
 %
-%   Solve the model, access, and display the solution:
-%       solve
-%       display_soln
-%       parse_soln
-%       is_solved
-%       has_parsed_soln
+%   mm = mp.opt_model;
+%   mm.var.add('y', 2, y0, ymin);
+%   mm.var.add('z', 2, z0, [], zmax);
+%   mm.lin.add(mm.var, 'lincon1', A1, b1, b1);
+%   mm.lin.add(mm.var, 'lincon2', A2, [], u2, {'y'});
+%   mm.qdc.add(mm.var, 'cost', H, []);
 %
-%   Retreive user data in the model object:
-%       get_userdata
+%   prob_type = mm.problem_type();
 %
-%   Display the object (called automatically when you omit the semicolon
-%   at the command-line):
-%       display
+%   if ~mm.is_solved()
+%       [x, f, exitflag, output, lambda] = mm.solve();
+%   end
+%   mm.display_soln();
 %
-%   Return the value of an individual field:
-%       get
-%
-%   Make a shallow copy of the object:
-%       copy
-%
-%   The following is the structure of the data in the mp.opt_model object.
-%   Each field of .idx or .data is a struct whose field names are the names
-%   of the corresponding blocks of vars, constraints or costs (found in
-%   order in the corresponding .order field). The description next to these
-%   fields gives the meaning of the value for each named sub-field.
-%   E.g. mm.var.data.v0.Pg contains a vector of initial values for the 'Pg'
-%   block of variables.
-%
-%   mm
-%       .var        - data for optimization variable sets that make up
-%                     the full optimization variable x
-%           .idx
-%               .i1 - starting index within x
-%               .iN - ending index within x
-%               .N  - number of elements in this variable set
-%           .N      - total number of elements in x
-%           .NS     - number of variable sets or named blocks
-%           .data   - bounds and initial value data
-%               .v0 - vector of initial values
-%               .vl - vector of lower bounds
-%               .vu - vector of upper bounds
-%               .vt - scalar or vector of variable types
-%                       'C' = continuous
-%                       'I' = integer
-%                       'B' = binary
-%           .order  - struct array of names/indices for variable
-%                     blocks in the order they appear in x
-%               .name   - name of the block, e.g. Pg
-%               .idx    - indices for name, {2,3} => Pg(2,3)
-%           .cache - cache for previously assembled aggregate parameters
-%               .v0  - aggregate vector of variable initial values
-%               .vl  - aggregate vector of variable lower bounds
-%               .vu  - aggregate vector of variable upper bounds
-%               .vt  - aggregate vector of variable types
-%       .nle        - data for nonlinear equality constraints that make up the
-%                     full set of nonlinear constraints ghne(x)
-%           .idx
-%               .i1 - starting index within ghne(x)
-%               .iN - ending index within ghne(x)
-%               .N  - number of elements in this constraint set
-%           .N      - total number of elements in ghne(x)
-%           .NS     - number of nonlinear constraint sets or named blocks
-%           .data   - data for nonlinear constraints
-%               .fcn - function handle for constraints/gradient evaluation
-%               .hess - function handle for Hessian evaluation
-%               .vs - cell array of variable sets that define the xx for
-%                     this constraint block
-%           .order  - struct array of names/indices for nonlinear constraint
-%                     blocks in the order they appear in ghne(x)
-%               .name   - name of the block, e.g. Pmis
-%               .idx    - indices for name, {2,3} => Pmis(2,3)
-%       .nli        - data for nonlinear inequality constraints that make up the
-%                     full set of nonlinear constraints ghni(x)
-%           .idx
-%               .i1 - starting index within ghni(x)
-%               .iN - ending index within ghni(x)
-%               .N  - number of elements in this constraint set
-%           .N      - total number of elements in ghni(x)
-%           .NS     - number of nonlinear constraint sets or named blocks
-%           .data   - data for nonlinear constraints
-%               .fcn - function handle for constraints/gradient evaluation
-%               .hess - function handle for Hessian evaluation
-%               .vs - cell array of variable sets that define the xx for
-%                     this constraint block
-%           .order  - struct array of names/indices for nonlinear constraint
-%                     blocks in the order they appear in ghni(x)
-%               .name   - name of the block, e.g. Pmis
-%               .idx    - indices for name, {2,3} => Pmis(2,3)
-%       .lin        - data for linear constraints that make up the
-%                     full set of linear constraints ghl(x)
-%           .idx
-%               .i1 - starting index within ghl(x)
-%               .iN - ending index within ghl(x)
-%               .N  - number of elements in this constraint set
-%           .N      - total number of elements in ghl(x)
-%           .NS     - number of linear constraint sets or named blocks
-%           .data   - data for l <= A*xx <= u linear constraints
-%               .A  - sparse linear constraint matrix
-%               .l  - left hand side vector, bounding A*x below
-%               .u  - right hand side vector, bounding A*x above
-%               .vs - cell array of variable sets that define the xx for
-%                     this constraint block
-%           .order  - struct array of names/indices for linear constraint
-%                     blocks in the order they appear in ghl(x)
-%               .name   - name of the block, e.g. Pmis
-%               .idx    - indices for name, {2,3} => Pmis(2,3)
-%           .cache - cache for previously assembled aggregate parameters
-%               .A  - aggregate sparse linear constraint matrix
-%               .l  - aggregate left hand side vector, bounding A*x below
-%               .u  - aggregate right hand side vector, bounding A*x above
-%       .qdc       - quadratic costs
-%           .idx
-%               .i1 - starting row index within quadratic costs
-%               .iN - ending row index within quadratic costs
-%               .N  - number of rows in this quadratic cost block
-%           .N      - total number of rows in quadratic costs
-%           .NS     - number of quadratic cost blocks
-%           .data   - data for each quadratic cost block
-%               .Q  - sparse matrix (or vector) of quadratic cost coefficients
-%               .c  - column vector of linear cost coefficients
-%               .k  - constant term
-%               .vs - cell array of variable sets that define xx for this
-%                     quadratic cost block, where sizes of Q, c, k conform to xx
-%           .order  - struct array of names/indices for quadratic cost blocks
-%                     in the order the were added
-%               .name   - name of the block, e.g. R
-%               .idx    - indices for name, {2,3} => R(2,3)
-%           .cache - cache for previously assembled aggregate parameters
-%               .Q  - aggregate sparse matrix of quadratic cost coefficients
-%               .c  - aggregate column vector of linear cost coefficients
-%               .k  - aggregate constant term
-%       .nlc       - general nonlinear costs
-%           .idx
-%               .i1 - starting row index within nonlinear costs
-%               .iN - ending row index within nonlinear costs
-%               .N  - number of rows in this nonlinear cost block
-%                     (always equal to 1 for nonlinear cost blocks)
-%           .N      - total number of rows in nonlinear costs
-%           .NS     - number of nonlinear cost blocks
-%           .data   - data for each nonlinear cost block
-%               .fcn - function handle for cost, gradient, Hessian evaluation
-%               .vs - cell array of variable sets that define xx for this
-%                     nonlinear cost block, where xx is the input to the
-%                     evaluation function
-%           .order  - struct array of names/indices for nonlinear cost blocks
-%                     in the order they were added
-%               .name   - name of the block, e.g. R
-%               .idx    - indices for name, {2,3} => R(2,3)
-%       .prob_type  - used to cache the return value of problem_type()
-%       .soln       - struct containing the output of the solve() method
-%                     with the following fields
-%           .eflag  - exit flag
-%           .output - output struct with the following fields
-%               .alg     - algorithm code of solver used
-%               (others) - solver specific fields
-%           .x      - solution vector
-%           .f      - final (objective) function value
-%           .jac    - final Jacobian matrix (if available, for LEQ/NLEQ probs)
-%           .lambda - Lagrange and Kuhn-Tucker multipliers on constraints
-%       .userdata   - any user defined data
-%           .(user defined fields)
+% Replaces the now deprecated legacy opt_model class and its base class,
+% mp_idx_manager.
 %
 % See also mp.set_manager.
 
@@ -194,24 +70,31 @@ classdef opt_model < handle
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
     properties
-        var             %% variables
-        lin             %% linear constraints
-        qcn             %% quadratic constraints
-        nle             %% nonlinear equality constraints
-        nli             %% nonlinear inequality constraints
-        qdc             %% quadratic costs
-        nlc             %% general nonlinear costs
-        prob_type = ''; %% problem type
-        userdata = struct();
+        var             % (mp.sm_variable) MP Set Manager for variables
+        lin             % (mp.sm_lin_constraint) MP Set Manager for linear constraints
+        qcn             % (mp.sm_quad_constraint) MP Set Manager for quadratic constraints
+        nle             % (mp.sm_nln_constraint) MP Set Manager for nonlinear equality constraints
+        nli             % (mp.sm_nln_constraint) MP Set Manager for nonlinear inequality constraints
+        qdc             % (mp.sm_quad_cost) MP Set Manager for quadratic costs
+        nlc             % (mp.sm_nln_cost) MP Set Manager for general nonlinear costs
+        prob_type = ''; % *(char array)* problem type, cached result of problem_type()
 
-        %% results of solve()
+        % *(struct)* results of solve(), with fields:
+        %
+        %   - ``'eflag'`` - exit flag
+        %   - ``'output'`` - algorithm code (``'alg'``) & solver-specific fields
+        %   - ``'x'`` - solution vector
+        %   - ``'f'`` - final (objective) function value
+        %   - ``'jac'`` - Jacobian (if available) for LEQ/NLEQ
+        %   - ``'lambda'`` - struct of constraint shadow prices
         soln = struct( ...
-            'eflag', [], ...    %% exit flag
-            'output', [], ...   %% algorithm code & solver-specific fields
-            'x', [], ...        %% solution vector
-            'f', [], ...        %% final (objective) function value
-            'jac', [], ...      %% Jacobian (if available) for LEQ/NLEQ
-            'lambda', [] );     %% constraint shadow prices
+            'eflag', [], ...
+            'output', [], ...
+            'x', [], ...
+            'f', [], ...
+            'jac', [], ...
+            'lambda', [] );
+        userdata = struct();    % *(struct)* arbitrary user data
     end     %% properties
 
     methods
@@ -222,6 +105,19 @@ classdef opt_model < handle
             %   mm = mp.opt_model()
             %   mm = mp.opt_model(a_struct)
             %   mm = mp.opt_model(an_mm)
+            %   mm = mp.opt_model(an_om)
+            %
+            % Optionally copies data from (duplicates) a struct or existing
+            % mathematical model object.
+            %
+            % Input:
+            %   a_struct (struct) : a struct with the stucture obtained by
+            %       converting an mp.opt_model object and its sub-objects to a
+            %       struct
+            %   an_mm (mp.opt_model) : existing mathematical model
+            %       (mp.opt_model) object
+            %   an_om (:class:`opt_model`) : existing *legacy* mathematical
+            %       model (:class:`opt_model`) object
 
             if nargin > 0
                 s = varargin{1};
@@ -279,6 +175,15 @@ classdef opt_model < handle
 
         function new_mm = copy(mm)
             % Duplicate the object.
+            % ::
+            %
+            %   new_mm = mm.copy()
+            %
+            % Output:
+            %   new_mm (mp.opt_model) : duplicate of original object
+            %
+            % Make a duplicate of the object, including duplicates of all
+            % contained objects.
 
             %% delete old 'params' (cached parameters) fields
             %% to avoid clash with newer params() method
@@ -307,68 +212,89 @@ classdef opt_model < handle
         end
 
         function varargout = get_idx(mm, varargin)
-            % get_idx - Returns the idx struct for vars, lin/nonlin constraints, costs.
+            % Return ``idx`` struct for vars, constraints, costs.
             % ::
             %
-            %   VV = MM.GET_IDX()
-            %   [VV, LL] = MM.GET_IDX()
-            %   [VV, LL, NNE] = MM.GET_IDX()
-            %   [VV, LL, NNE, NNI] = MM.GET_IDX()
-            %   [VV, LL, NNE, NNI, QQ] = MM.GET_IDX()
-            %   [VV, LL, NNE, NNI, QQ, NNC] = MM.GET_IDX()
-            %   [VV, LL, NNE, NNI, QQ, NNC, QQCN] = MM.GET_IDX()
+            %   vv = mm.get_idx()
+            %   [vv, ll] = mm.get_idx()
+            %   [vv, ll, nne] = mm.get_idx()
+            %   [vv, ll, nne, nni] = mm.get_idx()
+            %   [vv, ll, nne, nni, qq] = mm.get_idx()
+            %   [vv, ll, nne, nni, qq, nnc] = mm.get_idx()
+            %   [vv, ll, nne, nni, qq, nnc, qqcn] = mm.get_idx()
             %
-            %   Returns a structure for each with the beginning and ending
-            %   index value and the number of elements for each named block.
-            %   The 'i1' field (that's a one) is a struct with all of the
-            %   starting indices, 'iN' contains all the ending indices and
-            %   'N' contains all the sizes. Each is a struct whose fields are
-            %   the named blocks.
+            % Returns the :attr:`idx <mp.set_manager.idx>` property of each
+            % of the set manager objects, with the beginning and ending
+            % index value and the number of elements for each named block.
+            % The ``i1`` field is a struct with all of the  starting indices,
+            % ``iN`` contains all the ending indices, and ``N`` contains all
+            % the sizes. Each is a struct whose fields are the named blocks.
             %
-            %   Alternatively, you can specify the type of named set(s) directly
-            %   as inputs ...
+            % Alternatively, you can specify the property name of the set type
+            % directly as inputs.
+            % ::
             %
-            %   [IDX1, IDX2, ...] = MM.GET_IDX(SET_TYPE1, SET_TYPE2, ...);
-            %   VV = MM.GET_IDX('var');
-            %   [LL, NNE, NNI] = MM.GET_IDX('lin', 'nle', 'nli');
+            %   [idx1, idx2, ...] = mm.get_idx(set_type1, set_type2, ...)
             %
-            %   The specific type of named set being referenced is
-            %   given by the SET_TYPE inputs, with the following valid options:
-            %       SET_TYPE = 'var'   => variable set
-            %       SET_TYPE = 'lin'   => linear constraint set
-            %       SET_TYPE = 'qcn'   => quadratic constraint set
-            %       SET_TYPE = 'nle'   => nonlinear equality constraint set
-            %       SET_TYPE = 'nli'   => nonlinear inequality constraint set
-            %       SET_TYPE = 'qdc'   => quadratic cost set
-            %       SET_TYPE = 'nnc'   => nonlinear cost set
+            % Inputs:
+            %   set_type<n> (char array) : name of set type, valid options are:
             %
-            %   Examples:
-            %       [vv, ll, nne] = mm.get_idx();
-            %       [vv, ll, qq] = mm.get_idx('var', 'lin', 'qdc');
+            %       - ``'var'`` - variables
+            %       - ``'lin'`` - linear constraints
+            %       - ``'qcn'`` - quadratic constraints
+            %       - ``'nle'`` - nonlinear equality constraints
+            %       - ``'nli'`` - nonlinear inequality constraints
+            %       - ``'qdc'`` - quadratic costs
+            %       - ``'nlc'`` - general nonlinear costs
             %
-            %       For a variable block named 'z' we have ...
-            %           vv.i1.z - starting index for 'z' in optimization vector x
-            %           vv.iN.z - ending index for 'z' in optimization vector x
-            %           vv.N.z  - number of elements in 'z'
+            % Outputs:
+            %   vv (struct) : ``mm.var.idx``
+            %   ll (struct) : ``mm.lin.idx``
+            %   nne (struct) : ``mm.nle.idx``
+            %   nni (struct) : ``mm.nli.idx``
+            %   qq (struct) : ``mm.qdc.idx``
+            %   nnc (struct) : ``mm.nlc.idx``
+            %   qqcn (struct) : ``mm.qcn.idx``
+            %   idx<n> (struct) : :attr:`idx <mp.set_manager.idx>` property
+            %       of property indicated by respective input
             %
-            %       To extract a 'z' variable from x:
-            %           z = x(vv.i1.z:vv.iN.z);
+            % **Examples**::
             %
-            %       To extract the multipliers on a linear constraint set
-            %       named 'foo', where mu_l and mu_u are the full set of
-            %       linear constraint multipliers:
-            %           mu_l_foo = mu_l(ll.i1.foo:ll.iN.foo);
-            %           mu_u_foo = mu_u(ll.i1.foo:ll.iN.foo);
+            %   [vv, ll, nne] = mm.get_idx();
+            %   [vv, ll, qq] = mm.get_idx('var', 'lin', 'qdc');
+            %   [ll, nne, nni] = mm.get_idx('lin', 'nle', 'nli');
             %
-            %       The number of nonlinear equality constraints in a set named 'bar':
-            %           nbar = nne.N.bar;
-            %         (note: the following is preferable ...
-            %           nbar = mm.nle.get_N('bar');
-            %         ... if you haven't already called get_idx to get nne.)
+            % For a variable block named ``z`` we have ...
             %
-            %       If 'z', 'foo' and 'bar' are indexed sets, then you can
-            %       replace them with something like 'z(i,j)', 'foo(i,j,k)'
-            %       or 'bar(i)' in the examples above.
+            %   - ``vv.i1.z`` - starting index for ``z`` in vector ``x``
+            %   - ``vv.iN.z`` - ending index for ``z`` in vector ``x``
+            %   - ``vv.N.z`` - number of elements in ``z``
+            %
+            % To extract a ``z`` variable from ``x``::
+            %
+            %   z = x(vv.i1.z:vv.iN.z);
+            %
+            % To extract the multipliers on a linear constraint set
+            % named ``foo``, where ``mu_l`` and ``mu_u`` are the full set of
+            % linear constraint multipliers::
+            %
+            %   mu_l_foo = mu_l(ll.i1.foo:ll.iN.foo);
+            %   mu_u_foo = mu_u(ll.i1.foo:ll.iN.foo);
+            %
+            % The number of nonlinear equality constraints in a set named
+            % ``bar``::
+            %
+            %   nbar = nne.N.bar;
+            %
+            % *Note:* The following is preferable if you haven't already called
+            % get_idx to get ``nne``.
+            % ::
+            %
+            %   nbar = mm.nle.get_N('bar');
+            %
+            % If ``z``, ``foo``, and ``bar`` are indexed sets, then you can
+            % replace them with something like ``z(i,j)``, ``foo(i,j,k)``
+            % or ``bar(i)`` in the examples above.
 
             if nargin == 1
                 varargout{1} = mm.var.idx;
@@ -398,22 +324,30 @@ classdef opt_model < handle
         end
 
         function rv = get_userdata(mm, name)
-            % get_userdata - Used to retrieve values of user data.
+            % Used to retrieve values of user data.
             % ::
             %
-            %   VAL = MM.GET_USERDATA(NAME) returns the value specified by the given name
-            %   or an empty matrix if userdata with NAME does not exist.
+            %   val = mm.get_userdata(name)
             %
-            %   This function allows the user to retrieve any arbitrary data that was
-            %   saved in the object for later use. Data for a given NAME is saved by
-            %   assigning it to MM.userdata.(NAME).
+            % Returns the value specified by the given name or an empty matrix
+            % if userdata with ``name`` does not exist.
             %
-            %   This can be useful, for example, when using a user function to add
-            %   variables or constraints, etc. Suppose some special indexing is
-            %   constructed when adding some variables or constraints. This indexing data
-            %   can be stored and used later to "unpack" the results of the solved case.
+            % Inputs:
+            %   name (char array) : name of user data to return
             %
-            % See also mp.opt_model.
+            % Outputs:
+            %   val (arbitrary) : the arbitrary user data stored under the
+            %       specified name
+            %
+            % This function allows the user to retrieve any arbitrary data that
+            % was saved in the object for later use. Data for a given ``name``
+            % is saved by assigning it to ``mm.userdata.(name)``.
+            %
+            % This can be useful, for example, when using a user function to add
+            % variables or constraints, etc. Suppose some special indexing is
+            % constructed when adding some variables or constraints. This
+            % indexing data can be stored and used later to "unpack" the results
+            % of the solved case.
 
             if isfield(mm.userdata, name)
                 rv = mm.userdata.(name);
@@ -423,42 +357,46 @@ classdef opt_model < handle
         end
 
         function prob = problem_type(mm, recheck)
-            % problem_type - Return a string identifying the type of mathematical program
+            % Return string identifying type of mathematical program.
             % ::
             %
-            %   PROB_TYPE = MM.PROBLEM_TYPE()
-            %   PROB_TYPE = MM.PROBLEM_TYPE(RECHECK)
+            %   prob_type = mm.problem_type()
+            %   prob_type = mm.problem_type(recheck)
             %
-            %   Returns a string identifying the type of mathematical program
-            %   represented by the current model, based on the variables, costs,
-            %   and constraints that have been added to the model. Used to
-            %   automatically select an appropriate solver.
+            % Returns a string identifying the type of mathematical program
+            % represented by the current model, based on the variables, costs,
+            % and constraints that have been added to the model. Used to
+            % automatically select an appropriate solver.
             %
-            %   Linear and nonlinear equations are models with no costs, no inequality
-            %   constraints, and an equal number of continuous variables and equality
-            %   constraints. If the number of variables in a nonlinear equation model
-            %   is one more than the number of constraints, it is a parameterized
-            %   nonlinear equation.
+            % Linear and nonlinear equations are models with no costs, no
+            % inequality constraints, and an equal number of continuous
+            % variables and equality constraints. If the number of variables in
+            % a nonlinear equation model is one more than the number of
+            % constraints, it is a parameterized nonlinear equation.
             %
-            %   Outputs:
-            %       PROB_TYPE : problem type, one of the following strings:
-            %           'LEQ'   - linear equations
-            %           'NLEQ'  - nonlinear equations
-            %           'PNE'   - parameterized nonlinear equations
-            %           'LP'    - linear program
-            %           'QP'    - quadratic program
-            %           'NLP'   - nonlinear program
-            %           'MILP'  - mixed-integer linear program
-            %           'MIQP'  - mixed-integer quadratic program
-            %           'MINLP' - mixed-integer nonlinear program
+            % The output value is cached for future calls, but calling with a
+            % true value for the optional ``recheck`` argument will force it to
+            % recheck in case the problem type has changed due to modifying the
+            % variables, constraints or costs in the model.
             %
-            %   The output value is cached for future calls, but calling with a true
-            %   value for the optional RECHECK argument will force it to recheck in
-            %   case the problem type has changed due to modifying the variables,
-            %   constraints or costs in the model.
+            % Input:
+            %   recheck (logical) : true to force a reevaluation instead of
+            %       possibly returning a cached value
             %
-            % See also mp.opt_model.
-            
+            % Output:
+            %     prob_type (char array) : problem type, one of the following
+            %       strings:
+            %
+            %       - ``'LEQ'``   - linear equations
+            %       - ``'NLEQ'``  - nonlinear equations
+            %       - ``'PNE'``   - parameterized nonlinear equations
+            %       - ``'LP'``    - linear program
+            %       - ``'QP'``    - quadratic program
+            %       - ``'NLP'``   - nonlinear program
+            %       - ``'MILP'``  - mixed-integer linear program
+            %       - ``'MIQP'``  - mixed-integer quadratic program
+            %       - ``'MINLP'`` - mixed-integer nonlinear program
+
             if isempty(mm.prob_type) || nargin > 1 && recheck
                 nleN = mm.nle.get_N();      %% nonlinear equalities
                 nliN = mm.nli.get_N();      %% nonlinear inequalities
@@ -525,16 +463,14 @@ classdef opt_model < handle
         end
 
         function TorF = is_mixed_integer(mm)
-            % is_mixed_integer - Return true if model is mixed integer, false otherwise.
+            % Return true if model is mixed integer, false otherwise.
             % ::
             %
-            %   TorF = MM.IS_MIXED_INTEGER()
+            %   TorF = mm.is_mixed_integer()
             %
-            %   Outputs:
-            %       TorF : 1 or 0, indicating whether any of the variables are
-            %              binary or integer
-            %
-            % See also mp.opt_model.
+            % Outputs:
+            %   TorF (logical): true or false, indicating whether any of the
+            %       variables are binary or integer
 
             TorF = 0;
             if mm.var.get_N()
@@ -559,141 +495,175 @@ classdef opt_model < handle
 
         function TorF = is_solved(mm)
             % Return true if model has been solved.
+            % ::
+            %
+            %   TorF = mm.is_solved()
+            %
+            % Outputs:
+            %   TorF (logical): true or false, indicating whether the model
+            %       solution is available
 
             TorF = ~isempty(mm.soln.eflag);
         end
 
         function [x, f, eflag, output, lambda] = solve(mm, opt)
-            % solve - Solve the model.
+            % Solve the model.
             % ::
             %
-            %   X = MM.SOLVE()
-            %   [X, F] = MM.SOLVE()
-            %   [X, F, EXITFLAG] = MM.SOLVE()
-            %   [X, F, EXITFLAG, OUTPUT] = MM.SOLVE()
-            %   [X, F, EXITFLAG, OUTPUT, JAC] = MM.SOLVE()      (LEQ/NLEQ problems)
-            %   [X, F, EXITFLAG, OUTPUT, LAMBDA] = MM.SOLVE()   (other problem types)
-            %   [X ...] = MM.SOLVE(OPT)
+            %   x = mm.solve()
+            %   [x, f] = mm.solve()
+            %   [x, f, exitflag] = mm.solve()
+            %   [x, f, exitflag, output] = mm.solve()
+            %   [x, f, exitflag, output, jac] = mm.solve()      (LEQ/NLEQ problems)
+            %   [x, f, exitflag, output, lambda] = mm.solve()   (other problem types)
+            %   [x ...] = mm.solve(opt)
             %
-            %   Solves the model using one of the following, depending on the
-            %   problem type: MP_LINSOLVE, NLEQS_MASTER, PNES_MASTER,
-            %   QPS_MASTER, QCQPS_MASTER, MIQPS_MASTER, NLPS_MASTER.
+            % Solves the model using one of the following, depending on the
+            % problem type: mp_linsolve, nleqs_master, pnes_master,
+            % qps_master, qcqps_master, miqps_master, nlps_master.
             %
-            %   Inputs:
-            %       OPT : optional options structure with the following fields,
-            %           all of which are also optional (default values shown in
-            %           parentheses)
-            %           alg ('DEFAULT') : determines which solver to use, list of relevant
-            %                   problem types are listed in parens next to each
-            %               'DEFAULT' : automatic, depending on problem type, uses the
-            %                       the first available of:
-            %                   LP - Gurobi, CPLEX, MOSEK, linprog (if MATLAB), HIGHS, GLPK,
-            %                           BPMPD, MIPS
-            %                   QP - Gurobi, CPLEX, MOSEK, quadprog (if MATLAB), HIGHS,
-            %                           BPMPD, MIPS
-            %                   MILP - Gurobi, CPLEX, MOSEK, Opt Tbx (intlingprog), HIGHS,
-            %                           GLPK
-            %                   MIQP - Gurobi, CPLEX, MOSEK
-            %                   NLP - MIPS
-            %                   MINLP - Artelys Knitro (not yet implemented)
-            %                   LEQ - built-in backslash operator
-            %                   NLEQ - Newton's method
-            %               'BPMPD'   : (LP, QP) BPMPD_MEX
-            %               'CLP'     : (LP, QP) CLP
-            %               'CPLEX'   : (LP, QP, MILP, MIQP) CPLEX
-            %               'FD'      : (NLEQ) fast-decoupled Newon's method
-            %               'FMINCON' : (NLP) FMINCON, MATLAB Optimization Toolbox
-            %               'FSOLVE'  : (NLEQ) FSOLVE, MATLAB Optimization Toolbox
-            %               'GLPK'    : (LP, MILP) GLPK
-            %               'GS'      : (NLEQ) Gauss-Seidel
-            %               'GUROBI'  : (LP, QP, MILP, MIQP) Gurobi
-            %               'HIGHS'   : (LP, QP, MILP) HiGHS, https://highs.dev
-            %               'IPOPT'   : (LP, QP, NLP) IPOPT, requires MEX interface to IPOPT solver
-            %                           https://github.com/coin-or/Ipopt
-            %               'KNITRO'  : (NLP, MINLP) Artelys Knitro, requires Artelys Knitro solver
-            %                           https://www.artelys.com/solvers/knitro/
-            %               'MIPS'    : (LP, QP, NLP) MIPS, MATPOWER Interior Point Solver
-            %                        pure MATLAB implementation of a primal-dual
-            %                        interior point method, if mips_opt.step_control = 1
-            %                        it uses MIPS-sc, a step controlled variant of MIPS
-            %               'MOSEK'   : (LP, QP, MILP, MIQP) MOSEK
-            %               'NEWTON'  : (NLEQ) Newton's method
-            %               'OSQP'    : (LP, QP) OSQP, https://osqp.org
-            %               'OT'      : (LP, QP, MILP) MATLAB Optimization Toolbox,
-            %                           LINPROG, QUADPROG or INTLINPROG
-            %           verbose (0) - controls level of progress output displayed
-            %               0 = no progress output
-            %               1 = some progress output
-            %               2 = verbose progress output
-            %           bp_opt      - options vector for BP (BPMPD)
-            %           clp_opt     - options vector for CLP
-            %           cplex_opt   - options struct for CPLEX
-            %           fd_opt      - options struct for fast-decoupled Newton's method,
-            %                           nleqs_fd_newton()
-            %           fmincon_opt - options struct for FMINCON
-            %           fsolve_opt  - options struct for FSOLVE
-            %           glpk_opt    - options struct for GLPK
-            %           grb_opt     - options struct for GUROBI
-            %           gs_opt      - options struct for Gauss-Seidel method,
-            %                           nleqs_gauss_seidel()
-            %           highs_opt   - options struct for HIGHS
-            %           intlinprog_opt - options struct for INTLINPROG
-            %           ipopt_opt   - options struct for IPOPT
-            %           knitro_opt  - options struct for Artelys Knitro
-            %           leq_opt     - options struct for MPLINSOLVE, with optional fields
-            %               'solver' and 'opt' corresponding to respective MPLINSOLVE args,
-            %               and 'thresh' specifying a threshold on the absolute value of
-            %               any element X, above which EXITFLAG will be set to 0
-            %           linprog_opt - options struct for LINPROG
-            %           mips_opt    - options struct for MIPS
-            %           mosek_opt   - options struct for MOSEK
-            %           newton_opt  - options struct for Newton method, NLEQS_NEWTON
-            %           osqp_opt    - options struct for OSQP
-            %           quadprog_opt - options struct for QUADPROG
-            %           parse_soln (0) - flag that specifies whether or not to call
-            %               the PARSE_SOLN method and place the return values in MM.soln.
-            %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
-            %               value and primal variable relative match required to avoid
-            %               mis-match warning message if mixed integer price computation
-            %               stage is not skipped
-            %           relax_integer (0) - relax integer constraints, if true
-            %           skip_prices (0) - flag that specifies whether or not to skip the
-            %               price computation stage for mixed integer problems, in which
-            %               the problem is re-solved for only the continuous variables,
-            %               with all others being constrained to their solved values
-            %           x0 (empty)  - optional initial value of x, overrides value
-            %               stored in model (ignored by some solvers)
+            % Inputs:
+            %   opt (struct) : optional options struct with the following
+            %       fields, all of which are also optional *(default values
+            %       shown in parentheses)*
             %
-            %   Outputs:
-            %       X : solution vector
-            %       F : final (objective) function value
-            %       EXITFLAG : exit flag
-            %           1 = converged
-            %           0 or negative values = solver specific failure codes
-            %       OUTPUT : output struct with the following fields:
-            %           alg - algorithm code of solver used
-            %           et  - elapsed time (sec)
-            %           (others) - solver specific fields
-            %       JAC : final Jacobian matrix (if available, for LEQ/NLEQ problems)
-            %       LAMBDA : (for all non-NLEQ problem types) struct containing the
-            %           Langrange and Kuhn-Tucker multipliers on the constraints, with
-            %           fields:
-            %           eqnonlin - nonlinear equality constraints
-            %           ineqnonlin - nonlinear inequality constraints
-            %           mu_l - lower (left-hand) limit on linear constraints
-            %           mu_u - upper (right-hand) limit on linear constraints
-            %           lower - lower bound on optimization variables
-            %           upper - upper bound on optimization variables
+            %       - ``alg`` (``'DEFAULT'``) - determines which solver to
+            %         use, list of relevant problem types are listed in parens
+            %         next to each
+            %
+            %           - ``'DEFAULT'`` - automatic, depending on problem type,
+            %             uses the the first available of:
+            %
+            %             ===== ================================================
+            %             Type  Solver Precedence
+            %             ===== ================================================
+            %             LP    Gurobi, CPLEX, MOSEK, linprog *(if MATLAB)*,
+            %                   HIGHS, GLPK, BPMPD, MIPS
+            %             QP    Gurobi, CPLEX, MOSEK, quadprog *(if MATLAB)*,
+            %                   HIGHS, BPMPD, MIPS
+            %             QCQP  IPOPT, Artelys Knitro, FMINCON, MIPS
+            %             MILP  Gurobi, CPLEX, MOSEK, Opt Tbx (intlingprog),
+            %                   HIGHS, GLPK
+            %             MIQP  Gurobi, CPLEX, MOSEK
+            %             NLP   MIPS
+            %             MINLP Artelys Knitro *(not yet implemented)*
+            %             LEQ   built-in backslash operator
+            %             NLEQ  Newton's method
+            %             PNE   predictor/corrector method
+            %             ===== ================================================
+            %
+            %           - ``'BPMPD'``   - *(LP, QP)* BPMPD_MEX
+            %           - ``'CLP'``     - *(LP, QP)* CLP
+            %           - ``'CPLEX'``   - *(LP, QP, MILP, MIQP)* CPLEX
+            %           - ``'FD'``      - *(NLEQ)* fast-decoupled Newon's method
+            %           - ``'FMINCON'`` - *(QCQP, NLP)* FMINCON, MATLAB
+            %             Optimization Toolbox
+            %           - ``'FSOLVE'``  - *(NLEQ)* FSOLVE, MATLAB Optimization
+            %             Toolbox
+            %           - ``'GLPK'``    - *(LP, MILP)* GLPK
+            %           - ``'GS'``      - *(NLEQ)* Gauss-Seidel
+            %           - ``'GUROBI'``  - *(LP, QP, QCQP, MILP, MIQP)* Gurobi
+            %           - ``'HIGHS'``   - *(LP, QP, MILP)* HiGHS,
+            %             https://highs.dev
+            %           - ``'IPOPT'``   - *(LP, QP, QCQP, NLP)* IPOPT, requires
+            %             MEX interface to IPOPT solver
+            %             https://github.com/coin-or/Ipopt
+            %           - ``'KNITRO'``  - *(QCQP, NLP, MINLP)* Artelys Knitro,
+            %             requires Artelys Knitro solver
+            %             https://www.artelys.com/solvers/knitro/
+            %           - ``'MIPS'``    - *(LP, QP, QCQP, NLP)* MIPS, MATPOWER
+            %             Interior Point Solver, pure MATLAB implementation of
+            %             a primal-dual interior point method, if
+            %             ``mips_opt.step_control = 1`` it uses MIPS-sc, a
+            %             step controlled variant of MIPS
+            %           - ``'MOSEK'``   - *(LP, QP, MILP, MIQP)* MOSEK
+            %           - ``'NEWTON'``  - *(NLEQ)* Newton's method
+            %           - ``'OSQP'``    - *(LP, QP)* OSQP, https://osqp.org
+            %           - ``'OT'``      - *(LP, QP, MILP)* MATLAB Optimization
+            %             Toolbox, linprog, quadprog or intlinprog
+            %       - ``verbose`` (0) - controls level of progress output
+            %         displayed:
+            %
+            %           - 0 = no progress output
+            %           - 1 = some progress output
+            %           - 2 = verbose progress output
+            %       - ``bp_opt``      - options vector for :func:`bp` (BPMPD)
+            %       - ``clp_opt``     - options vector for CLP
+            %       - ``cplex_opt``   - options struct for CPLEX
+            %       - ``fd_opt``      - options struct for fast-decoupled
+            %         Newton's method, nleqs_fd_newton
+            %       - ``fmincon_opt`` - options struct for :func:`fmincon`
+            %       - ``fsolve_opt``  - options struct for :func:`fsolve`
+            %       - ``glpk_opt``    - options struct for GLPK
+            %       - ``grb_opt``     - options struct for Gurobi
+            %       - ``gs_opt``      - options struct for Gauss-Seidel method,
+            %         nleqs_gauss_seidel
+            %       - ``highs_opt``   - options struct for HiGHS
+            %       - ``intlinprog_opt`` - options struct for :func:`intlinprog`
+            %       - ``ipopt_opt``   - options struct for IPOPT
+            %       - ``knitro_opt``  - options struct for Artelys Knitro
+            %       - ``leq_opt``     - options struct for mplinsolve, with
+            %         optional fields ``solver`` and ``opt`` corresponding to
+            %         respective mplinsolve args, and ``thresh`` specifying a
+            %         threshold on the absolute value of any element ``x``,
+            %         above which ``exitflag`` will be set to 0
+            %       - ``linprog_opt`` - options struct for :func:`linprog`
+            %       - ``mips_opt``    - options struct for mips
+            %       - ``mosek_opt``   - options struct for MOSEK
+            %       - ``newton_opt``  - options struct for Newton method,
+            %         nleqs_newton
+            %       - ``osqp_opt``    - options struct for OSQP
+            %       - ``quadprog_opt`` - options struct for :func:`quadprog`
+            %       - ``parse_soln`` (0) - flag that specifies whether or not
+            %         to call the parse_soln() method and place the return values
+            %         in ``mm.soln``.
+            %       - ``price_stage_warn_tol`` (1e-7) - tolerance on 
+            %         objective fcn value and primal variable relative match
+            %         required to avoid mismatch warning message if mixed
+            %         integer price computation stage is not skipped
+            %       - ``relax_integer`` (0) - relax integer constraints, if true
+            %       - ``skip_prices`` (0) - flag that specifies whether or not
+            %         to skip the price computation stage for mixed integer
+            %         problems, in which the problem is re-solved for only the
+            %         continuous variables, with all others being constrained
+            %         to their solved values
+            %       - ``x0`` (empty)  - optional initial value of ``x``,
+            %         overrides value stored in model *(ignored by some solvers)*
+            %
+            % Outputs:
+            %     x (double) : solution vector
+            %     f (double) : final (objective) function value
+            %     exitflag (integer) : exit flag
+            %
+            %       - 1 = converged
+            %       - 0 or negative values = solver specific failure codes
+            %     output (struct) : output struct with the following fields:
+            %
+            %       - ``alg`` - algorithm code of solver used
+            %       - ``et``  - elapsed time (sec)
+            %       - *(others)* - solver specific fields
+            %     jac (double) : final Jacobian matrix *(if available, for
+            %       LEQ/NLEQ problems)*
+            %     lambda (struct) : *(for all problem types except LEQ, NLEQ,
+            %       and PNE)* Langrange and Kuhn-Tucker multipliers on the
+            %       constraints, struct with fields:
+            %
+            %       - ``eqnonlin`` - nonlinear equality constraints
+            %       - ``ineqnonlin`` - nonlinear inequality constraints
+            %       - ``mu_l`` - lower (left-hand) limit on linear constraints
+            %       - ``mu_u`` - upper (right-hand) limit on linear constraints
+            %       - ``lower`` - lower bound on optimization variables
+            %       - ``upper`` - upper bound on optimization variables
             %
             % See also mp_linsolve, nleqs_master, pnes_master, qps_master,
             % qcqps_master, miqps_master, nlps_master.
-            
+
             t0 = tic;       %% start timer
             if nargin < 2
                 opt = struct();
             end
             % opt.parse_soln = 1;
-            
+
             %% call appropriate solver
             pt = mm.problem_type();
             switch pt
@@ -719,15 +689,15 @@ classdef opt_model < handle
                         leq_opt = struct();
                         leq_thresh = 0;
                     end
-            
+
                     [A, b] = mm.lin.params(mm.var);
                     if leq_thresh           %% check for failure
                         %% set up to trap non-singular matrix warnings
                         [lastmsg, lastid] = lastwarn;
                         lastwarn('');
-            
+
                         x = mplinsolve(A, b, leq_solver, leq_opt);
-            
+
                         [msg, id] = lastwarn;
                         %% Octave is not consistent in assigning proper warning id,
                         %% so we just check for presence of *any* warning
@@ -749,7 +719,7 @@ classdef opt_model < handle
                     else
                         x0 = mm.var.params();
                     end
-            
+
                     fcn = @(x)nleq_fcn_(mm, x);
                     switch pt
                         case 'NLEQ' %% NLEQ - nonlinear equation
@@ -768,7 +738,7 @@ classdef opt_model < handle
                         if isfield(opt, 'x0')
                             x0 = opt.x0;
                         end
-            
+
                         %% run solver
                         [A, l, u] = mm.lin.params(mm.var);
                         f_fcn = @(x)nlp_costfcn(mm, x);
@@ -784,14 +754,14 @@ classdef opt_model < handle
                     [A, l, u] = mm.lin.params(mm.var);
                     mixed_integer = strcmp(pt(1:2), 'MI') && ...
                         (~isfield(opt, 'relax_integer') || ~opt.relax_integer);
-            
+
                     if mixed_integer
                         %% optimization vars, bounds, types
                         [x0, xmin, xmax, vtype] = mm.var.params();
                         if isfield(opt, 'x0')
                             x0 = opt.x0;
                         end
-            
+
                         %% run solver
                         if isempty(Q)          %% MILP, MIQP - mixed integer linear/quadratic program
                             [x, f, eflag, output, lambda] = ...
@@ -807,7 +777,7 @@ classdef opt_model < handle
                         if isfield(opt, 'x0')
                             x0 = opt.x0;
                         end
-            
+
                         %% run solver
                         if isempty(Q)          %% LP, QP - linear/quadratic program
                             [x, f, eflag, output, lambda] = ...
@@ -819,7 +789,7 @@ classdef opt_model < handle
                     end
                     f = f + C0;
             end
-            
+
             %% store solution
             mm.soln.eflag = eflag;
             mm.soln.x = x;
@@ -830,93 +800,107 @@ classdef opt_model < handle
             else
                 mm.soln.jac = lambda;
             end
-            
+
             %% parse solution
             if isfield(opt, 'parse_soln') && opt.parse_soln
                 mm.parse_soln(true);
             end
             mm.soln.output.et = toc(t0);    %% stop timer
         end
+
         function TorF = has_parsed_soln(mm)
             % Return true if model has a parsed solution.
+            % ::
+            %
+            %   TorF = mm.has_parsed_soln()
 
             TorF = mm.var.has_parsed_soln();
         end
 
         function ps = parse_soln(mm, stash)
-            % parse_soln - Parse solution vector and shadow prices by all named sets.
+            % Parse solution vector and shadow prices by all named sets.
             % ::
             %
-            %   PS = MM.PARSE_SOLN()
-            %   MM.PARSE_SOLN(STASH)
+            %   ps = mm.parse_soln()
+            %   mm.parse_soln(stash)
             %
-            %   For a solved model, MM.PARSE_SOLN() returns a struct of parsed
-            %   solution vector and shadow price values for each named set of
-            %   variables and constraints. The returned PS (parsed solution) struct
-            %   has the following format, where each of the terminal elements is a
-            %   struct with fields corresponding to the respective named sets:
+            % For a solved model, parse_soln returns a struct of parsed solution
+            % vector and shadow price values for each named set of variables
+            % and constraints.
             %
-            %   Output:
-            %       PS
-            %           .var
-            %               .val
-            %               .mu_l
-            %               .mu_u
-            %           .lin
-            %               .mu_l
-            %               .mu_u
-            %           .qcn
-            %               .mu_l
-            %               .mu_u
-            %           .nle
-            %               .lam
-            %           .nli
-            %               .mu
+            % Input:
+            %   stash (logical) : if true, individual parsed solutions are
+            %       stored in the :attr:`soln` property of the respective
+            %       set type object.
             %
-            %   The value of each element in the returned struct can be obtained
-            %   via the GET_SOLN method as well, but using PARSE_SOLN is generally
-            %   more efficient if a complete set of values is needed.
+            % Output:
+            %   ps (struct) : struct of parsed solution values with the
+            %       following fields, where each of the terminal elements is
+            %       a struct with fields corresponding to the respective named
+            %       sets.
             %
-            %   If the optional STASH input argument is present and true, the fields
-            %   of the return struct are copied to MM.SOLN.
+            %       - ``var`` - variable solution struct with fields:
             %
-            % See also get_soln.
-            
+            %           - ``val`` - values of variables
+            %           - ``mu_l`` - shadow prices on variable lower bounds
+            %           - ``mu_u`` - shadow prices on variable upper bounds
+            %       - ``lin`` - linear constraint solution struct with fields:
+            %
+            %           - ``mu_l`` - shadow prices on constraint lower bounds
+            %           - ``mu_u`` - shadow prices on constraint upper bounds
+            %       - ``qcn`` - quadratic constraint solution struct with fields:
+            %
+            %           - ``mu_l`` - shadow prices on constraint lower bounds
+            %           - ``mu_u`` - shadow prices on constraint upper bounds
+            %       - ``nle`` - nonlinear equality constraint solution struct
+            %         with fields:
+            %
+            %           - ``lam`` - shadow prices on constraints
+            %       - ``nli`` - nonlinear inequality constraint solution struct
+            %         with fields:
+            %
+            %           - ``mu`` - shadow prices on constraints
+            %
+            % The value of each element in the returned struct can be obtained
+            % via the :meth:`get_soln` method of the appropriate set type
+            % object as well, but using parse_soln is generally more efficient
+            % if a complete set of values is needed.
+
             if nargin < 2
                 stash = false;
             end
-            
+
             if ~mm.is_solved()
                 error('mp.opt_model.parse_soln: model not solved');
             end
-            
+
             %% var
             ps = struct('var', mm.var.parse_soln(mm.soln, stash));
-            
+
             %% lin
             ps_lin = mm.lin.parse_soln(mm.soln, stash);
             if ~isempty(ps_lin)
                 ps.lin = ps_lin;
             end
-            
+
             %% qcn
             ps_qcn = mm.qcn.parse_soln(mm.soln, stash);
             if ~isempty(ps_qcn)
                 ps.qcn = ps_qcn;
             end
-            
+
             %% nle
             ps_nle = mm.nle.parse_soln(mm.soln, true, stash);
             if ~isempty(ps_nle)
                 ps.nle = ps_nle;
             end
-            
+
             %% nli
             ps_nli = mm.nli.parse_soln(mm.soln, false, stash);
             if ~isempty(ps_nli)
                 ps.nli = ps_nli;
             end
-            
+
             %%-----  DEPRECATED  -----
             %% if requested, stash the result directly in mm.soln
             %% (they are already stashed in the soln property of each set type)
@@ -926,19 +910,21 @@ classdef opt_model < handle
         end
 
         function display(mm, varargin)
-            % display - Displays the object.
+            % Display the object.
+            %
+            % ::
+            %
+            %   mm
             %
             % Called when semicolon is omitted at the command-line. Displays the details
             % of the variables, constraints, costs included in the model.
-            %
-            % See also mp.opt_model.
 
             if nargin < 2
                 more_set_types = {};
             else
                 more_set_types = varargin{1};
             end
-            
+
             %% display details of each set type
             set_types = mm.get_set_types();
             set_types = horzcat(set_types, more_set_types);
@@ -947,7 +933,7 @@ classdef opt_model < handle
             for k = 1:length(set_types)
                 mm.(set_types{k}).display(set_types{k});
             end
-            
+
             %% user data
             fields = fieldnames(mm.userdata);
             if ~isempty(fields)
@@ -966,48 +952,58 @@ classdef opt_model < handle
         end
 
         function mm = display_soln(mm, varargin)
-            % display_soln - Display solution values.
+            % Display solution values.
             % ::
             %
-            %   MM.DISPLAY_SOLN()
-            %   MM.DISPLAY_SOLN(SET_TYPE)
-            %   MM.DISPLAY_SOLN(SET_TYPE, NAME)
-            %   MM.DISPLAY_SOLN(SET_TYPE, NAME, IDX)
-            %   MM.DISPLAY_SOLN(FID)
-            %   MM.DISPLAY_SOLN(FID, SET_TYPE)
-            %   MM.DISPLAY_SOLN(FID, SET_TYPE, NAME)
-            %   MM.DISPLAY_SOLN(FID, SET_TYPE, NAME, IDX)
+            %   mm.display_soln()
+            %   mm.display_soln(set_type)
+            %   mm.display_soln(set_type, name)
+            %   mm.display_soln(set_type, name, idx)
+            %   mm.display_soln(fid)
+            %   mm.display_soln(fid, set_type)
+            %   mm.display_soln(fid, set_type, name)
+            %   mm.display_soln(fid, set_type, name, idx)
             %
-            %   Displays the model solution, including values, bounds and shadow
-            %   prices for variables and linear constraints, values and shadow
-            %   prices for nonlinear constraints, and individual cost components.
+            % Displays the model solution, including values, bounds and shadow
+            % prices for variables, linear and quadratic constraints, values
+            % and shadow prices for nonlinear constraints, and individual cost
+            % components.
             %
-            %   Results are displayed for each SET_TYPE or specified SET_TYPE and
-            %   for each named/indexed set or a specified NAME/IDX.
+            % Results are displayed for all set types or those specified by
+            % ``set_type`` and for each named/indexed set or a specified
+            % ``name``/``idx``.
             %
-            %   Inputs:
-            %       SET_TYPE - one of the following, specifying the type of set:
-            %           'var' - variables
-            %           'lin' - linear constraints
-            %           'nle' - nonlinear equality constraints
-            %           'nli' - nonlinear inequality constraints
-            %           'nlc' - nonlinear costs
-            %           'qdc' - quadratic costs
-            %         or
-            %           a cell array of one or more of the above
-            %         or
-            %           '' or 'all' - indicating to display all
-            %       NAME - (optional) char array specifying the name of the set
-            %       IDX  - (optional) cell array specifying the indices of the set
+            % Inputs:
+            %   set_type (char array or cell array) : one of the following,
+            %       specifying the type of set:
             %
-            %   Examples:
-            %       mm.display_soln('var');
-            %       mm.display_soln({'nle', 'nli'});
-            %       mm.display_soln('var', 'P');
-            %       mm.display_soln('lin', 'lin_con_1');
-            %       mm.display_soln('nle', 'nle_con_b', {2,3});
+            %       - ``'var'`` - variables
+            %       - ``'lin'`` - linear constraints
+            %       - ``'qcn'`` - quadratic constraints
+            %       - ``'nle'`` - nonlinear equality constraints
+            %       - ``'nli'`` - nonlinear inequality constraints
+            %       - ``'nlc'`` - nonlinear costs
+            %       - ``'qdc'`` - quadratic costs
             %
-            % See also get_soln, parse_soln.
+            %       *or*
+            %
+            %       - a cell array of one or more of the above
+            %
+            %       *or*
+            %
+            %       - ``''`` or ``'all'`` - indicating to display all
+            %   name (char array) : *(optional)* the name of the set
+            %   idx (cell array) : *(optional)* the indices of the set
+            %
+            % Examples::
+            %
+            %   mm.display_soln('var');
+            %   mm.display_soln({'nle', 'nli'});
+            %   mm.display_soln('var', 'P');
+            %   mm.display_soln('lin', 'lin_con_1');
+            %   mm.display_soln('nle', 'nle_con_b', {2,3});
+            %
+            % See also parse_soln.
 
             %% input arg handling
             if nargin < 2 || ischar(varargin{1})
@@ -1018,7 +1014,7 @@ classdef opt_model < handle
                 args = varargin(2:end);
             end
             nargs = length(args);
-            
+
             set_type = 'all';
             name = [];
             idx = [];
@@ -1031,7 +1027,7 @@ classdef opt_model < handle
                     end
                 end
             end
-            
+
             %% print header
             if mm.is_solved()
                 if strcmp(set_type, 'all')
@@ -1041,11 +1037,11 @@ classdef opt_model < handle
                 else
                     set_types = set_type;
                 end
-            
+
                 for ss = 1:length(set_types)
                     st = set_types{ss};
                     sm = mm.(st);
-            
+
                     switch st
                     case 'var'
                         sm.display_soln(mm.soln, fid, args{2:end});
@@ -1065,6 +1061,7 @@ classdef opt_model < handle
 end         %% classdef
 
 function d = copy_prop(s, d, prop)
+    %
     if isa(s.(prop), 'mp.sm_quad_cost_legacy')
         d.(prop) = s.(prop).copy('mp.sm_quad_cost');
     elseif isa(s.(prop), 'mp.set_manager')
@@ -1079,6 +1076,7 @@ end
 
 %% system of nonlinear and linear equations
 function [f, J] = nleq_fcn_(mm, x)
+    %
     flin = []; Jlin = [];
     fqcn = []; Jqcn = [];
     fnln = []; Jnln = [];

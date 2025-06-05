@@ -171,6 +171,9 @@ classdef set_manager < handle
             %   new_class (char array) : *(default = same class)* name of class
             %       to use for new object
             %
+            % Output:
+            %   new_sm (mp.set_manager) : duplicate of original object
+            %
             % Make a shallow copy of the object by copying each of the
             % top-level properties.
 
@@ -197,7 +200,7 @@ classdef set_manager < handle
         end
 
         function obj = add(obj, name, idx, varargin)
-            % add - Add a named (and optionally indexed) subset of entities.
+            % Add a named (and optionally indexed) subset of entities.
             % ::
             %
             %   sm.add(name, N, ...)
@@ -277,7 +280,7 @@ classdef set_manager < handle
         end
 
         function label = describe_idx(obj, idxs)
-            % describe_idx - Provide/display name and index label for given indices.
+            % Provide/display name and index label for given indices.
             % ::
             %
             %   label = sm.describe_idx(idxs)
@@ -372,7 +375,7 @@ classdef set_manager < handle
         end
 
         function N = get_N(obj, name, idx)
-            % get_N - Return the number of elements in the set.
+            % Return the number of elements in the set.
             % ::
             %
             %   N = sm.get_N()
@@ -407,7 +410,7 @@ classdef set_manager < handle
         end
 
         function obj = init_indexed_name(obj, name, dim_list)
-            % init_indexed_name - Initialize dimensions for an indexed named set.
+            % Initialize dimensions for an indexed named set.
             % ::
             %
             %   sm.init_indexed_name(name, dim_list)
@@ -458,7 +461,7 @@ classdef set_manager < handle
         end
 
         function s = set_type_idx_map(obj, idxs, group_by_name)
-            % set_type_idx_map - Map index back to named subset & index within set.
+            % Map index back to named subset & index within set.
             % ::
             %
             %   s = sm.set_type_idx_map()
@@ -474,7 +477,7 @@ classdef set_manager < handle
             %       full set *(default, if empty or not provided, is*
             %       ``[1:ns]'`` *where* ``ns`` *is the full dimension of the
             %       set corresponding to the all elements)*
-            %   group_by_name (boolean) : *(default = false)* if true, then the
+            %   group_by_name (logical) : *(default = false)* if true, then the
             %       results are consolidated, with a single entry in ``s`` for
             %       each unique name/idx pair, where the ``i`` and ``j`` fields
             %       are vectors. In this case ``s`` is 1 dimensional.
