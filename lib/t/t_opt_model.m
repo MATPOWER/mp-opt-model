@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 802;
+num_tests = 803;
 
 t_begin(num_tests, quiet);
 
@@ -1926,13 +1926,14 @@ warning(s1.state, warn_id);
 
 
 %%-----  copy  -----
-t = 'copy constructor';
+t = 'copy constructor : ';
 if have_feature('octave') && have_feature('octave', 'vnum') < 5.003
-    t_skip(1, [t ' - https://savannah.gnu.org/bugs/?52614']);
+    t_skip(2, [t ' - https://savannah.gnu.org/bugs/?52614']);
 else
     om1 = opt_model(om);
+    t_ok(isequal(om1, om), [t 'identical']);
     om1.add_var('test', 10);
-    t_is(om1.var.N, om.var.N+10, 12, t);
+    t_is(om1.var.N, om.var.N+10, 12, [t 'orig not modified by copy']);
 end
 
 t = 'copy';

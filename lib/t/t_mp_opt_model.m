@@ -1936,25 +1936,29 @@ mm1.var.add('test', 10);
 t_is(mm1.var.N, mm.var.N+10, 12, [t 'orig not modified by copy']);
 
 t = 'copy constructor (opt_model) : ';
-om = opt_model(struct(mm));
-om_struct = struct(om);
-mm_struct = struct(mm);
-if isfield(om_struct, 'set_types')
-    om_struct = rmfield(om_struct, 'set_types');
+if have_feature('octave') && have_feature('octave', 'vnum') < 6.002
+    t_skip(6, [t 'issues w/inherited copy constructor in Octave < v6.2.x']);
+else
+    om = opt_model(struct(mm));
+    om_struct = struct(om);
+    mm_struct = struct(mm);
+    if isfield(om_struct, 'set_types')
+        om_struct = rmfield(om_struct, 'set_types');
+    end
+    om_struct.qdc = struct(om_struct.qdc);
+    mm_struct.qdc = struct(mm_struct.qdc);
+    mm_struct.qdc.data.Q = mm_struct.qdc.data.H;
+    mm_struct.qdc.data = rmfield(mm_struct.qdc.data, 'H');
+    t_str_match(class(om.qdc), 'mp.sm_quad_cost_legacy', [t 'class(om.qdc)']);
+    t_ok(isequal(om_struct, mm_struct), [t 'om identical']);
+    mm2 = mp.opt_model(om);
+    om.var.add('test0', 5);
+    t_is(om.var.N, mm.var.N+5, 12, [t 'orig not modified by copy']);
+    t_str_match(class(mm2.qdc), 'mp.sm_quad_cost', [t 'class(mm.qdc)']);
+    t_ok(isequal(struct(mm2), struct(mm)), [t 'mm identical'])
+    mm2.var.add('test', 10);
+    t_is(mm2.var.N, mm.var.N+10, 12, [t 'orig not modified by copy']);
 end
-om_struct.qdc = struct(om_struct.qdc);
-mm_struct.qdc = struct(mm_struct.qdc);
-mm_struct.qdc.data.Q = mm_struct.qdc.data.H;
-mm_struct.qdc.data = rmfield(mm_struct.qdc.data, 'H');
-t_str_match(class(om.qdc), 'mp.sm_quad_cost_legacy', [t 'class(om.qdc)']);
-t_ok(isequal(om_struct, mm_struct), [t 'om identical']);
-mm2 = mp.opt_model(om);
-om.var.add('test0', 5);
-t_is(om.var.N, mm.var.N+5, 12, [t 'orig not modified by copy']);
-t_str_match(class(mm2.qdc), 'mp.sm_quad_cost', [t 'class(mm.qdc)']);
-t_ok(isequal(struct(mm2), struct(mm)), [t 'mm identical'])
-mm2.var.add('test', 10);
-t_is(mm2.var.N, mm.var.N+10, 12, [t 'orig not modified by copy']);
 
 t = 'copy : ';
 mm3 = mm.copy();

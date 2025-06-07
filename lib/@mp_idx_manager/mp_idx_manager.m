@@ -190,6 +190,8 @@ classdef mp_idx_manager < handle
                 nis = obj.set_types.(f{1});
                 if ischar(nis)
                     nis = mp.set_manager(nis);
+                else
+                    nis = nis.copy();
                 end
                 obj.(f{1}) = nis;
             end
