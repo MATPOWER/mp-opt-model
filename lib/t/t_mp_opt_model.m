@@ -1597,6 +1597,7 @@ if have_feature('isequaln')
     val = repmat(s.qcn.data.Q.Qmis(1), m+1, n);
     try
         mm.qcn.set_params(mm.var, 'Qmis', 'Q', val);
+        t_ok(false, [t 'Qmis, Q (wrong cell size, no error thrown)']);
     catch me
         TorF = strfind(me.message, 'dimension change for ''Qmis'' not allowed except for ''all''');
         t_ok(TorF, [t 'Qmis, Q (wrong cell size)']);
@@ -1646,6 +1647,7 @@ if have_feature('isequaln')
     val = {Q(2:3), B(2:3,:), lq(2:3), uq(2:3)};
     try
         mm.qcn.set_params(mm.var, 'myqcn', {2,2}, 'all', val);
+        t_ok(false, [t 'Qmis, Q (wrong cell size, no error thrown)']);
     catch me
         TorF = strfind(me.message, 'for ''myqcn(2,2)'' number of columns of ''Q'' (5) must be consistent with ''vs'' (170)');
         t_ok(TorF, [t 'Qmis, Q (wrong cell size)']);
@@ -1915,7 +1917,7 @@ if have_feature('isequaln')
     mm.nlc.set_params(mm.var, 'wc', {2,2}, 'all', val);
     t_ok(isequaln(struct(mm), s), [t 'wc{2,2}, all']);
 else
-    t_skip(40, 'mm.set_params tests require ''isequaln()''');
+    t_skip(47, 'mm.set_params tests require ''isequaln()''');
 end
 
 %%-----  get_userdata  -----

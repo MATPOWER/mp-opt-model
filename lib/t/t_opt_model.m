@@ -2,7 +2,7 @@ function t_opt_model(quiet)
 % t_opt_model - Tests for opt_model.
 
 %   MP-Opt-Model
-%   Copyright (c) 2012-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2012-2025, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -1598,6 +1598,7 @@ if have_feature('isequaln')
     val = repmat(s.qcn.data.Q.Qmis(1), m+1, n);
     try
         om.qcn.set_params(om.var, 'Qmis', 'Q', val);
+        t_ok(false, [t 'Qmis, Q (wrong cell size, no error thrown)']);
     catch me
         TorF = strfind(me.message, 'dimension change for ''Qmis'' not allowed except for ''all''');
         t_ok(TorF, [t 'Qmis, Q (wrong cell size)']);
@@ -1647,6 +1648,7 @@ if have_feature('isequaln')
     val = {Q(2:3), B(2:3,:), lq(2:3), uq(2:3)};
     try
         om.qcn.set_params(om.var, 'myqcn', {2,2}, 'all', val);
+        t_ok(false, [t 'Qmis, Q (wrong cell size, no error thrown)']);
     catch me
         TorF = strfind(me.message, 'for ''myqcn(2,2)'' number of columns of ''Q'' (5) must be consistent with ''vs'' (170)');
         t_ok(TorF, [t 'Qmis, Q (wrong cell size)']);
@@ -1916,7 +1918,7 @@ if have_feature('isequaln')
     om.set_params('nlc', 'wc', {2,2}, 'all', val);
     t_ok(isequaln(struct(om), s), [t 'wc{2,2}, all']);
 else
-    t_skip(40, 'om.set_params tests require ''isequaln()''');
+    t_skip(47, 'om.set_params tests require ''isequaln()''');
 end
 
 %% turn object to struct warnings back on
