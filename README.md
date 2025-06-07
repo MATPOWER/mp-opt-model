@@ -16,10 +16,12 @@ System Requirements
 -------------------
 
 *   [MATLAB][3] version 7.9 (R2009b) or later, or
-*   [GNU Octave][4] version 4 or later
+*   [GNU Octave][4] version 6.2 or later [#]_
 *   [MP-Test][5]
 *   [MATPOWER Interior Point Solver (MIPS)][6]
 
+.. [#] All functionality except object copy constructors work on GNU Octave
+4.4 and later.
 
 Installation
 ------------
@@ -236,7 +238,7 @@ MP-Opt-Model is distributed under the [3-clause BSD license][9].
 [1]: https://github.com/MATPOWER/mp-opt-model
 [2]: https://matpower.org/
 [3]: https://www.mathworks.com/
-[4]: https://www.gnu.org/software/octave/
+[4]: https://octave.org
 [5]: https://github.com/MATPOWER/mptest
 [6]: https://github.com/MATPOWER/mips
 [7]: docs/MP-Opt-Model-manual.pdf
