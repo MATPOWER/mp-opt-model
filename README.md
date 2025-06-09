@@ -16,11 +16,11 @@ System Requirements
 -------------------
 
 *   [MATLAB][3] version 7.9 (R2009b) or later, or
-*   [GNU Octave][4] version 6.2 or later [#]_
+*   [GNU Octave][4] version 6.2 or later [^1]
 *   [MP-Test][5]
 *   [MATPOWER Interior Point Solver (MIPS)][6]
 
-.. [#] All functionality except object copy constructors work on GNU Octave
+[^1]: All functionality except object copy constructors work on GNU Octave
 4.4 and later.
 
 Installation
