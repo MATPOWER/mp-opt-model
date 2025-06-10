@@ -123,7 +123,8 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             %       coefficient, :math:`n_x \times 1` vector :math:`\c`
             %   k (double) : *(optional, default = 0)* constant cost term,
             %       scalar :math:`\param{k}`, or :math:`n_x \times 1` vector
-            %       :math:`\k`
+            %       :math:`\k`; scalar `k` is expanded to a vector if `H` is
+            %       a vector
             %   vs (cell or struct array) : *(optional, default* ``{}`` *)*
             %       variable set defining vector :math:`\x` for this
             %       cost subset; can be either a cell array of names of
@@ -158,7 +159,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             nargs = length(args);
 
             %% prepare data
-            c = []; k = 0; vs = {};
+            c = []; k = []; vs = {};
             if nargs >= 1
                 c = args{1};
                 if nargs >= 2
@@ -166,6 +167,13 @@ classdef sm_quad_cost < mp.set_manager_opt_model
                     if nargs >= 3
                         vs = args{3};
                     end
+                end
+            end
+            if isempty(k)
+                if isempty(H)
+                    k = zeros(size(c));
+                else
+                    k = 0;
                 end
             end
 
@@ -176,6 +184,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             %% check sizes
             [MH, NH] = size(H);
             [Mc, Nc] = size(c);
+            [Mk, Nk] = size(k);
             if MH
                 if NH ~= MH && NH ~= 1
                     error('mp.sm_quad_cost.add: H (%d x %d) must be square or a column vector (or empty)', MH, NH);
@@ -200,10 +209,24 @@ classdef sm_quad_cost < mp.set_manager_opt_model
             end
 
             %% size of named cost set
-            if NH == 1 || isempty(H)    %% if H is a column vector or empty
-                N = nx;                 %%   cost is element-wise, i.e. a vector
-            else                        %% otherwise H is a square matrix
-                N = 1;                  %%   cost is scalar
+            if isempty(H)
+                if Mk == 0 || Mk == Mc
+                    N = nx;     %% cost is element-wise, i.e. a vector
+                elseif isscalar(k)
+                    N = 1;      %% cost is scalar
+                else
+                    error('mp.sm_quad_cost.add: k must be a scalar or (%d x 1) vector', nx);
+                end
+            elseif NH == 1
+                N = nx;     %% cost is element-wise, i.e. a vector
+                if isscalar(k)
+                    k = k * ones(N, 1); %% expand k to vector if necessary
+                end
+            else
+                N = 1;      %% cost is scalar
+                if ~isscalar(k)
+                    error('mp.sm_quad_cost.add: k must be a scalar when H is a matrix');
+                end
             end
 
             %% call parent to handle standard indexing
@@ -364,11 +387,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
                             if havec
                                 c = c + ck_full;
                             end
-                            if length(kk) == 1
-                                K = K + N * kk;     %% N handles case where k is expanded to vector cost
-                            else
-                                K = K + sum(kk);
-                            end
+                            K = K + sum(kk);
                         end
                         H = Ht';
                    else
@@ -409,11 +428,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
                                     c_ijv(k, :) = {jj(ic), jc, vc};
                                 end
                             end
-                            if length(kk) == 1
-                                K = K + N * kk;     %% N handles case where k is expanded to vector cost
-                            else
-                                K = K + sum(kk);
-                            end
+                            K = K + sum(kk);
                         end
                         H = sparse( vertcat(H_ijv{:,1}), ...
                                     vertcat(H_ijv{:,2}), ...
@@ -678,7 +693,7 @@ classdef sm_quad_cost < mp.set_manager_opt_model
                         if ~isempty(H)          %% add H term
                             f = f + (xx'*H*xx)/2;
                         end
-                    else                    %% f is vector (H is vector or empty, k is vector or scalar)
+                    else                    %% f is vector (H is vector or empty, k is vector)
                         if isempty(c)           %% H, k terms only
                             f = (H .* xx.^2)/2 + k;
                         else

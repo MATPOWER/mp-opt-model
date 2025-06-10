@@ -2597,11 +2597,11 @@ f(x) = \frac{1}{2} \trans{x} H x + \trans{c} x + k \label{eq:quad_cost}
 \end{equation}
 where $x$ here refers to either the full variable vector \emph{(default)}, or the vector obtained by stacking the subset of variables specified in \code{varsets}. Here \code{H} contains the $n_x \times n_x$ matrix $H$, \code{c} the $n_x \times 1$ vector $c$, and \code{k} the scalar $k$.\footnote{The \code{H} matrix can be sparse.}
 
-Alternatively, if \code{H} is an $n_x \times 1$ vector or empty, then $f(x)$ is also an $n_x \times 1$ vector, \code{k} can be $n_x \times 1$ or scalar, and the $i$-th element of $f(x)$ is given by
+Alternatively, if \code{H} is an $n_x \times 1$ vector, then $f(x)$ is also an $n_x \times 1$ vector, \code{k} can be $n_x \times 1$ or scalar, and the $i$-th element of $f(x)$ is given by
 \begin{equation}
 f_i(x) = \frac{1}{2} H_i x_i^2 + c_i x_i + k_i. \label{eq:quad_cost2}
 \end{equation}
-where $k_i = k$ for all $i$ if \code{k} is scalar.
+where $k_i = $~\code{k} for all $i$ if \code{k} is scalar. If \code{H} is empty, then form \eqref{eq:quad_cost} is implied by a scalar \code{k} and \eqref{eq:quad_cost2} by a vector \code{k}.
 
 For example, suppose our problem has the following three sets of quadratic costs,
 \begin{align}
@@ -5010,7 +5010,7 @@ Alternatively, if \code{Q} is an $n_x \times 1$ vector or empty, then $f(x)$ is 
 \begin{equation}
 f_i(x) = \frac{1}{2} Q_i x_i^2 + c_i x_i + k_i. \label{eq:quad_cost2_legacy}
 \end{equation}
-where $k_i = k$ for all $i$ if \code{k} is scalar.
+where $k_i = $~\code{k} for all $i$ if \code{k} is scalar.
 
 For example, suppose our problem has the following three sets of quadratic costs,
 \begin{align}
@@ -6521,6 +6521,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
 
 \item New classes:
     \begin{itemize}
+    \item \code{mp.opt\_model} replaces legacy \code{opt\_model} and \code{mp\_idx\_manager} classes with a new modeling API. \emph{The legacy classes are retained for backward compatibility.}
     \item \code{mp.set\_manager} encapsulates \code{mp\_idx\_manager} functionality into an individual field object representing a specific set type, rather than in the container class.
     \item \code{mp.set\_manager\_opt\_model} is a subclass of \code{mp.set\_manager} that handles common functionality, e.g. related to handling solution data, for all of the set manager subclasses used by \code{opt\_model}.
     \item \code{mp.sm\_lin\_constraint} - set manager class for linear constraints
@@ -6528,6 +6529,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
     \item \code{mp.sm\_nln\_constraint} - set manager class for nonlinear constraints
     \item \code{mp.sm\_nln\_cost} - set manager class for general nonlinear costs
     \item \code{mp.sm\_quad\_cost} - set manager class for quadratic costs
+    \item \code{mp.sm\_quad\_cost\_legacy} - backward compatible set manager class for quadratic costs
     \item \code{mp.sm\_variable} - set manager class for variables
     \end{itemize}
 \item New functions:
@@ -6564,7 +6566,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
     \item \code{mp.sm\_quad\_constraint} - set manager class for quadratic constraints
     \item \code{mp.sm\_nln\_constraint} - set manager class for nonlinear constraints
     \item \code{mp.sm\_nln\_cost} - set manager class for general nonlinear costs
-    \item \code{mp.sm\_quad\_cost} - set manager class for quadratic costs
+    \item \code{mp.sm\_quad\_cost\_legacy} - backward compatible set manager class for quadratic costs
     \item \code{mp.sm\_variable} - set manager class for variables
     \end{itemize}
 \item Deprecate the following \code{opt\_model} methods in favor of methods of the individual \code{mp.set\_manager} objects contained by the \code{opt\_model} object:

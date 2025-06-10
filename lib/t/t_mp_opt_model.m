@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 813;
+num_tests = 814;
 
 t_begin(num_tests, quiet);
 
@@ -1117,7 +1117,7 @@ n = mm.var.get_N();
 c6 = -(1:n)';
 k6 = 3;
 mm.qdc.add(mm.var, 'qc6', [], c6, k6);
-qcNS = qcNS + 1; qcN = qcN + n;
+qcNS = qcNS + 1; qcN = qcN + 1;
 t_ok(mm.qdc.get_N() == qcN, sprintf('%s : qdc.N  = %d', t, qcN));
 t_ok(mm.qdc.NS == qcNS, sprintf('%s : qdc.NS = %d', t, qcNS));
 
@@ -1164,10 +1164,10 @@ t_is(c, c3, 14, [t, ' : c']);
 t_is(k, k3, 14, [t, ' : k']);
 
 t = 'mm.qdc.params(mm.var, ''qc4'')';
-[H, c] = mm.qdc.params(mm.var, 'qc4');
+[H, c, k] = mm.qdc.params(mm.var, 'qc4');
 t_is(H, H4, 14, [t, ' : H']);
 t_ok(isempty(c), [t, ' : c']);
-% t_is(k, 0, 14, [t, ' : k']);
+t_is(k, zeros(size(H, 2), 1), 14, [t, ' : k']);
 
 t = 'mm.qdc.params(mm.var, ''qc5'')';
 [H, c, k] = mm.qdc.params(mm.var, 'qc5');
@@ -1205,7 +1205,7 @@ HH = sparse(ii, jj, ss, mm.var.N, mm.var.N);
 cc = [ 2139 2238 2337 2436 1751 1841 1931 1622 1611 1600 1589 1578 1566 1554 1542 1530 1518 1504 1491 1482 1469 1460 1447 1434 1427 1414 1413 1402 1391 1380 1369 1358 1347 1336 1325 1314 1303 1292 1281 1270 1259 1248 1237 1226 1215 1204 1193 1182 1171 1160 1149 1138 1127 1116 1105 1094 1083 1072 1061 1050 1039 1028 1017 1006 995 984 973 962 951 940 929 918 907 896 885 874 863 852 841 830 819 808 797 786 775 764 753 742 731 720 709 698 687 676 665 654 643 632 621 610 599 588 577 566 555 544 533 522 511 500 489 478 467 456 445 434 423 412 401 390 379 368 357 346 335 324 313 302 291 280 269 258 247 236 225 214 203 192 181 170 159 148 137 126 115 104 93 82 71 60 49 38 27 16 5 -6 -17 -28 -39 -50 -61 -72 -83 -94 -105 -116 -127 -138 -149 -160]';
 t_is(H, HH, 14, [t, ' : H']);
 t_is(c, cc, 14, [t, ' : c']);
-t_is(k, k1+k3*length(H3)+sum(k5)+k6*length(c6)+4000, 14, [t, ' : k']);
+t_is(k, k1+k3*length(H3)+sum(k5)+k6+4000, 14, [t, ' : k']);
 
 %%-----  qdc.eval  -----
 t = 'mm.qdc.eval(mm.var, x, ''qc1'')';
@@ -1267,12 +1267,12 @@ t_is(d2f, sparse(length(xx), 1), 14, [t, ' : d2f']);
 t = 'mm.qdc.eval(mm.var, x, ''qc6'')';
 [H, c, k, vs] = mm.qdc.params(mm.var, 'qc6');
 xx = x;
-ef = c.*xx + k;
+ef = c'*xx + k;
 edf = c;
 [f, df, d2f] = mm.qdc.eval(mm.var, x, 'qc6');
 t_is(f, ef, 14, [t, ' : f']);
 t_is(df, edf, 14, [t, ' : df']);
-t_is(d2f, sparse(length(x), 1), 14, [t, ' : d2f']);
+t_is(d2f, sparse(length(x), length(x)), 14, [t, ' : d2f']);
 
 for i = 1:2
     for j = 1:2
@@ -1830,7 +1830,7 @@ if have_feature('isequaln')
 
     [H, c, k, vs] = mm.qdc.params(mm.var, 'qc4');
     vs(2) = [];
-    val = {H(2:2:6, :), c, k, vs};
+    val = {H(2:2:6, :), c, k(2:2:6), vs};
     s.qdc.data.H.qc4 = val{1};
     s.qdc.data.vs.qc4 = val{4};
     dN = -3;
@@ -1978,9 +1978,9 @@ if have_feature('isequaln')
     g = mm.nli.set_type_idx_map(15);
     e = struct('name', 'mynli', 'idx', {{2,2}}, 'i', 4);
     t_ok(isequal(g, e), [t '''nli'', 15']);
-    g = mm.qdc.set_type_idx_map([5;192;20]);
+    g = mm.qdc.set_type_idx_map([5;23;20]);
     e = struct('name', {'qc3';'qc';'qc5'}, 'idx', {[];{1,2};[]}, 'i', {3;1;7});
-    t_ok(isequal(g, e), [t '''qdc'', [5;192;20]']);
+    t_ok(isequal(g, e), [t '''qdc'', [5;23;20]']);
     g = mm.lin.set_type_idx_map([12 3;2 10]);
     e = struct('name', {'mylin', 'Qmis';'Pmis' 'mylin'}, 'idx', {{2,1}, []; [], {1,2}}, 'i', {2, 1;2, 3});
     t_ok(isequal(g, e), [t '''lin'', [12 3;2 10]']);
@@ -2046,9 +2046,9 @@ t_ok(isequal(g, 'Vm2(3)'), [t '''var'', 15']);
 if have_feature('isequaln')
     g = mm.nli.describe_idx(15);
     t_ok(isequal(g, 'mynli{2,2}(4)'), [t '''nli'', 15']);
-    g = mm.qdc.describe_idx([5;192;20]);
+    g = mm.qdc.describe_idx([5;23;20]);
     e = {'qc3(3)'; 'qc{1,2}(1)'; 'qc5(7)'};
-    t_ok(isequal(g, e), [t '''qdc'', [5;192;20]']);
+    t_ok(isequal(g, e), [t '''qdc'', [5;23;20]']);
     g = mm.lin.describe_idx([12 3;2 10]);
     e = {'mylin{2,1}(2)', 'Qmis(1)'; 'Pmis(2)', 'mylin{1,2}(3)'};
     t_ok(isequal(g, e), [t '''lin'', [12 3;2 10]']);
