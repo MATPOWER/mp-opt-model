@@ -123,7 +123,7 @@ classdef sm_variable < mp.set_manager_opt_model
             nargs = length(args);
 
             %% prepare data
-            v0 = []; vl = []; vu = []; vt = [];
+            v0 = []; vl = []; vu = []; vt = '';
             if nargs >= 1
                 v0 = args{1};
                 if nargs >= 2
@@ -219,7 +219,7 @@ classdef sm_variable < mp.set_manager_opt_model
             end
             if nargin < 2       %% aggregate
                 if isempty(obj.cache)       %% build the aggregate
-                    v0 = []; vl = []; vu = []; vt = char([]);
+                    v0 = []; vl = []; vu = []; vt = '';
                     %% calls to substruct() are relatively expensive, so we pre-build the
                     %% structs for addressing cell and numeric array fields, updating only
                     %% the subscripts before use
@@ -317,7 +317,7 @@ classdef sm_variable < mp.set_manager_opt_model
                     vl = [];
                     vu = [];
                     if have_vt
-                        vt = [];
+                        vt = '';
                     end
                 end
             end
