@@ -6,7 +6,11 @@ since 4.2
 ---------
 
 #### 6/10/25
-  - Update handling of constant term in `mp.sm_quad_cost`:
+  - Fix handling of scalar inputs for vector parameters when adding an
+    empty set of variables or linear/quadratic constraints. Now
+    properly "expands" them to an empty vector ([issue #16][18]).
+  - Update handling by `mp.sm_quad_cost` of constant term for
+    quadratic costs ([issue #15][17]):
     - When `H` is empty, a scalar `k` will no longer be expanded
       _(implicitly)_ to a vector, rather it will result in a scalar
       cost set.
@@ -637,3 +641,5 @@ Version 0.7.0 - *Jun 20, 2019*
 [14]: https://www.artelys.com/solvers/knitro/
 [15]: https://highs.dev
 [16]: https://github.com/savyasachi/HiGHSMEX
+[17]: https://github.com/MATPOWER/matpower/issues/15
+[18]: https://github.com/MATPOWER/matpower/issues/16

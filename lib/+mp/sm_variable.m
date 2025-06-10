@@ -138,17 +138,17 @@ classdef sm_variable < mp.set_manager_opt_model
             end
             if isempty(v0)
                 v0 = zeros(N, 1);   %% init to zero by default
-            elseif N > 1 && length(v0) == 1     %% expand from scalar as needed
+            elseif N ~= 1 && length(v0) == 1    %% expand from scalar as needed
                 v0 = v0 * ones(N, 1);
             end
             if isempty(vl)
                 vl = -Inf(N, 1);    %% unbounded below by default
-            elseif N > 1 && length(vl) == 1     %% expand from scalar as needed
+            elseif N ~= 1 && length(vl) == 1    %% expand from scalar as needed
                 vl = vl * ones(N, 1);
             end
             if isempty(vu)
                 vu = Inf(N, 1);     %% unbounded above by default
-            elseif N > 1 && length(vu) == 1     %% expand from scalar as needed
+            elseif N ~= 1 && length(vu) == 1    %% expand from scalar as needed
                 vu = vu * ones(N, 1);
             end
             if isempty(vt) && N > 0
