@@ -5,6 +5,16 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 6/10/25
+  - Update handling of constant term in `mp.sm_quad_cost`:
+    - When `H` is empty, a scalar `k` will no longer be expanded
+      _(implicitly)_ to a vector, rather it will result in a scalar
+      cost set.
+    - When `H` is a vector and `k` is a scalar, `k` will be expanded
+      _explicitly_ to a vector.
+    The `mp.sm_quad_cost_legacy` class is unchanged, so this change
+    affects only `mp.opt_model`, not the legacy `opt_model`.
+
 #### 5/23/25
   - Add support to `qps_master()` and `miqps_master()` for the
     open-source [HiGHS][15] solver for LP, QP and MILP problems,
