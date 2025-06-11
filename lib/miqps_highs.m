@@ -189,12 +189,6 @@ end
 if isempty(x0)
     x0 = zeros(nx, 1);
 end
-if nA == 0      %% unconstrained
-    %% add single non-binding constraint
-    A = sparse(1, nx);
-    l = -Inf;
-    u =  Inf;
-end
 
 %% default options
 if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
