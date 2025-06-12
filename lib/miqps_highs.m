@@ -223,8 +223,10 @@ else
         xmin(k(kk)) = 0;
     end
     %% form integrality input
-    map = struct('C', "c", 'B', "i", 'I', "i", 'S', "sc", 'N', "si");
-    integrality = cellfun(@(s) map.(s), cellstr(vtype));
+    integrality = repmat("c", nx, 1);               %% continuous, default
+    integrality(vtype == 'B' | vtype == 'I') = "i"; %% integer
+    integrality(vtype == 'S') = "sc";               %% semi-continuous
+    integrality(vtype == 'N') = "si";               %% semi-integer
 end
 
 %% set up options struct for HiGHS
