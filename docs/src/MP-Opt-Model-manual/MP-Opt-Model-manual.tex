@@ -3750,11 +3750,11 @@ Returns set-type-specific parameters for the full set, if called without input a
 
 \subsubsection*{\code{set\_params}}
 \begin{Code}
-sm.set_params(name, params, vals)
-sm.set_params(name, idx_list, params, vals)
+sm.set_params(var, name, params, vals)
+sm.set_params(var, name, idx_list, params, vals)
 \end{Code}
 
-This method can be used to modify set-type-specific parameters for an existing subset.
+This method can be used to modify set-type-specific parameters for an existing subset. The \code{var} input is omitted for objects of the subclass \code{mp.sm\_variable}.
 
 \subsubsection*{\code{display\_soln}}
 \begin{Code}

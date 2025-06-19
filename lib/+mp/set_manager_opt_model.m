@@ -72,8 +72,8 @@ classdef set_manager_opt_model < mp.set_manager
             % Modify parameter data.
             % ::
             %
-            %   sm.set_params(name, params, vals)
-            %   sm.set_params(name, idx_list, params, vals)
+            %   sm.set_params(var, name, params, vals)
+            %   sm.set_params(var, name, idx_list, params, vals)
             %
             % .. note:: This abstract method must be implemented by a
             %   subclass.
@@ -82,6 +82,9 @@ classdef set_manager_opt_model < mp.set_manager
             % for an existing subset.
             %
             % Inputs:
+            %   var (mp.sm_variable) : set manager object for variables
+            %       (this input is omitted for objects of subclass
+            %       mp.sm_variable)
             %   name (char array) : name of subset/block of entities to modify
             %   idx_list (cell array) : *(optional)* index list for subset/block
             %       of entities modify (for an indexed subset)
