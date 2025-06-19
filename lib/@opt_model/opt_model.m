@@ -1,5 +1,9 @@
 classdef opt_model < mp_idx_manager
 % opt_model - MP-Opt-Model optimization model class.
+%
+% .. note::
+%    .. deprecated:: 5.0 Please use mp.opt_model instead.
+%
 % ::
 %
 %   OM = OPT_MODEL

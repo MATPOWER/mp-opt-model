@@ -4423,7 +4423,7 @@ name & description \\
 %\renewcommand{\arraystretch}{1.2}
 \centering
 \begin{threeparttable}
-\caption{Legacy Mathematical Model Class}
+\caption{Legacy Mathematical Model Class\tnote{*}}
 \label{tab:opt_model}
 \footnotesize
 \begin{tabular}{lp{0.66\textwidth}}
@@ -4464,6 +4464,7 @@ name & description \\
 \end{tabular}
 \begin{tablenotes}
  \scriptsize
+ \item [*] {Deprecated, please use \code{mp.opt\_model} instead, except as needed for backward compatibility.}
  \item [\dag] {Private method for internal use only.}
  \item [\ddag] {For all, or alternatively, only for a named (and possibly indexed) subset.}
 \end{tablenotes}
@@ -4475,7 +4476,7 @@ name & description \\
 %\renewcommand{\arraystretch}{1.2}
 \centering
 \begin{threeparttable}
-\caption{Legacy \matpower{} Index Manager Class}
+\caption{Legacy \matpower{} Index Manager Class\tnote{*}}
 \label{tab:mp_idx_manager}
 \footnotesize
 \begin{tabular}{lp{0.66\textwidth}}
@@ -4497,6 +4498,7 @@ name & description \\
 \end{tabular}
 \begin{tablenotes}
  \scriptsize
+ \item [*] {Deprecated, please use \code{mp.set\_manager} instead, except as needed for backward compatibility. The functionality previously implemented in \code{mp\_idx\_manager}, a parent container class for managing various set types, has been moved to \code{mp.set\_manager}, a base class for the set type objects themselves.}
  \item [\dag] {Private method for internal use only.}
  \item [\ddag] {For all, or alternatively, only for a named (and possibly indexed) subset.}
 \end{tablenotes}
