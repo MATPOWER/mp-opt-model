@@ -38,6 +38,8 @@ classdef opt_model < handle
 %   * has_parsed_soln - return true if model has a parsed solution
 %   * parse_soln - parse solution vector and shadow prices by all named sets
 %   * display - display the object
+%   * display_header - display header, before each set type
+%   * display_footer - display footer, after each set type
 %   * display_soln - display solution values
 %
 % Example::
@@ -925,6 +927,8 @@ classdef opt_model < handle
                 more_set_types = varargin{1};
             end
 
+            mm.display_header();
+
             %% display details of each set type
             set_types = mm.get_set_types();
             set_types = horzcat(set_types, more_set_types);
@@ -933,6 +937,30 @@ classdef opt_model < handle
             for k = 1:length(set_types)
                 mm.(set_types{k}).display(set_types{k});
             end
+
+            mm.display_footer();
+        end
+
+        function mm = display_header(mm)
+            % Display header, before each set type.
+            % ::
+            %
+            %   mm.display_header()
+            %
+            % Called automatically by display, *before* displaying each
+            % set type.
+
+            fprintf('CLASS : %s\n', class(mm));
+        end
+
+        function mm = display_footer(mm)
+            % Display footer, after each set type.
+            % ::
+            %
+            %   mm.display_footer()
+            %
+            % Called automatically by display, *after* displaying each
+            % set type. By default, displays information about user data.
 
             %% user data
             fields = fieldnames(mm.userdata);
