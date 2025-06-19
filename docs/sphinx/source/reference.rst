@@ -197,10 +197,12 @@ QCQP Solver
 |MPOM| Examples
 ---------------
 
-These are examples of using |MPOM| to solve a NLP.
+These are examples of using |MPOM| to build and solve various types of problems.
 
 .. toctree::
 
+   functions/lp_ex1
+   functions/milp_ex1
    functions/nleqs_master_ex1
    functions/nleqs_master_ex2
    functions/nlps_master_ex1
@@ -208,6 +210,15 @@ These are examples of using |MPOM| to solve a NLP.
    functions/pne_ex1
    functions/qcqp_ex1
    functions/qp_ex1
+
+The following Live Scripts, also found in the ``lib/t`` directory, help to
+illustrate MP-Opt-Model usage.
+
+- `milp_example1.mlx`_ - *Good introduction to build and solve a model with MP-Opt-Model.*
+- `qcqp_example1.mlx`_ - *Example of quadratic constraints and QCQP.*
+
+.. _milp_example1.mlx: https://github.com/MATPOWER/mp-opt-model/blob/master/lib/t/milp_example1.mlx
+.. _qcqp_example1.mlx: https://github.com/MATPOWER/mp-opt-model/blob/master/lib/t/qcqp_example1.mlx
 
 
 |MPOM| Tests
