@@ -234,8 +234,8 @@ classdef sm_nln_cost < mp.set_manager_opt_model
             % Modify general nonlinear cost parameter data.
             % ::
             %
-            %   nlc.set_params(name, params, vals)
-            %   nlc.set_params(name, idx_list, params, vals)
+            %   nlc.set_params(var, name, params, vals)
+            %   nlc.set_params(var, name, idx_list, params, vals)
             %
             % This method can be used to modify parameters for an existing
             % subset of general nonlinear costs.

@@ -444,8 +444,8 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
             % Modify quadratic cost parameter data.
             % ::
             %
-            %   qdc.set_params(name, params, vals)
-            %   qdc.set_params(name, idx_list, params, vals)
+            %   qdc.set_params(var, name, params, vals)
+            %   qdc.set_params(var, name, idx_list, params, vals)
             %
             % This method can be used to modify parameters for an existing
             % subset of quadratic costs.
