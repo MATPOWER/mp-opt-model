@@ -147,7 +147,7 @@ classdef set_manager < handle
         order = struct('name', [], 'idx', []);
 
         % *(struct)* additional set-type-specific data for each block
-        data = struct();
+        data
     end     %% properties
 
     methods
@@ -156,6 +156,9 @@ classdef set_manager < handle
             % ::
             %
             %   sm = mp.set_manager(label)
+            %
+            % Input:
+            %   label (char array) : label used in display for this set type
 
             obj.label = label;
         end
