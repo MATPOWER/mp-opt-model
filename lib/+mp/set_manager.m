@@ -21,6 +21,8 @@ classdef set_manager < handle
 % mp.set_manager Methods:
 %   * set_manager - constructor
 %   * copy - make a duplicate (shallow copy) of the object
+%   * to_struct - convert object data *to* a struct
+%   * from_struct - copy object data *from* a struct
 %   * add - add a named (and optionally indexed) subset of entities
 %   * describe_idx - provide/display name and index label for given indices
 %   * display - display summary of indexing of subsets in object
@@ -156,11 +158,19 @@ classdef set_manager < handle
             % ::
             %
             %   sm = mp.set_manager(label)
+            %   sm = mp.set_manager(s)
             %
             % Input:
             %   label (char array) : label used in display for this set type
+            %   s (struct) : a struct to use as an input to from_struct()
 
-            obj.label = label;
+            if isstruct(label)
+                obj = obj.from_struct(label);
+            elseif ischar(label)
+                obj.label = label;
+            else
+                error('mp.set_manager: constructor input argument must be char array or struct');
+            end
         end
 
         function new_obj = copy(obj, cls)
@@ -200,6 +210,34 @@ classdef set_manager < handle
             for k = 1:length(props)
                 new_obj.(props{k}) = obj.(props{k});
             end
+        end
+
+        function s =  to_struct(obj)
+            % Convert object data *to* a struct.
+            % ::
+            %
+            %   s = sm.to_struct()
+            %
+            % Converts the object data *to* a struct that can later be
+            % converted back to an identical object using mp.struct2object.
+            % Useful for saving the object data to a MAT-file in Octave.
+
+            s = nested_struct_copy(struct(), obj);
+            s.class_ = class(obj);
+            s.constructor_args_ = { obj.label };
+        end
+
+        function obj = from_struct(obj, s)
+            % Copy object data *from* a struct.
+            % ::
+            %
+            %   sm.from_struct(s)
+            %
+            % Called by function mp.struct2object, after creating the object
+            % to copy the object data *from* a struct. Useful for recreating
+            % the object after loading struct data from a MAT-file in Octave.
+
+            obj = nested_struct_copy(obj, s);
         end
 
         function obj = add(obj, name, idx, varargin)

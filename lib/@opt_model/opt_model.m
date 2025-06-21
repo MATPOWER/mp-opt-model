@@ -308,6 +308,41 @@ classdef opt_model < mp_idx_manager
             new_om = copy@mp_idx_manager(om);
         end
 
+        function s = to_struct(om)
+            % Convert object data *to* a struct.
+            % ::
+            %
+            %   s = om.to_struct()
+            %
+            % Converts the object data *to* a struct that can later be
+            % converted back to an identical object using mp.struct2object.
+            % Useful for saving the object data to a MAT-file in Octave.
+
+            s = nested_struct_copy(struct(), om);
+            s.class_ = class(om);
+            st = fieldnames(om.set_types);
+            for k = 1:length(st)
+                s.(st{k}) = s.(st{k}).to_struct();
+            end
+        end
+
+        function om = from_struct(om, s)
+            % Copy object data *from* a struct.
+            % ::
+            %
+            %   om.from_struct(s)
+            %
+            % Called by function mp.struct2object, after creating the object
+            % to copy the object data *from* a struct. Useful for recreating
+            % the object after loading struct data from a MAT-file in Octave.
+
+            om = nested_struct_copy(om, s);
+            st = fieldnames(om.set_types);
+            for k = 1:length(st)
+                om.(st{k}) = mp.struct2object(om.(st{k}));
+            end
+        end
+
         function TorF = is_solved(om)
             % Return true if model has been solved.
 

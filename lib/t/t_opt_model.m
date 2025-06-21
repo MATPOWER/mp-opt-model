@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 803;
+num_tests = 811;
 
 t_begin(num_tests, quiet);
 
@@ -1941,6 +1941,21 @@ om2 = om.copy();
 om2.add_var('test', 10);
 t_is(om2.var.N, om.var.N+10, 12, t);
 
+%%-----  to_struct()/from_struct()  -----
+t = 'to_struct() : ';
+s = om.to_struct();
+t_ok(isstruct(s), [t 'isstruct']);
+t_ok(isfield(s, 'var') && isstruct(s.var), [t 'var']);
+t_ok(isfield(s, 'lin') && isstruct(s.lin), [t 'lin']);
+t_ok(isfield(s, 'qdc') && isstruct(s.qdc), [t 'qdc']);
+t_ok(isfield(s, 'nle') && isstruct(s.nle), [t 'nle']);
+t_ok(isfield(s, 'nli') && isstruct(s.nli), [t 'nli']);
+t_ok(isfield(s, 'nlc') && isstruct(s.nlc), [t 'nlc']);
+
+t = 'from_struct()';
+om1 = mp.struct2object(s);
+t_ok(isequal(om, om1), t);
+
 %%-----  set_type_idx_map  -----
 t = 'set_type_idx_map : ';
 g = om.set_type_idx_map('var', 15);
@@ -1968,18 +1983,18 @@ else
     t_ok(isequal(g, e), [t '''lin'', [12 3;2 10]']);
 end
 
-mm = opt_model();
-mm.add_var('a', 3);
-mm.init_indexed_name('var', 'b', {2});
-mm.add_var('b', {1}, 2);
-mm.add_var('b', {2}, 1);
-mm.add_var('c', 2);
-g = mm.set_type_idx_map('var');
+om1 = opt_model();
+om1.add_var('a', 3);
+om1.init_indexed_name('var', 'b', {2});
+om1.add_var('b', {1}, 2);
+om1.add_var('b', {2}, 1);
+om1.add_var('c', 2);
+g = om1.set_type_idx_map('var');
 e = struct( 'name', {'a','a','a','b','b','b','c','c'}, ...
             'idx',  { [], [], [],{1},{1},{2}, [], []}, ...
             'i',    { 1,  2,  3,  1,  2,  1,  1,  2 })';
 t_ok(isequal(g, e), [t '''var''']);
-g = mm.set_type_idx_map('var', []);
+g = om1.set_type_idx_map('var', []);
 t_ok(isequal(g, e), [t '''var'', []']);
 
 g = om.set_type_idx_map('lin', [12 3;5 10]);
@@ -2004,7 +2019,7 @@ else
 end
 t_ok(isequal(g, e), [t '''lin'', [12 3;5 10], 1']);
 
-g = mm.set_type_idx_map('var', [], 1);
+g = om1.set_type_idx_map('var', [], 1);
 e = struct( 'name', {'a',     'b',  'b','c'}, ...
             'idx',  { [],     {1},  {2}, []}, ...
             'i',    { [1:3]', [1;2], 1,  [1;2] }, ...

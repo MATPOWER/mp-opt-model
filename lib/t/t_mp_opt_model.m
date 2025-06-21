@@ -13,7 +13,7 @@ if nargin < 1
     quiet = 0;
 end
 
-num_tests = 814;
+num_tests = 822;
 
 t_begin(num_tests, quiet);
 
@@ -1968,6 +1968,21 @@ t_is(mm3.var.N, mm.var.N+10, 12, [t 'orig not modified by copy']);
 
 %% turn object to struct warnings back on
 warning(s1.state, warn_id);
+
+%%-----  to_struct()/from_struct()  -----
+t = 'to_struct() : ';
+s = mm.to_struct();
+t_ok(isstruct(s), [t 'isstruct']);
+t_ok(isfield(s, 'var') && isstruct(s.var), [t 'var']);
+t_ok(isfield(s, 'lin') && isstruct(s.lin), [t 'lin']);
+t_ok(isfield(s, 'qdc') && isstruct(s.qdc), [t 'qdc']);
+t_ok(isfield(s, 'nle') && isstruct(s.nle), [t 'nle']);
+t_ok(isfield(s, 'nli') && isstruct(s.nli), [t 'nli']);
+t_ok(isfield(s, 'nlc') && isstruct(s.nlc), [t 'nlc']);
+
+t = 'from_struct()';
+mm1 = mp.struct2object(s);
+t_ok(isequal(mm, mm1), t);
 
 %%-----  set_type_idx_map  -----
 t = 'set_type_idx_map : ';

@@ -3461,6 +3461,20 @@ mm.display_soln()
 \end{Code}
 The \code{display\_soln} method displays the model solution, including values, bounds and shadow prices for variables, linear constraints, and quadratic constraints, values and shadow prices for nonlinear constraints, and individual cost components. Results are displayed for each set type. To display the solution for a given set type, use the \code{display\_soln} method of the specific set type object.
 
+\subsubsection*{\code{from\_struct}}
+\label{sec:from_struct}
+\begin{Code}
+mm.from_struct(s)
+\end{Code}
+Called by function \code{mp.struct2object}, after creating the object to copy the object data \emph{from} a struct. Useful for recreating the object after loading struct data from a MAT-file in Octave.
+
+\subsubsection*{\code{get\_set\_types}}
+\label{sec:get_set_types}
+\begin{Code}
+set_types = mm.get_set_types()
+\end{Code}
+The \code{get\_set\_types} method returns a cell array of the names of the properties containing the set types, that is those containing the \code{mp.set\_manager} objects, as listed in Table~\ref{tab:set_types}.
+
 \subsubsection*{\code{get\_userdata}}
 \begin{Code}
 data = mm.get_userdata(name)
@@ -3498,12 +3512,12 @@ The \code{prob\_type} string is one of the following:
 
 The output value is cached for future calls, but calling with a true value for the optional \code{recheck} argument will force it to recheck in case the problem type has changed due to modifying the variables, constraints or costs in the model.
 
-\subsubsection*{\code{get\_set\_types}}
-\label{sec:get_set_types}
+\subsubsection*{\code{to\_struct}}
+\label{sec:to_struct}
 \begin{Code}
-set_types = mm.get_set_types()
+s = mm.to_struct()
 \end{Code}
-The \code{get\_set\_types} method returns a cell array of the names of the properties containing the set types, that is those containing the \code{mp.set\_manager} objects, as listed in Table~\ref{tab:set_types}.
+Converts the object data \emph{to} a struct that can later be converted back to an identical object using \code{mp.struct2object}. Useful for saving the object data to a MAT-file in Octave.
 
 \subsubsection*{Methods for Variable Sets}
 
@@ -3567,9 +3581,11 @@ name & description \\
 \code{~~copy}	& make a duplicate (shallow copy) of the object	\\
 \code{~~describe\_idx}	& provide/display name and index label for given indices, e.g.~element 361 corresponds to \code{w(68)}, see also Section~\ref{sec:describe_idx} \\
 \code{~~display}	& display summary of indexing of subsets in object	\\
+\code{~~from\_struct}	& copy object data \emph{from} a struct	\\
 \code{~~get\_N}	& return the number of elements in the set	\\
 \code{~~init\_indexed\_name}	& initialize dimensions for an indexed named set	\\
 \code{~~set\_type\_idx\_map}	& map index back to named subset \& index within set, e.g.~element 361 corresponds to \code{w(68)}, see Section~\ref{sec:set_type_idx_map} \\
+\code{~~to\_struct}	& convert object data \emph{to} a struct	\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -3661,6 +3677,12 @@ This method is called automatically when omitting a semicolon on a line that ret
 
 Displays the details of the indexing for each subset or block, as well as the total number of elements and subsets.
 
+\subsubsection*{\code{from\_struct}}
+\begin{Code}
+sm.from_struct(s)
+\end{Code}
+Called by function \code{mp.struct2object}, after creating the object to copy the object data \emph{from} a struct. Useful for recreating the object after loading struct data from a MAT-file in Octave.
+
 \subsubsection*{\code{get\_N}}
 \begin{Code}
 N = sm.get_N()
@@ -3732,6 +3754,12 @@ var23 =
      idx: []
        i: 4
 \end{Code}
+
+\subsubsection*{\code{to\_struct}}
+\begin{Code}
+s = sm.to_struct()
+\end{Code}
+Converts the object data \emph{to} a struct that can later be converted back to an identical object using \code{mp.struct2object}. Useful for saving the object data to a MAT-file in Octave.
 
 \subsubsection{MP Set Manager Math Model Methods}
 
@@ -3834,6 +3862,7 @@ name & description \\
 \code{copy}	& duplicate the object	\\
 \code{display}	& displays the object	\\
 \code{display\_soln}	& displays solution values	\\
+\code{from\_struct}	& copy object data \emph{from} a struct	\\
 \code{get\_idx}	& returns the \code{idx} struct for vars, constraints, costs	\\
 \code{get\_userdata}	& used to retrieve values of user data	\\
 \code{has\_parsed\_soln}	& returns 1 if model has a parsed solution available, 0 otherwise	\\
@@ -3842,6 +3871,7 @@ name & description \\
 \code{parse\_soln}	& returns struct of all named solution vectors and shadow prices	\\
 \code{problem\_type}	& type of mathematical program represented by current model	\\
 \code{solve}	& solves the model, see Section~\ref{sec:solve}	\\
+\code{to\_struct}	& convert object data \emph{to} a struct	\\
 \bottomrule
 \end{tabular}
 \end{threeparttable}
@@ -6062,12 +6092,14 @@ name & description \\
 \code{~~copy}	& makes a copy of an existing \code{mp\_idx\_manager} object	\\
 \code{~~describe\_idx}	& wrapper around \code{describe\_idx} for a given set object \\
 \code{~~display\_set}	& wrapper around \code{display} for a given set object, typically called by \code{display}	\\
+\code{~~from\_struct}	& copy object data \emph{from} a struct	\\
 \code{~~get}	& access (possibly nested) fields of the object	\\
 \code{~~get\_idx}	& returns index structure(s) for specified set type(s), with starting/ending indices and number of elements for each named (and optionally indexed) block	\\
 \code{~~get\_userdata}	& retreives values of user data stored in the object	\\
 \code{~~getN}	& returns the number of elements of any given set type\tnote{\dag}	\\
 \code{~~init\_indexed\_name}	& wrapper around \code{init\_indexed\_name} for a given set object	\\
 \code{~~set\_type\_idx\_map}	& wrapper around \code{set\_type\_idx\_map} for a given set object \\
+\code{~~to\_struct}	& convert object data \emph{to} a struct	\\
 \\
 \multicolumn{2}{l}{\emph{Private Methods}\tnote{\ddag}} \\
 \code{~~add\_named\_set}	& wrapper around \code{add} for a given set object	\\
@@ -6539,6 +6571,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
 \item New \code{relax\_integer} option for \code{opt\_model.solve()}. Set to true to easily solve the LP or QP relaxation of a mixed integer LP or QP.
 \item Support for \href{https://www.artelys.com/solvers/knitro/}{\knitro{}} solver for LP and QP problems, including functions \code{qps\_knitro()}, \code{knitrover()}, and \code{artelys\_knitro\_options()}.
 \emph{Thanks to Wilson Gonz{\'a}lez Vanegas.}
+\item Support for conversion between objects and structs to facilitate workarounds for Octave's inability to save and load classdef objects.
 
 \item New classes:
     \begin{itemize}

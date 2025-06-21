@@ -11,6 +11,11 @@ since 4.2
     that Octave still (as of 10.x) does not support saving/loading of
     classdef objects. This function allows objects to implement
     `to_struct()` and `from_struct()` methods to facilitate the process.
+  - Add `to_struct()` and `from_struct()` methods to `mp.opt_model`,
+    `mp.set_manager`, and legacy `opt_model` classes, to facilitate
+    trivial conversion between objects, which Octave cannot save/load,
+    and structs, which it can.
+
 #### 6/10/25
   - Fix handling of scalar inputs for vector parameters when adding an
     empty set of variables or linear/quadratic constraints. Now

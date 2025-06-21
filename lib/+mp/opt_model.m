@@ -29,6 +29,8 @@ classdef opt_model < handle
 %   * opt_model - constructor, optionally copying from struct or existing object
 %   * get_set_types - list of names of properties of set types managed by this class
 %   * copy - make a duplicate of the object
+%   * to_struct - convert object data *to* a struct
+%   * from_struct - copy object data *from* a struct
 %   * get_idx - return ``idx`` struct for vars, constraints, costs
 %   * get_user_data - used to retrieve values of user data
 %   * problem_type - return string identifying type of mathematical program
@@ -146,6 +148,12 @@ classdef opt_model < handle
                             mm = copy_prop(s, mm, props{k});
                         end
                     end
+                    st = mm.get_set_types();
+                    for k = 1:length(st)
+                        if isstruct(mm.(st{k}))
+                            mm.(st{k}) = s.(st{k}).to_struct();
+                        end
+                    end
                 else
                     error('mp.opt_model: input must be an ''mp.opt_model'' object or a struct');
                 end
@@ -210,6 +218,41 @@ classdef opt_model < handle
             end
             for k = 1:length(props)
                 new_mm = copy_prop(mm, new_mm, props{k});
+            end
+        end
+
+        function s = to_struct(mm)
+            % Convert object data *to* a struct.
+            % ::
+            %
+            %   s = mm.to_struct()
+            %
+            % Converts the object data *to* a struct that can later be
+            % converted back to an identical object using mp.struct2object.
+            % Useful for saving the object data to a MAT-file in Octave.
+
+            s = nested_struct_copy(struct(), mm);
+            s.class_ = class(mm);
+            st = mm.get_set_types();
+            for k = 1:length(st)
+                s.(st{k}) = s.(st{k}).to_struct();
+            end
+        end
+
+        function mm = from_struct(mm, s)
+            % Copy object data *from* a struct.
+            % ::
+            %
+            %   mm.from_struct(s)
+            %
+            % Called by function mp.struct2object, after creating the object
+            % to copy the object data *from* a struct. Useful for recreating
+            % the object after loading struct data from a MAT-file in Octave.
+
+            mm = nested_struct_copy(mm, s);
+            st = mm.get_set_types();
+            for k = 1:length(st)
+                mm.(st{k}) = mp.struct2object(mm.(st{k}));
             end
         end
 
