@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 6/21/25
+  - Add new `mp.struct2object()` function to convert a struct back to the
+    object from which it was created. Helps with workarounds to the fact
+    that Octave still (as of 10.x) does not support saving/loading of
+    classdef objects. This function allows objects to implement
+    `to_struct()` and `from_struct()` methods to facilitate the process.
 #### 6/10/25
   - Fix handling of scalar inputs for vector parameters when adding an
     empty set of variables or linear/quadratic constraints. Now

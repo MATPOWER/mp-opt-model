@@ -3951,6 +3951,25 @@ Prints or returns \mpom{} version information for the current installation. When
 
 The \code{nested\_struct\_copy} function copies values from a source struct \code{s} to a destination struct \code{d} in a nested, recursive manner. That is, the value of each field in \code{s} is copied directly to the corresponding field in \code{d}, unless that value is itself a struct, in which case the copy is done via a recursive call to \code{nested\_struct\_copy}. Certain aspects of the copy behavior can be controled via the optional options struct \code{opt}, including the possible checking of valid field names.
 
+\subsection{\tt mp.struct2object}
+\begin{Code}
+  obj = mp.struct2object(s)
+\end{Code}
+
+As of version 10.x, Octave is still not able to save and load classdef objects. To aid in creating workarounds, this function allows objects to implement the following pattern with appropriately coded \code{to\_struct()} and \code{from\_struct()} methods:
+
+\begin{Code}
+  s = obj.to_struct();            % convert to normal struct
+  new_obj = mp.struct2object(s);  % convert back to classdef object
+  isequal(new_obj, obj)           % returns true
+\end{Code}
+
+The \code{to\_struct()} method of the object must create a struct containing all of the data in the object, plus a char array field naned \code{class\_} with the class name of the desired object, and an optional cell array field named \code{constructor\_args\_} with arguments to pass to the object constructor.
+
+The \code{from\_struct()} method takes a freshly constructed object and the struct above and copies the data from the struct back to the object.
+
+This function creates an instance of the specified class, by calling its constructor with any specified arguments, then calling its \code{from\_struct()} method.
+
 \subsection{Private Feature Detection Functions}
 \label{sec:featuredetection}
 
@@ -6545,6 +6564,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
     \item \code{knitrover()} displays version of installed \knitro{}.
     \item \code{miqps\_highs()} provides standardized interface for using \highs{} to solve MILP problems.
     \item \code{mpopt2qcqpopt()} creates/modifies \code{qcqps\_master} options struct from \matpower{} options struct
+    \item \code{mp.struct2object()} converts a struct back to the object from which it was created.
     \item \code{qcqps\_gurobi()} provides standardized interface for using \gurobi{} to solve QCQP problems.
     \item \code{qcqps\_knitro()} provides standardized interface for using \knitro{} to solve QCQP problems.
     \item \code{qcqps\_nlps()} provides standardized interface for using \code{nlps\_master} to solve QCQP problems via \code{fmincon}, \ipopt{}, \knitro{}, or \mips{}.

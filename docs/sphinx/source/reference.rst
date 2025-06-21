@@ -62,6 +62,7 @@ Use these functions to convert constraints or to copy data from one struct to an
    functions/convert_lin_constraint
    functions/convert_quad_constraint
    functions/nested_struct_copy
+   functions/mp/struct2object
 
 
 Options Handling Functions
