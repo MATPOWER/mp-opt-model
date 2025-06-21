@@ -32,31 +32,34 @@ function m = milp_ex1
 %   - Plus delivery costs for all products shipped
 
 %%-----  Problem Data  -----
-PlantCapacity = [ 60; 60 ];
+PlantCapacity = [ 60; 60 ];     % Plants 1, 2
 
 % Customer Demand for each Product: total = 56 units
 CustomerDemandY = [ 10; 15; 5 ];    % Customers 1, 2, 3
 CustomerDemandZ = [  8; 12; 6 ];    % Customers 1, 2, 3
 
-% Delivery costs for Product Y and Z (Customer x Plant)
+% Delivery costs for Product Y and Z
 DeliveryCostY = [
-    4   7;          % Customer 1
-    5   6;          % Customer 2
-    3   8           % Customer 3
+%   Plant 1     Plant 2
+    4           7;          % Customer 1
+    5           6;          % Customer 2
+    3           8           % Customer 3
 ];
 DeliveryCostZ = [
-    10  4;          % Customer 1
-     9  5;          % Customer 2
-    12  3           % Customer 3
+%   Plant 1     Plant 2
+    10          4;          % Customer 1
+     9          5;          % Customer 2
+    12          3           % Customer 3
 ];
 
 % Plant fixed cost for 3 scenarios:
 %   1 : plant 2 relatively more expensive, shut down
 %   2 : plant 1 relatively more expensive, shut down
 %   3 : both plants operating
-PlantFixedCost = [       % Plant x Scenario
-    100     100      50;
-    200     100     120
+PlantFixedCost = [
+%   Scenario 1  Scenario 2  Scenario 3
+    100         100          50;    % Plant 1
+    200         100         120     % Plant 2
 ];
 
 %%-----  Build Model  -----
