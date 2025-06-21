@@ -1921,10 +1921,6 @@ else
     t_skip(47, 'om.set_params tests require ''isequaln()''');
 end
 
-%% turn object to struct warnings back on
-warning(s1.state, warn_id);
-
-
 %%-----  copy  -----
 t = 'copy constructor : ';
 if have_feature('octave') && have_feature('octave', 'vnum') < 5.003
@@ -1955,6 +1951,9 @@ t_ok(isfield(s, 'nlc') && isstruct(s.nlc), [t 'nlc']);
 t = 'from_struct()';
 om1 = mp.struct2object(s);
 t_ok(isequal(om, om1), t);
+
+%% turn object to struct warnings back on
+warning(s1.state, warn_id);
 
 %%-----  set_type_idx_map  -----
 t = 'set_type_idx_map : ';

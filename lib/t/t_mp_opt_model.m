@@ -1966,9 +1966,6 @@ t_ok(isequal(struct(mm3), struct(mm)), [t 'identical'])
 mm3.var.add('test', 10);
 t_is(mm3.var.N, mm.var.N+10, 12, [t 'orig not modified by copy']);
 
-%% turn object to struct warnings back on
-warning(s1.state, warn_id);
-
 %%-----  to_struct()/from_struct()  -----
 t = 'to_struct() : ';
 s = mm.to_struct();
@@ -1983,6 +1980,9 @@ t_ok(isfield(s, 'nlc') && isstruct(s.nlc), [t 'nlc']);
 t = 'from_struct()';
 mm1 = mp.struct2object(s);
 t_ok(isequal(mm, mm1), t);
+
+%% turn object to struct warnings back on
+warning(s1.state, warn_id);
 
 %%-----  set_type_idx_map  -----
 t = 'set_type_idx_map : ';
