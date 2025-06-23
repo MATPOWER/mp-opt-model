@@ -149,7 +149,7 @@ classdef set_manager < handle
         order = struct('name', [], 'idx', []);
 
         % *(struct)* additional set-type-specific data for each block
-        data
+        data = struct();
     end     %% properties
 
     methods

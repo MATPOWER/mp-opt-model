@@ -40,7 +40,7 @@ classdef sm_nln_cost < mp.set_manager_opt_model
 
             es = struct();  %% empty struct
             obj@mp.set_manager_opt_model(varargin{:});
-            if isempty(obj.data)
+            if isempty(fieldnames(obj.data))
                 obj.data = struct( ...
                     'fcn', es, ...
                     'vs', es );
