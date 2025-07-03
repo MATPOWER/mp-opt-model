@@ -5,6 +5,17 @@ Change history for MP-Opt-Model
 since 4.2
 ---------
 
+#### 7/3/25
+  - Add support for Artelys Knitro 15.x which required changes to the
+    prior options handling.
+  - **INCOMPATIBLE CHANGE:** The `knitro_opts` field of the `opt` input
+   to `nlps_master()` and `nlps_knitro()` and the `solve()` method of
+   `opt_model` has been redesigned. It is now a raw Artelys Knitro options
+   struct, so the `opts`, `tol_x` and `tol_f` fields are no longer valid.
+   For `tol_x` and `tol_f`, use `xtol` and `ftol`, and the contents of
+   `opts` should be placed directly in the top level of the `knitro_opts`
+   field.
+
 #### 6/21/25
   - Add new `mp.struct2object()` function to convert a struct back to the
     object from which it was created. Helps with workarounds to the fact

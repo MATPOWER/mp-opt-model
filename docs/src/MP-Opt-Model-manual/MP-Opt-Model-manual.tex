@@ -6571,6 +6571,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
 \item New \code{relax\_integer} option for \code{opt\_model.solve()}. Set to true to easily solve the LP or QP relaxation of a mixed integer LP or QP.
 \item Support for \href{https://www.artelys.com/solvers/knitro/}{\knitro{}} solver for LP and QP problems, including functions \code{qps\_knitro()}, \code{knitrover()}, and \code{artelys\_knitro\_options()}.
 \emph{Thanks to Wilson Gonz{\'a}lez Vanegas.}
+\item Support for \href{https://www.artelys.com/solvers/knitro/}{\knitro{}} 15.x, which required changes to the prior options handling.
 \item Support for conversion between objects and structs to facilitate workarounds for Octave's inability to save and load classdef objects.
 
 \item New classes:
@@ -6661,6 +6662,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
 \subsubsection*{Incompatible Changes}
 \begin{itemize}
 \item Parsed solution information was moved from the \code{soln} property of the \code{opt\_model} object to the \code{soln} property of the individual child \code{mp.set\_manager\_opt\_model} objects. Currently it is still available at the original location, but this is now deprecated.
+\item The \code{knitro\_opts} field of the \code{opt} input to \code{nlps\_master()} and \code{nlps\_knitro()} and the \code{solve()} method of \code{opt\_model} has been redesigned. It is now a raw Artelys Knitro options struct, so the \code{opts}, \code{tol\_x} and \code{tol\_f} fields are no longer valid. For \code{tol\_x} and \code{tol\_f}, use \code{xtol} and \code{ftol}, and the contents of \code{opts} should be placed directly in the top level of the \code{knitro\_opts} field.
 \end{itemize}
 
 % \subsection{Version 5.0 -- released ??? ?, 202?}
