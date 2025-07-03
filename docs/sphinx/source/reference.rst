@@ -290,7 +290,6 @@ rather are used to extend the capabilities of :func:`have_feature`.
    functions/have_feature_isequaln
    functions/have_feature_knitro
    functions/have_feature_knitromatlab
-   functions/have_feature_ktrlink
    functions/have_feature_linprog_ds
    functions/have_feature_linprog
    functions/have_feature_mosek

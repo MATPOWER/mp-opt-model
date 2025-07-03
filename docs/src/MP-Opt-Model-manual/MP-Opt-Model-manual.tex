@@ -4096,11 +4096,6 @@ This function implements the \codeq{knitro} tag for \code{have\_feature} to dete
 
 This function implements the \codeq{knitromatlab} tag for \code{have\_feature} to detect availability/version of \knitro{} 9.0.0 and later. See also Appendix~\ref{app:knitro}.
 
-\subsubsection{\tt have\_feature\_ktrlink}
-\label{sec:have_feature_ktrlink}
-
-This function implements the \codeq{ktrlink} tag for \code{have\_feature} to detect availability/version of \knitro{} prior to version 9.0.0, which required the \matlab{} \ot{}. See also Appendix~\ref{app:knitro}.
-
 \subsubsection{\tt have\_feature\_linprog}
 \label{sec:have_feature_linprog}
 
@@ -4613,7 +4608,6 @@ name & description \\
 \code{have\_feature\_isequaln}	& support for \code{isequaln} function	\\
 \code{have\_feature\_knitro}	& \knitro{}, NLP solver, \url{https://www.artelys.com/solvers/knitro/}	\\
 \code{have\_feature\_knitromatlab}	& \knitro{}, version 9.0.0+ 	\\
-\code{have\_feature\_ktrlink}	& Knitro, version prior to 9.0.0 (requires \ot{})	\\
 \code{have\_feature\_linprog}	& \code{linprog}, LP solver from \ot{}
 	\\
 \code{have\_feature\_linprog\_ds}	& \code{linprog} w/dual-simplex solver from \ot{} 7.1 (R2014b)+	\\
@@ -4770,11 +4764,11 @@ When installed, \ipopt{} can be used by \mpom{} to solve general LP, QP and NLP 
 \subsection{\knitro{} -- LP, QP, QCQP, and Non-Linear Programming Solver}
 \label{app:knitro}
 
-\knitro{}~\cite{knitro} is a general purpose optimization solver specializing in nonlinear problems, available from Artelys. As of version 9, Knitro includes a native \matlab{} interface, \code{knitromatlab}\footnote{Earlier versions required the \matlab{} \ot{} from The MathWorks, which included an interface to the Knitro libraries called \code{ktrlink}, but the libraries themselves still had to be acquired directly from Ziena Optimization, LLC (subsequently acquired by Artelys).}. More information is available at \url{https://www.artelys.com/solvers/knitro/} and \url{https://www.artelys.com/docs/knitro/}.
+\knitro{}~\cite{knitro} is a general purpose optimization solver specializing in nonlinear problems, available from Artelys. More information is available at \url{https://www.artelys.com/solvers/knitro/} and \url{https://www.artelys.com/docs/knitro/}.
 
 Although \knitro{} is a commercial package, at the time of this writing there is a free academic license available, with details on their download page.
 
-When installed, Knitro's \matlab{} interface function, \code{knitromatlab} or \code{ktrlink}, can be used by \mpom{} to solve general NLP problems via \mpom{}'s common NLP solver interface \code{nlps\_master} with the algorithm option set to \codeq{KNITRO}, or by calling \code{nlps\_knitro} directly. As of \mpom{} version 5.x, it can also solve LP and QP problems via the common LP/QP solver interface \code{qps\_master} with the algorithm option set to \codeq{KNITRO}, or by calling \code{qps\_knitro} directly.
+When installed, Knitro's \matlab{} interface functions can be used by \mpom{} to solve general NLP problems via \mpom{}'s common NLP solver interface \code{nlps\_master} with the algorithm option set to \codeq{KNITRO}, or by calling \code{nlps\_knitro} directly. As of \mpom{} version 5.x, it can also solve LP/QP and QCQP problems via the common LP/QP and QCQP solver interfaces, \code{qps\_master} and \code{qcqps\_master}, respectively, with the algorithm option set to \codeq{KNITRO}, or by calling \code{qps\_knitro} or \code{qcqps\_knitro} directly.
 
 \subsection{\mosek{} -- High-performance LP, QP, MILP and MIQP Solvers}
 \label{app:mosek}
@@ -6662,7 +6656,8 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.0.pdf}{\mpom{} 5.0 Use
 \subsubsection*{Incompatible Changes}
 \begin{itemize}
 \item Parsed solution information was moved from the \code{soln} property of the \code{opt\_model} object to the \code{soln} property of the individual child \code{mp.set\_manager\_opt\_model} objects. Currently it is still available at the original location, but this is now deprecated.
-\item The \code{knitro\_opts} field of the \code{opt} input to \code{nlps\_master()} and \code{nlps\_knitro()} and the \code{solve()} method of \code{opt\_model} has been redesigned. It is now a raw Artelys Knitro options struct, so the \code{opts}, \code{tol\_x} and \code{tol\_f} fields are no longer valid. For \code{tol\_x} and \code{tol\_f}, use \code{xtol} and \code{ftol}, and the contents of \code{opts} should be placed directly in the top level of the \code{knitro\_opts} field.
+\item The \code{knitro\_opts} field of the \code{opt} input to \code{nlps\_master()} and \code{nlps\_knitro()} and the \code{solve()} method of \code{opt\_model} has been redesigned. It is now a raw \knitro{} options struct, so the \code{opts}, \code{tol\_x} and \code{tol\_f} fields are no longer valid. For \code{tol\_x} and \code{tol\_f}, use \code{xtol} and \code{ftol}, and the contents of \code{opts} should be placed directly in the top level of the \code{knitro\_opts} field.
+\item Remove support for older versions of \knitro{}, including all references to \code{ktrlink} for pre-v9 versions. Currently supports \knitro{} version 13.1 and later.
 \end{itemize}
 
 % \subsection{Version 5.0 -- released ??? ?, 202?}
