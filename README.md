@@ -44,6 +44,7 @@ of MATLAB or Octave, including setting up your MATLAB/Octave path.
 2.  Add the following directories to your MATLAB or Octave path:
     *   `<MPOM>/lib`
     *   `<MPOM>/lib/t`
+    *   `<MPOM>/examples`
 
 3.  At the MATLAB/Octave prompt, type `test_mp_opt_model` to run the test suite and
     verify that MP-Opt-Model is properly installed and functioning. (Note: The
@@ -158,7 +159,7 @@ u = [ b1;  u2  ];
 [x, f, exitflag, output, lambda] = qps_master(H, [], A, l, u, xmin, xmax, x0);
 ```
 
-The above examples are included in `<MPOM>/lib/t/qp_ex1.m` along with
+The above examples are included in `<MPOM>/examples/qp_ex1.m` along with
 some commands to print the results, yielding the output below for
 each approach:
 
@@ -186,8 +187,9 @@ progress output, or modify a solver's default parameters.
 Both approaches can be applied to each of the types of problems that
 MP-Opt-Model handles, namely, LP, QP, MILP, MIQP, NLP and nonlinear equations.
 
-There are also examples in the test files in `<MPOM>/lib/t`, as well as in
-the [`opf_setup()`][12] and [`opf_execute()`][13] functions in [MATPOWER][2].
+There are other examples in `<MPOM>/examples`, in the test files in
+`<MPOM>/lib/t`, as well as in the [`opf_setup()`][12] and
+[`opf_execute()`][13] functions in [MATPOWER][2].
 
 
 Documentation

@@ -55,6 +55,10 @@ Pre-release
       - User's Manual
       - search citations in all other projects being updated simultaneously
         - MATPOWER User's Manual
+    - search everywhere for 10.5281/zenodo.3236519 and update year (MATPOWER User's Manual)
+      - User's Manual
+    - search everywhere for 10.5281/zenodo.3236535 and update year (MATPOWER Software)
+      - User's Manual
 - Copy latest `MIPS-manual.aux` to `docs/src/MP-Opt-Model-manual` for
   `\externaldocument`
 - Create `MP-Opt-Model-manual.pdf` from `MP-Opt-Model-manual.tex` and move

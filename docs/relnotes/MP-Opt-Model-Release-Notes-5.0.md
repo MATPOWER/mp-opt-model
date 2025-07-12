@@ -50,8 +50,8 @@ Manual][2].
 
 #### New Documentation:
 Two live scripts illustrate the use of new features.
-- `milp_example1.mlx` (in `mp-opt-model/lib/t`) illustrates the use of MP-Opt-Model and the new `mp.opt_model` class to build and solve an optimization (MILP) model.
-- `qcqp_example1.mlx` (in `mp-opt-model/lib/t`) illustrates the new quadratic constraint features and two methods of building and solving a quadratically-constrained quadratic programming (QCQP) model.
+- `milp_example1.mlx` (in `examples`) illustrates the use of MP-Opt-Model and the new `mp.opt_model` class to build and solve an optimization (MILP) model.
+- `qcqp_example1.mlx` (in `examples`) illustrates the new quadratic constraint features and two methods of building and solving a quadratically-constrained quadratic programming (QCQP) model.
 
 
 #### Bugs Fixed:
