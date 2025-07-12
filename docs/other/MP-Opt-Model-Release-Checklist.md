@@ -43,7 +43,7 @@ Pre-release
   - Make updates for current version specific citations:
     - version number (3 places)
     - year
-    - latest version DOI, current is: 10.5281/zenodo.15851564
+    - latest version DOI, current is: 10.5281/zenodo.15871431
       - (update here each time)
     ... in the following places ...
     - CITATION file

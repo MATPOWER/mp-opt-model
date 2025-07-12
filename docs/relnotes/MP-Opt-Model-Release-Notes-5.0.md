@@ -1,7 +1,7 @@
 What's New in MP-Opt-Model 5.0
 ------------------------------
 
-#### Released Jul 9, 2025
+#### Released Jul 12, 2025
 
 Below is a summary of the changes since version 4.2 of MP-Opt-Model. See
 the [`CHANGES.md`][1] file for all the gory details. For release notes
