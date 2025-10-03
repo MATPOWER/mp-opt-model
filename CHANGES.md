@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 10/3/25
+  - Avoid error displaying `mp.opt_model` object when variable was added
+    with a sparse dimension argument.
+
 #### 9/25/25
   - Improve reliability of detection of CLP MEX file.
 
