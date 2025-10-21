@@ -6,6 +6,7 @@ since version 5.0
 -----------------
 
 #### 10/21/25
+  - Add MILP example from `examples/miqp_ex1.m` to MILP tests.
   - Fix typo bug in dimension checking in `set_params()` for quadratic costs.
 
 #### 10/3/25
