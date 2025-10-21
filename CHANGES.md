@@ -5,6 +5,9 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 10/21/25
+  - Fix typo bug in dimension checking in `set_params()` for quadratic costs.
+
 #### 10/3/25
   - Avoid error displaying `mp.opt_model` object when variable was added
     with a sparse dimension argument.
