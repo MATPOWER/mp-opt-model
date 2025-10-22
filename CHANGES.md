@@ -6,6 +6,9 @@ since version 5.0
 -----------------
 
 #### 10/21/25
+  - Add `fix_integer` option for `mp.opt_model.solve()`. Set to true to fix
+    any integer variables to their initial values, as specified in ``x0`` or
+    ``opt.x0``.
   - Add MILP example from `examples/miqp_ex1.m` to MILP tests.
   - Fix typo bug in dimension checking in `set_params()` for quadratic costs.
 

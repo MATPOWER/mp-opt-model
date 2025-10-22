@@ -26,7 +26,7 @@ if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_miqp(1) = 1;
 end
 
-n = 51;
+n = 60;
 nmiqp = 20;
 nmiqp_soln = 30;
 diff_tool = 'bbdiff';
@@ -101,6 +101,8 @@ for k = 1:length(algs)
         end
         opt_r = opt;
         opt_r.relax_integer = 1;
+        opt_f = opt;
+        opt_f.fix_integer = 1;
 
 % opt.verbose = 3;
         t = sprintf('%s - 2-d ILP : ', names{k});
@@ -216,6 +218,13 @@ for k = 1:length(algs)
             t_is(s, 1, 12, [t 'exitflag']);
             t_is(x, ex(:, 4), 12, [t 'x']);
             t_is(f, ef(Scenario, 2), 12, [t 'f']);
+            
+            t = sprintf('%s - 14-d MILP Scenario %d (integer fixed) : ', names{k}, Scenario);
+            opt_f.x0 = ones(size(x));
+            [x, f, s, out, lam] = om.solve(opt_f);
+            t_is(s, 1, 12, [t 'exitflag']);
+            t_is(x, ex(:, 3), 12, [t 'x']);
+            t_is(f, ef(Scenario, 3), 12, [t 'f']);
         end
 
         if does_miqp(k)
