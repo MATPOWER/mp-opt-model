@@ -26,7 +26,7 @@ if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_miqp(1) = 1;
 end
 
-n = 53;
+n = 62;
 nqp = 28;
 nmiqp = 11;
 t_begin(n*length(algs), quiet);
@@ -221,6 +221,77 @@ for k = 1:length(algs)
              norm(x - [0; 0; 3; 1; 0; 2], Inf) < 1e-12 || ...
              norm(x - [0; 0; 3; 0; 2; 1], Inf) < 1e-12, [t 'x']);
         t_is(f, 16, 12, [t 'f']);
+
+        if exist('mp.opt_model')
+            %% from milp_ex1.m
+            PlantCapacity = [ 60; 60 ];     % Plants 1, 2
+            CustomerDemandY = [ 10; 15; 5 ];    % Customers 1, 2, 3
+            CustomerDemandZ = [  8; 12; 6 ];    % Customers 1, 2, 3
+            DeliveryCostY = [
+                4           7;          % Customer 1
+                5           6;          % Customer 2
+                3           8           % Customer 3
+            ];
+            DeliveryCostZ = [
+                10          4;          % Customer 1
+                9          5;          % Customer 2
+                12          3           % Customer 3
+            ];
+            PlantFixedCost = [
+                100         100          50;    % Plant 1
+                200         100         120     % Plant 2
+            ];
+            Scenario = 1;   % build scenario 1 initially
+            mm = mp.opt_model();
+            mm.var.add('u', 2, [], 0, 1, 'B');
+            mm.var.init_indexed_name('y', {2});
+            mm.var.init_indexed_name('z', {2});
+            for p = 1:2
+                mm.var.add('y', {p}, 3, [], 0);     % Product Y, Plant p to Customers 1-3
+                mm.var.add('z', {p}, 3, [], 0);     % Product Z, Plant p to Customers 1-3
+            end
+            mm.qdc.add(mm.var, 'fixed', [], PlantFixedCost(:, Scenario), [], {'u'});
+            mm.qdc.init_indexed_name('delivery_y', {2});
+            mm.qdc.init_indexed_name('delivery_z', {2});
+            for p = 1:2
+                vs_y = struct('name', 'y', 'idx', {{p}});    % variable set for 'y{p}'
+                vs_z = struct('name', 'z', 'idx', {{p}});    % variable set for 'z{p}'
+                mm.qdc.add(mm.var, 'delivery_y', {p}, [], DeliveryCostY(:, p), [], vs_y);
+                mm.qdc.add(mm.var, 'delivery_z', {p}, [], DeliveryCostZ(:, p), [], vs_z);
+            end
+            Au = -spdiags(PlantCapacity, 0, 2, 2);
+            Ayz = sparse([1 1 1 1 1 1 0 0 0 0 0 0;   % sum for plant 1
+                        0 0 0 0 0 0 1 1 1 1 1 1]); % sum for plant 2
+            ub = 0;    % constraint upper bound (no lower bound)
+            mm.lin.add(mm.var, 'capacity', [Au Ayz], [], ub);
+            vs_y = struct('name', 'y', 'idx', {{1}, {2}});
+            Ad = [speye(3) speye(3)];
+            mm.lin.add(mm.var, 'demand_y', Ad, CustomerDemandY, CustomerDemandY, vs_y);
+            vs_z = struct('name', 'z', 'idx', {{1}, {2}});
+            mm.lin.add(mm.var, 'demand_z', Ad, CustomerDemandZ, CustomerDemandZ, vs_z);
+            ef = [  490 1130/3 540;
+                    410 1000/3 440;
+                    410 317 410 ];
+            ex = [  1 0 10 15 5 8 12 6 0 0 0 0 0 0;
+                    0 1 0 0 0 0 0 0 10 15 5 8 12 6;
+                    1 1 10 15 5 0 0 0 0 0 0 8 12 6;
+                    0.5 1.3/3 10 15 5 0 0 0 0 0 0 8 12 6]';
+            for Scenario = 1:3
+                t = sprintf('%s - 14-d MILP Scenario %d: ', names{k}, Scenario);
+                mm.qdc.set_params(mm.var, 'fixed', 'c', PlantFixedCost(:, Scenario));
+                [x0, xl, xu, vt] = mm.var.params();
+                [A, l, u] = mm.lin.params(mm.var);
+                [HH, cc, kk] = mm.qdc.params(mm.var);
+
+                [x, f, s, out, lam] = miqps_master(HH, cc, A, l, u, xl, xu, x0, vt, opt);
+                t_is(s, 1, 12, [t 'exitflag']);
+                t_is(x, ex(:, Scenario), 12, [t 'x']);
+                t_is(f, ef(Scenario, 1), 12, [t 'f']);
+            end
+        else
+            t_skip(9, sprintf('%s : mp.opt_model not available', names{k}));
+        end
+
 
         if does_miqp(k)
             t = sprintf('%s - 4-d MIQP : ', names{k});
