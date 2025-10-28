@@ -659,6 +659,9 @@ classdef opt_model < handle
             %         nleqs_newton
             %       - ``osqp_opt``    - options struct for OSQP
             %       - ``quadprog_opt`` - options struct for :func:`quadprog`
+            %       - ``fix_integer`` (0) - fix integer variables at value in
+            %         ``x0``, if true
+            %       - ``relax_integer`` (0) - relax integer constraints, if true
             %       - ``parse_soln`` (0) - flag that specifies whether or not
             %         to call the parse_soln() method and place the return values
             %         in ``mm.soln``.
@@ -666,9 +669,6 @@ classdef opt_model < handle
             %         objective fcn value and primal variable relative match
             %         required to avoid mismatch warning message if mixed
             %         integer price computation stage is not skipped
-            %       - ``relax_integer`` (0) - relax integer constraints, if true
-            %       - ``fix_integer`` (0) - fix integer variables at value in
-            %         ``x0``, if true
             %       - ``skip_prices`` (0) - flag that specifies whether or not
             %         to skip the price computation stage for mixed integer
             %         problems, in which the problem is re-solved for only the
@@ -1126,13 +1126,13 @@ classdef opt_model < handle
                     x0 = opt.x0;
                 end
 
-                if isfield(opt, 'fix_integer') && opt.fix_integer
-                    %% fix integer variables
-                    j = find(vtype == 'B' | vtype == 'I')';
-                    xmin(j) = x0(j);
-                    xmax(j) = x0(j);
-                    mixed_integer = false;
-                end
+%                 if isfield(opt, 'fix_integer') && opt.fix_integer
+%                     %% fix integer variables
+%                     j = find(vtype == 'B' | vtype == 'I')';
+%                     xmin(j) = x0(j);
+%                     xmax(j) = x0(j);
+%                     mixed_integer = false;
+%                 end
             else
                 %% optimization vars, bounds, types
                 [x0, xmin, xmax] = mm.var.params();

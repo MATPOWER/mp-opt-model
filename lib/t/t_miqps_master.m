@@ -26,7 +26,7 @@ if have_feature('gurobi') || have_feature('cplex') || have_feature('mosek')
     does_miqp(1) = 1;
 end
 
-n = 62;
+n = 83;
 nqp = 28;
 nmiqp = 11;
 t_begin(n*length(algs), quiet);
@@ -94,6 +94,10 @@ for k = 1:length(algs)
             end
             opt.mosek_opt = mosek_options([], mpopt);
         end
+        opt_r = opt;
+        opt_r.relax_integer = 1;
+        opt_f = opt;
+        opt_f.fix_integer = 1;
 
         t = sprintf('%s - 3-d LP : ', names{k});
         %% based on example from 'doc linprog'
@@ -205,6 +209,13 @@ for k = 1:length(algs)
         t_is(x, [4; 2], 12, [t 'x']);
         t_is(f, -14, 12, [t 'f']);
 
+        t = sprintf('%s - 2-d ILP (integer relaxed) : ', names{k});
+        p.opt = opt_r;
+        [x, f, s, out, lam] = miqps_master(p);
+        t_is(s, 1, 12, [t 'success']);
+        t_is(x, [2.441860465; 3.255813953], 8, [t 'x']);
+        t_is(f, -14.651162791, 8, [t 'f']);
+
         t = sprintf('%s - 6-d ILP : ', names{k});
         %% from https://doi.org/10.1109/TASE.2020.2998048
         c = [1; 2; 3; 1; 2; 3];
@@ -287,9 +298,22 @@ for k = 1:length(algs)
                 t_is(s, 1, 12, [t 'exitflag']);
                 t_is(x, ex(:, Scenario), 12, [t 'x']);
                 t_is(f, ef(Scenario, 1), 12, [t 'f']);
+
+                t = sprintf('%s - 14-d MILP Scenario %d (integer relaxed) : ', names{k}, Scenario);
+                [x, f, s, out, lam] = miqps_master(HH, cc, A, l, u, xl, xu, x0, vt, opt_r);
+                t_is(s, 1, 12, [t 'exitflag']);
+                t_is(x, ex(:, 4), 12, [t 'x']);
+                t_is(f, ef(Scenario, 2), 12, [t 'f']);
+
+                t = sprintf('%s - 14-d MILP Scenario %d (integer fixed) : ', names{k}, Scenario);
+                x0 = ones(size(x));
+                [x, f, s, out, lam] = miqps_master(HH, cc, A, l, u, xl, xu, x0, vt, opt_f);
+                t_is(s, 1, 12, [t 'exitflag']);
+                t_is(x, ex(:, 3), 12, [t 'x']);
+                t_is(f, ef(Scenario, 3), 12, [t 'f']);
             end
         else
-            t_skip(9, sprintf('%s : mp.opt_model not available', names{k}));
+            t_skip(27, sprintf('%s : mp.opt_model not available', names{k}));
         end
 
 

@@ -84,14 +84,14 @@ function [x, f, eflag, output, lambda] = solve(om, opt)
 %           newton_opt  - options struct for Newton method, NLEQS_NEWTON
 %           osqp_opt    - options struct for OSQP
 %           quadprog_opt - options struct for QUADPROG
+%           fix_integer (0) - fix integer variables at value in x0, if true
+%           relax_integer (0) - relax integer constraints, if true
 %           parse_soln (0) - flag that specifies whether or not to call
 %               the PARSE_SOLN method and place the return values in OM.soln.
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message if mixed integer price computation
 %               stage is not skipped
-%           relax_integer (0) - relax integer constraints, if true
-%           fix_integer (0) - fix integer variables at value in x0, if true
 %           skip_prices (0) - flag that specifies whether or not to skip the
 %               price computation stage for mixed integer problems, in which
 %               the problem is re-solved for only the continuous variables,
@@ -296,13 +296,13 @@ if mixed_integer
         x0 = opt.x0;
     end
 
-    if isfield(opt, 'fix_integer') && opt.fix_integer
-        %% fix integer variables
-        j = find(vtype == 'B' | vtype == 'I')';
-        xmin(j) = x0(j);
-        xmax(j) = x0(j);
-        mixed_integer = false;
-    end
+%     if isfield(opt, 'fix_integer') && opt.fix_integer
+%         %% fix integer variables
+%         j = (vtype == 'B' | vtype == 'I')';
+%         xmin(j) = x0(j);
+%         xmax(j) = x0(j);
+%         mixed_integer = false;
+%     end
 else
     %% optimization vars, bounds, types
     [x0, xmin, xmax] = om.var.params();

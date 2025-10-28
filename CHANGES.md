@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 10/28/25
+  - Add `fix_integer` and `relax_integer` options to `miqps_master()` and move
+    the implementations from `mp.opt_model.solve()` to `miqps_master()`.
+    *Note: Since the implementation is in `miqps_master()` it is not available
+    directly in the individual solver-specific `miqps_<solver>()` functions.*
+
 #### 10/21/25
   - Add `fix_integer` option for `mp.opt_model.solve()`. Set to true to fix
     any integer variables to their initial values, as specified in ``x0`` or
