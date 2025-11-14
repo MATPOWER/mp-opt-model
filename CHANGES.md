@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 11/14/25
+  - Add support for the new HiPO interior point LP solver in HiGHS, including
+    `have_feature_highs_hipo()` to detect availability.
+
 #### 10/28/25
   - Add `fix_integer` and `relax_integer` options to `miqps_master()` and move
     the implementations from `mp.opt_model.solve()` to `miqps_master()`.

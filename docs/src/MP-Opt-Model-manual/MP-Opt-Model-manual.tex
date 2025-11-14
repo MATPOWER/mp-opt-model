@@ -4077,7 +4077,12 @@ This function implements the \codeq{gurobi} tag for \code{have\_feature} to dete
 \subsubsection{\tt have\_feature\_highs}
 \label{sec:have_feature_highs}
 
-This function implements the \codeq{highs} tag for \code{have\_feature} to detect availability/version of \code{callhighs}, \highs{} optimizer. See also Appendix~\ref{app:gurobi}.
+This function implements the \codeq{highs} tag for \code{have\_feature} to detect availability/version of \code{callhighs}, \highs{} optimizer. See also Appendix~\ref{app:highs}.
+
+\subsubsection{\tt have\_feature\_highs\_hipo}
+\label{sec:have_feature_highs_hipo}
+
+This function implements the \codeq{highs\_hipo} tag for \code{have\_feature} to detect availability/version of the HiPO interior point LP solver for the \highs{} optimizer. See also Appendix~\ref{app:highs}.
 
 \subsubsection{\tt have\_feature\_intlinprog}
 \label{sec:have_feature_intlinprog}
@@ -6718,9 +6723,10 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \begin{itemize}
 \item New \code{fix\_integer} option for \code{miqps\_master()} and \code{mp.opt\_model.solve()}. Set to true to fix any integer variables to their initial values, as specified in \code{x0} or \code{opt.x0}.
 \item Add \code{relax\_integer} option to \code{miqps\_master()} and move the implementation from \code{mp.opt\_model.solve()}.
+\item Support for the new HiPO interior point LP solver in the \highs{} optimizer.
 \item New functions:
     \begin{itemize}
-    \item \code{foobar()} does whizbang.
+    \item \code{have\_feature\_highs\_hipo()} feature detection function for HiPO solver in \highs{} optimizer.
     \end{itemize}
 \end{itemize}
 
