@@ -249,6 +249,7 @@ if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
     end
     j = (vtype == 'B' | vtype == 'I')';
     if isfield(opt, 'fix_integer') && opt.fix_integer
+        x0(j) = round(x0(j));
         if fix_integer_presolve
             x = x0;
             Axj = A(:,j) * x(j);
@@ -257,7 +258,7 @@ if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
                 HH = [];
             else
                 HH = H(~j, ~j);
-                cc = cc + (H(~j,j)+H(j,~j)') * x(j)
+                cc = cc + (H(~j,j)+H(j,~j)') * x(j);
             end
             [x(~j), f, eflag, output, lambda] = ...
                 qps_master(HH, cc,  A(:, ~j), l-Axj, u-Axj, ...
