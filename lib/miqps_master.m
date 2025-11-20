@@ -252,10 +252,20 @@ if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
         if fix_integer_presolve
             x = x0;
             Axj = A(:,j) * x(j);
+            cc = c(~j);
+            if isempty(H)
+                HH = [];
+            else
+                HH = H(~j, ~j);
+                cc = cc + (H(~j,j)+H(j,~j)') * x(j)
+            end
             [x(~j), f, eflag, output, lambda] = ...
-                qps_master(H(~j, ~j), c(~j) + (H(~j,j)+H(j,~j)') * x(j), ...
-                    A(:, ~j), l-Axj, u-Axj, xmin(~j), xmax(~j), x(~j), opt);
-            f = f + (x(j)' * H(j,j) + c(j)') * x(j);
+                qps_master(HH, cc,  A(:, ~j), l-Axj, u-Axj, ...
+                    xmin(~j), xmax(~j), x(~j), opt);
+            f = f + c(j)' * x(j);
+            if ~isempty(H)
+                f = f + x(j)' * H(j,j) * x(j);
+            end
             mu_lower = zeros(size(x));
             mu_upper = zeros(size(x));
             mu_lower(~j) = lambda.lower;
