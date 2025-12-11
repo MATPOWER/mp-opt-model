@@ -238,7 +238,7 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
                 obj.data.vs = subsasgn(obj.data.vs, sc, vs);
             end
             if ~isempty(obj.cache)  %% clear cache of aggregated params
-                obj.cache = [];
+                obj.clear_cached_params();
             end
         end
 
@@ -590,7 +590,7 @@ classdef sm_quad_cost_legacy < mp.set_manager_opt_model
             end
 
             %% clear cached parameters
-            obj.cache = [];
+            obj.clear_cached_params();
 
             %% update dimensions and indexing, if necessary
             dN = N - N0;

@@ -174,7 +174,7 @@ classdef sm_variable < mp.set_manager_opt_model
                 obj.data.vt = subsasgn(obj.data.vt, sc, vt);    %% variable type
             end
             if ~isempty(obj.cache)  %% clear cache of aggregated params
-                obj.cache = [];
+                obj.clear_cached_params();
             end
         end
 
@@ -465,7 +465,7 @@ classdef sm_variable < mp.set_manager_opt_model
             end
 
             %% clear cached parameters
-            obj.cache = [];
+            obj.clear_cached_params();
 
             %% update dimensions and indexing, if necessary
             dN = N - N0;

@@ -1474,7 +1474,7 @@ if have_feature('isequaln')
     t = 'om.set_params(''var'', name, ...) : ';
     val = [1:4]';
     s.var.data.v0.Va = val;
-    s.var.cache = [];   % remove cache, as set_params() does
+    s.var.clear_cached_params();    % remove cache, as set_params() does
     om.set_params('var', 'Va', 'v0', val);
     t_ok(isequaln(struct(om), s), [t 'Va, v0']);
 
@@ -1533,7 +1533,7 @@ if have_feature('isequaln')
 
     val = sparse(m, n);
     s.lin.data.A.Qmis = val;
-    s.lin.cache = [];   % remove cache, as set_params() does
+    s.lin.clear_cached_params();    % remove cache, as set_params() does
     om.set_params('lin', 'Qmis', 'A', val);
     t_ok(isequaln(struct(om), s), [t 'Qmis, A']);
 
@@ -1609,7 +1609,7 @@ if have_feature('isequaln')
 
     val = repmat({sparse(mi, ni)}, m, n);
     s.qcn.data.Q.Qmis = val;
-    s.qcn.cache = [];   % remove cache, as set_params() does
+    s.qcn.clear_cached_params();    % remove cache, as set_params() does
     om.qcn.set_params(om.var, 'Qmis', 'Q', val);
     t_ok(isequaln(struct(om), s), [t 'Qmis, Q']);
 
@@ -1820,7 +1820,7 @@ if have_feature('isequaln')
 
     val = sparse(m, n);
     s.qdc.data.Q.qc1 = val;
-    s.qdc.cache = [];   % remove cache, as set_params() does
+    s.qdc.clear_cached_params();    % remove cache, as set_params() does
     om.set_params('qdc', 'qc1', 'Q', val);
     t_ok(isequaln(struct(om), s), [t 'qc1, Q']);
 

@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 12/11/25
+   - Add `clear_cached_params()` method to `mp.set_manager_opt_model` and
+     `mp.opt_model`, to clear aggregated parameters cached by the `params()`
+     method.
 
 #### 12/10/25
    - Add support for the Gurobi's new PDHG LP solver in `qps_gurobi()`.

@@ -31,6 +31,7 @@ classdef opt_model < handle
 %   * copy - make a duplicate of the object
 %   * to_struct - convert object data *to* a struct
 %   * from_struct - copy object data *from* a struct
+%   * clear_cached_params - clears parameters cached by set type objects
 %   * get_idx - return ``idx`` struct for vars, constraints, costs
 %   * get_userdata - used to retrieve values of user data
 %   * problem_type - return string identifying type of mathematical program
@@ -254,6 +255,24 @@ classdef opt_model < handle
             for k = 1:length(st)
                 mm.(st{k}) = mp.struct2object(mm.(st{k}));
             end
+        end
+
+        function clear_cached_params(obj)
+            % Clear cached parameters.
+            % ::
+            %
+            %   mm.clear_cached_params()
+            %
+            % Clears any parameters that were cached by set types in each of
+            % the  :attr:`var`, :attr:`lin`, :attr:`qcn` and :attr:`qdc`
+            % properties by calling the 
+            % :meth:`clear_cached_params() <mp.set_manager_opt_model.clear_cached_params>`
+            % method on each.
+
+            obj.lin.clear_cached_params();
+            obj.var.clear_cached_params();
+            obj.qcn.clear_cached_params();
+            obj.qdc.clear_cached_params();
         end
 
         function varargout = get_idx(mm, varargin)

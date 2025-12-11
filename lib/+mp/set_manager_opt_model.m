@@ -13,6 +13,7 @@ classdef set_manager_opt_model < mp.set_manager
 % mp.set_manager_opt_model Methods:
 %   * set_manager_opt_model - constructor
 %   * params - *(abstract)* return set-type-specific parameter data
+%   * clear_cached_params - clears parameters cached by params() method
 %   * set_params - *(abstract)* modify set-type-specific parameter data
 %   * display_soln - display solution values
 %   * has_parsed_soln - return true if parsed solution is available
@@ -66,6 +67,21 @@ classdef set_manager_opt_model < mp.set_manager
             % Outputs are determined by the implementing subclass.
             %
             % See also mp.set_manager.add, set_params.
+        end
+
+        function clear_cached_params(obj)
+            % Clear cached parameters.
+            % ::
+            %
+            %   sm.clear_cached_params()
+            %
+            % For subclasses that cache aggregated parameters in the
+            % :attr:`cache` property, this  method clears that cache, forcing
+            % a rebuild on the next call to params().
+
+            try
+                obj.cache = [];
+            end
         end
 
         function obj = set_params(obj, name, idx, params, vals)

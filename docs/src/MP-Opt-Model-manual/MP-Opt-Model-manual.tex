@@ -3453,6 +3453,13 @@ vs = struct('name', {'y', 'z'}, 'idx', {{3}, {3,7}});
 
 \subsubsection{Public Methods}
 
+\subsubsection*{\code{clear\_cached\_params}}
+\label{sec:clear_cached_params}
+\begin{Code}
+mm.clear_cached_params()
+\end{Code}
+The \code{clear\_cached\_params} method clears any parameters that were cached by the \code{params()} method of each of the set type objects in the \code{var}, \code{lin}, \code{qcn}, and \code{qdc} properties.
+
 \subsubsection*{\code{copy}}
 \label{sec:copy}
 \begin{Code}
@@ -3780,6 +3787,12 @@ The following are methods implemented by \code{mp.set\_manager\_opt\_model}, a s
 
 See the online \href{https://matpower.org/doc/mpom/}{\mpom{} Reference Manual} for the implementing subclass for details.
 
+\subsubsection*{\code{clear\_cached\_params}}
+\begin{Code}
+sm.clear_cached_params()
+\end{Code}
+The \code{clear\_cached\_params} method clears any parameters that were cached by the \code{params()} method.
+
 \subsubsection*{\code{params}}
 \begin{Code}
 [...] = sm.params()
@@ -3872,6 +3885,7 @@ name & description \\
 name & description \\
 \midrule
 \code{get\_set\_types}	& return list of property names of set types managed by this class	\\
+\code{clear\_cached\_params}	& clear cached parameters	\\
 \code{copy}	& duplicate the object	\\
 \code{display}	& displays the object	\\
 \code{display\_soln}	& displays solution values	\\
@@ -6723,6 +6737,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \begin{itemize}
 \item New \code{fix\_integer} option for \code{miqps\_master()} and \code{mp.opt\_model.solve()}. Set to true to fix any integer variables to their initial values, as specified in \code{x0} or \code{opt.x0}.
 \item Add \code{relax\_integer} option to \code{miqps\_master()} and move the implementation from \code{mp.opt\_model.solve()}.
+\item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.
 \item Support for the new PDHG LP solver in \gurobi{}.
 \item New functions:
