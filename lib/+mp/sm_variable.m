@@ -214,7 +214,7 @@ classdef sm_variable < mp.set_manager_opt_model
             %
             % See also add, set_params.
 
-            if nargout > 3
+            if nargout > 3 || ~obj.all_continuous()
                 have_vt = 1;
             else
                 have_vt = 0;
@@ -699,6 +699,37 @@ classdef sm_variable < mp.set_manager_opt_model
 
             if nargin > 2 && stash
                 obj.soln = ps;
+            end
+        end
+
+        function TorF = all_continuous(obj)
+            % Return true of all variables are continuous, false otherwise.
+            % ::
+            %
+            %   TorF = var.all_continous();
+            %
+            % Output:
+            %   TorF (logical) : true if all variables are continuous,
+            %       false otherwise.
+
+            TorF = true;
+            if obj.get_N()
+                for k = 1:length(obj.order)
+                    t = obj.data.vt.(obj.order(k).name);
+                    if iscell(t)
+                        for j = 1:length(t(:))
+                            if any(t{j} ~= 'C')
+                                TorF = false;
+                                break;
+                            end
+                        end
+                    else
+                        if any(t ~= 'C')
+                            TorF = false;
+                            break;
+                        end
+                    end
+                end
             end
         end
 

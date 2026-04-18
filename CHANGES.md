@@ -5,6 +5,15 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 4/17/26
+   - Move `mp.opt_model.is_mixed_integer()` logic into new `all_continuous()`
+     method of `mp.sm_variable` and make the former a wrapper.
+   - Fix bug with parameter caching in `mp.sm_variable`, where calling
+     `params()` without requesting the variable type would not cache it,
+     so subsequent requests for the variable time incorrectly returned an
+     empty string. Now the variable type is assembled and cached any time
+     there is a non-continuous variable present.
+
 #### 12/11/25
    - Add `clear_cached_params()` method to `mp.set_manager_opt_model` and
      `mp.opt_model`, to clear aggregated parameters cached by the `params()`

@@ -6740,6 +6740,10 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.
 \item Support for the new PDHG LP solver in \gurobi{}.
+\item New methods:
+    \begin{itemize}
+    \item \code{mp.sm\_variable.all\_continuous()} method returns true if all variables are continuous, false otherwise.
+    \end{itemize}
 \item New functions:
     \begin{itemize}
     \item \code{have\_feature\_highs\_hipo()} feature detection function for HiPO solver in \highs{} optimizer.
@@ -6748,6 +6752,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 
 \subsubsection*{Bugs Fixed}
 \begin{itemize}
+\item Calling the \code{params()} method of \code{mp.sm\_variable} without less than 4 output arguments would prevent the variable type from being assembled and cached, resulting in an incorrect empty string being returned on subsequent calls with the fourth output argument present.
 \item
     \emph{Thanks to Fulano.}
 \end{itemize}

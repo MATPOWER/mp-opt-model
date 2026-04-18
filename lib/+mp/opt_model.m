@@ -536,25 +536,7 @@ classdef opt_model < handle
             %   TorF (logical): true or false, indicating whether any of the
             %       variables are binary or integer
 
-            TorF = 0;
-            if mm.var.get_N()
-                for k = 1:length(mm.var.order)
-                    t = mm.var.data.vt.(mm.var.order(k).name);
-                    if iscell(t)
-                        for j = 1:length(t(:))
-                            if any(t{j} ~= 'C')
-                                TorF = 1;
-                                break;
-                            end
-                        end
-                    else
-                        if any(t ~= 'C')
-                            TorF = 1;
-                            break;
-                        end
-                    end
-                end
-            end
+            TorF = ~mm.var.all_continuous();
         end
 
         function TorF = is_solved(mm)
