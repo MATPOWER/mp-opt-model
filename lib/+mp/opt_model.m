@@ -536,7 +536,7 @@ classdef opt_model < handle
             %   TorF (logical): true or false, indicating whether any of the
             %       variables are binary or integer
 
-            TorF = ~mm.var.all_continuous();
+            TorF = ~mm.var.are_all_continuous();
         end
 
         function TorF = is_solved(mm)

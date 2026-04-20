@@ -11,6 +11,7 @@ classdef sm_variable < mp.set_manager_opt_model
 % By convention, ``var`` is the variable name used for mp.sm_variable objects.
 %
 % mp.sm_variable Properties:
+%   * all_continuous - true if all variables are continuous, false otherwise
 %   * cache - struct for caching aggregated parameters for the set
 %
 % mp.sm_variable Methods:
@@ -21,6 +22,7 @@ classdef sm_variable < mp.set_manager_opt_model
 %   * display_soln - display solution values for variables
 %   * get_soln - fetch solution values for specific named/indexed subsets
 %   * parse_soln - parse solution for variables
+%   * are_all_continuous - return true if all variables are continuous, false otherwise
 %   * varsets_idx - return vector of indices into full :math:`\x` corresponding to ``vs``
 %   * varsets_len - return the total number of variables specified by ``vs``
 %   * varsets_x - return subset of :math:`\x` specified by ``vs``
@@ -29,7 +31,7 @@ classdef sm_variable < mp.set_manager_opt_model
 % See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -37,6 +39,7 @@ classdef sm_variable < mp.set_manager_opt_model
 %   See https://github.com/MATPOWER/mp-opt-model for more info.
 
     properties
+        all_continuous = [];
         % struct for caching aggregated parameters for variables
         cache = [];
     end     %% properties
@@ -173,6 +176,14 @@ classdef sm_variable < mp.set_manager_opt_model
                 obj.data.vu = subsasgn(obj.data.vu, sc, vu);    %% upper bound
                 obj.data.vt = subsasgn(obj.data.vt, sc, vt);    %% variable type
             end
+
+            %% update all_continuous
+            if isempty(obj.all_continuous)
+                obj.all_continuous = obj.are_all_continuous();
+            else
+                obj.all_continuous = obj.all_continuous && all(vt == 'C');
+            end
+
             if ~isempty(obj.cache)  %% clear cache of aggregated params
                 obj.clear_cached_params();
             end
@@ -214,7 +225,7 @@ classdef sm_variable < mp.set_manager_opt_model
             %
             % See also add, set_params.
 
-            if nargout > 3 || ~obj.all_continuous()
+            if nargout > 3 || ~obj.are_all_continuous()
                 have_vt = 1;
             else
                 have_vt = 0;
@@ -472,6 +483,15 @@ classdef sm_variable < mp.set_manager_opt_model
             if is_all && dN
                 obj.set_params_update_dims(dN, name, idx);
             end
+
+            %% update all_continuous
+            if u.vt
+                if isempty(obj.all_continuous)
+                    obj.all_continuous = obj.are_all_continuous();
+                else
+                    obj.all_continuous = obj.all_continuous && all(p.vt == 'C');
+                end
+            end
         end
 
         function obj = display_soln(obj, soln, varargin)
@@ -702,34 +722,39 @@ classdef sm_variable < mp.set_manager_opt_model
             end
         end
 
-        function TorF = all_continuous(obj)
-            % Return true of all variables are continuous, false otherwise.
+        function TorF = are_all_continuous(obj)
+            % Return true if all variables are continuous, false otherwise.
             % ::
             %
-            %   TorF = var.all_continous();
+            %   TorF = var.are_all_continuous();
             %
             % Output:
             %   TorF (logical) : true if all variables are continuous,
             %       false otherwise.
 
-            TorF = true;
-            if obj.get_N()
-                for k = 1:length(obj.order)
-                    t = obj.data.vt.(obj.order(k).name);
-                    if iscell(t)
-                        for j = 1:length(t(:))
-                            if any(t{j} ~= 'C')
+            if isempty(obj.all_continuous)
+                %% evaluate and cache value
+                TorF = true;
+                if obj.get_N()
+                    for k = 1:length(obj.order)
+                        t = obj.data.vt.(obj.order(k).name);
+                        if iscell(t)
+                            for j = 1:length(t(:))
+                                if any(t{j} ~= 'C')
+                                    TorF = false;
+                                    break;
+                                end
+                            end
+                        else
+                            if any(t ~= 'C')
                                 TorF = false;
                                 break;
                             end
                         end
-                    else
-                        if any(t ~= 'C')
-                            TorF = false;
-                            break;
-                        end
                     end
                 end
+            else    %% use cached value in all_continous property
+                TorF = obj.all_continuous;
             end
         end
 
