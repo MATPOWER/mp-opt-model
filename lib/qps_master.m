@@ -53,6 +53,9 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           lazy ([])   - vector of constraint indices (logical or numeric) of
+%               lazy constraints, triggers an iterative cutting plane approach,
+%               if not empty; set to 'all' to indicate all constraints are lazy
 %           bp_opt      - options vector for BP
 %           clp_opt     - options vector for CLP
 %           cplex_opt   - options struct for CPLEX
@@ -200,6 +203,24 @@ if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
 else
     verbose = 0;
 end
+if ~isempty(opt) && isfield(opt, 'lazy') && ~isempty(opt.lazy)
+    lazy = opt.lazy;
+    [m, n] = size(A);
+    %% ensure that lazy is logical
+    if ischar(lazy)
+        if strcmp(lazy, 'all')
+            lazy = true(m, 1);
+        else
+            error('qps_master: opt.lazy must be a constraint index vector or ''all''');
+        end
+    elseif ~islogical(lazy) || length(lazy) ~= m
+        tmp = false(m, 1);
+        tmp(lazy) = true;
+        lazy = tmp;
+    end
+else
+    lazy = [];
+end
 if strcmp(alg, 'DEFAULT')
     if have_feature('gurobi')       %% use Gurobi by default, if available
         alg = 'GUROBI';
@@ -223,73 +244,198 @@ if strcmp(alg, 'DEFAULT')
 end
 
 %%----- call the appropriate solver  -----
-switch alg
-    case 'BPMPD'                    %% use BPMPD_MEX
-        [x, f, eflag, output, lambda] = ...
-            qps_bpmpd(H, c, A, l, u, xmin, xmax, x0, opt);
+if isempty(lazy)
+    switch alg
+        case 'BPMPD'                    %% use BPMPD_MEX
+            [x, f, eflag, output, lambda] = ...
+                qps_bpmpd(H, c, A, l, u, xmin, xmax, x0, opt);
 
-        if eflag == -99
-            if verbose
-                fprintf('         Retrying with QPS_MIPS solver ...\n\n');
+            if eflag == -99
+                if verbose
+                    fprintf('         Retrying with QPS_MIPS solver ...\n\n');
+                end
+                %% save (incorrect) solution from BPMPD
+                bpmpd = struct('x', x, 'f', f, 'eflag', eflag, ...
+                                'output', output, 'lambda', lambda);
+                opt.alg = 'MIPS';
+                [x, f, eflag, output, lambda] = ...
+                    qps_master(H, c, A, l, u, xmin, xmax, x0, opt);
+                output.bpmpd = bpmpd;
             end
-            %% save (incorrect) solution from BPMPD
-            bpmpd = struct('x', x, 'f', f, 'eflag', eflag, ...
-                            'output', output, 'lambda', lambda);
-            opt.alg = 'MIPS';
+        case 'CLP'
             [x, f, eflag, output, lambda] = ...
-                qps_master(H, c, A, l, u, xmin, xmax, x0, opt);
-            output.bpmpd = bpmpd;
-        end
-    case 'CLP'
-        [x, f, eflag, output, lambda] = ...
-            qps_clp(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'CPLEX'
-        [x, f, eflag, output, lambda] = ...
-            qps_cplex(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'GLPK'
-        [x, f, eflag, output, lambda] = ...
-            qps_glpk(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'GUROBI'
-        [x, f, eflag, output, lambda] = ...
-            qps_gurobi(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'HIGHS'
-        [x, f, eflag, output, lambda] = ...
-            qps_highs(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'IPOPT'
-        [x, f, eflag, output, lambda] = ...
-            qps_ipopt(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'MIPS'
-        %% set up options
-        if ~isempty(opt) && isfield(opt, 'mips_opt') && ~isempty(opt.mips_opt)
-            mips_opt = opt.mips_opt;
-        else
-            mips_opt = [];
-        end
-        mips_opt.verbose = verbose;
+                qps_clp(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'CPLEX'
+            [x, f, eflag, output, lambda] = ...
+                qps_cplex(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'GLPK'
+            [x, f, eflag, output, lambda] = ...
+                qps_glpk(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'GUROBI'
+            [x, f, eflag, output, lambda] = ...
+                qps_gurobi(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'HIGHS'
+            [x, f, eflag, output, lambda] = ...
+                qps_highs(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'IPOPT'
+            [x, f, eflag, output, lambda] = ...
+                qps_ipopt(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'MIPS'
+            %% set up options
+            if ~isempty(opt) && isfield(opt, 'mips_opt') && ~isempty(opt.mips_opt)
+                mips_opt = opt.mips_opt;
+            else
+                mips_opt = [];
+            end
+            mips_opt.verbose = verbose;
 
-        %% call solver
-        [x, f, eflag, output, lambda] = ...
-            qps_mips(H, c, A, l, u, xmin, xmax, x0, mips_opt);
-    case 'MOSEK'
-        [x, f, eflag, output, lambda] = ...
-            qps_mosek(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'OSQP'
-        [x, f, eflag, output, lambda] = ...
-            qps_osqp(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'OT'                   %% use QUADPROG or LINPROG from Opt Tbx ver 2.x+
-        [x, f, eflag, output, lambda] = ...
-            qps_ot(H, c, A, l, u, xmin, xmax, x0, opt);
-    case 'KNITRO'
-        [x, f, eflag, output, lambda] = ...
-            qps_knitro(H, c, A, l, u, xmin, xmax, x0, opt);
-    otherwise
-        fcn = ['qps_' lower(alg)];
-        if exist([fcn '.m']) == 2
+            %% call solver
             [x, f, eflag, output, lambda] = ...
-                feval(fcn, H, c, A, l, u, xmin, xmax, x0, opt);
-        else
-            error('qps_master: ''%s'' is not a valid algorithm code', alg);
+                qps_mips(H, c, A, l, u, xmin, xmax, x0, mips_opt);
+        case 'MOSEK'
+            [x, f, eflag, output, lambda] = ...
+                qps_mosek(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'OSQP'
+            [x, f, eflag, output, lambda] = ...
+                qps_osqp(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'OT'                   %% use QUADPROG or LINPROG from Opt Tbx ver 2.x+
+            [x, f, eflag, output, lambda] = ...
+                qps_ot(H, c, A, l, u, xmin, xmax, x0, opt);
+        case 'KNITRO'
+            [x, f, eflag, output, lambda] = ...
+                qps_knitro(H, c, A, l, u, xmin, xmax, x0, opt);
+        otherwise
+            fcn = ['qps_' lower(alg)];
+            if exist([fcn '.m']) == 2
+                [x, f, eflag, output, lambda] = ...
+                    feval(fcn, H, c, A, l, u, xmin, xmax, x0, opt);
+            else
+                error('qps_master: ''%s'' is not a valid algorithm code', alg);
+            end
+    end
+else    %% use cutting plain approach for lazy constraints
+    %% set up default inputs
+    if isempty(u)           %% linear inequalities are ...
+        u = Inf(m, 1);      %% ... unbounded above and ...
+    end
+    if isempty(l)
+        l = -Inf(m, 1);     %% ... unbounded below.
+    end
+    if isempty(xmax)        %% variables are ...
+        xmax = Inf(n, 1);   %% ... unbounded above and ...
+    end
+    if isempty(xmin)
+        xmin = -Inf(n, 1);  %% ... unbounded below.
+    end
+    if isempty(x0)          %% variables are ...
+        x0 = max(xmin, 0) + min(xmax, 0);
+    end
+    if isempty(c)           %% linear costs are ...
+        c = zeros(n, 1);    %% ... zero
+    end
+    active_rows = ~lazy;
+    % make all equality constraints active
+    out = {};
+    opt_no_lazy = opt;
+    opt_no_lazy.lazy = [];
+    nn = 1;     %% number of active constraints to add at a time
+                %% if problem is unbounded
+    infeasible = true;
+    penalty = 1e-5;
+    while infeasible
+        %% solve with active constraints
+        [x, f, eflag, output, lambda] = ...
+            qps_master(H, c, A(active_rows, :), l(active_rows), u(active_rows), ...
+                xmin, xmax, x0, opt_no_lazy);
+        out{end+1} = output;
+        out{end}.eflag = eflag;
+
+        if ~all(active_rows)
+            %% check for lazy constraint violations and resolve, if necessary
+            violated = false(m, 1);
+            if eflag <= 0 || any(isnan(x))  %% unbounded (or other failure)
+                %% add next nn inactive constraints
+                inactive = find(~active_rows);
+                nn = min(nn, length(inactive));
+                violated(inactive(1:nn)) = true;
+                nn = nn * 2;
+                detection_method = 'direct selection';
+            else    %% find violations
+                %% find "inactive" variables not included in active constraints
+                active_cols = full(any(A(active_rows, :)));
+                mi = sum(~active_rows);     %% number of inactive rows
+                ni = sum(~active_cols);     %% number of inactive cols
+                inactive_Ax = A(~active_rows, active_cols) * x(active_cols);
+                if ni == 0  %% no "inactive" vars, evaluate violations directly
+                    violated(~active_rows) = ...
+                        inactive_Ax < l(~active_rows) | ...
+                        inactive_Ax > u(~active_rows);
+                    detection_method = 'direct evaluation';
+                else
+                    ll = l(~active_rows) - inactive_Ax;
+                    uu = u(~active_rows) - inactive_Ax;
+                    AA = [ A(~active_rows, ~active_cols) speye(mi) -speye(mi) ];
+                    if nnz(H)
+                        HH = [ H(~active_cols, ~active_cols) sparse(ni, 2*mi);
+                               sparse(2*mi, ni+2*mi) ];
+                        ca = c(~active_cols) + ...
+                            ( H(~active_cols, active_cols) + ...
+                              H(active_cols, ~active_cols)' ) / 2 * x(active_cols);
+                    else
+                        HH = [];
+                        ca = c(~active_cols);
+                    end
+                    cc = [ ca; ones(mi, 1); penalty * ones(mi, 1) ];
+                    xxmin = [ xmin(~active_cols); zeros(2*mi, 1) ];
+                    xxmax = [ xmax(~active_cols); Inf(2*mi, 1) ];
+                    xx0 = [ x0(~active_cols); zeros(2*mi, 1) ];
+                    %% solve LP/QP to find violations, allowing any inactive vars to move
+                    if nnz(HH)
+                        detection_method = 'solving QP';
+                    else
+                        detection_method = 'solving LP';
+                    end
+                    [xx, ff, eeflag, ooutput, llambda] = ...
+                        qps_master(HH, cc, AA, ll, uu, ...
+                            xxmin, xxmax, xx0, opt_no_lazy);
+
+                    if eeflag == 1
+                        x(~active_cols) = xx(1:ni);
+                        violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
+                        f = c' * x;
+                        if nnz(H)
+                            f = f + 0.5 * x' * H * x;
+                        end
+                    else
+                        error('qps_master: finding violated lazy constraints failed (eflag = %d).', eeflag);
+                    end
+                end
+            end
+
+            if any(violated)    %% update active, re-solve
+                if verbose
+                    fprintf('added %d lazy constraint(s), found by %s : eflag = %d\n', ...
+                        sum(violated), detection_method, eflag);
+                end
+                active_rows = active_rows | violated;
+            else                %% done, no more violations
+                infeasible = false;
+            end
+        else    %% done, no more inactive constraints left
+            infeasible = false;
         end
+    end
+
+    %% update lambda
+    mu_l = lambda.mu_l;
+    mu_u = lambda.mu_u;
+    lambda.mu_l = zeros(m, 1);
+    lambda.mu_u = zeros(m, 1);
+    lambda.mu_l(active_rows) = mu_l;
+    lambda.mu_u(active_rows) = mu_u;
+    if length(out) > 1  %% keep output of previous iterations
+        output.lazy_output = out(1:end-1);
+    end
 end
 if ~isfield(output, 'alg') || isempty(output.alg)
     output.alg = alg;

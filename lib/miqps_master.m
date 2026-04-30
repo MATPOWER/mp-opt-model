@@ -53,6 +53,9 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %               1 = some progress output
 %               2 = verbose progress output
 %           fix_integer (0) - fix integer variables at value in x0, if true
+%           lazy ([])   - vector of constraint indices (logical or numeric) of
+%               lazy constraints, triggers an iterative cutting plane approach,
+%               if not empty; set to 'all' to indicate all constraints are lazy
 %           relax_integer (0) - relax integer constraints, if true
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
@@ -62,9 +65,9 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
 %           cplex_opt - options struct for CPLEX
-%           glpk_opt    - options struct for GLPK
-%           grb_opt   - options struct for GUROBI
-%           highs_opt   - options struct for HIGHS
+%           glpk_opt - options struct for GLPK
+%           grb_opt - options struct for GUROBI
+%           highs_opt - options struct for HIGHS
 %           intlinprog_opt - options struct for INTLINPROG
 %           linprog_opt - options struct for LINPROG
 %           mosek_opt - options struct for MOSEK
@@ -190,6 +193,24 @@ if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
 else
     verbose = 0;
 end
+if ~isempty(opt) && isfield(opt, 'lazy') && ~isempty(opt.lazy)
+    lazy = opt.lazy;
+    [m, n] = size(A);
+    %% ensure that lazy is logical
+    if ischar(lazy)
+        if strcmp(lazy, 'all')
+            lazy = true(m, 1);
+        else
+            error('miqps_master: opt.lazy must be a constraint index vector or ''all''');
+        end
+    elseif ~islogical(lazy) || length(lazy) ~= m
+        tmp = false(m, 1);
+        tmp(lazy) = true;
+        lazy = tmp;
+    end
+else
+    lazy = [];
+end
 if strcmp(alg, 'DEFAULT')
     if have_feature('gurobi')       %% use Gurobi by default, if available
         alg = 'GUROBI';
@@ -243,9 +264,9 @@ done = false;
 fix_integer_presolve = true;
 if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
         isfield(opt, 'fix_integer') && opt.fix_integer)
-    nx = length(x0);
+    n = max([length(x0) length(xmin) length(xmax) size(A, 2)]);
     if length(vtype) == 1   %% expand if necessary
-        vtype = char(vtype * ones(1, nx));
+        vtype = char(vtype * ones(1, n));
     end
     j = (vtype == 'B' | vtype == 'I')';
     if isfield(opt, 'fix_integer') && opt.fix_integer
@@ -279,14 +300,14 @@ if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
             if ~isempty(j)
                 %% expand if necessary
                 if length(xmin) == 1
-                    xmin = xmin * ones(nx, 1);
+                    xmin = xmin * ones(n, 1);
                 elseif isempty(xmin)
-                    xmin = -Inf(nx, 1);
+                    xmin = -Inf(n, 1);
                 end
                 if length(xmax) == 1
-                    xmax = xmax * ones(nx, 1);
+                    xmax = xmax * ones(n, 1);
                 elseif isempty(xmax)
-                    xmax = Inf(nx, 1);
+                    xmax = Inf(n, 1);
                 end
                 xmin(j) = x0(j);
                 xmax(j) = x0(j);
@@ -300,33 +321,174 @@ end
 
 %%----- call the appropriate solver  -----
 if ~done
-    switch alg
-        case 'CPLEX'
-            [x, f, eflag, output, lambda] = ...
-                miqps_cplex(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
-        case 'GLPK'
-            [x, f, eflag, output, lambda] = ...
-                miqps_glpk(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
-        case 'GUROBI'
-            [x, f, eflag, output, lambda] = ...
-                miqps_gurobi(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
-        case 'MOSEK'
-            [x, f, eflag, output, lambda] = ...
-                miqps_mosek(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
-        case 'OT'
-            [x, f, eflag, output, lambda] = ...
-                miqps_ot(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
-        case 'HIGHS'
-            [x, f, eflag, output, lambda] = ...
-                miqps_highs(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
-        otherwise
-            fcn = ['miqps_' lower(alg)];
-            if exist([fcn '.m']) == 2
+    if isempty(lazy)
+        switch alg
+            case 'CPLEX'
                 [x, f, eflag, output, lambda] = ...
-                    feval(fcn, H, c, A, l, u, xmin, xmax, x0, vtype, opt);
-            else
-                error('miqps_master: ''%s'' is not a valid algorithm code', alg);
+                    miqps_cplex(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+            case 'GLPK'
+                [x, f, eflag, output, lambda] = ...
+                    miqps_glpk(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+            case 'GUROBI'
+                [x, f, eflag, output, lambda] = ...
+                    miqps_gurobi(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+            case 'MOSEK'
+                [x, f, eflag, output, lambda] = ...
+                    miqps_mosek(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+            case 'OT'
+                [x, f, eflag, output, lambda] = ...
+                    miqps_ot(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+            case 'HIGHS'
+                [x, f, eflag, output, lambda] = ...
+                    miqps_highs(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+            otherwise
+                fcn = ['miqps_' lower(alg)];
+                if exist([fcn '.m']) == 2
+                    [x, f, eflag, output, lambda] = ...
+                        feval(fcn, H, c, A, l, u, xmin, xmax, x0, vtype, opt);
+                else
+                    error('miqps_master: ''%s'' is not a valid algorithm code', alg);
+                end
+        end
+    else    %% use cutting plain approach for lazy constraints
+        %% set up default inputs
+        if isempty(u)           %% linear inequalities are ...
+            u = Inf(m, 1);      %% ... unbounded above and ...
+        end
+        if isempty(l)
+            l = -Inf(m, 1);     %% ... unbounded below.
+        end
+        if isempty(xmax)        %% variables are ...
+            xmax = Inf(n, 1);   %% ... unbounded above and ...
+        end
+        if isempty(xmin)
+            xmin = -Inf(n, 1);  %% ... unbounded below.
+        end
+        if isempty(x0)          %% variables are ...
+            x0 = max(xmin, 0) + min(xmax, 0);
+        end
+        if isempty(c)           %% linear costs are ...
+            c = zeros(n, 1);    %% ... zero
+        end
+        if isempty(vtype) || length(vtype) ~= n && ...
+                isempty(find(vtype == 'B' | vtype == 'I' | ...
+                    vtype == 'S' | vtype == 'N', 1))
+            vtype = char('C' * ones(1, n));
+        elseif length(vtype) == 1 && n > 1
+            %% expand vtype to n elements if necessary
+            vtype = char(vtype * ones(1, n));
+        end
+        active_rows = ~lazy;
+        % make all equality constraints active
+        out = {};
+        opt_no_lazy = opt;
+        opt_no_lazy.lazy = [];
+        % opt_no_lazy.skip_prices = 1;
+        nn = 1;     %% number of active constraints to add at a time
+                    %% if problem is unbounded
+        infeasible = true;
+        penalty = 1e-5;
+        while infeasible
+            %% solve with active constraints
+            [x, f, eflag, output, lambda] = ...
+                miqps_master(H, c, A(active_rows, :), l(active_rows), u(active_rows), ...
+                    xmin, xmax, x0, vtype, opt_no_lazy);
+            out{end+1} = output;
+            out{end}.eflag = eflag;
+    
+            if ~all(active_rows)
+                %% check for lazy constraint violations and resolve, if necessary
+                violated = false(m, 1);
+                if eflag <= 0 || any(isnan(x))  %% unbounded (or other failure)
+                    %% add next nn inactive constraints
+                    inactive = find(~active_rows);
+                    nn = min(nn, length(inactive));
+                    violated(inactive(1:nn)) = true;
+                    nn = nn * 2;
+                    detection_method = 'direct selection';
+                else    %% find violations
+                    %% find "inactive" variables not included in active constraints
+                    active_cols = full(any(A(active_rows, :)));
+                    mi = sum(~active_rows);     %% number of inactive rows
+                    ni = sum(~active_cols);     %% number of inactive cols
+                    inactive_Ax = A(~active_rows, active_cols) * x(active_cols);
+                    if ni == 0  %% no "inactive" vars, evaluate violations directly
+                        violated(~active_rows) = ...
+                            inactive_Ax < l(~active_rows) | ...
+                            inactive_Ax > u(~active_rows);
+                        detection_method = 'direct evaluation';
+                    else
+                        ll = l(~active_rows) - inactive_Ax;
+                        uu = u(~active_rows) - inactive_Ax;
+                        AA = [ A(~active_rows, ~active_cols) speye(mi) -speye(mi) ];
+                        if nnz(H)
+                            HH = [ H(~active_cols, ~active_cols) sparse(ni, 2*mi);
+                                   sparse(2*mi, ni+2*mi) ];
+                            ca = c(~active_cols) + ...
+                                ( H(~active_cols, active_cols) + ...
+                                  H(active_cols, ~active_cols)' ) / 2 * x(active_cols);
+                        else
+                            HH = [];
+                            ca = c(~active_cols);
+                        end
+                        cc = [ ca; ones(mi, 1); penalty * ones(mi, 1) ];
+                        xxmin = [ xmin(~active_cols); zeros(2*mi, 1) ];
+                        xxmax = [ xmax(~active_cols); Inf(2*mi, 1) ];
+                        xx0 = [ x0(~active_cols); zeros(2*mi, 1) ];
+                        vvtype = [ vtype(~active_cols) char('C' * ones(1, 2*mi)) ];
+                        %% solve LP/QP to find violations, allowing any inactive vars to move
+                        if isempty(find(vvtype == 'B' | vvtype == 'I' | ...
+                                vvtype == 'S' | vvtype == 'N', 1))
+                            prefix = '';
+                        else
+                            prefix = 'MI';
+                        end
+                        if nnz(HH)
+                            detection_method = sprintf('solving %sQP', prefix);
+                        else
+                            detection_method = sprintf('solving %sLP', prefix);
+                        end
+                        [xx, ff, eeflag, ooutput, llambda] = ...
+                            miqps_master(HH, cc, AA, ll, uu, ...
+                                xxmin, xxmax, xx0, vvtype, opt_no_lazy);
+    
+                        if eeflag == 1
+                            x(~active_cols) = xx(1:ni);
+                            violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
+                            f = c' * x;
+                            if nnz(H)
+                                f = f + 0.5 * x' * H * x;
+                            end
+                        else
+                            error('miqps_master: finding violated lazy constraints failed (eflag = %d).', eeflag);
+                        end
+                    end
+                end
+    
+                if any(violated)    %% update active, re-solve
+                    if verbose
+                        fprintf('added %d lazy constraint(s), found by %s : eflag = %d\n', ...
+                            sum(violated), detection_method, eflag);
+                    end
+                    active_rows = active_rows | violated;
+                else                %% done, no more violations
+                    infeasible = false;
+                end
+            else    %% done, no more inactive constraints left
+                infeasible = false;
             end
+        end
+    
+        %% update lambda
+        mu_l = lambda.mu_l;
+        mu_u = lambda.mu_u;
+        lambda.mu_l = zeros(m, 1);
+        lambda.mu_u = zeros(m, 1);
+        lambda.mu_l(active_rows) = mu_l;
+        lambda.mu_u(active_rows) = mu_u;
+        if length(out) > 1  %% keep output of previous iterations
+            output.lazy_output = out(1:end-1);
+        end
     end
 end
 if ~isfield(output, 'alg') || isempty(output.alg)

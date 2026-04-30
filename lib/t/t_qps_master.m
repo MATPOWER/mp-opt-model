@@ -21,7 +21,7 @@ does_qp = [1 1 1 1 1 1 1 1 1 1 1 0 1 1];
 
 n = 36;
 nqp = 28;
-t_begin(n*length(algs), quiet);
+t_begin(2*n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
@@ -30,6 +30,7 @@ if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
 end
 
 for k = 1:length(algs)
+for j = 1:2
     if ~isempty(check{k}) && ~have_feature(check{k})
         t_skip(n, sprintf('%s not installed', names{k}));
     else
@@ -108,8 +109,13 @@ for k = 1:length(algs)
             opt.knitro_opt = artelys_knitro_options([],  mpopt);
             opt.knitro_opt.opttol = 1e-8;
         end
+        name = names{k};
+        if j == 2
+            name = [name ' (lazy)'];
+            opt.lazy = 'all';
+        end
 
-        t = sprintf('%s - 3-d LP : ', names{k});
+        t = sprintf('%s - 3-d LP : ', name);
         %% based on example from 'doc linprog'
         c = [-5; -4; -6];
         A = [1 -1  1;
@@ -133,7 +139,7 @@ for k = 1:length(algs)
         end
 
         if does_qp(k)
-            t = sprintf('%s - unconstrained 3-d quadratic : ', names{k});
+            t = sprintf('%s - unconstrained 3-d quadratic : ', name);
             %% from http://www.akiti.ca/QuadProgEx0Constr.html
             H = [5 -2 -1; -2 4 3; -1 3 5];
             c = [2; -35; -47];
@@ -147,7 +153,7 @@ for k = 1:length(algs)
             t_is(lam.lower, zeros(size(x)), 13, [t 'lam.lower']);
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
 
-            t = sprintf('%s - constrained 2-d QP : ', names{k});
+            t = sprintf('%s - constrained 2-d QP : ', name);
             %% example from 'doc quadprog'
             H = [   1   -1;
                     -1  2   ];
@@ -172,7 +178,7 @@ for k = 1:length(algs)
                 t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
             end
 
-            t = sprintf('%s - constrained 4-d QP : ', names{k});
+            t = sprintf('%s - constrained 4-d QP : ', name);
             %% from https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm
             H = [   1003.1  4.3     6.3     5.9;
                     4.3     2.2     2.1     3.9;
@@ -198,7 +204,7 @@ for k = 1:length(algs)
                 t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
             end
 
-            t = sprintf('%s - (struct) constrained 4-d QP : ', names{k});
+            t = sprintf('%s - (struct) constrained 4-d QP : ', name);
             p = struct('H', H, 'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
             [x, f, s, out, lam] = qps_master(p);
             t_is(s, 1, 12, [t 'success']);
@@ -216,12 +222,13 @@ for k = 1:length(algs)
             t_skip(nqp, sprintf('%s does not handle QP problems', names{k}));
         end
 
-        t = sprintf('%s - infeasible LP : ', names{k});
+        t = sprintf('%s - infeasible LP : ', name);
         p = struct('A', sparse([1 1]), 'c', [1;1], 'u', -1, 'xmin', [0;0], 'opt', opt);
         [x, f, s, out, lam] = qps_master(p);
         t_ok(s <= 0, [t 'no success']);
     end
-end
+end     %% j = 1:2
+end     %% k = 1:length(algs)
 
 if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);

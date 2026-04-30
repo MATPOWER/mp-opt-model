@@ -700,6 +700,7 @@ name & default & description \\
 2 & print a lot of progress info \\
 3 & print all progress info \\
 \end{tabular}	\\
+\code{lazy}	& \emph{empty}	& vector of constraint indices (logical or numeric) of lazy constraints, triggers an iterative cutting plane approach, if not empty; set to \codeq{all} to indicate all constraints are lazy \\
 \code{bp\_opt}	& \emph{empty}	& options vector for \code{bp}\tnote{*} \\
 \code{clp\_opt}	& \emph{empty}	& options vector for \clp{}\tnote{*} \\
 \code{cplex\_opt}	& \emph{empty}	& options struct for \cplex{}\tnote{*} \\
@@ -868,6 +869,7 @@ name & default & description \\
 3 & print all progress info \\
 \end{tabular}	\\
 \code{fix\_integer}	& 0	& fix integer variables at value in \code{x0}, if true \\
+\code{lazy}	& \emph{empty}	& vector of constraint indices (logical or numeric) of lazy constraints, triggers an iterative cutting plane approach, if not empty; set to \codeq{all} to indicate all constraints are lazy \\
 \code{relax\_integer}	& 0	& relax integer constraints, if true \\
 \code{skip\_prices}	& 0	& flag that specifies whether or not to skip the price computation stage, in which the problem is re-solved for only the continuous variables, with all others being constrained to their solved values \\
 \code{price\_stage\_warn\_tol}	& \emph{$10^{-7}$}	& tolerance on the objective function value and primal variable relative mismatch required to avoid mismatch warning message \\
@@ -6737,6 +6739,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \begin{itemize}
 \item New \code{fix\_integer} option for \code{miqps\_master()} and \code{mp.opt\_model.solve()}. Set to true to fix any integer variables to their initial values, as specified in \code{x0} or \code{opt.x0}.
 \item Add \code{relax\_integer} option to \code{miqps\_master()} and move the implementation from \code{mp.opt\_model.solve()}.
+\item Add \code{lazy} option to \code{miqps\_master()} and \code{qps\_master()} to enable basic handling of lazy constraints, where the problem is solved iteratively beginning without lazy constraints, adding only those that are violated at each iteration until all constraints are satisfied.
 \item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
 \item Support for \highs{} solution status in \code{eflag} output of \code{miqps\_highs()} and \code{qps\_highs()}.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.
