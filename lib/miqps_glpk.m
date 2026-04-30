@@ -230,8 +230,19 @@ end
 glpk_opt.msglev = verbose;
 
 %% call the solver
+if isempty(AA)
+    AA = sparse(1, nx);
+    bb = 0;
+    emptyA = true;
+else
+    emptyA = false;
+end
 [x, f, errnum, extra] = ...
     glpk(c, AA, bb, xmin, xmax, ctype, vtype, 1, glpk_opt);
+if emptyA
+    AA = sparse(0, nx);
+    bb = [];
+end
 
 %% set exit flag
 if isfield(extra, 'status')             %% status found in extra.status
