@@ -25,7 +25,7 @@ function varargout = pnes_master(fcn, x0, opt)
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use
+%           alg ('DEFAULT') - determines which solver to use
 %               'DEFAULT' : automatic, currently there is only one
 %               solver implementation, a predictor/corrector method
 %           verbose (0) - controls level of progress output displayed
@@ -182,7 +182,7 @@ function varargout = pnes_master(fcn, x0, opt)
 % See also pne_callback_default, pne_register_callbacks, pne_register_events.
 
 %   MP-Opt-Model
-%   Copyright (c) 2013-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2013-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell,
 %   Shrirang Abhyankar, Argonne National Laboratory,
 %   and Alexander Flueck, IIT

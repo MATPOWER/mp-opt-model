@@ -28,7 +28,7 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use, can be either
+%           alg ('DEFAULT') - determines which solver to use, can be either
 %                   a string (new-style) or a numerical alg code (old-style)
 %               'DEFAULT' : (or 0) automatic, first available of Gurobi,
 %                       CPLEX, MOSEK, Opt Tbx (if MATLAB), HIGHS, GLPK (LPs
@@ -124,7 +124,7 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %       [x, f, s, out, lambda] = qps_master(H, c, A, l, u, xmin, [], x0, opt);
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %

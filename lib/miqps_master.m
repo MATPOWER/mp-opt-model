@@ -36,7 +36,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use, can be either
+%           alg ('DEFAULT') - determines which solver to use, can be either
 %                   a string (new-style) or a numerical alg code (old-style)
 %               'DEFAULT' : (or 0) automatic, first available of Gurobi,
 %                       CPLEX, MOSEK, Opt Tbx (MILPs only), HIGHS (MILPs only),
@@ -123,7 +123,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %       [x, f, s, out, lam] = miqps_master(p);
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.

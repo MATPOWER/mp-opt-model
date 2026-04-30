@@ -51,7 +51,7 @@ function [x, f, eflag, output, lambda] = nlps_master(f_fcn, x0, A, l, u, xmin, x
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use
+%           alg ('DEFAULT') - determines which solver to use
 %               'DEFAULT' : automatic, current default is MIPS
 %               'MIPS'    : MIPS, MATPOWER Interior Point Solver
 %                        pure MATLAB implementation of a primal-dual
@@ -154,7 +154,7 @@ function [x, f, eflag, output, lambda] = nlps_master(f_fcn, x0, A, l, u, xmin, x
 % See also mips, nlps_fmincon, nlps_ipopt, nlps_knitro.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.

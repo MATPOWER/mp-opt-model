@@ -34,7 +34,7 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, 
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use
+%           alg ('DEFAULT') - determines which solver to use
 %               'DEFAULT' :  automatic, first available of IPOPT, Artelys
 %                   Knitro, FMINCON, MIPS
 %               'FMINCON' : FMINCON, MATLAB Optimization Toolbox
@@ -119,7 +119,7 @@ function [x, f, eflag, output, lambda] = qcqps_master(H, c, Q, B, lq, uq, A, l, 
 %           qcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, opt);
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2019-2026, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
