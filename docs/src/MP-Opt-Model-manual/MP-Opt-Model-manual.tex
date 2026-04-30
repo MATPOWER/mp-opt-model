@@ -245,7 +245,7 @@
 %\title{\hl{--- DRAFT  ---}\\\hl{\em do not distribute}\\~\\{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}\\
 \title{{\huge \bfseries \mpomname{} User's Manual } \\ ~ \\ \LARGE Version \mpomver{}}
 \author{Ray~D.~Zimmerman}
-\date{July 12, 2025} % comment this line to display the current date
+%\date{July 12, 2025} % comment this line to display the current date
 %\date{May 8, 2020\thanks{Second revision. First revision was April 29, 2020}} % comment this line to display the current date
 
 %%% BEGIN DOCUMENT
@@ -256,7 +256,7 @@
 \vfill
 \begin{center}
 {\scriptsize
-\copyright~2020--2025~\PSERC{}\\
+\copyright~2020--2026~\PSERC{}\\
 All Rights Reserved}
 \end{center}
 
@@ -6738,6 +6738,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \item New \code{fix\_integer} option for \code{miqps\_master()} and \code{mp.opt\_model.solve()}. Set to true to fix any integer variables to their initial values, as specified in \code{x0} or \code{opt.x0}.
 \item Add \code{relax\_integer} option to \code{miqps\_master()} and move the implementation from \code{mp.opt\_model.solve()}.
 \item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
+\item Support for \highs{} solution status in \code{eflag} output of \code{miqps\_highs()} and \code{qps\_highs()}.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.
 \item Support for the new PDHG LP solver in \gurobi{}.
 \item New methods:

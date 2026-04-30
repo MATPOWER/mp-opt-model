@@ -233,7 +233,54 @@ end
 %% extract results
 x = soln.col_value;
 f = info.objective_function_value;
-eflag = info.valid && soln.value_valid;
+if info.valid && soln.value_valid && strcmp(info.model_status_string, 'Optimal')
+    eflag = 1;
+else
+    switch info.model_status_string
+        case 'Not Set'
+            eflag = 0;
+        case 'Load error'
+            eflag = -1;
+        case 'Model error'
+            eflag = -2;
+        case 'Presolve error'
+            eflag = -3;
+        case 'Solve error'
+            eflag = -4;
+        case 'Postsolve error'
+            eflag = -5;
+        case 'Empty'
+            eflag = -6;
+        case 'Memory limit reached'
+            eflag = -7;
+        case 'Optimal'
+            eflag = 1;
+        case 'Infeasible'
+            eflag = -9;
+        case 'Primal infeasible or unbounded'
+            eflag = -10;
+        case 'Unbounded'
+            eflag = -11;
+        case 'Bound on objective reached'
+            eflag = -12;
+        case 'Target for objective reached'
+            eflag = -13;
+        case 'Time limit reached'
+            eflag = -14;
+        case 'Iteration limit reached'
+            eflag = -15;
+        case 'Solution limit reached'
+            eflag = -16;
+        case 'Interrupted by user'
+            eflag = -17;
+        case 'Interrupted by HiGHS'
+            eflag = -18;
+        case 'Unknown'
+            eflag = -19;
+        otherwise
+            eflag = -100;
+    end
+end
 output = info;
 
 %% separate duals into binding lower & upper bounds
