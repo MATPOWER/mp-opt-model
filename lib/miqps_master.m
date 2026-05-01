@@ -53,9 +53,12 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %               1 = some progress output
 %               2 = verbose progress output
 %           fix_integer (0) - fix integer variables at value in x0, if true
-%           lazy ([])   - vector of constraint indices (logical or numeric) of
+%           lazy ([]) - vector of constraint indices (logical or numeric) of
 %               lazy constraints, triggers an iterative cutting plane approach,
 %               if not empty; set to 'all' to indicate all constraints are lazy
+%           lazy_thresh ([]) - vector of constraint thresholds for including
+%               lazy constraints, size must match total number of constraints
+%               or number of lazy constraints
 %           relax_integer (0) - relax integer constraints, if true
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
@@ -203,10 +206,25 @@ if ~isempty(opt) && isfield(opt, 'lazy') && ~isempty(opt.lazy)
         else
             error('miqps_master: opt.lazy must be a constraint index vector or ''all''');
         end
-    elseif ~islogical(lazy) || length(lazy) ~= m
+    elseif ~islogical(lazy)
         tmp = false(m, 1);
         tmp(lazy) = true;
         lazy = tmp;
+    elseif length(lazy) ~= m
+        error('miqps_master: if opt.lazy is a logical vector its length (%d) must match the number of constraints (%d)', length(lazy), m);
+    end
+    if ~isempty(opt) && isfield(opt, 'lazy_thresh') && ~isempty(opt.lazy_thresh)
+        lazy_thresh = opt.lazy_thresh;
+        if length(lazy_thresh) ~= m
+            if length(lazy_thresh) == sum(lazy)
+                lazy_thresh = zeros(m, 1);
+                lazy_thresh(lazy) = lazy_thresh;
+            else
+                error('miqps_master: size of opt.lazy_thresh (%d) must match number of lazy (%d) or total (%d) constraints', length(lazy_thresh), sum(lazy), m);
+            end
+        end
+    else
+        lazy_thresh = [];
     end
 else
     lazy = [];
@@ -395,7 +413,7 @@ if ~done
                     xmin, xmax, x0, vtype, opt_no_lazy);
             out{end+1} = output;
             out{end}.eflag = eflag;
-    
+
             if ~all(active_rows)
                 %% check for lazy constraint violations and resolve, if necessary
                 violated = false(m, 1);
@@ -451,10 +469,17 @@ if ~done
                         [xx, ff, eeflag, ooutput, llambda] = ...
                             miqps_master(HH, cc, AA, ll, uu, ...
                                 xxmin, xxmax, xx0, vvtype, opt_no_lazy);
-    
+
                         if eeflag == 1
                             x(~active_cols) = xx(1:ni);
-                            violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
+                            if isempty(lazy_thresh)
+                                violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
+                            else
+                                AAxx = AA * xx;
+                                violated(~active_rows) = violated(~active_rows) || ...
+                                    ll - AAxx > -lazy_thresh(~active_rows) | ...
+                                    AAxx - uu > -lazy_thresh(~active_rows);
+                            end
                             f = c' * x;
                             if nnz(H)
                                 f = f + 0.5 * x' * H * x;
@@ -464,7 +489,7 @@ if ~done
                         end
                     end
                 end
-    
+
                 if any(violated)    %% update active, re-solve
                     if verbose
                         fprintf('added %d lazy constraint(s), found by %s : eflag = %d\n', ...
@@ -478,7 +503,7 @@ if ~done
                 infeasible = false;
             end
         end
-    
+
         %% update lambda
         mu_l = lambda.mu_l;
         mu_u = lambda.mu_u;

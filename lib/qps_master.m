@@ -53,9 +53,12 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
-%           lazy ([])   - vector of constraint indices (logical or numeric) of
+%           lazy ([]) - vector of constraint indices (logical or numeric) of
 %               lazy constraints, triggers an iterative cutting plane approach,
 %               if not empty; set to 'all' to indicate all constraints are lazy
+%           lazy_thresh ([]) - vector of constraint thresholds for including
+%               lazy constraints, size must match total number of constraints
+%               or number of lazy constraints
 %           bp_opt      - options vector for BP
 %           clp_opt     - options vector for CLP
 %           cplex_opt   - options struct for CPLEX
@@ -213,10 +216,25 @@ if ~isempty(opt) && isfield(opt, 'lazy') && ~isempty(opt.lazy)
         else
             error('qps_master: opt.lazy must be a constraint index vector or ''all''');
         end
-    elseif ~islogical(lazy) || length(lazy) ~= m
+    elseif ~islogical(lazy)
         tmp = false(m, 1);
         tmp(lazy) = true;
         lazy = tmp;
+    elseif length(lazy) ~= m
+        error('qps_master: if opt.lazy is a logical vector its length (%d) must match the number of constraints (%d)', length(lazy), m);
+    end
+    if ~isempty(opt) && isfield(opt, 'lazy_thresh') && ~isempty(opt.lazy_thresh)
+        lazy_thresh = opt.lazy_thresh;
+        if length(lazy_thresh) ~= m
+            if length(lazy_thresh) == sum(lazy)
+                lazy_thresh = zeros(m, 1);
+                lazy_thresh(lazy) = lazy_thresh;
+            else
+                error('qps_master: size of opt.lazy_thresh (%d) must match number of lazy (%d) or total (%d) constraints', length(lazy_thresh), sum(lazy), m);
+            end
+        end
+    else
+        lazy_thresh = [];
     end
 else
     lazy = [];
@@ -401,7 +419,14 @@ else    %% use cutting plain approach for lazy constraints
 
                     if eeflag == 1
                         x(~active_cols) = xx(1:ni);
-                        violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
+                        if isempty(lazy_thresh)
+                            violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
+                        else
+                            AAxx = AA * xx;
+                            violated(~active_rows) = violated(~active_rows) || ...
+                                ll - AAxx > -lazy_thresh(~active_rows) | ...
+                                AAxx - uu > -lazy_thresh(~active_rows);
+                        end
                         f = c' * x;
                         if nnz(H)
                             f = f + 0.5 * x' * H * x;
