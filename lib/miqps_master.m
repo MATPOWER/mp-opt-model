@@ -396,26 +396,42 @@ if ~done
             %% expand vtype to n elements if necessary
             vtype = char(vtype * ones(1, n));
         end
+        ilazy = 0;
+        nlazy = sum(lazy);
         active_rows = ~lazy;
         % make all equality constraints active
         out = {};
         opt_no_lazy = opt;
         opt_no_lazy.lazy = [];
+        opt_no_lazy.verbose = max(verbose-1, 0);    %% decrease verbose level
         % opt_no_lazy.skip_prices = 1;
         nn = 1;     %% number of active constraints to add at a time
                     %% if problem is unbounded
         infeasible = true;
         penalty = 1e-5;
         while infeasible
+            ilazy = ilazy + 1;      %% iteration counter
             %% solve with active constraints
+            t0 = tic;
             [x, f, eflag, output, lambda] = ...
                 miqps_master(H, c, A(active_rows, :), l(active_rows), u(active_rows), ...
                     xmin, xmax, x0, vtype, opt_no_lazy);
+            if verbose
+                fprintf('----- %3d : Solved with %d of %d lazy constraints : eflag = %d (%g sec)\n', ...
+                    ilazy, sum(lazy & active_rows), nlazy, eflag, toc(t0));
+            end
             out{end+1} = output;
             out{end}.eflag = eflag;
 
             if ~all(active_rows)
-                %% check for lazy constraint violations and resolve, if necessary
+                %% partition constraints and variables into active/inactive
+                %% [ la ] <= [ Aaa  0  ] [ xa ] <= [ ua ]
+                %% [ li ]    [ Aia Aii ] [ xi ]    [ ui ]
+                active_cols = full(any(A(active_rows, :)));
+                mi = sum(~active_rows);     %% number of inactive rows
+                ni = sum(~active_cols);     %% number of inactive cols
+
+                %% check for lazy constraint violations and re-solve, if necessary
                 violated = false(m, 1);
                 if eflag <= 0 || any(isnan(x))  %% unbounded (or other failure)
                     %% add next nn inactive constraints
@@ -423,21 +439,17 @@ if ~done
                     nn = min(nn, length(inactive));
                     violated(inactive(1:nn)) = true;
                     nn = nn * 2;
-                    detection_method = 'direct selection';
                 else    %% find violations
-                    %% find "inactive" variables not included in active constraints
-                    active_cols = full(any(A(active_rows, :)));
-                    mi = sum(~active_rows);     %% number of inactive rows
-                    ni = sum(~active_cols);     %% number of inactive cols
-                    inactive_Ax = A(~active_rows, active_cols) * x(active_cols);
+                    t0 = tic;
+                    Aia_xa = A(~active_rows, active_cols) * x(active_cols);
                     if ni == 0  %% no "inactive" vars, evaluate violations directly
                         violated(~active_rows) = ...
-                            inactive_Ax < l(~active_rows) | ...
-                            inactive_Ax > u(~active_rows);
-                        detection_method = 'direct evaluation';
+                            Aia_xa < l(~active_rows) | ...
+                            Aia_xa > u(~active_rows);
+                        status = sprintf('direct evaluation (%g sec)', toc(t0));
                     else
-                        ll = l(~active_rows) - inactive_Ax;
-                        uu = u(~active_rows) - inactive_Ax;
+                        ll = l(~active_rows) - Aia_xa;
+                        uu = u(~active_rows) - Aia_xa;
                         AA = [ A(~active_rows, ~active_cols) speye(mi) -speye(mi) ];
                         if nnz(H)
                             HH = [ H(~active_cols, ~active_cols) sparse(ni, 2*mi);
@@ -455,31 +467,26 @@ if ~done
                         xx0 = [ x0(~active_cols); zeros(2*mi, 1) ];
                         vvtype = [ vtype(~active_cols) char('C' * ones(1, 2*mi)) ];
                         %% solve LP/QP to find violations, allowing any inactive vars to move
-                        if isempty(find(vvtype == 'B' | vvtype == 'I' | ...
-                                vvtype == 'S' | vvtype == 'N', 1))
-                            prefix = '';
-                        else
-                            prefix = 'MI';
-                        end
-                        if nnz(HH)
-                            detection_method = sprintf('solving %sQP', prefix);
-                        else
-                            detection_method = sprintf('solving %sLP', prefix);
-                        end
                         [xx, ff, eeflag, ooutput, llambda] = ...
                             miqps_master(HH, cc, AA, ll, uu, ...
                                 xxmin, xxmax, xx0, vvtype, opt_no_lazy);
+                        if verbose
+                            if isempty(find(vvtype == 'B' | vvtype == 'I' | ...
+                                    vvtype == 'S' | vvtype == 'N', 1))
+                                prefix = '';
+                            else
+                                prefix = 'MI';
+                            end
+                            if nnz(HH)
+                                status = sprintf('%sQP : eflag = %d (%g sec)', prefix, eeflag, toc(t0));
+                            else
+                                status = sprintf('%sLP : eflag = %d (%g sec)', prefix, eeflag, toc(t0));
+                            end
+                        end
 
                         if eeflag == 1
                             x(~active_cols) = xx(1:ni);
-                            if isempty(lazy_thresh)
-                                violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
-                            else
-                                AAxx = AA * xx;
-                                violated(~active_rows) = violated(~active_rows) || ...
-                                    ll - AAxx > -lazy_thresh(~active_rows) | ...
-                                    AAxx - uu > -lazy_thresh(~active_rows);
-                            end
+                            violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
                             f = c' * x;
                             if nnz(H)
                                 f = f + 0.5 * x' * H * x;
@@ -491,12 +498,46 @@ if ~done
                 end
 
                 if any(violated)    %% update active, re-solve
+                    nviolated = sum(violated);
+                    if ~isempty(lazy_thresh)
+                        if ni == 0  %% no "inactive" vars, evaluate slack directly
+                            sl = Aia_xa - l(~active_rows);
+                            su = u(~active_rows) - Aia_xa;
+                        else
+                            AAxx = AA * xx;
+                            %% find "slack" columns, i.e. any inactive column with
+                            %% zero cost and a single non-zero row in A
+                            js = (ca == 0 & sum(A(~active_rows, ~active_cols) ~= 0)' == 1);
+                            AAp = AA(:, js);
+                            AAn = AAp;
+                            AAp(AAp < 0) = 0;   %% positive vals in slack cols
+                            AAn(AAn > 0) = 0;   %% negative vals in slack cols
+                            %% find slack in actual constraint plus any
+                            %% slack provided by these "slack" variables
+                            sl = AAxx - ll + ...
+                                AAp * (xxmax(js) - xx(js)) + ...
+                                AAn * (xxmin(js) - xx(js));
+                            su = uu - AAxx + ...
+                                AAn * (xx(js) - xxmax(js)) + ...
+                                AAp * (xx(js) - xxmin(js));
+                        end
+                        violated(~active_rows) = violated(~active_rows) | ...
+                            sl < lazy_thresh(~active_rows) | ...
+                            su < lazy_thresh(~active_rows);
+                    end
+
                     if verbose
-                        fprintf('added %d lazy constraint(s), found by %s : eflag = %d\n', ...
-                            sum(violated), detection_method, eflag);
+                        if eflag == 1
+                            fprintf('-----       %d violation(s) detected via %s\n', ...
+                                nviolated, status);
+                        end
+                        fprintf('-----       Adding %d lazy constraint(s)\n', sum(violated));
                     end
                     active_rows = active_rows | violated;
                 else                %% done, no more violations
+                    if verbose
+                        fprintf('-----       No violations detected via %s\n', status);
+                    end
                     infeasible = false;
                 end
             else    %% done, no more inactive constraints left

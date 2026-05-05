@@ -5,11 +5,13 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 5/5/26
+  - Add basic lazy constraint support to `qps_master()` and `miqps_master()`
+    via `lazy` and `lazy_thresh` option fields.
+
 #### 4/30/26
   - Modify `eflag` output of `qps_highs()` and `miqps_highs()` to reflect
     the `model_status_string` returned by the HiGHS solver.
-  - Add basic lazy constraint support to `qps_master()` and `miqps_master()`
-    via `lazy` and `lazy_thresh` option fields.
 
 #### 4/20/26
   - Move `mp.opt_model.is_mixed_integer()` logic into new
