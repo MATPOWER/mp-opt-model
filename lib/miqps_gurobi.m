@@ -183,9 +183,6 @@ end
 if isempty(xmax)
     xmax = Inf(nx, 1);          %% ... unbounded above.
 end
-if isempty(x0)
-    x0 = zeros(nx, 1);
-end
 
 %% default options
 if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
@@ -234,6 +231,9 @@ m.sense = char([ double('=')*ones(1,neq) double('<')*ones(1,niq) ]);
 m.lb = xmin;
 m.ub = xmax;
 m.obj = c';
+if ~isempty(x0)
+    m.start = x0;
+end
 if ~isempty(vtype)
     m.vtype = vtype;
 end

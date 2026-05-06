@@ -173,9 +173,6 @@ end
 if isempty(xmax)
     xmax = Inf(nx, 1);          %% ... unbounded above.
 end
-if isempty(x0)
-    x0 = zeros(nx, 1);
-end
 
 %% default options
 if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
@@ -225,7 +222,7 @@ if verbose
     end
     fprintf('HiGHS Version %s -- %s %s solver\n', vn, solver_name, lpqp);
 end
-[soln, info, opts, basis] = callhighs(c, A, l, u, xmin, xmax, H, [], highs_opt);
+[soln, info, opts, basis] = callhighs(c, A, l, u, xmin, xmax, H, [], highs_opt, [], x0);
 if verbose
     fprintf('HiGHS solution status: %s\n', info.model_status_string);
 end
