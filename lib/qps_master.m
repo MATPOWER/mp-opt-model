@@ -363,13 +363,14 @@ else    %% use cutting plain approach for lazy constraints
                 %% if problem is unbounded
     infeasible = true;
     penalty = 1e-5;
+    x = x0;
     while infeasible
         ilazy = ilazy + 1;      %% iteration counter
         %% solve with active constraints
         t0 = tic;
         [x, f, eflag, output, lambda] = ...
             qps_master(H, c, A(active_rows, :), l(active_rows), u(active_rows), ...
-                xmin, xmax, x0, opt_no_lazy);
+                xmin, xmax, x, opt_no_lazy);
         if verbose
             fprintf('----- %3d : Solved with %d of %d lazy constraints : eflag = %d (%g sec)\n', ...
                 ilazy, sum(lazy & active_rows), nlazy, eflag, toc(t0));
@@ -393,6 +394,7 @@ else    %% use cutting plain approach for lazy constraints
                 nn = min(nn, length(inactive));
                 violated(inactive(1:nn)) = true;
                 nn = nn * 2;
+                x = x0;
             else    %% find violations
                 t0 = tic;
                 Aia_xa = A(~active_rows, active_cols) * x(active_cols);
