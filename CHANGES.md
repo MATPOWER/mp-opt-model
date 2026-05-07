@@ -11,6 +11,8 @@ since version 5.0
     where the problem is solved iteratively beginning without lazy constraints,
     adding at each iteration only those that are violated or within a
     threshold, until all constraints are satisfied.
+  - Force dual-simplex method for price computation stage of `miqps_<solver>()`
+    functions.
 
 #### 4/30/26
   - Modify `eflag` output of `qps_highs()` and `miqps_highs()` to reflect

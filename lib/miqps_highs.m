@@ -388,6 +388,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
         x0(k) = round(x0(k));
         xmin(k) = x0(k);
         xmax(k) = x0(k);
+        opt.highs_opt.solver = "simplex";   %% dual simplex
 
         [x_, f_, eflag_, output_, lambda] = qps_highs(H, c, A, l, u, xmin, xmax, x0, opt);
         if eflag ~= eflag_
