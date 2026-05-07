@@ -5,9 +5,12 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
-#### 5/5/26
+#### 5/7/26
   - Add basic lazy constraint support to `qps_master()` and `miqps_master()`
-    via `lazy` and `lazy_thresh` option fields.
+    via `lazy`, `lazy_thresh`, and `lazy_violation_cost` option fields, where
+    where the problem is solved iteratively beginning without lazy constraints,
+    adding at each iteration only those that are violated or within a
+    threshold, until all constraints are satisfied.
 
 #### 4/30/26
   - Modify `eflag` output of `qps_highs()` and `miqps_highs()` to reflect

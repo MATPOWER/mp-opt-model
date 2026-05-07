@@ -59,6 +59,8 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %           lazy_thresh ([]) - vector of constraint thresholds for including
 %               lazy constraints, size must match total number of constraints
 %               or number of lazy constraints
+%           lazy_violation_cost (1) - cost (scalar) of violating a lazy
+%               constraint when evaluating violations and thresholds
 %           relax_integer (0) - relax integer constraints, if true
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
@@ -225,6 +227,11 @@ if ~isempty(opt) && isfield(opt, 'lazy') && ~isempty(opt.lazy)
         end
     else
         lazy_thresh = [];
+    end
+    if ~isempty(opt) && isfield(opt, 'lazy_violation_cost') && ~isempty(opt.lazy_violation_cost)
+        lazy_violation_cost = opt.lazy_violation_cost;
+    else
+        lazy_violation_cost = 1;
     end
 else
     lazy = [];
@@ -396,6 +403,7 @@ if ~done
             %% expand vtype to n elements if necessary
             vtype = char(vtype * ones(1, n));
         end
+        ivars = (vtype ~= 'C'); %% logical index of integer variables
         ilazy = 0;
         nlazy = sum(lazy);
         active_rows = ~lazy;
@@ -405,10 +413,11 @@ if ~done
         opt_no_lazy.lazy = [];
         opt_no_lazy.verbose = max(verbose-1, 0);    %% decrease verbose level
         % opt_no_lazy.skip_prices = 1;
+        opt_find_violated = opt_no_lazy;
+        opt_find_violated.skip_prices = 0;
         nn = 1;     %% number of active constraints to add at a time
                     %% if problem is unbounded
         infeasible = true;
-        penalty = 1e-5;
         x = x0;
         while infeasible
             ilazy = ilazy + 1;      %% iteration counter
@@ -423,6 +432,9 @@ if ~done
             end
             out{end+1} = output;
             out{end}.eflag = eflag;
+
+            %% enforce integrality of integer vars, to help with warm starts
+            x(ivars) = round(x(ivars));
 
             if ~all(active_rows)
                 %% partition constraints and variables into active/inactive
@@ -456,14 +468,14 @@ if ~done
                         if nnz(H)
                             HH = [ H(~active_cols, ~active_cols) sparse(ni, 2*mi);
                                    sparse(2*mi, ni+2*mi) ];
-                            ca = c(~active_cols) + ...
+                            cia = c(~active_cols) + ...
                                 ( H(~active_cols, active_cols) + ...
                                   H(active_cols, ~active_cols)' ) / 2 * x(active_cols);
                         else
                             HH = [];
-                            ca = c(~active_cols);
+                            cia = c(~active_cols);
                         end
-                        cc = [ ca; ones(mi, 1); penalty * ones(mi, 1) ];
+                        cc = [ cia; lazy_violation_cost * ones(2*mi, 1) ];
                         xxmin = [ xmin(~active_cols); zeros(2*mi, 1) ];
                         xxmax = [ xmax(~active_cols); Inf(2*mi, 1) ];
                         xx0 = [ x0(~active_cols); zeros(2*mi, 1) ];
@@ -471,7 +483,7 @@ if ~done
                         %% solve LP/QP to find violations, allowing any inactive vars to move
                         [xx, ff, eeflag, ooutput, llambda] = ...
                             miqps_master(HH, cc, AA, ll, uu, ...
-                                xxmin, xxmax, xx0, vvtype, opt_no_lazy);
+                                xxmin, xxmax, xx0, vvtype, opt_find_violated);
                         if verbose
                             if isempty(find(vvtype == 'B' | vvtype == 'I' | ...
                                     vvtype == 'S' | vvtype == 'N', 1))
@@ -509,7 +521,7 @@ if ~done
                             AAxx = AA * xx;
                             %% find "slack" columns, i.e. any inactive column with
                             %% zero cost and a single non-zero row in A
-                            js = (ca == 0 & sum(A(~active_rows, ~active_cols) ~= 0)' == 1);
+                            js = (cia == 0 & sum(A(~active_rows, ~active_cols) ~= 0)' == 1);
                             AAp = AA(:, js);
                             AAn = AAp;
                             AAp(AAp < 0) = 0;   %% positive vals in slack cols

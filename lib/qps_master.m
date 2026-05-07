@@ -59,6 +59,8 @@ function [x, f, eflag, output, lambda] = qps_master(H, c, A, l, u, xmin, xmax, x
 %           lazy_thresh ([]) - vector of constraint thresholds for including
 %               lazy constraints, size must match total number of constraints
 %               or number of lazy constraints
+%           lazy_violation_cost (1) - cost (scalar) of violating a lazy
+%               constraint when evaluating violations and thresholds
 %           bp_opt      - options vector for BP
 %           clp_opt     - options vector for CLP
 %           cplex_opt   - options struct for CPLEX
@@ -236,6 +238,11 @@ if ~isempty(opt) && isfield(opt, 'lazy') && ~isempty(opt.lazy)
     else
         lazy_thresh = [];
     end
+    if ~isempty(opt) && isfield(opt, 'lazy_violation_cost') && ~isempty(opt.lazy_violation_cost)
+        lazy_violation_cost = opt.lazy_violation_cost;
+    else
+        lazy_violation_cost = 1;
+    end
 else
     lazy = [];
 end
@@ -362,7 +369,6 @@ else    %% use cutting plain approach for lazy constraints
     nn = 1;     %% number of active constraints to add at a time
                 %% if problem is unbounded
     infeasible = true;
-    penalty = 1e-5;
     x = x0;
     while infeasible
         ilazy = ilazy + 1;      %% iteration counter
@@ -410,14 +416,14 @@ else    %% use cutting plain approach for lazy constraints
                     if nnz(H)
                         HH = [ H(~active_cols, ~active_cols) sparse(ni, 2*mi);
                                sparse(2*mi, ni+2*mi) ];
-                        ca = c(~active_cols) + ...
+                        cia = c(~active_cols) + ...
                             ( H(~active_cols, active_cols) + ...
                               H(active_cols, ~active_cols)' ) / 2 * x(active_cols);
                     else
                         HH = [];
-                        ca = c(~active_cols);
+                        cia = c(~active_cols);
                     end
-                    cc = [ ca; ones(mi, 1); penalty * ones(mi, 1) ];
+                    cc = [ cia; lazy_violation_cost * ones(2*mi, 1) ];
                     xxmin = [ xmin(~active_cols); zeros(2*mi, 1) ];
                     xxmax = [ xmax(~active_cols); Inf(2*mi, 1) ];
                     xx0 = [ x0(~active_cols); zeros(2*mi, 1) ];
@@ -456,7 +462,7 @@ else    %% use cutting plain approach for lazy constraints
                         AAxx = AA * xx;
                         %% find "slack" columns, i.e. any inactive column with
                         %% zero cost and a single non-zero row in A
-                        js = (ca == 0 & sum(A(~active_rows, ~active_cols) ~= 0)' == 1);
+                        js = (cia == 0 & sum(A(~active_rows, ~active_cols) ~= 0)' == 1);
                         AAp = AA(:, js);
                         AAn = AAp;
                         AAp(AAp < 0) = 0;   %% positive vals in slack cols
