@@ -226,6 +226,14 @@ else
     integrality(vtype == 'N') = "si";               %% semi-integer
 end
 
+%% ensure feasibility of x0
+if ~isempty(x0)
+    x0 = max(xmin, min(xmax, x0));
+    if mi
+        x0(vtype ~= 'C') = round(x0(vtype ~= 'C'));
+    end
+end
+
 %% set up options struct for HiGHS
 if ~isempty(opt) && isfield(opt, 'highs_opt') && ~isempty(opt.highs_opt)
     highs_opt = highs_options(opt.highs_opt);

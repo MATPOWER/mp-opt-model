@@ -181,6 +181,11 @@ else
     verbose = 0;
 end
 
+%% ensure feasibility of x0
+if ~isempty(x0)
+    x0 = max(xmin, min(xmax, x0));
+end
+
 %% set up options struct for HiGHS
 if ~isempty(opt) && isfield(opt, 'highs_opt') && ~isempty(opt.highs_opt)
     highs_opt = highs_options(opt.highs_opt);
