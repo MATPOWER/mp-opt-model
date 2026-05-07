@@ -487,8 +487,8 @@ if ~done
                         end
 
                         if eeflag == 1
-                            x(~active_cols) = xx(1:ni);
-                            violated(~active_rows) = xx(ni+1:ni+mi) + xx(ni+mi+1:ni+2*mi) > 0;
+                            x(~active_cols) = xx(1:ni); %% updated inactive variables
+                            violated(~active_rows) = llambda.mu_l + llambda.mu_u > 0;
                             f = c' * x;
                             if nnz(H)
                                 f = f + 0.5 * x' * H * x;
