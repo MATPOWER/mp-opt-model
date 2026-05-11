@@ -388,7 +388,7 @@ else    %% use cutting plain approach for lazy constraints
             %% partition constraints and variables into active/inactive
             %% [ la ] <= [ Aaa  0  ] [ xa ] <= [ ua ]
             %% [ li ]    [ Aia Aii ] [ xi ]    [ ui ]
-            active_cols = full(any(A(active_rows, :)));
+            active_cols = full(any(A(active_rows, :), 1));
             mi = sum(~active_rows);     %% number of inactive rows
             ni = sum(~active_cols);     %% number of inactive cols
 
