@@ -1123,24 +1123,15 @@ classdef opt_model < handle
             if mixed_integer
                 %% optimization vars, bounds, types
                 [x0, xmin, xmax, vtype] = mm.var.params();
-                if isfield(opt, 'x0')
-                    x0 = opt.x0;
-                end
-
-%                 if isfield(opt, 'fix_integer') && opt.fix_integer
-%                     %% fix integer variables
-%                     j = find(vtype == 'B' | vtype == 'I')';
-%                     xmin(j) = x0(j);
-%                     xmax(j) = x0(j);
-%                     mixed_integer = false;
-%                 end
             else
                 %% optimization vars, bounds, types
                 [x0, xmin, xmax] = mm.var.params();
-                if isfield(opt, 'x0')
-                    x0 = opt.x0;
-                end
                 vtype = [];
+            end
+            if isfield(opt, 'ignore_x0') && opt.ignore_x0
+                x0 = [];
+            elseif isfield(opt, 'x0')
+                x0 = opt.x0;
             end
         end
     end
