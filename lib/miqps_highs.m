@@ -38,6 +38,10 @@ function [x, f, eflag, output, lambda] = miqps_highs(H, c, A, l, u, xmin, xmax, 
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -47,7 +51,8 @@ function [x, f, eflag, output, lambda] = miqps_highs(H, c, A, l, u, xmin, xmax, 
 %               mis-match warning message
 %           highs_opt - options struct for HiGHS (see
 %               https://ergo-code.github.io/HiGHS/dev/options/definitions/),
-%               value in verbose overrides these options
+%               values in verbose, mip_gap, and mip_gap_abs override these
+%               options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -246,6 +251,12 @@ else
     highs_opt.output_flag = false;
 end
 highs_opt = highsoptset(highs_opt);
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    highs_opt.mip_rel_gap = opt.mip_gap;
+end
+if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+    highs_opt.mip_abs_gap = opt.mip_gap_abs;
+end
 
 %% get solver type
 if isfield(highs_opt, 'solver')

@@ -38,6 +38,10 @@ function [x, f, eflag, output, lambda] = miqps_gurobi(H, c, A, l, u, xmin, xmax,
 %               1 = some progress output
 %               2 = verbose progress output
 %               3 = even more verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -45,8 +49,8 @@ function [x, f, eflag, output, lambda] = miqps_gurobi(H, c, A, l, u, xmin, xmax,
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           grb_opt - options struct for GUROBI, value in verbose
-%                   overrides these options
+%           grb_opt - options struct for GUROBI, values in verbose, mip_gap,
+%               and mip_gap_abs override these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -208,6 +212,12 @@ if verbose > 1
 else
     g_opt.LogToConsole = 0;
     g_opt.OutputFlag = 0;
+end
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    g_opt.MIPGap = opt.mip_gap;
+end
+if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+    g_opt.MIPGapAbs = opt.mip_gap_abs;
 end
 
 if ~issparse(A)

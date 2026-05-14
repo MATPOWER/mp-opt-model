@@ -37,6 +37,10 @@ function [x, f, eflag, output, lambda] = miqps_cplex(H, c, A, l, u, xmin, xmax, 
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -44,8 +48,8 @@ function [x, f, eflag, output, lambda] = miqps_cplex(H, c, A, l, u, xmin, xmax, 
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           cplex_opt - options struct for CPLEX, value in verbose
-%                   overrides these options
+%           cplex_opt - options struct for CPLEX, values in verbose, mip_gap,
+%               and mip_gap_abs override these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -218,6 +222,12 @@ elseif verbose > 1
     cplex_opt.display = 'on';
 elseif verbose > 0
     cplex_opt.display = 'off';
+end
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    cplex_opt.mip.tolerances.mipgap = opt.mip_gap;
+end
+if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+    cplex_opt.mip.tolerances.absmipgap = opt.mip_gap_abs;
 end
 
 if isempty(Ai) && isempty(Ae)

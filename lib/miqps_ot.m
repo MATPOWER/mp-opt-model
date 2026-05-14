@@ -38,6 +38,10 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -45,8 +49,8 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           intlinprog_opt - options struct for INTLINPROG, value in verbose
-%                   overrides these options
+%           intlinprog_opt - options struct for INTLINPROG, values in verbose,
+%               mip_gap, and mip_gap_abs override these options
 %           linprog_opt - options struct for LINPROG, value in verbose
 %                   overrides these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
@@ -239,6 +243,12 @@ if isLP
         ot_opt = optimoptions('intlinprog');
         if ~isempty(opt) && isfield(opt, 'intlinprog_opt') && ~isempty(opt.intlinprog_opt)
             ot_opt = nested_struct_copy(ot_opt, opt.intlinprog_opt);
+        end
+        if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+            ot_opt.TolGapRel = opt.mip_gap;
+        end
+        if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+            ot_opt.TolGapAbs = opt.mip_gap_abs;
         end
     else
         ot_opt = optimoptions('linprog');

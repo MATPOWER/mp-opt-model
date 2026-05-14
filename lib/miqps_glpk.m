@@ -38,6 +38,8 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -45,8 +47,8 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           glpk_opt - options struct for GLPK, value in verbose
-%                   overrides these options
+%           glpk_opt - options struct for GLPK, values in verbose and mip_gap
+%               override these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -228,6 +230,9 @@ else
     glpk_opt = glpk_options;
 end
 glpk_opt.msglev = verbose;
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    glpk_opt.tolobj = opt.mip_gap;
+end
 
 %% call the solver
 if isempty(AA)

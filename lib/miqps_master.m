@@ -61,6 +61,10 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %               or number of lazy constraints
 %           lazy_violation_cost (1) - cost (scalar) of violating a lazy
 %               constraint when evaluating violations and thresholds
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           relax_integer (0) - relax integer constraints, if true
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem

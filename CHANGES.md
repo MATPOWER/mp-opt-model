@@ -5,6 +5,11 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 5/13/26
+  - Add options `mip_gap` and `mip_gap_abs` to the `miqps_<solver>()`
+    functions, including `miqps_master()` to provide a unified interface for
+    setting the MIP gap tolerance parameters for the various solvers.
+
 #### 5/7/26
   - Add basic lazy constraint support to `qps_master()` and `miqps_master()`
     via `lazy`, `lazy_thresh`, and `lazy_violation_cost` option fields, where

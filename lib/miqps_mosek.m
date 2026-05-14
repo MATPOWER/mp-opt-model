@@ -37,6 +37,10 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -44,8 +48,8 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           mosek_opt - options struct for MOSEK, value in verbose
-%                   overrides these options
+%           mosek_opt - options struct for MOSEK, values in verbose, mip_gap,
+%               and mip_gap_abs override these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -188,6 +192,12 @@ if ~isempty(p.opt) && isfield(p.opt, 'mosek_opt') && ~isempty(p.opt.mosek_opt)
     mosek_opt = mosek_options(p.opt.mosek_opt);
 else
     mosek_opt = mosek_options;
+end
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    mosek_opt.MSK_DPAR_MIO_TOL_REL_GAP = opt.mip_gap;
+end
+if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+    mosek_opt.MSK_DPAR_MIO_TOL_ABS_GAP = opt.mip_gap_abs;
 end
 
 %% set up problem struct for MOSEK
