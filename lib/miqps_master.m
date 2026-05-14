@@ -92,6 +92,7 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %           0 or negative values = solver specific failure codes
 %       OUTPUT : output struct with the following fields:
 %           alg - algorithm code of solver used
+%           mip_gap - relative MIP gap for solution, if provided by the solver
 %           (others) - algorithm specific fields
 %       LAMBDA : struct containing the Langrange and Kuhn-Tucker
 %           multipliers on the constraints, with fields:

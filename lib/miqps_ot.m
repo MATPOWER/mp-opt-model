@@ -112,7 +112,7 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 % See also miqps_master, intlinprog, quadprog, linprog.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -315,6 +315,9 @@ else
     );
 end
 
+if mi && eflag == 1
+    output.mip_gap = output.relativegap;
+end
 if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
     if length(intcon) < nx  %% still have some free variables
         if verbose

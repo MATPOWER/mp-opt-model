@@ -5,10 +5,14 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
-#### 5/13/26
+#### 5/14/26
   - Add options `mip_gap` and `mip_gap_abs` to the `miqps_<solver>()`
-    functions, including `miqps_master()` to provide a unified interface for
+    functions, including `miqps_master()` to provide a common interface for
     setting the MIP gap tolerance parameters for the various solvers.
+  - Add `mip_gap` field to `output` return value for `miqps_gurobi()` and
+    `miqps_ot()` (`miqps_highs()` already includes it) to provide a common
+    method to access the relative MIP gap for the solution of `miqps_master()`
+    for solvers that provide it.
 
 #### 5/7/26
   - Add basic lazy constraint support to `qps_master()` and `miqps_master()`
