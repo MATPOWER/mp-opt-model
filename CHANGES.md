@@ -13,6 +13,9 @@ since version 5.0
     `miqps_ot()` (`miqps_highs()` already includes it) to provide a common
     method to access the relative MIP gap for the solution of `miqps_master()`
     for solvers that provide it.
+  - Add option `lazy_mip_gap` to `miqps_master()` to allow use of different
+    relative MIP gap tolerances for the early iterations of lazy constraint
+    handling.
 
 #### 5/7/26
   - Add basic lazy constraint support to `qps_master()` and `miqps_master()`

@@ -231,7 +231,7 @@ else
 end
 glpk_opt.msglev = verbose;
 if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
-    glpk_opt.tolobj = opt.mip_gap;
+    glpk_opt.tolobj = max(opt.mip_gap, eps);
 end
 
 %% call the solver

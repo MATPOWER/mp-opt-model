@@ -767,9 +767,7 @@ This function can be used to solve the problem with any of the available solvers
     miqps_master(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
 [x, f, exitflag, output, lambda] = miqps_master(problem);
 \end{Code}
-The calling syntax for \code{miqps\_master} is identical to that used by \code{qps\_master} with the exception of a single new input argument, \code{vtype}, to specify the variable type, just before the options struct. The input arguments and options for \code{miqps\_master} are described in Tables~\ref{tab:miqps_master_input} and \ref{tab:miqps_master_options}, respectively. The outputs are identical to those shown in Table~\ref{tab:qps_master_output} for \code{qps\_master}, with the addition
-of a \code{mip\_gap} field in \code{output} for solvers that provide the relative MIP gap at the solution.
-
+The calling syntax for \code{miqps\_master} is identical to that used by \code{qps\_master} with the exception of a single new input argument, \code{vtype}, to specify the variable type, just before the options struct. The input arguments, output arguments, and options for \code{miqps\_master} are described in Tables~\ref{tab:miqps_master_input}, Tables~\ref{tab:miqps_master_output}, and \ref{tab:miqps_master_options}, respectively.
 
 \begin{table}[!ht]
 %\renewcommand{\arraystretch}{1.2}
@@ -799,46 +797,52 @@ name & description \\
 \end{threeparttable}
 \end{table}
 
-% \begin{table}[!ht]
-% %\renewcommand{\arraystretch}{1.2}
-% \centering
-% \begin{threeparttable}
-% \caption{Output Arguments for \code{miqps\_master}\tnote{\dag}}
-% \label{tab:miqps_master_output}
-% \footnotesize
-% \begin{tabular}{p{0.15\textwidth}p{0.78\textwidth}}
-% \toprule
-% name & description \\
-% \midrule
+
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Output Arguments for \code{miqps\_master}}
+\label{tab:miqps_master_output}
+\footnotesize
+\begin{tabular}{p{0.12\textwidth}p{0.82\textwidth}}
+\toprule
+name & description \\
+\midrule
 % \multicolumn{2}{l}{\emph{all \code{qps\_master} output args from Table~\ref{tab:qps_master_output}, with the following additions/modifications}} \\
 % & \\
-% \code{x}	& solution vector $x$	\\
-% \code{f}	& final objective function value $f(x) = \frac{1}{2} \trans{x} H x + \trans{c} x$	\\
-% \code{exitflag}	& exit flag	\\
-% & \begin{tabular}{r @{ -- } l}
-% 1 & converged successfully \\
-% $\le 0$ & solver-specific failure code \\
-% \end{tabular}	\\
 % \code{output}	& output struct with the following fields:	\\
 % & \begin{tabular}{r @{ -- } l}
-% \code{alg} & algorithm code of solver used \\
-% \emph{(others)} & solver-specific fields \\
+% \code{mip\_gap} & relative MIP gap at the solution, if provided by the solver \\
 % \end{tabular}	\\
-% \code{lambda}	& struct containing the Langrange and Kuhn-Tucker multipliers on the constraints, with fields:	\\
-% & \begin{tabular}{r @{ -- } l}
-% \code{mu\_l} & lower (left-hand) limit on linear constraints \\
-% \code{mu\_u} & upper (right-hand) limit on linear constraints \\
-% \code{lower} & lower bound on optimization variables \\
-% \code{upper} & upper bound on optimization variables \\
-% \end{tabular}	\\
-% \bottomrule
-% \end{tabular}
-% % \begin{tablenotes}
-% %  \scriptsize
-% %  \item [\dag] {Requires the installation of an optional package. See Appendix~\ref{app:optional_packages} for details on the corresponding package.}
-% % \end{tablenotes}
-% \end{threeparttable}
-% \end{table}
+\code{x}	& solution vector $x$	\\
+\code{f}	& final objective function value $f(x) = \frac{1}{2} \trans{x} H x + \trans{c} x$	\\
+\code{exitflag}	& exit flag	\\
+& \begin{tabular}{r @{ -- } l}
+1 & converged successfully \\
+$\le 0$ & solver-specific failure code \\
+\end{tabular}	\\
+\code{output}	& output struct with the following fields:	\\
+& \begin{tabular}{r @{ -- } l}
+\code{alg} & algorithm code of solver used \\
+\code{mip\_gap} & relative MIP gap at the solution, if provided by the solver \\
+\emph{(others)} & solver-specific fields \\
+\end{tabular}	\\
+\code{lambda}	& struct containing the Langrange and Kuhn-Tucker multipliers on the constraints, with fields:	\\
+& \begin{tabular}{r @{ -- } l}
+\code{mu\_l} & lower (left-hand) limit on linear constraints \\
+\code{mu\_u} & upper (right-hand) limit on linear constraints \\
+\code{lower} & lower bound on optimization variables \\
+\code{upper} & upper bound on optimization variables \\
+\end{tabular}	\\
+\bottomrule
+\end{tabular}
+% \begin{tablenotes}
+%  \scriptsize
+%  \item [\dag] {Requires the installation of an optional package. See Appendix~\ref{app:optional_packages} for details on the corresponding package.}
+% \end{tablenotes}
+\end{threeparttable}
+\end{table}
 
 
 \begin{table}[!ht]
@@ -875,6 +879,7 @@ name & default & description \\
 \code{lazy}	& \emph{empty}	& vector of constraint indices (logical or numeric) of lazy constraints, triggers an iterative cutting plane approach, if not empty; set to \codeq{all} to indicate all constraints are lazy \\
 \code{lazy\_thresh}	& \emph{empty}	& vector of constraint thresholds for including lazy constraints, size must match total number of constraints or number of lazy constraints \\
 \code{lazy\_violation\_cost}	& 1	& cost (scalar) of violating a lazy constraint when evaluating violations and thresholds \\
+\code{lazy\_mip\_gap}	& \code{[]}	& $n$-element vector of values to use for \code{mip\_gap} parameter for first $n$ iterations of lazy constraint handling, last element defines final MIP gap tolerance \\
 \code{mip\_gap}	& \code{[]}	& relative MIP gap tolerance, defaults to solver default/options \\
 \code{mip\_gap\_abs}	& \code{[]}	& absolute MIP gap tolerance, defaults to solver default/options \\
 \code{relax\_integer}	& 0	& relax integer constraints, if true \\
@@ -918,7 +923,7 @@ p = struct('c', c, 'A', A, 'u', u, 'xmax', xmax, 'vtype', vtype, 'opt', opt);
 
 Other examples of using \code{miqps\_master} to solve MILP and MIQP problems can be found in \code{t\_miqps\_master.m}.
 
-
+\clearpage
 \subsection{QCQP Solvers -- {\tt qcqps\_master}}
 \label{sec:qcqps_master}
 
@@ -6750,6 +6755,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \item Add \code{mip\_gap} field to \code{output} return value for \code{miqps\_gurobi()} and \code{miqps\_ot()} (\code{miqps\_highs()} already includes it) to provide a common method to access the relative MIP gap for the solution of \code{miqps\_master()} for solvers that provide it.
 \item Add \code{lazy} option for \code{miqps\_master()} and \code{qps\_master()} to enable basic handling of lazy constraints, where the problem is solved iteratively beginning without lazy constraints, adding at each iteration only those that are violated or within a threshold, until all constraints are satisfied.
 \item Add \code{lazy\_thresh} option for \code{miqps\_master()} and \code{qps\_master()} to control the threshold for including lazy constraints and \code{lazy\_violation\_cost} option for controlling the penalty for violating a lazy constraint when evaluating violations and thresholds.
+\item Add \code{lazy\_mip\_gap} option for \code{miqps\_master()} to allow use of different relative MIP gap tolerances for the early iterations of lazy constraint handling.
 \item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
 \item Support for \highs{} solution status in \code{eflag} output of \code{miqps\_highs()} and \code{qps\_highs()}.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.

@@ -61,6 +61,9 @@ function [x, f, eflag, output, lambda] = miqps_master(H, c, A, l, u, xmin, xmax,
 %               or number of lazy constraints
 %           lazy_violation_cost (1) - cost (scalar) of violating a lazy
 %               constraint when evaluating violations and thresholds
+%           lazy_mip_gap (1) - n-element vector of values to use for mip_gap
+%               parameter for first n iterations of lazy constraint handling,
+%               last element defines final MIP gap tolerance
 %           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
 %               options or solver default
 %           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
@@ -408,6 +411,19 @@ if ~done
             %% expand vtype to n elements if necessary
             vtype = char(vtype * ones(1, n));
         end
+        if verbose
+            if isempty(find(vtype == 'B' | vtype == 'I' | ...
+                    vtype == 'S' | vtype == 'N', 1))
+                mixed_int = false;
+            else
+                mixed_int = true;
+            end
+        end
+        if isfield(opt, 'lazy_mip_gap') && ~isempty(opt.lazy_mip_gap)
+            lazy_mip_gap = opt.lazy_mip_gap;
+        else
+            lazy_mip_gap = [];
+        end
         ivars = (vtype ~= 'C'); %% logical index of integer variables
         ilazy = 0;
         nlazy = sum(lazy);
@@ -426,14 +442,28 @@ if ~done
         x = x0;
         while infeasible
             ilazy = ilazy + 1;      %% iteration counter
+            if ~isempty(lazy_mip_gap) && ilazy <= length(lazy_mip_gap)
+                opt_no_lazy.mip_gap = lazy_mip_gap(ilazy);
+            end
             %% solve with active constraints
             t0 = tic;
             [x, f, eflag, output, lambda] = ...
                 miqps_master(H, c, A(active_rows, :), l(active_rows), u(active_rows), ...
                     xmin, xmax, x, vtype, opt_no_lazy);
             if verbose
-                fprintf('----- %3d : Solved with %d of %d lazy constraints : eflag = %d (%g sec)\n', ...
-                    ilazy, sum(lazy & active_rows), nlazy, eflag, toc(t0));
+                if isfield(output, 'mip_gap')
+                    mip_gap_out = sprintf(', gap = %g', output.mip_gap);
+                else
+                    mip_gap_out = '';
+                end
+                if mixed_int && isfield(opt_no_lazy, 'mip_gap')
+                    mip_gap_in = sprintf(', gap tol = %g', opt_no_lazy.mip_gap);
+                else
+                    mip_gap_in = '';
+                end
+                fprintf('----- %3d : Solved with %d of %d lazy constraints%s%s : eflag = %d (%g sec)\n', ...
+                    ilazy, sum(lazy & active_rows), nlazy, mip_gap_out, ...
+                    mip_gap_in, eflag, toc(t0));
             end
             out{end+1} = output;
             out{end}.eflag = eflag;
@@ -557,7 +587,18 @@ if ~done
                     if verbose
                         fprintf('-----       No violations detected via %s\n', status);
                     end
-                    infeasible = false;
+                    if ~isempty(lazy_mip_gap) && isfield(output, 'mip_gap') && ...
+                            output.mip_gap > lazy_mip_gap(end)
+                        %% desired final MIP gap tolerance not met,
+                        %% re-solve with desired tolerance
+                        if verbose
+                            fprintf('-----       Desired relative MIP tolerance (%g) not met (%g)\n', ...
+                                lazy_mip_gap(end), output.mip_gap);
+                        end
+                        lazy_mip_gap(ilazy+1:end) = lazy_mip_gap(end);
+                    else
+                        infeasible = false;
+                    end
                 end
             else    %% done, no more inactive constraints left
                 infeasible = false;

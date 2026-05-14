@@ -103,6 +103,7 @@ for j = 1:2
         if j == 2
             name = [name ' (lazy)'];
             opt.lazy = 'all';
+            opt.lazy_mip_gap = [0.1 0.03 0];
         end
         opt_r = opt;
         opt_r.relax_integer = 1;
