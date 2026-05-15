@@ -5,6 +5,12 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 5/15/26
+  - Add ability for `mp.opt_model.solve()` to solve LP, QP, MILP, and MIQP
+    problems with only a subset of constraints included, specified as a
+    constraint index vector (logical or numeric) in a new `active_constraints`
+    field of the options struct.
+
 #### 5/14/26
   - Add options `mip_gap` and `mip_gap_abs` to the `miqps_<solver>()`
     functions, including `miqps_master()` to provide a common interface for

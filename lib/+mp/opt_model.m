@@ -794,13 +794,27 @@ classdef opt_model < handle
                     [HH, CC, C0] = mm.qdc.params(mm.var);
                     [Q, B, ll, uu] = mm.qcn.params(mm.var);
                     [A, l, u] = mm.lin.params(mm.var);
-                    [mixed_integer, x0, xmin, xmax, vtype] = ...
+                    [mixed_integer, x0, xmin, xmax, vtype, i] = ...
                         mm.mixed_integer_helper(opt);
                     if mixed_integer
                         %% run solver
                         if isempty(Q)          %% MILP, MIQP - mixed integer linear/quadratic program
-                            [x, f, eflag, output, lambda] = ...
-                                miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
+                            if isempty(i)
+                                [x, f, eflag, output, lambda] = ...
+                                    miqps_master(HH, CC, A, l, u, xmin, xmax, x0, vtype, opt);
+                            else
+                                if isfield(opt, 'lazy') && ~isempty(opt.lazy)
+                                    opt.lazy = opt.lazy(i);
+                                end
+                                [x, f, eflag, output, lambda] = ...
+                                    miqps_master(HH, CC, A(i, :), l(i), u(i), xmin, xmax, x0, vtype, opt);
+                                mu_l = lambda.mu_l;
+                                mu_u = lambda.mu_u;
+                                lambda.mu_l = zeros(size(A, 1), 1);
+                                lambda.mu_u = lambda.mu_l;
+                                lambda.mu_l(i) = mu_l;
+                                lambda.mu_u(i) = mu_u;
+                            end
                         else                   %% MIQCQP - mixed integer quadratically constrained quadratic program
                             % To be implemented ...
                             % [x, f, eflag, output, lambda] = ...
@@ -809,8 +823,22 @@ classdef opt_model < handle
                     else                %% LP, QP - linear/quadratic program
                         %% run solver
                         if isempty(Q)          %% LP, QP - linear/quadratic program
-                            [x, f, eflag, output, lambda] = ...
-                                qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
+                            if isempty(i)
+                                [x, f, eflag, output, lambda] = ...
+                                    qps_master(HH, CC, A, l, u, xmin, xmax, x0, opt);
+                            else
+                                if isfield(opt, 'lazy') && ~isempty(opt.lazy)
+                                    opt.lazy = opt.lazy(i);
+                                end
+                                [x, f, eflag, output, lambda] = ...
+                                    qps_master(HH, CC, A(i, :), l(i), u(i), xmin, xmax, x0, opt);
+                                mu_l = lambda.mu_l;
+                                mu_u = lambda.mu_u;
+                                lambda.mu_l = zeros(size(A, 1), 1);
+                                lambda.mu_u = lambda.mu_l;
+                                lambda.mu_l(i) = mu_l;
+                                lambda.mu_u(i) = mu_u;
+                            end
                         else                   %% QCQP - quadratically constrained quadratic program
                             [x, f, eflag, output, lambda] = ...
                                 qcqps_master(HH, CC, Q, B, ll, uu, A, l, u, xmin, xmax, x0, opt);
@@ -1115,7 +1143,7 @@ classdef opt_model < handle
     end     %% methods
 
     methods (Access=protected)
-        function [mixed_integer, x0, xmin, xmax, vtype] = mixed_integer_helper(mm, opt)
+        function [mixed_integer, x0, xmin, xmax, vtype, active_constraints] = mixed_integer_helper(mm, opt)
             %
             pt = mm.problem_type();
             mixed_integer = strcmp(pt(1:2), 'MI') && ...
@@ -1132,6 +1160,18 @@ classdef opt_model < handle
                 x0 = [];
             elseif isfield(opt, 'x0')
                 x0 = opt.x0;
+            end
+            if nargout > 5 && isfield(opt, 'active_constraints') && ...
+                    ~isempty(opt.active_constraints)
+                if islogical(opt.active_constraints) && length(opt.active_constraints) == mm.lin.N || ...
+                        min(opt.active_constraints) >= 1 && max(opt.active_constraints) <= mm.lin.n
+                    active_constraints = opt.active_constraints;
+                else
+                    warning('mp.opt_model.solve: opt.active_constraints is being ignored since it is not consistent with the full constraint matrix');
+                    active_constraints = [];
+                end
+            else
+                active_constraints = [];
             end
         end
     end

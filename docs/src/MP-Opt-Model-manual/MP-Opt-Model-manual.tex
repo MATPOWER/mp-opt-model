@@ -2728,6 +2728,7 @@ name & default & description \\
 \code{~~parse\_soln}	& 0	& flag that specifies whether or not to call the \code{parse\_soln} method and place the return values in the \code{soln}
 property of the field type objects \\
 \code{~~x0}	& \emph{empty}	& optional initial value of $x$, overrides value stored in model, \emph{(ignored by some solvers)}	\\
+\code{~~active\_constraints}	& \emph{empty}	& optional index vector (logical or numeric) of subset of constraints to include \emph{(currently implemented only for LP/QP, MILP/MIQP problems)}	\\
 \midrule
 \multicolumn{3}{l}{\emph{Additional Options for Specific Problem Types}} \\
 % \emph{problem type} & & \emph{for details see ...} \\
@@ -6756,6 +6757,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \item Add \code{lazy} option for \code{miqps\_master()} and \code{qps\_master()} to enable basic handling of lazy constraints, where the problem is solved iteratively beginning without lazy constraints, adding at each iteration only those that are violated or within a threshold, until all constraints are satisfied.
 \item Add \code{lazy\_thresh} option for \code{miqps\_master()} and \code{qps\_master()} to control the threshold for including lazy constraints and \code{lazy\_violation\_cost} option for controlling the penalty for violating a lazy constraint when evaluating violations and thresholds.
 \item Add \code{lazy\_mip\_gap} option for \code{miqps\_master()} to allow use of different relative MIP gap tolerances for the early iterations of lazy constraint handling.
+\item Support for \code{mp.opt\_model.solve()} to solve LP, QP, MILP, and MIQP problems with only a subset of constraints included, specified as a constraint index vector (logical or numeric) in a new \code{active\_constraints} field of the options struct.
 \item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
 \item Support for \highs{} solution status in \code{eflag} output of \code{miqps\_highs()} and \code{qps\_highs()}.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.
