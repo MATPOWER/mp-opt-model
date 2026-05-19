@@ -510,6 +510,7 @@ else    %% use cutting plain approach for lazy constraints
     if length(out) > 1  %% keep output of previous iterations
         output.lazy_output = out(1:end-1);
     end
+    output.active_constraints = active_rows;
 end
 if ~isfield(output, 'alg') || isempty(output.alg)
     output.alg = alg;

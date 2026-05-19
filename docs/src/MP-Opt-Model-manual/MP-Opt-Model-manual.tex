@@ -649,6 +649,7 @@ $\le 0$ & solver-specific failure code \\
 \end{tabular}	\\
 \code{output}	& output struct with the following fields:	\\
 & \begin{tabular}{r @{ -- } l}
+\code{active\_constraints} & logical vector indicating active constraints\tnote{\dag} \\
 \code{alg} & algorithm code of solver used \\
 \emph{(others)} & solver-specific fields \\
 \end{tabular}	\\
@@ -661,10 +662,10 @@ $\le 0$ & solver-specific failure code \\
 \end{tabular}	\\
 \bottomrule
 \end{tabular}
-% \begin{tablenotes}
-%  \scriptsize
-%  \item [\dag] {Requires the installation of an optional package. See Appendix~\ref{app:optional_packages} for details on the corresponding package.}
-% \end{tablenotes}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {Only present if \code{lazy} option was provided as input. A constraint is considered active unless it was specified as lazy \emph{and} was not included as an active row in the final solve.}
+\end{tablenotes}
 \end{threeparttable}
 \end{table}
 
@@ -824,6 +825,7 @@ $\le 0$ & solver-specific failure code \\
 \end{tabular}	\\
 \code{output}	& output struct with the following fields:	\\
 & \begin{tabular}{r @{ -- } l}
+\code{active\_constraints} & logical vector indicating active constraints\tnote{\dag} \\
 \code{alg} & algorithm code of solver used \\
 \code{mip\_gap} & relative MIP gap at the solution, if provided by the solver \\
 \emph{(others)} & solver-specific fields \\
@@ -837,10 +839,10 @@ $\le 0$ & solver-specific failure code \\
 \end{tabular}	\\
 \bottomrule
 \end{tabular}
-% \begin{tablenotes}
-%  \scriptsize
-%  \item [\dag] {Requires the installation of an optional package. See Appendix~\ref{app:optional_packages} for details on the corresponding package.}
-% \end{tablenotes}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {Only present if \code{lazy} option was provided as input. A constraint is considered active unless it was specified as lazy \emph{and} was not included as an active row in the final solve.}
+\end{tablenotes}
 \end{threeparttable}
 \end{table}
 
@@ -2728,7 +2730,7 @@ name & default & description \\
 \code{~~parse\_soln}	& 0	& flag that specifies whether or not to call the \code{parse\_soln} method and place the return values in the \code{soln}
 property of the field type objects \\
 \code{~~x0}	& \emph{empty}	& optional initial value of $x$, overrides value stored in model, \emph{(ignored by some solvers)}	\\
-\code{~~active\_constraints}	& \emph{empty}	& optional index vector (logical or numeric) of subset of constraints to include \emph{(currently implemented only for LP/QP, MILP/MIQP problems)}	\\
+\code{~~active\_constraints}	& \emph{empty}	& optional index vector (logical or numeric) of subset of constraints to include\tnote{\dag}	\\
 \midrule
 \multicolumn{3}{l}{\emph{Additional Options for Specific Problem Types}} \\
 % \emph{problem type} & & \emph{for details see ...} \\
@@ -2743,10 +2745,10 @@ property of the field type objects \\
 ~~PNE & & see Table~\ref{tab:pnes_master_options} \\
 \bottomrule
 \end{tabular}
-% \begin{tablenotes}
-%  \scriptsize
-%  \item [*] {}
-% \end{tablenotes}
+\begin{tablenotes}
+ \scriptsize
+ \item [\dag] {Currently implemented for LP/QP, MILP/MIQP problems only. When provided, a logical index vector indicating the active constraints will also be returned in the \code{active\_constraints} field of the \code{output} return value. If the \code{lazy} option was also provided, this output will indicate only those that were included in the active input set \emph{and} included in the final iteration of lazy constraint handling.}
+\end{tablenotes}
 \end{threeparttable}
 \end{table}
 
@@ -6758,6 +6760,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \item Add \code{lazy\_thresh} option for \code{miqps\_master()} and \code{qps\_master()} to control the threshold for including lazy constraints and \code{lazy\_violation\_cost} option for controlling the penalty for violating a lazy constraint when evaluating violations and thresholds.
 \item Add \code{lazy\_mip\_gap} option for \code{miqps\_master()} to allow use of different relative MIP gap tolerances for the early iterations of lazy constraint handling.
 \item Support for \code{mp.opt\_model.solve()} to solve LP, QP, MILP, and MIQP problems with only a subset of constraints included, specified as a constraint index vector (logical or numeric) in a new \code{active\_constraints} field of the options struct.
+\item Add \code{active\_constraints} field, a logical vector matching the constraint dimension, to \code{output} return value for LP, QP, MILP, and MIQP problems when \code{lazy} and/or \code{active\_constraints} input options are provided. For the lazy constraint case, an element is true if the corresponding constraint was included in the final solve.
 \item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
 \item Support for \highs{} solution status in \code{eflag} output of \code{miqps\_highs()} and \code{qps\_highs()}.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.

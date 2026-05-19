@@ -814,6 +814,13 @@ classdef opt_model < handle
                                 lambda.mu_u = lambda.mu_l;
                                 lambda.mu_l(i) = mu_l;
                                 lambda.mu_u(i) = mu_u;
+                                active_constraints = false(size(A, 1), 1);
+                                if isfield(output, 'active_constraints')
+                                    active_constraints(i) = output.active_constraints;
+                                else
+                                    active_constraints(i) = true;
+                                end
+                                output.active_constraints = active_constraints;
                             end
                         else                   %% MIQCQP - mixed integer quadratically constrained quadratic program
                             % To be implemented ...
