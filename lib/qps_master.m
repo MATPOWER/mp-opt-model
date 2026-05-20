@@ -208,7 +208,7 @@ if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
 else
     verbose = 0;
 end
-if ~isempty(opt) && isfield(opt, 'lazy') && ~isempty(opt.lazy)
+if ~isempty(opt) && isfield(opt, 'lazy') && any(opt.lazy)
     lazy = opt.lazy;
     [m, n] = size(A);
     %% ensure that lazy is logical
