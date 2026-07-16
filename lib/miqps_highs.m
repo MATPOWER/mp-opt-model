@@ -52,7 +52,8 @@ function [x, f, eflag, output, lambda] = miqps_highs(H, c, A, l, u, xmin, xmax, 
 %           highs_opt - options struct for HiGHS (see
 %               https://ergo-code.github.io/HiGHS/dev/options/definitions/),
 %               values in verbose, mip_gap, and mip_gap_abs override these
-%               options
+%               options, unless highs_opt.output_to_console is false, in the
+%               case of verbose
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -240,15 +241,21 @@ if ~isempty(x0)
 end
 
 %% set up options struct for HiGHS
+output_flag_override = false;
 if ~isempty(opt) && isfield(opt, 'highs_opt') && ~isempty(opt.highs_opt)
     highs_opt = highs_options(opt.highs_opt);
+    if isfield(opt.highs_opt, 'output_flag')
+        output_flag_override = true;
+    end
 else
     highs_opt = highs_options;
 end
-if verbose > 1
-    highs_opt.output_flag = true;
-else
-    highs_opt.output_flag = false;
+if ~output_flag_override
+    if verbose > 1
+        highs_opt.output_flag = true;
+    else
+        highs_opt.output_flag = false;
+    end
 end
 highs_opt = highsoptset(highs_opt);
 if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
