@@ -278,7 +278,7 @@ if verbose
         'deterministic concurrent simplex'
     };
     vn = gurobiver;
-    fprintf('Gurobi Version %s -- %s %s solver\n', ...
+    mp_printf('Gurobi Version %s -- %s %s solver\n', ...
         vn, alg_names{g_opt.Method+2}, lpqp);
 end
 results = gurobi(m, g_opt);
@@ -375,7 +375,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
     end
     if length(k) < nx   %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
             tol = opt.price_stage_warn_tol;

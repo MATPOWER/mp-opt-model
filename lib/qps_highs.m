@@ -96,7 +96,7 @@ function [x, f, eflag, output, lambda] = qps_highs(H, c, A, l, u, xmin, xmax, x0
 % See also qps_master, callhighs.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -232,11 +232,11 @@ if verbose
     else
         solver_name = 'unknown';
     end
-    fprintf('HiGHS Version %s -- %s %s solver\n', vn, solver_name, lpqp);
+    mp_printf('HiGHS Version %s -- %s %s solver\n', vn, solver_name, lpqp);
 end
 [soln, info, opts, basis] = callhighs(c, A, l, u, xmin, xmax, H, [], highs_opt, [], x0);
 if verbose
-    fprintf('HiGHS solution status: %s\n', info.model_status_string);
+    mp_printf('HiGHS solution status: %s\n', info.model_status_string);
 end
 
 %% extract results

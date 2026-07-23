@@ -16,7 +16,7 @@ function rv = gurobiver(varargin)
 % See also mpver, gurobi.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -40,8 +40,8 @@ if nargout > 0
     end
 else
     if g.av
-        fprintf('%-22s Version %-10s %-11s\n', v.Name, v.Version, v.Date);
+        mp_printf('%-22s Version %-10s %-11s\n', v.Name, v.Version, v.Date);
     else
-        fprintf('%-22s -- not installed --\n', v.Name);
+        mp_printf('%-22s -- not installed --\n', v.Name);
     end
 end

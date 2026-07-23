@@ -96,7 +96,7 @@ function [x, f, eflag, output, lambda] = qps_osqp(H, c, A, l, u, xmin, xmax, x0,
 % See also qps_master, osqp.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -238,11 +238,11 @@ end
 %% solve model
 if verbose
     vn = osqpver;
-    fprintf('OSQP Version %s -- %s solver\n', vn, lpqp);
+    mp_printf('OSQP Version %s -- %s solver\n', vn, lpqp);
 end
 res = o.solve();
 if verbose
-    fprintf('OSQP solution status: %s\n', res.info.status);
+    mp_printf('OSQP solution status: %s\n', res.info.status);
 end
 
 %% extract results

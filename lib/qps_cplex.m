@@ -93,7 +93,7 @@ function [x, f, eflag, output, lambda] = qps_cplex(H, c, A, l, u, xmin, xmax, x0
 % See also qps_master, cplexqp, cplexlp, cplex_options.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -226,14 +226,14 @@ if verbose
 end
 if ~nnz(H)
     if verbose
-        fprintf('CPLEX Version %s -- %s LP solver\n', ...
+        mp_printf('CPLEX Version %s -- %s LP solver\n', ...
             vstr, alg_names{cplex_opt.lpmethod+1});
     end
     [x, f, eflag, output, lam] = ...
         cplexlp(c, Ai, bi, Ae, be, xmin, xmax, x0, cplex_opt);
 else
     if verbose
-        fprintf('CPLEX Version %s --  %s QP solver\n', ...
+        mp_printf('CPLEX Version %s --  %s QP solver\n', ...
             vstr, alg_names{cplex_opt.qpmethod+1});
     end
     %% ensure H is numerically symmetric

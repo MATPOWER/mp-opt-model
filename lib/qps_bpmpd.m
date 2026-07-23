@@ -100,7 +100,7 @@ function [x, f, eflag, output, lambda] = qps_bpmpd(H, c, A, l, u, xmin, xmax, x0
 % See also qps_master.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -272,7 +272,7 @@ else
 end
 if strcmp(computer, 'PCWIN')
     if prnlev
-        fprintf('Windows version of BPMPD_MEX cannot print to screen.\n');
+        mp_printf('Windows version of BPMPD_MEX cannot print to screen.\n');
     end
     prnlev = 0;   % The Windows incarnation of bp was born mute and deaf,
 end               % probably because of acute shock after realizing its fate.
@@ -357,7 +357,7 @@ if eflag > 0
     if ~isempty(xmin)
         lb_violation = xmin - x;
         if verbose > 1
-            fprintf('max variable lower bound violatation: %g\n', max(lb_violation));
+            mp_printf('max variable lower bound violatation: %g\n', max(lb_violation));
         end
     else
         lb_violation = zeros(nx, 1);
@@ -365,7 +365,7 @@ if eflag > 0
     if ~isempty(xmax)
         ub_violation = x - xmax;
         if verbose > 1
-            fprintf('max variable upper bound violation: %g\n', max(ub_violation));
+            mp_printf('max variable upper bound violation: %g\n', max(ub_violation));
         end
     else
         ub_violation = zeros(nx, 1);
@@ -373,7 +373,7 @@ if eflag > 0
     if neq > 0
         eq_violation = abs( Ae * x - be );
         if verbose > 1
-            fprintf('max equality constraint violation: %g\n', max(eq_violation));
+            mp_printf('max equality constraint violation: %g\n', max(eq_violation));
         end
     else
         eq_violation = zeros(neq, 1);
@@ -381,7 +381,7 @@ if eflag > 0
     if niq
         ineq_violation = Ai * x - bi;
         if verbose > 1
-            fprintf('max inequality constraint violation: %g\n', max(ineq_violation));
+            mp_printf('max inequality constraint violation: %g\n', max(ineq_violation));
         end
     else
         ineq_violation = zeros(niq, 1);
@@ -416,11 +416,11 @@ if eflag > 0
                     max(ineq_violation));
         end
         if verbose > 0
-            fprintf('\nWARNING: This version of BPMPD_MEX has a bug which caused it to return\n');
-            fprintf(  '         an incorrect (infeasible) solution for this particular problem.\n');
+            mp_printf('\nWARNING: This version of BPMPD_MEX has a bug which caused it to return\n');
+            mp_printf(  '         an incorrect (infeasible) solution for this particular problem.\n');
         end
         for err_idx = 1:err_cnt
-            fprintf('         %s\n', errs{err_idx});
+            mp_printf('         %s\n', errs{err_idx});
         end
         if bpmpd_bug_fatal
             error('qps_bpmpd: %s\n%s', ...

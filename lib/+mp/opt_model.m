@@ -67,7 +67,7 @@ classdef opt_model < handle
 % See also mp.set_manager.
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -995,7 +995,7 @@ classdef opt_model < handle
             set_types = mm.get_set_types();
             set_types = horzcat(set_types, more_set_types);
             % set_types = {'var', 'nle', 'nli', 'lin', 'qcn', 'qdc', 'nlc', more_set_types{:}};
-            fprintf('\n');
+            mp_printf('\n');
             for k = 1:length(set_types)
                 mm.(set_types{k}).display(set_types{k});
             end
@@ -1012,7 +1012,7 @@ classdef opt_model < handle
             % Called automatically by display, *before* displaying each
             % set type.
 
-            fprintf('CLASS : %s\n', class(mm));
+            mp_printf('CLASS : %s\n', class(mm));
         end
 
         function mm = display_footer(mm)
@@ -1027,17 +1027,17 @@ classdef opt_model < handle
             %% user data
             fields = fieldnames(mm.userdata);
             if ~isempty(fields)
-                fprintf('\nUSER DATA\n')
-                fprintf('=========\n')
-                fprintf('  name                               size       class\n');
-                fprintf(' ------------------------------   -----------  --------------------\n');
+                mp_printf('\nUSER DATA\n')
+                mp_printf('=========\n')
+                mp_printf('  name                               size       class\n');
+                mp_printf(' ------------------------------   -----------  --------------------\n');
                 for k = 1:length(fields)
                     f = mm.userdata.(fields{k});
                     [m, n] = size(f);
-                    fprintf('  %-31s %5dx%-5d   %s\n', fields{k}, m, n, class(f));
+                    mp_printf('  %-31s %5dx%-5d   %s\n', fields{k}, m, n, class(f));
                 end
             else
-                fprintf('USER DATA                   :  <none>\n');
+                mp_printf('USER DATA                   :  <none>\n');
             end
         end
 
@@ -1144,7 +1144,7 @@ classdef opt_model < handle
                     end
                 end             %% loop over set types
             else
-                fprintf(fid, 'Not a solved model.\n');
+                mp_printf(fid, 'Not a solved model.\n');
             end
         end
     end     %% methods

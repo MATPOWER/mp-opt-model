@@ -97,7 +97,7 @@ function [x, f, eflag, output, lambda] = qps_mosek(H, c, A, l, u, xmin, xmax, x0
 % See also qps_master, mosekopt.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -258,7 +258,7 @@ if verbose
     if isempty(vn)
         vn = '<unknown>';
     end
-    fprintf('MOSEK Version %s -- %s %s solver\n', ...
+    mp_printf('MOSEK Version %s -- %s %s solver\n', ...
             vn, alg_names{mosek_opt.MSK_IPAR_OPTIMIZER+1}, lpqp);
 end
 cmd = sprintf('minimize echo(%d)', verbose);
@@ -334,7 +334,7 @@ if (verbose || r == sc.MSK_RES_ERR_LICENSE || ...
         r == sc.MSK_RES_ERR_LICENSE_SERVER_VERSION || ...
         r == sc.MSK_RES_ERR_MISSING_LICENSE_FILE) ...
         && ~isempty(msg)  %% always alert user of license problems
-    fprintf('%s\n', msg);
+    mp_printf('%s\n', msg);
 end
 
 %%-----  repackage results  -----

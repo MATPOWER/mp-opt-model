@@ -71,7 +71,7 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
 % See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2019-2026, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
@@ -823,21 +823,21 @@ classdef sm_quad_constraint < mp.set_manager_opt_model
                     else
                         ub = obj.sprintf_num(8, vu(idxs(k)));
                     end
-                    fprintf(fid, '%9s%9s%9s%9s%9s\n', ...
+                    mp_printf(fid, '%9s%9s%9s%9s%9s\n', ...
                         mu_lb, lb, obj.sprintf_num(8, v(idxs(k))), ub, mu_ub);
                 end
 
                 %% print footer rows
-                fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
-                fprintf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', 'Min', ...
+                mp_printf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                mp_printf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', 'Min', ...
                     obj.sprintf_num(8, min(mu_l)), obj.sprintf_num(8, min(vl)), ...
                     obj.sprintf_num(8, min(v)), ...
                     obj.sprintf_num(8, min(vu)), obj.sprintf_num(8, min(mu_u)));
-                fprintf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', 'Max', ...
+                mp_printf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', 'Max', ...
                     obj.sprintf_num(8, max(mu_l)), obj.sprintf_num(8, max(vl)), ...
                     obj.sprintf_num(8, max(v)), ...
                     obj.sprintf_num(8, max(vu)), obj.sprintf_num(8, max(mu_u)));
-                fprintf(fid, '\n');
+                mp_printf(fid, '\n');
             end
         end
 

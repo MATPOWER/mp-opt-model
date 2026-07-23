@@ -107,7 +107,7 @@ classdef set_manager < handle
 % ^-----^  TO BE DELETED  ^-----^
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -386,20 +386,20 @@ classdef set_manager < handle
 
             if obj.NS
                 fmt = '%-26s %6s %8s %8s %8s\n';
-                fprintf(fmt, obj.label, 'name', 'i1', 'iN', 'N');
-                fprintf(fmt, repmat('=', 1, length(obj.label)), '------', '-----', '-----', '------');
+                mp_printf(fmt, obj.label, 'name', 'i1', 'iN', 'N');
+                mp_printf(fmt, repmat('=', 1, length(obj.label)), '------', '-----', '-----', '------');
                 idx = obj.idx;
                 fmt = '%10d:%22s %8d %8d %8d\n';
                 for k = 1:obj.NS
                     name = obj.order(k).name;
                     if isempty(obj.order(k).idx)
-                        fprintf(fmt, k, name, idx.i1.(name), idx.iN.(name), idx.N.(name));
+                        mp_printf(fmt, k, name, idx.i1.(name), idx.iN.(name), idx.N.(name));
                     else
                         vsidx = obj.order(k).idx;
                         str = '%d'; for m = 2:length(vsidx), str = [str ',%d']; end
                         s = substruct('.', name, '()', vsidx);
                         nname = sprintf(['%s{' str, '}'], name, vsidx{:});
-                        fprintf(fmt, k, nname, ...
+                        mp_printf(fmt, k, nname, ...
                                 subsref(idx.i1, s), subsref(idx.iN, s), subsref(idx.N, s));
                     end
                 end
@@ -409,9 +409,9 @@ classdef set_manager < handle
                     tag = [tag '.'];
                 end
                 fmt = sprintf('%%10d = %%sNS%%%dd = %%sN\\n\\n', 36-length(tag));
-                fprintf(fmt, obj.NS, tag, obj.N, tag);
+                mp_printf(fmt, obj.NS, tag, obj.N, tag);
             else
-                fprintf('%-26s  :  <none>\n', obj.label);
+                mp_printf('%-26s  :  <none>\n', obj.label);
             end
         end
 

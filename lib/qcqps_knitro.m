@@ -104,7 +104,7 @@ function [x, f, eflag, output, lambda] = qcqps_knitro(H, c, Q, B, lq, uq, A, l, 
 % See also qcqps_master, artelys_knitro_options, qcqp_knitro
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2019-2026, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
@@ -352,7 +352,7 @@ if verbose
         'sequential QP'
         };
     vn = knitrover;
-    fprintf('Artelys Knitro Version %s -- %s %s solver\n', ...
+    mp_printf('Artelys Knitro Version %s -- %s %s solver\n', ...
         vn, alg_names{kn_opt.algorithm+1}, lpqcqp);
 end
 

@@ -2,7 +2,7 @@ function t_om_solve_qcqps(quiet)
 % t_om_solve_qcqps - Tests of QCQP solvers via opt_model.solve.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
@@ -248,7 +248,7 @@ end
 om.display_soln(fd);    %% write out solution
 fclose(fd);
 if ~t_file_match(fname_g, fname_e, t, reps, 1);
-    fprintf('  compare these 2 files:\n    %s\n    %s\n', fname_g, fname_e);
+    mp_printf('  compare these 2 files:\n    %s\n    %s\n', fname_g, fname_e);
     if show_diff_on_fail
         cmd = sprintf('%s %s %s', diff_tool, fname_g, fname_e);
         [status, result] = system(cmd);

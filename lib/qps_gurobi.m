@@ -96,7 +96,7 @@ function [x, f, eflag, output, lambda] = qps_gurobi(H, c, A, l, u, xmin, xmax, x
 % See also qps_master, gurobi.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -246,7 +246,7 @@ if verbose
     else
         alg_name = 'unknown';
     end
-    fprintf('Gurobi Version %s -- %s %s solver\n', ...
+    mp_printf('Gurobi Version %s -- %s %s solver\n', ...
         vn, alg_name, lpqp);
 end
 results = gurobi(m, g_opt);

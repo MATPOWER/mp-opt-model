@@ -109,7 +109,7 @@ function [x, f, eflag, output, lambda] = miqps_cplex(H, c, A, l, u, xmin, xmax, 
 % See also miqps_master, cplexmiqp, cplexmilp, cplexqp, cplexlp, cplex_options.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -264,7 +264,7 @@ end
 if mi
     if ~nnz(H)
         if verbose
-            fprintf('CPLEX Version %s -- %s MILP solver\n', ...
+            mp_printf('CPLEX Version %s -- %s MILP solver\n', ...
                 vstr, alg_names{cplex_opt.lpmethod+1});
         end
         [x, f, eflag, output] = ...
@@ -272,7 +272,7 @@ if mi
         lam = [];
     else
         if verbose
-            fprintf('CPLEX Version %s --  %s MIQP solver\n', ...
+            mp_printf('CPLEX Version %s --  %s MIQP solver\n', ...
                 vstr, alg_names{cplex_opt.qpmethod+1});
         end
         %% ensure H is numerically symmetric
@@ -286,14 +286,14 @@ if mi
 else
     if ~nnz(H)
         if verbose
-            fprintf('CPLEX Version %s -- %s LP solver\n', ...
+            mp_printf('CPLEX Version %s -- %s LP solver\n', ...
                 vstr, alg_names{cplex_opt.lpmethod+1});
         end
         [x, f, eflag, output, lam] = ...
             cplexlp(c, Ai, bi, Ae, be, xmin, xmax, x0, cplex_opt);
     else
         if verbose
-            fprintf('CPLEX Version %s --  %s QP solver\n', ...
+            mp_printf('CPLEX Version %s --  %s QP solver\n', ...
                 vstr, alg_names{cplex_opt.qpmethod+1});
         end
         %% ensure H is numerically symmetric
@@ -360,7 +360,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
             (vtype == 'S' & x' == 0));
     if length(k) < nx   %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
             tol = opt.price_stage_warn_tol;

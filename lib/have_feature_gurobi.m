@@ -8,7 +8,7 @@ function [TorF, vstr, rdate] = have_feature_gurobi()
 % See also have_feature, qps_master, miqps_master, gurobi.
 
 %   MP-Opt-Model
-%   Copyright (c) 2004-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2004-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -35,7 +35,7 @@ if TorF
         vstr = sprintf('%d.%d.%d', result.versioninfo.major, result.versioninfo.minor, result.versioninfo.technical);
     catch % gurobiError
         TorF = 0;
-        fprintf('Gurobi Error!\n');
+        mp_printf('Gurobi Error!\n');
 %         disp(gurobiError.message);
     end
 end

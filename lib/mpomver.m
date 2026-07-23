@@ -26,7 +26,7 @@ function rv = mpomver(varargin)
 v = struct( 'Name',     'MP-Opt-Model', ...
             'Version',  '5.1-dev', ...
             'Release',  '', ...
-            'Date',     '16-Jul-2026' );
+            'Date',     '23-Jul-2026' );
 if nargout > 0
     if nargin > 0
         rv = v;
@@ -34,5 +34,5 @@ if nargout > 0
         rv = v.Version;
     end
 else
-    fprintf('%-22s Version %-9s  %11s\n', v.Name, v.Version, v.Date);
+    mp_printf('%-22s Version %-9s  %11s\n', v.Name, v.Version, v.Date);
 end

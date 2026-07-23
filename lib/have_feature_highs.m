@@ -8,7 +8,7 @@ function [TorF, vstr, rdate] = have_feature_highs()
 % See also have_feature, qps_master, miqps_master, callhighs.
 
 %   MP-Opt-Model
-%   Copyright (c) 2004-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2004-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -23,6 +23,6 @@ if TorF
         vstr = char(callhighs(string('ver')));
     catch
         TorF = 0;
-        fprintf('HiGHS Error!\n');
+        mp_printf('HiGHS Error!\n');
     end
 end

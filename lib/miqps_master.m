@@ -461,7 +461,7 @@ if ~done
                 else
                     mip_gap_in = '';
                 end
-                fprintf('----- %3d : Solved with %d of %d lazy constraints%s%s : eflag = %d (%g sec)\n', ...
+                mp_printf('----- %3d : Solved with %d of %d lazy constraints%s%s : eflag = %d (%g sec)\n', ...
                     ilazy, sum(lazy & active_rows), nlazy, mip_gap_out, ...
                     mip_gap_in, eflag, toc(t0));
             end
@@ -577,22 +577,22 @@ if ~done
 
                     if verbose
                         if eflag == 1
-                            fprintf('-----       %d violation(s) detected via %s\n', ...
+                            mp_printf('-----       %d violation(s) detected via %s\n', ...
                                 nviolated, status);
                         end
-                        fprintf('-----       Adding %d lazy constraint(s)\n', sum(violated));
+                        mp_printf('-----       Adding %d lazy constraint(s)\n', sum(violated));
                     end
                     active_rows = active_rows | violated;
                 else                %% done, no more violations
                     if verbose
-                        fprintf('-----       No violations detected via %s\n', status);
+                        mp_printf('-----       No violations detected via %s\n', status);
                     end
                     if ~isempty(lazy_mip_gap) && isfield(output, 'mip_gap') && ...
                             output.mip_gap > lazy_mip_gap(end)
                         %% desired final MIP gap tolerance not met,
                         %% re-solve with desired tolerance
                         if verbose
-                            fprintf('-----       Desired relative MIP tolerance (%g) not met (%g)\n', ...
+                            mp_printf('-----       Desired relative MIP tolerance (%g) not met (%g)\n', ...
                                 lazy_mip_gap(end), output.mip_gap);
                         end
                         lazy_mip_gap(ilazy+1:end) = lazy_mip_gap(end);

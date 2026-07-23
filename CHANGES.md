@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 7/23/26
+  - Use `mp_printf()`, recently included in [MP-Test](8), in place of
+    `fprintf()` everywhere to allow redirecting of console output.
+
 #### 5/19/26
   - Add support for `mp.opt_model.solve()` to solve LP, QP, MILP, and MIQP
     problems with only a subset of constraints included, specified as a

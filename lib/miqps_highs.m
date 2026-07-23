@@ -110,7 +110,7 @@ function [x, f, eflag, output, lambda] = miqps_highs(H, c, A, l, u, xmin, xmax, 
 % See also miqps_master, callhighs.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -304,11 +304,11 @@ if verbose
     else
         solver_name = 'unknown';
     end
-    fprintf('HiGHS Version %s -- %s %s solver\n', vn, solver_name, lpqp);
+    mp_printf('HiGHS Version %s -- %s %s solver\n', vn, solver_name, lpqp);
 end
 [soln, info, opts, basis] = callhighs(c, A, l, u, xmin, xmax, H, integrality, highs_opt, [], x0);
 if verbose
-    fprintf('HiGHS solution status: %s\n', info.model_status_string);
+    mp_printf('HiGHS solution status: %s\n', info.model_status_string);
 end
 
 %% extract results
@@ -402,7 +402,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
                 (vtype == 'S' & x == 0));
     if length(k) < nx   %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
             tol = opt.price_stage_warn_tol;

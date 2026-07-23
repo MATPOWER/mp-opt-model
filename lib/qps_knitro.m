@@ -95,7 +95,7 @@ function [x, f, eflag, output, lambda] = qps_knitro(H, c, A, l, u, xmin, xmax, x
 % See also qps_master, knitro_qp, knitro_lp
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
@@ -217,7 +217,7 @@ end
 
 if verbose
     vn = knitrover;
-    fprintf('Artelys Knitro Version %s -- %s %s solver\n', ...
+    mp_printf('Artelys Knitro Version %s -- %s %s solver\n', ...
         vn, output.algorithm, lpqp);
 end
 

@@ -82,7 +82,7 @@ function [x, f, eflag, output, J] = nleqs_core(sp, fcn, x0, opt)
 % See also nleqs_master, nleqs_newton, nleqs_gauss_seidel.
 
 %   MP-Opt-Model
-%   Copyright (c) 1996-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 1996-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -128,15 +128,15 @@ end
 %% check tolerance
 normf = norm(f, Inf);
 if verbose > 1
-    fprintf('\n it    max residual        max ∆x');
-    fprintf('\n----  --------------  --------------');
-    fprintf('\n%3d     %10.3e           -    ', i, normf);
+    mp_printf('\n it    max residual        max ∆x');
+    mp_printf('\n----  --------------  --------------');
+    mp_printf('\n%3d     %10.3e           -    ', i, normf);
 end
 if normf < tol
     eflag = 1;
     msg = sprintf('%s method converged in %d iterations.', sp.name, i);
     if verbose > 1
-        fprintf('\nConverged!\n');
+        mp_printf('\nConverged!\n');
     end
 end
 
@@ -169,7 +169,7 @@ while (~eflag && i < max_it)
     normf  = norm(f, Inf);
     normdx = norm(x-xp, Inf);
     if verbose > 1
-        fprintf('\n%3d     %10.3e      %10.3e', i, normf, normdx);
+        mp_printf('\n%3d     %10.3e      %10.3e', i, normf, normdx);
     end
     if normf < tol
         eflag = 1;
@@ -184,7 +184,7 @@ if eflag ~= 1
     msg = sprintf('%s method did not converge in %d iterations.', sp.name, i);
 end
 if verbose
-    fprintf('\n%s\n', msg);
+    mp_printf('\n%s\n', msg);
 end
 if nargout > 3
     output = struct('alg', sp.alg, ...

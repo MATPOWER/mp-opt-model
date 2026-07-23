@@ -277,7 +277,7 @@ if isempty(lazy)
 
             if eflag == -99
                 if verbose
-                    fprintf('         Retrying with QPS_MIPS solver ...\n\n');
+                    mp_printf('         Retrying with QPS_MIPS solver ...\n\n');
                 end
                 %% save (incorrect) solution from BPMPD
                 bpmpd = struct('x', x, 'f', f, 'eflag', eflag, ...
@@ -378,7 +378,7 @@ else    %% use cutting plain approach for lazy constraints
             qps_master(H, c, A(active_rows, :), l(active_rows), u(active_rows), ...
                 xmin, xmax, x, opt_no_lazy);
         if verbose
-            fprintf('----- %3d : Solved with %d of %d lazy constraints : eflag = %d (%g sec)\n', ...
+            mp_printf('----- %3d : Solved with %d of %d lazy constraints : eflag = %d (%g sec)\n', ...
                 ilazy, sum(lazy & active_rows), nlazy, eflag, toc(t0));
         end
         out{end+1} = output;
@@ -483,15 +483,15 @@ else    %% use cutting plain approach for lazy constraints
 
                 if verbose
                     if eflag == 1
-                        fprintf('-----       %d violation(s) detected via %s\n', ...
+                        mp_printf('-----       %d violation(s) detected via %s\n', ...
                             nviolated, status);
                     end
-                    fprintf('-----       Adding %d lazy constraint(s)\n', sum(violated));
+                    mp_printf('-----       Adding %d lazy constraint(s)\n', sum(violated));
                 end
                 active_rows = active_rows | violated;
             else                %% done, no more violations
                 if verbose
-                    fprintf('-----       No violations detected via %s\n', status);
+                    mp_printf('-----       No violations detected via %s\n', status);
                 end
                 infeasible = false;
             end

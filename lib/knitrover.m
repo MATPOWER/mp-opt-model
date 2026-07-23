@@ -16,7 +16,7 @@ function rv = knitrover(varargin)
 % See also mpver, knitro_solve.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
@@ -41,8 +41,8 @@ if nargout > 0
     end
 else
     if kntr.av
-        fprintf('%-22s Version %-10s %-11s\n', v.Name, v.Version, v.Date);
+        mp_printf('%-22s Version %-10s %-11s\n', v.Name, v.Version, v.Date);
     else
-        fprintf('%-22s -- not installed --\n', v.Name);
+        mp_printf('%-22s -- not installed --\n', v.Name);
     end
 end
