@@ -213,6 +213,25 @@ else
     options.ipopt.print_level = 0;
 end
 
+%% handle redirection of console output
+print_level = options.ipopt.print_level;
+if print_level
+    %% IPOPT is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        options.ipopt.print_level = 0;      %% disable IPOPT console output
+    end
+    if (~isfield(options.ipopt, 'output_file') || strlength(options.ipopt.output_file) == 0)
+        %% IPOPT is not writing to a log file ...
+        log_file_path = mp.logger.manager('path');
+        if ~isempty(log_file_path)  %% but active logger IS
+            %% redirect IPOPT output to log file too
+            options.ipopt.output_file = log_file_path;
+            options.ipopt.file_append = 'yes';
+            options.ipopt.file_print_level = print_level;
+        end
+    end
+end
+
 %% define variable and constraint bounds, if given
 if nA
     options.cu = u;

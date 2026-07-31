@@ -22,7 +22,9 @@ rdate = '';
 if TorF
     try
         if have_feature('evalc')
+            mp.logger.manager('pause');
             str = evalc('qps_ipopt([],[1; 1],[1 1],[2],[2],[1; 1],[1; 1],[1; 1],struct(''verbose'', 2))');
+            mp.logger.manager('resume');
             pat = 'Ipopt version ([^\s,]+)';
             [s,e,tE,m,t] = regexp(str, pat);
             if ~isempty(t)

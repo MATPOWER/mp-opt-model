@@ -273,23 +273,40 @@ end
 ot_opt = optimoptions(ot_opt, 'Display', vrb);
 
 %% call the solver
+no_logger = ~mp.logger.manager('active');
 if isLP
     if mi
-        [x, f, eflag, output] = ...
-            intlinprog(c, intcon, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+        if no_logger
+            [x, f, eflag, output] = ...
+                intlinprog(c, intcon, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+        else
+            mp_printf(evalc('[x, f, eflag, output] = intlinprog(c, intcon, Ai, bi, Ae, be, xmin, xmax, ot_opt);'));
+        end
         lam = [];
     else
         if have_feature('matlab', 'vnum') > 9.013
-            [x, f, eflag, output, lam] = ...
-                linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+            if no_logger
+                [x, f, eflag, output, lam] = ...
+                    linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+            else
+                mp_printf(evalc('[x, f, eflag, output, lam] = linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);'));
+            end
         else
-            [x, f, eflag, output, lam] = ...
-                linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+            if no_logger
+                [x, f, eflag, output, lam] = ...
+                    linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+            else
+                mp_printf(evalc('[x, f, eflag, output, lam] = linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);'));
+            end
         end
     end
 else
-    [x, f, eflag, output, lam] = ...
-        quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+    if no_logger
+        [x, f, eflag, output, lam] = ...
+            quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+    else
+        mp_printf(evalc('[x, f, eflag, output, lam] = quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);'));
+    end
 end
 
 %% repackage lambdas

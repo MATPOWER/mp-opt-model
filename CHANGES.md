@@ -5,6 +5,22 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 7/30/26
+  - Add `mp.logger` support for solver output.
+    - DONE
+      - `miqps_glpk()`, `qps_glpk()`
+      - `miqps_gurobi()`, `qps_gurobi()`
+      - `miqps_highs()`, `qps_highs()`
+      - `nlps_ipopt()`, `qps_ipopt()`
+      - `miqps_mosek()`, `qps_mosek()`
+    - DONE, but using `evalc()` (no output during solve)
+      - `miqps_ot()`, `qps_ot()` (`intlinprog()`, `linprog()`, `quadprog()`)
+      - `nleqs_fsolve()`
+      - `nlps_fmincon()`
+    - TO DO
+      - `miqps_cplex()`, `qps_cplex()`
+      - `nlps_knitro()`
+
 #### 7/23/26
   - Use `mp_printf()`, recently included in [MP-Test](8), in place of
     `fprintf()` everywhere to allow redirecting of console output.

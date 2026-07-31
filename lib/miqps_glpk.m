@@ -234,6 +234,15 @@ if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
     glpk_opt.tolobj = max(opt.mip_gap, eps);
 end
 
+%% handle redirection of console output
+if glpk_opt.msglev
+    %% GLPK is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        glpk_opt.msglev = 0;    %% disable GLPK console output
+    end
+    %% GLPK doesn't support logging to a file
+end
+
 %% call the solver
 if isempty(AA)
     AA = sparse(1, nx);
@@ -241,6 +250,38 @@ if isempty(AA)
     emptyA = true;
 else
     emptyA = false;
+end
+if verbose
+    if mi
+        lpqp = 'MILP';
+    else
+        lpqp = 'LP';
+    end
+    alg_names = {
+        'primal simplex',
+        'dual simplex',
+        'interior',
+    };
+    if isfield(glpk_opt, 'lpsolver') && glpk_opt.lpsolver == 2
+        alg = 3;
+    else
+        alg = 1;
+        if isfield(glpk_opt, 'dual') && glpk_opt.dual
+            dual = glpk_opt.dual;
+            if have_feature('octave', 'vnum') >= 3.007
+                dual = dual -1;
+            end
+            if dual
+                alg = 2;
+            end
+        end
+    end
+    vn = have_feature('glpk', 'vstr');
+    if isempty(vn)
+        vn = '<unknown>';
+    end
+    mp_printf('GLPK Version %s -- %s %s solver\n', ...
+        vn, alg_names{alg}, lpqp);
 end
 [x, f, errnum, extra] = ...
     glpk(c, AA, bb, xmin, xmax, ctype, vtype, 1, glpk_opt);

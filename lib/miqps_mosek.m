@@ -200,6 +200,15 @@ if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
     mosek_opt.MSK_DPAR_MIO_TOL_ABS_GAP = opt.mip_gap_abs;
 end
 
+%% handle redirection of console output
+if verbose
+    log_to_console = mp.logger.manager('write_to_console');
+    log_file_path = mp.logger.manager('path');
+else
+    log_to_console = true;  %% no MOSEK console output
+    log_file_path = '';
+end
+
 %% set up problem struct for MOSEK
 prob.c = p.c;
 if qp
@@ -328,8 +337,22 @@ if verbose
     mp_printf('MOSEK Version %s -- %s %s solver\n', ...
             vn, alg_names{mosek_opt.MSK_IPAR_OPTIMIZER+1}, lpqp);
 end
-cmd = sprintf('minimize echo(%d)', verbose);
-[r, res] = mosekopt(cmd, prob, mosek_opt);
+if log_to_console
+    cmd = sprintf('minimize echo(%d)', verbose);
+else
+    cmd = 'minimize';
+end
+if isempty(log_file_path)
+    [r, res] = mosekopt(cmd, prob, mosek_opt);
+else
+    log_callback = struct( ...
+        'loghandle', [], ...
+        'log', 'mosek_log_callback' ...
+    );
+    mosek_opt.MSK_IPAR_LOG = verbose;   %% not sure this has any effect
+    outstr = evalc('[r, res] = mosekopt(cmd, prob, mosek_opt, log_callback);');
+    mp_printf(outstr);
+end
 
 %%-----  repackage results  -----
 if isfield(res, 'sol')

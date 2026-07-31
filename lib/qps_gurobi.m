@@ -35,7 +35,7 @@ function [x, f, eflag, output, lambda] = qps_gurobi(H, c, A, l, u, xmin, xmax, x
 %               2 = verbose progress output
 %               3 = even more verbose progress output
 %           grb_opt - options struct for GUROBI, value in verbose
-%                   overrides these options
+%               overrides these options, unless ``grb_opt.OutputFlag`` is false
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, opt
@@ -176,22 +176,48 @@ else
 end
 
 %% set up options struct for Gurobi
+output_flag_override = false;
 if ~isempty(opt) && isfield(opt, 'grb_opt') && ~isempty(opt.grb_opt)
     g_opt = gurobi_options(opt.grb_opt);
+    if isfield(opt.grb_opt, 'OutputFlag')
+        output_flag_override = true;
+    end
 else
     g_opt = gurobi_options;
 end
-if verbose > 1
-    g_opt.LogToConsole = 1;
-    g_opt.OutputFlag = 1;
-    if verbose > 2
-        g_opt.DisplayInterval = 1;
+if ~output_flag_override
+    if verbose > 1
+        g_opt.OutputFlag = 1;
+        g_opt.LogToConsole = 1;
     else
-        g_opt.DisplayInterval = 100;
+        g_opt.OutputFlag = 0;
+        g_opt.LogToConsole = 0;
     end
+end
+if (isfield(g_opt, 'OutputFlag') && ~g_opt.OutputFlag)
+   g_opt.LogToConsole = 0;
+end
+if verbose > 2
+    g_opt.DisplayInterval = 1;
 else
-    g_opt.LogToConsole = 0;
-    g_opt.OutputFlag = 0;
+    g_opt.DisplayInterval = 100;
+end
+
+%% handle redirection of console output
+if (~isfield(g_opt, 'OutputFlag') || g_opt.OutputFlag) && ...
+        (~isfield(g_opt, 'LogToConsole') || g_opt.LogToConsole)
+    %% Gurobi is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        g_opt.LogToConsole = 0;     %% disable Gurobi console output
+    end
+    if (~isfield(g_opt, 'LogFile') || strlength(g_opt.LogFile) == 0)
+        %% Gurobi is not writing to a log file ...
+        log_file_path = mp.logger.manager('path');
+        if ~isempty(log_file_path)  %% but active logger IS
+            %% redirect Gurobi output to log file too
+            g_opt.LogFile = log_file_path;
+        end
+    end
 end
 
 if ~issparse(A)

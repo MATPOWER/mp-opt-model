@@ -78,6 +78,7 @@ Use these functions to set up input options for individual solvers.
    functions/gurobi_options
    functions/highs_options
    functions/ipopt_options
+   functions/mosek_log_callback
    functions/mosek_options
    functions/mosek_symbcon
    functions/osqp_options

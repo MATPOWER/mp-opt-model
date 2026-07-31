@@ -35,7 +35,7 @@ function [x, f, eflag, output, lambda] = qps_highs(H, c, A, l, u, xmin, xmax, x0
 %           highs_opt - options struct for HiGHS (see
 %               https://ergo-code.github.io/HiGHS/dev/options/definitions/),
 %               value in verbose overrides these options, unless
-%               ``highs_opt.output_to_console`` is false
+%               ``highs_opt.output_flag`` is false
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, opt
@@ -204,6 +204,24 @@ if ~output_flag_override
         highs_opt.output_flag = false;
     end
 end
+
+%% handle redirection of console output
+if (~isfield(highs_opt, 'output_flag') || highs_opt.output_flag) && ...
+        (~isfield(highs_opt, 'log_to_console') || highs_opt.log_to_console)
+    %% HiGHS is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        highs_opt.log_to_console = false;   %% disable HiGHS console output
+    end
+    if (~isfield(highs_opt, 'log_file') || strlength(highs_opt.log_file) == 0)
+        %% HiGHS is not writing to a log file ...
+        log_file_path = mp.logger.manager('path');
+        if ~isempty(log_file_path)  %% but active logger IS
+            %% redirect HiGHS output to log file too
+            highs_opt.log_file = log_file_path;
+        end
+    end
+end
+
 highs_opt = highsoptset(highs_opt);
 
 %% get solver type

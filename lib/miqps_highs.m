@@ -52,7 +52,7 @@ function [x, f, eflag, output, lambda] = miqps_highs(H, c, A, l, u, xmin, xmax, 
 %           highs_opt - options struct for HiGHS (see
 %               https://ergo-code.github.io/HiGHS/dev/options/definitions/),
 %               values in verbose, mip_gap, and mip_gap_abs override these
-%               options, unless highs_opt.output_to_console is false, in the
+%               options, unless highs_opt.output_flag is false, in the
 %               case of verbose
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
@@ -257,13 +257,31 @@ if ~output_flag_override
         highs_opt.output_flag = false;
     end
 end
-highs_opt = highsoptset(highs_opt);
 if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
     highs_opt.mip_rel_gap = opt.mip_gap;
 end
 if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
     highs_opt.mip_abs_gap = opt.mip_gap_abs;
 end
+
+%% handle redirection of console output
+if (~isfield(highs_opt, 'output_flag') || highs_opt.output_flag) && ...
+        (~isfield(highs_opt, 'log_to_console') || highs_opt.log_to_console)
+    %% HiGHS is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        highs_opt.log_to_console = false;   %% disable HiGHS console output
+    end
+    if (~isfield(highs_opt, 'log_file') || strlength(highs_opt.log_file) == 0)
+        %% HiGHS is not writing to a log file ...
+        log_file_path = mp.logger.manager('path');
+        if ~isempty(log_file_path)  %% but active logger IS
+            %% redirect HiGHS output to log file too
+            highs_opt.log_file = log_file_path;
+        end
+    end
+end
+
+highs_opt = highsoptset(highs_opt);
 
 %% get solver type
 if isfield(highs_opt, 'solver')
