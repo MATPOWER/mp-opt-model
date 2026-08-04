@@ -21,7 +21,7 @@ matlab = have_feature('matlab');
 if ~matlab || (matlab && license('test', 'optimization_toolbox'))
     v = ver('optim');
     if length(v) > 1
-        warning('The built-in VER command is behaving strangely, probably as a result of installing a 3rd party toolbox in a directory named ''optim'' on your path. Check each element of the output of ver(''optim'') to find the offending toolbox, then move the toolbox to a more appropriately named directory.');
+        mp_warning('The built-in VER command is behaving strangely, probably as a result of installing a 3rd party toolbox in a directory named ''optim'' on your path. Check each element of the output of ver(''optim'') to find the offending toolbox, then move the toolbox to a more appropriately named directory.');
         v = v(1);
     end
     if ~isempty(v) && ~isempty(v.Version)

@@ -1174,7 +1174,7 @@ classdef opt_model < handle
                         min(opt.active_constraints) >= 1 && max(opt.active_constraints) <= mm.lin.n
                     active_constraints = opt.active_constraints;
                 else
-                    warning('mp.opt_model.solve: opt.active_constraints is being ignored since it is not consistent with the full constraint matrix');
+                    mp_warning('mp.opt_model.solve: opt.active_constraints is being ignored since it is not consistent with the full constraint matrix');
                     active_constraints = [];
                 end
             else

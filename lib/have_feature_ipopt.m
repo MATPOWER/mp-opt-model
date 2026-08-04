@@ -31,7 +31,7 @@ if TorF
                 vstr = t{1}{1};
                 if vstr2num(vstr) >= 3.011 && ~exist('ipopt_auxdata', 'file')
                     TorF = 0;
-                    warning('Improper installation of IPOPT. Version %s detected, but IPOPT_AUXDATA.M is missing.', vstr);
+                    mp_warning('Improper installation of IPOPT. Version %s detected, but IPOPT_AUXDATA.M is missing.', vstr);
                 end
             end
         else

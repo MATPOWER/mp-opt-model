@@ -5,7 +5,10 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
-#### 7/30/26
+#### 8/4/26
+  - Add support for redirecting console output via `mp.logger` by replacing
+    `fprintf()` and `warning()` everywhere with `mp_printf()` and
+    `mp_warning()`, respectively. Requires [MP-Test](8) 8.2 or later.
   - Add `mp.logger` support for solver output.
     - DONE
       - `miqps_glpk()`, `qps_glpk()`
@@ -20,10 +23,6 @@ since version 5.0
     - TO DO
       - `miqps_cplex()`, `qps_cplex()`
       - `nlps_knitro()`
-
-#### 7/23/26
-  - Use `mp_printf()`, recently included in [MP-Test](8), in place of
-    `fprintf()` everywhere to allow redirecting of console output.
 
 #### 5/19/26
   - Add support for `mp.opt_model.solve()` to solve LP, QP, MILP, and MIQP

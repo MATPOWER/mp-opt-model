@@ -380,7 +380,7 @@ To use \mpom{} \mpomver{} you will need:
 \item GNU Octave version 6.2 or later\footnote{GNU Octave \cite{octave} is free software, available online at \url{https://octave.org}. All functionality except object copy constructors work on GNU Octave version
 4.4 and later. \mpom{}~4.2 and earlier required Octave~4.}
 \item \mipslink{}, \mipsname{}~\cite{wang2007a, mips_manual}\footnote{\mips{} is available at \url{\mipsurl}.}
-\item \mptestlink{}\footnote{\mptest{} is available at \url{\mptesturl}.}
+\item \mptestlink{} version 8.2 or later\footnote{\mptest{} is available at \url{\mptesturl}.}
 \end{itemize}
 
 For the hardware requirements, please refer to the system requirements for the version of \matlab{}\footnote{\url{https://www.mathworks.com/support/sysreq/previous_releases.html}} or Octave that you are using.
@@ -6762,7 +6762,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \item Support for \code{mp.opt\_model.solve()} to solve LP, QP, MILP, and MIQP problems with only a subset of constraints included, specified as a constraint index vector (logical or numeric) in a new \code{active\_constraints} field of the options struct.
 \item Add \code{active\_constraints} field, a logical vector matching the constraint dimension, to \code{output} return value for LP, QP, MILP, and MIQP problems when \code{lazy} and/or \code{active\_constraints} input options are provided. For the lazy constraint case, an element is true if the corresponding constraint was included in the final solve.
 \item Add \code{clear\_cached\_params()} method to \code{mp.set\_manager\_opt\_model} and \code{mp.opt\_model}, to clear aggregated parameters cached by the \code{params()} method.
-\item Support for redirecting console output via \code{mp.logger} and replacing \code{fprintf()} everywhere with \code{\code{mp\_printf()}}. Requires \mptest{} 8.2 or later.
+\item Support for redirecting console output via \code{mp.logger} by replacing \code{fprintf()} and \code{warning()} everywhere with \code{mp\_printf()} and \code{mp\_warning()}, respectively. Requires \mptestlink{} 8.2 or later.
 \item Support for \highs{} solution status in \code{eflag} output of \code{miqps\_highs()} and \code{qps\_highs()}.
 \item Support for the new HiPO interior point LP solver in the \highs{} optimizer.
 \item Support for the new PDHG LP solver in \gurobi{}.

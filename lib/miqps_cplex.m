@@ -310,7 +310,7 @@ end
 %%    cplexstatusstring: 'non-optimal'
 %%              message: 'Solution with numerical issues'
 if eflag > 1
-    warning('qps_cplex: Undocumented ''exitflag'' value (%d)\n          cplexstatus: %d\n    cplexstatusstring: ''%s''\n              message: ''%s''', eflag, output.cplexstatus, output.cplexstatusstring, output.message);
+    mp_warning('qps_cplex: Undocumented ''exitflag'' value (%d)\n          cplexstatus: %d\n    cplexstatusstring: ''%s''\n              message: ''%s''', eflag, output.cplexstatus, output.cplexstatusstring, output.message);
     if eflag == 5 && mi
         eflag = 1;      %% give it a try for the MI phase
     else
@@ -379,13 +379,13 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
             error('miqps_cplex: EXITFLAG from price computation stage = %d', eflag_);
         end
         if abs(f - f_)/max(abs(f), 1) > tol
-            warning('miqps_cplex: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
+            mp_warning('miqps_cplex: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
         end
         xn = abs(x);
         xn(xn<1) = 1;
         [mx, k] = max(abs(x - x_) ./ xn);
         if mx > tol
-            warning('miqps_cplex: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
+            mp_warning('miqps_cplex: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
         end
         output.price_stage = output_;
     end

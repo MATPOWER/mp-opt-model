@@ -249,7 +249,7 @@ end
 %%    cplexstatusstring: 'non-optimal'
 %%              message: 'Solution with numerical issues'
 if eflag > 1
-    warning('qps_cplex: Undocumented ''exitflag'' value (%d)\n          cplexstatus: %d\n    cplexstatusstring: ''%s''\n              message: ''%s''', eflag, output.cplexstatus, output.cplexstatusstring, output.message);
+    mp_warning('qps_cplex: Undocumented ''exitflag'' value (%d)\n          cplexstatus: %d\n    cplexstatusstring: ''%s''\n              message: ''%s''', eflag, output.cplexstatus, output.cplexstatusstring, output.message);
     eflag = -100 - eflag;
 end
 
