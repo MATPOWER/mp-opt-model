@@ -308,18 +308,18 @@ if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
             x = x0;
             Axj = A(:,j) * x(j);
             cc = c(~j);
-            if isempty(H)
+            if nnz(H)
                 HH = [];
             else
                 HH = H(~j, ~j);
-                cc = cc + (H(~j,j)+H(j,~j)') * x(j);
+                cc = cc + 0.5 * (H(~j,j)+H(j,~j)') * x(j);
             end
             [x(~j), f, eflag, output, lambda] = ...
                 qps_master(HH, cc,  A(:, ~j), l-Axj, u-Axj, ...
                     xmin(~j), xmax(~j), x(~j), opt);
             f = f + c(j)' * x(j);
-            if ~isempty(H)
-                f = f + x(j)' * H(j,j) * x(j);
+            if ~nnz(H)
+                f = f + 0.5 * x(j)' * H(j,j) * x(j);
             end
             mu_lower = zeros(size(x));
             mu_upper = zeros(size(x));
