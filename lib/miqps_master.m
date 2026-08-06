@@ -308,7 +308,7 @@ if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
             x = x0;
             Axj = A(:,j) * x(j);
             cc = c(~j);
-            if nnz(H)
+            if ~nnz(H)
                 HH = [];
             else
                 HH = H(~j, ~j);
@@ -318,7 +318,7 @@ if ~isempty(vtype) && (isfield(opt, 'relax_integer') && opt.relax_integer || ...
                 qps_master(HH, cc,  A(:, ~j), l-Axj, u-Axj, ...
                     xmin(~j), xmax(~j), x(~j), opt);
             f = f + c(j)' * x(j);
-            if ~nnz(H)
+            if nnz(H)
                 f = f + 0.5 * x(j)' * H(j,j) * x(j);
             end
             mu_lower = zeros(size(x));
