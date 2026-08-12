@@ -217,18 +217,23 @@ if ~isempty(opt) && isfield(opt, 'lazy') && any(opt.lazy)
             error('miqps_master: opt.lazy must be a constraint index vector or ''all''');
         end
     elseif ~islogical(lazy)
-        tmp = false(m, 1);
-        tmp(lazy) = true;
-        lazy = tmp;
+        if all(lazy >= 1) && all(lazy <= m)
+            tmp = false(m, 1);
+            tmp(lazy) = true;
+            lazy = tmp;
+        else
+            error('miqps_master: if opt.lazy is a numerical vector, all elements must be >= 1 and <= %d', m);
+        end
     elseif length(lazy) ~= m
-        error('miqps_master: if opt.lazy is a logical vector its length (%d) must match the number of constraints (%d)', length(lazy), m);
+        error('miqps_master: if opt.lazy is a logical vector, its length (%d) must match the number of constraints (%d)', length(lazy), m);
     end
     if ~isempty(opt) && isfield(opt, 'lazy_thresh') && ~isempty(opt.lazy_thresh)
         lazy_thresh = opt.lazy_thresh;
         if length(lazy_thresh) ~= m
             if length(lazy_thresh) == sum(lazy)
-                lazy_thresh = zeros(m, 1);
-                lazy_thresh(lazy) = lazy_thresh;
+                tmp = zeros(m, 1);
+                tmp(lazy) = lazy_thresh;
+                lazy_thresh = tmp;
             else
                 error('miqps_master: size of opt.lazy_thresh (%d) must match number of lazy (%d) or total (%d) constraints', length(lazy_thresh), sum(lazy), m);
             end
@@ -465,8 +470,8 @@ if ~done
                     ilazy, sum(lazy & active_rows), nlazy, mip_gap_out, ...
                     mip_gap_in, eflag, toc(t0));
             end
-            out{end+1} = output;
-            out{end}.eflag = eflag;
+            out{ilazy} = output;
+            out{ilazy}.eflag = eflag;
 
             %% enforce integrality of integer vars, to help with warm starts
             x(ivars) = round(x(ivars));

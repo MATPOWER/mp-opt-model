@@ -219,18 +219,23 @@ if ~isempty(opt) && isfield(opt, 'lazy') && any(opt.lazy)
             error('qps_master: opt.lazy must be a constraint index vector or ''all''');
         end
     elseif ~islogical(lazy)
-        tmp = false(m, 1);
-        tmp(lazy) = true;
-        lazy = tmp;
+        if all(lazy >= 1) && all(lazy <= m)
+            tmp = false(m, 1);
+            tmp(lazy) = true;
+            lazy = tmp;
+        else
+            error('qps_master: if opt.lazy is a numerical vector, all elements must be >= 1 and <= %d', m);
+        end
     elseif length(lazy) ~= m
-        error('qps_master: if opt.lazy is a logical vector its length (%d) must match the number of constraints (%d)', length(lazy), m);
+        error('qps_master: if opt.lazy is a logical vector, its length (%d) must match the number of constraints (%d)', length(lazy), m);
     end
     if ~isempty(opt) && isfield(opt, 'lazy_thresh') && ~isempty(opt.lazy_thresh)
         lazy_thresh = opt.lazy_thresh;
         if length(lazy_thresh) ~= m
             if length(lazy_thresh) == sum(lazy)
-                lazy_thresh = zeros(m, 1);
-                lazy_thresh(lazy) = lazy_thresh;
+                tmp = zeros(m, 1);
+                tmp(lazy) = lazy_thresh;
+                lazy_thresh = tmp;
             else
                 error('qps_master: size of opt.lazy_thresh (%d) must match number of lazy (%d) or total (%d) constraints', length(lazy_thresh), sum(lazy), m);
             end
@@ -381,8 +386,8 @@ else    %% use cutting plain approach for lazy constraints
             mp_printf('----- %3d : Solved with %d of %d lazy constraints : eflag = %d (%g sec)\n', ...
                 ilazy, sum(lazy & active_rows), nlazy, eflag, toc(t0));
         end
-        out{end+1} = output;
-        out{end}.eflag = eflag;
+        out{ilazy} = output;
+        out{ilazy}.eflag = eflag;
 
         if ~all(active_rows)
             %% partition constraints and variables into active/inactive
