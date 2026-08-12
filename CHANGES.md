@@ -5,6 +5,10 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 8/12/26
+  - Add mechanism for limiting number of lazy constraint iterations, controlled
+    by new options `lazy_it_lim`, `lazy_mode`, and `lazy_thresh_multiplier`.
+
 #### 8/4/26
   - Add support for redirecting console output via `mp.logger` by replacing
     `fprintf()` and `warning()` everywhere with `mp_printf()` and

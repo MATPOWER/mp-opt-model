@@ -590,7 +590,7 @@ This function can be used to solve the problem with any of the available solvers
 [x, f, exitflag, output, lambda] = ...
     qps_master(H, c, A, l, u, xmin, xmax, x0, opt);
 \end{Code}
-where the input and output arguments are described in Tables~\ref{tab:qps_master_input} and \ref{tab:qps_master_output}, respectively, and the options in Table~\ref{tab:qps_master_options}.
+where the input and output arguments are described in Tables~\ref{tab:qps_master_input} and \ref{tab:qps_master_output}, respectively, and the options in Tables~\ref{tab:qps_master_options} and \ref{tab:lazy_options}.
 Alternatively, the input arguments can be packaged as fields in a \code{problem} struct and passed in as a single argument, where all fields are (individually) optional.
 \begin{Code}
 [x, f, exitflag, output, lambda] = qps_master(problem);
@@ -618,7 +618,7 @@ name & description \\
 \code{xmin}	& column vector $x_\mathrm{min}$ of lower bounds on $x$, defaults to $-\infty$	\\
 \code{xmax}	& 	column vector $x_\mathrm{max}$ of upper bounds on $x$, defaults to $+\infty$	\\
 \code{x0}	& optional starting value of optimization vector $x$ \emph{(ignored by some solvers)}	\\
-\code{opt}	& optional options struct (all fields optional), see Table~\ref{tab:qps_master_options} for details	\\
+\code{opt}	& optional options struct (all fields optional), see Tables~\ref{tab:qps_master_options} and \ref{tab:lazy_options} for details	\\
 \code{problem}	& alternative, single argument input struct with fields corresponding to arguments above	\\
 \bottomrule
 \end{tabular}
@@ -692,6 +692,7 @@ name & default & description \\
 \codeq{IPOPT} & \ipopt{}\tnote{*} \\
 \codeq{MIPS} & \mipslink{}, \mipsname{} \\
 \codeq{MOSEK} & \mosek{}\tnote{*} \\
+\codeq{OSQP} & \osqp{}\tnote{*} \\
 \codeq{OT} & \matlab{} Opt Toolbox, \code{quadprog}, \code{linprog} \\
 \end{tabular}	\\
 \code{verbose}	& 0	& amount of progress info to be printed \\
@@ -701,9 +702,6 @@ name & default & description \\
 2 & print a lot of progress info \\
 3 & print all progress info \\
 \end{tabular}	\\
-\code{lazy}	& \emph{empty}	& vector of constraint indices (logical or numeric) of lazy constraints, triggers an iterative cutting plane approach, if not empty; set to \codeq{all} to indicate all constraints are lazy \\
-\code{lazy\_thresh}	& \emph{empty}	& vector of constraint thresholds for including lazy constraints, size must match total number of constraints or number of lazy constraints \\
-\code{lazy\_violation\_cost}	& 1	& cost (scalar) of violating a lazy constraint when evaluating violations and thresholds \\
 \code{bp\_opt}	& \emph{empty}	& options vector for \code{bp}\tnote{*} \\
 \code{clp\_opt}	& \emph{empty}	& options vector for \clp{}\tnote{*} \\
 \code{cplex\_opt}	& \emph{empty}	& options struct for \cplex{}\tnote{*} \\
@@ -714,7 +712,9 @@ name & default & description \\
 \code{linprog\_opt}	& \emph{empty}	& options struct for \code{linprog}\tnote{*} \\
 \code{mips\_opt}	& \emph{empty}	& options struct for \mips{} \\
 \code{mosek\_opt}	& \emph{empty}	& options struct for \mosek{}\tnote{*} \\
+\code{osqp\_opt}	& \emph{empty}	& options struct for \osqp{}\tnote{*} \\
 \code{quadprog\_opt}	& \emph{empty}	& options struct for \code{quadprog}\tnote{*} \\
+\emph{lazy constraint options} && see Table~\ref{tab:lazy_options} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -724,7 +724,40 @@ name & default & description \\
 \end{threeparttable}
 \end{table}
 
-The \code{qps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{qps\_bpmpd}, \code{qps\_clp}, \code{qps\_cplex}, \code{qps\_glpk}, \code{qps\_gurobi}, \code{qps\_highs}, \code{qps\_ipopt}, \code{qps\_knitro}, \code{qps\_mips}, \code{qps\_mosek}, and \code{qps\_ot}. Each of these functions has an interface identical to that of \code{qps\_master}, with the exception of the options struct for \code{qps\_mips}, which is a simple \mips{} options struct.
+\begin{table}[!ht]
+%\renewcommand{\arraystretch}{1.2}
+\centering
+\begin{threeparttable}
+\caption{Lazy Constraint Options for \code{qps\_master} and \code{miqps\_master}}
+\label{tab:lazy_options}
+\footnotesize
+\begin{tabular}{lcp{0.62\textwidth}}
+\toprule
+name & default & description \\
+\midrule
+\code{lazy}	& \emph{empty}	& vector of constraint indices (logical or numeric) of lazy constraints, triggers an iterative cutting plane approach, if not empty; set to \codeq{all} to indicate all constraints are lazy \\
+\code{lazy\_it\_lim}	& $\infty$	& lazy constraint iteration limit \\
+\code{lazy\_mode}	& 0	& selects mode for handling lazy constraints \\
+&& \begin{tabular}{r @{ -- } p{0.58\textwidth}}
+0 & add all lazy constraints at iteration \code{lazy\_it\_lim} if any are still not satisfied \\
+1 & scale \code{lazy\_thresh} by \code{lazy\_thresh\_multiplier} at each iteration beginning at iteration \code{lazy\_it\_lim} \\
+2 & scale \code{lazy\_thresh} by \code{lazy\_thresh\_multiplier} at each iteration \emph{beginning when} number of violations increases from previous iteration, plus \code{lazy\_mode} = 0 behavior \\
+3 & scale \code{lazy\_thresh} by \code{lazy\_thresh\_multiplier} at each iteration \emph{in which} number of violations increases from previous iteration, plus \code{lazy\_mode} = 0 behavior \\
+\end{tabular}	\\
+\code{lazy\_thresh}	& \emph{empty}	& vector of constraint thresholds for including lazy constraints, size must match total number of constraints or number of lazy constraints \\
+\code{lazy\_thresh\_multiplier}	& 2	& used to scale \code{lazy\_thresh} as specified by \code{lazy\_mode} \\
+\code{lazy\_violation\_cost}	& 1	& cost (scalar) of violating a lazy constraint when evaluating violations and thresholds \\
+\code{lazy\_mip\_gap}\tnote{*}	& \code{[]}	& $n$-element vector of values to use for \code{mip\_gap} parameter for first $n$ iterations of lazy constraint handling, last element defines final MIP gap tolerance \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+ \scriptsize
+ \item [*] {For \code{miqps\_master} only.}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The \code{qps\_master} function is simply a master wrapper around corresponding functions specific to each solver, namely, \code{qps\_bpmpd}, \code{qps\_clp}, \code{qps\_cplex}, \code{qps\_glpk}, \code{qps\_gurobi}, \code{qps\_highs}, \code{qps\_ipopt}, \code{qps\_knitro}, \code{qps\_mips}, \code{qps\_mosek}, \code{qps\_osqp}, and \code{qps\_ot}. Each of these functions has an interface identical to that of \code{qps\_master}, with the exception of the options struct for \code{qps\_mips}, which is a simple \mips{} options struct.
 
 \clearpage
 \subsubsection{QP Example}
@@ -768,7 +801,7 @@ This function can be used to solve the problem with any of the available solvers
     miqps_master(H, c, A, l, u, xmin, xmax, x0, vtype, opt);
 [x, f, exitflag, output, lambda] = miqps_master(problem);
 \end{Code}
-The calling syntax for \code{miqps\_master} is identical to that used by \code{qps\_master} with the exception of a single new input argument, \code{vtype}, to specify the variable type, just before the options struct. The input arguments, output arguments, and options for \code{miqps\_master} are described in Tables~\ref{tab:miqps_master_input}, Tables~\ref{tab:miqps_master_output}, and \ref{tab:miqps_master_options}, respectively.
+The calling syntax for \code{miqps\_master} is identical to that used by \code{qps\_master} with the exception of a single new input argument, \code{vtype}, to specify the variable type, just before the options struct. The input arguments, output arguments, and options for \code{miqps\_master} are described in Table~\ref{tab:miqps_master_input}, Table~\ref{tab:miqps_master_output}, and Tables~\ref{tab:miqps_master_options} and \ref{tab:lazy_options}, respectively.
 
 \begin{table}[!ht]
 %\renewcommand{\arraystretch}{1.2}
@@ -789,6 +822,7 @@ name & description \\
 \codeq{B} & binary \\
 \codeq{I} & integer \\
 \end{tabular}	\\
+\code{opt}	& optional options struct (all fields optional), see Tables~\ref{tab:miqps_master_options} and \ref{tab:lazy_options} for details	\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -878,10 +912,6 @@ name & default & description \\
 3 & print all progress info \\
 \end{tabular}	\\
 \code{fix\_integer}	& 0	& fix integer variables at value in \code{x0}, if true \\
-\code{lazy}	& \emph{empty}	& vector of constraint indices (logical or numeric) of lazy constraints, triggers an iterative cutting plane approach, if not empty; set to \codeq{all} to indicate all constraints are lazy \\
-\code{lazy\_thresh}	& \emph{empty}	& vector of constraint thresholds for including lazy constraints, size must match total number of constraints or number of lazy constraints \\
-\code{lazy\_violation\_cost}	& 1	& cost (scalar) of violating a lazy constraint when evaluating violations and thresholds \\
-\code{lazy\_mip\_gap}	& \code{[]}	& $n$-element vector of values to use for \code{mip\_gap} parameter for first $n$ iterations of lazy constraint handling, last element defines final MIP gap tolerance \\
 \code{mip\_gap}	& \code{[]}	& relative MIP gap tolerance, defaults to solver default/options \\
 \code{mip\_gap\_abs}	& \code{[]}	& absolute MIP gap tolerance, defaults to solver default/options \\
 \code{relax\_integer}	& 0	& relax integer constraints, if true \\
@@ -893,6 +923,7 @@ name & default & description \\
 \code{highs\_opt}	& \emph{empty}	& options struct for \highs{}\tnote{*} \\
 \code{intlinprog\_opt}	& \emph{empty}	& options struct for \code{intlinprog}\tnote{*} \\
 \code{mosek\_opt}	& \emph{empty}	& options struct for \mosek{}\tnote{*} \\
+\emph{lazy constraint options} && see Table~\ref{tab:lazy_options} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -2734,8 +2765,8 @@ property of the field type objects \\
 \midrule
 \multicolumn{3}{l}{\emph{Additional Options for Specific Problem Types}} \\
 % \emph{problem type} & & \emph{for details see ...} \\
-~~LP/QP & & see Table~\ref{tab:qps_master_options} \\
-~~MILP/MIQP & & see Table~\ref{tab:miqps_master_options} \\
+~~LP/QP & & see Tables~\ref{tab:qps_master_options} and \ref{tab:lazy_options} \\
+~~MILP/MIQP & & see Tables~\ref{tab:miqps_master_options} and \ref{tab:lazy_options} \\
 ~~QCQP & & see Table~\ref{tab:qcqps_master_options} \\
 ~~NLP & & see Table~\ref{tab:nlps_master_options} \\
 ~~LEQ & & see Section~\ref{MIPSMAN-sec:mplinsolve} of the \mipsman{} \\
@@ -4814,7 +4845,7 @@ When \glpk{} is installed, either as part of Octave or with a MEX interface for 
 
 \gurobi{}~\cite{gurobi} is a collection of optimization tools that includes high-performance solvers for large-scale linear programming (LP) and quadratic programming (QP) problems, among others. The project was started by some former \cplex{} developers. More information is available at \url{https://www.gurobi.com/}.
 
-Although \gurobi{} is a commercial package, at the time of this writing their is a free academic license available. See \url{https://www.gurobi.com/academia/for-universities} for more details.
+Although \gurobi{} is a commercial package, at the time of this writing there is a free academic license available. See \url{https://www.gurobi.com/academia/for-universities} for more details.
 
 When \gurobi{} is installed, it can be used to solve general LP and QP problems via \mpom{}'s common QP solver interface \code{qps\_master}, or MILP and MIQP problems via \code{miqps\_master}, with the algorithm option set to \codeq{GUROBI}, or by calling \code{qps\_gurobi} or \code{miqps\_gurobi} directly.
 
@@ -5235,8 +5266,8 @@ property of the field type objects \\
 \midrule
 \multicolumn{3}{l}{\emph{Additional Options for Specific Problem Types}} \\
 % \emph{problem type} & & \emph{for details see ...} \\
-~~LP/QP & & see Table~\ref{tab:qps_master_options} \\
-~~MILP/MIQP & & see Table~\ref{tab:miqps_master_options} \\
+~~LP/QP & & see Tables~\ref{tab:qps_master_options} and \ref{tab:lazy_options} \\
+~~MILP/MIQP & & see Tables~\ref{tab:miqps_master_options} and \ref{tab:lazy_options} \\
 ~~NLP & & see Table~\ref{tab:nlps_master_options} \\
 ~~LEQ & & see Section~\ref{MIPSMAN-sec:mplinsolve} of the \mipsman{} \\
 ~~~~\code{leq\_opt.solver} & \codeq{} & see \code{help mplinsolve}, input argument \code{solver} \\
@@ -6758,6 +6789,7 @@ The \href{https://matpower.org/docs/MP-Opt-Model-manual-5.1.pdf}{\mpom{} 5.1 Use
 \item Add \code{mip\_gap} field to \code{output} return value for \code{miqps\_gurobi()} and \code{miqps\_ot()} (\code{miqps\_highs()} already includes it) to provide a common method to access the relative MIP gap for the solution of \code{miqps\_master()} for solvers that provide it.
 \item Add \code{lazy} option for \code{miqps\_master()} and \code{qps\_master()} to enable basic handling of lazy constraints, where the problem is solved iteratively beginning without lazy constraints, adding at each iteration only those that are violated or within a threshold, until all constraints are satisfied.
 \item Add \code{lazy\_thresh} option for \code{miqps\_master()} and \code{qps\_master()} to control the threshold for including lazy constraints and \code{lazy\_violation\_cost} option for controlling the penalty for violating a lazy constraint when evaluating violations and thresholds.
+\item Add \code{lazy\_it\_lim}, \code{lazy\_mode}, and \code{lazy\_thresh\_multiplier} options for \code{miqps\_master()} and \code{qps\_master()} to control mechanisms for limiting the number of lazy constraint iterations.
 \item Add \code{lazy\_mip\_gap} option for \code{miqps\_master()} to allow use of different relative MIP gap tolerances for the early iterations of lazy constraint handling.
 \item Support for \code{mp.opt\_model.solve()} to solve LP, QP, MILP, and MIQP problems with only a subset of constraints included, specified as a constraint index vector (logical or numeric) in a new \code{active\_constraints} field of the options struct.
 \item Add \code{active\_constraints} field, a logical vector matching the constraint dimension, to \code{output} return value for LP, QP, MILP, and MIQP problems when \code{lazy} and/or \code{active\_constraints} input options are provided. For the lazy constraint case, an element is true if the corresponding constraint was included in the final solve.
