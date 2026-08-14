@@ -34,7 +34,8 @@ function [x, f, eflag, output, lambda] = qps_highs(H, c, A, l, u, xmin, xmax, x0
 %               2 = verbose progress output
 %           highs_opt - options struct for HiGHS (see
 %               https://ergo-code.github.io/HiGHS/dev/options/definitions/),
-%               value in verbose overrides these options
+%               value in verbose overrides these options, unless
+%               ``highs_opt.output_flag`` is false
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, opt
@@ -95,7 +96,7 @@ function [x, f, eflag, output, lambda] = qps_highs(H, c, A, l, u, xmin, xmax, x0
 % See also qps_master, callhighs.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -173,9 +174,6 @@ end
 if isempty(xmax)
     xmax = Inf(nx, 1);          %% ... unbounded above.
 end
-if isempty(x0)
-    x0 = zeros(nx, 1);
-end
 
 %% default options
 if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
@@ -184,17 +182,46 @@ else
     verbose = 0;
 end
 
+%% ensure feasibility of x0
+if ~isempty(x0)
+    x0 = max(xmin, min(xmax, x0));
+end
+
 %% set up options struct for HiGHS
+output_flag_override = false;
 if ~isempty(opt) && isfield(opt, 'highs_opt') && ~isempty(opt.highs_opt)
     highs_opt = highs_options(opt.highs_opt);
+    if isfield(opt.highs_opt, 'output_flag')
+        output_flag_override = true;
+    end
 else
     highs_opt = highs_options;
 end
-if verbose > 1
-    highs_opt.output_flag = true;
-else
-    highs_opt.output_flag = false;
+if ~output_flag_override
+    if verbose > 1
+        highs_opt.output_flag = true;
+    else
+        highs_opt.output_flag = false;
+    end
 end
+
+%% handle redirection of console output
+if (~isfield(highs_opt, 'output_flag') || highs_opt.output_flag) && ...
+        (~isfield(highs_opt, 'log_to_console') || highs_opt.log_to_console)
+    %% HiGHS is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        highs_opt.log_to_console = false;   %% disable HiGHS console output
+    end
+    if (~isfield(highs_opt, 'log_file') || strlength(highs_opt.log_file) == 0)
+        %% HiGHS is not writing to a log file ...
+        log_file_path = mp.logger.manager('path');
+        if ~isempty(log_file_path)  %% but active logger IS
+            %% redirect HiGHS output to log file too
+            highs_opt.log_file = log_file_path;
+        end
+    end
+end
+
 highs_opt = highsoptset(highs_opt);
 
 %% get solver type
@@ -223,17 +250,64 @@ if verbose
     else
         solver_name = 'unknown';
     end
-    fprintf('HiGHS Version %s -- %s %s solver\n', vn, solver_name, lpqp);
+    mp_printf('HiGHS Version %s -- %s %s solver\n', vn, solver_name, lpqp);
 end
-[soln, info, opts, basis] = callhighs(c, A, l, u, xmin, xmax, H, [], highs_opt);
+[soln, info, opts, basis] = callhighs(c, A, l, u, xmin, xmax, H, [], highs_opt, [], x0);
 if verbose
-    fprintf('HiGHS solution status: %s\n', info.model_status_string);
+    mp_printf('HiGHS solution status: %s\n', info.model_status_string);
 end
 
 %% extract results
 x = soln.col_value;
 f = info.objective_function_value;
-eflag = info.valid && soln.value_valid;
+if info.valid && soln.value_valid && strcmp(info.model_status_string, 'Optimal')
+    eflag = 1;
+else
+    switch info.model_status_string
+        case 'Not Set'
+            eflag = 0;
+        case 'Load error'
+            eflag = -1;
+        case 'Model error'
+            eflag = -2;
+        case 'Presolve error'
+            eflag = -3;
+        case 'Solve error'
+            eflag = -4;
+        case 'Postsolve error'
+            eflag = -5;
+        case 'Empty'
+            eflag = -6;
+        case 'Memory limit reached'
+            eflag = -7;
+        case 'Optimal'
+            eflag = 1;
+        case 'Infeasible'
+            eflag = -9;
+        case 'Primal infeasible or unbounded'
+            eflag = -10;
+        case 'Unbounded'
+            eflag = -11;
+        case 'Bound on objective reached'
+            eflag = -12;
+        case 'Target for objective reached'
+            eflag = -13;
+        case 'Time limit reached'
+            eflag = -14;
+        case 'Iteration limit reached'
+            eflag = -15;
+        case 'Solution limit reached'
+            eflag = -16;
+        case 'Interrupted by user'
+            eflag = -17;
+        case 'Interrupted by HiGHS'
+            eflag = -18;
+        case 'Unknown'
+            eflag = -19;
+        otherwise
+            eflag = -100;
+    end
+end
 output = info;
 
 %% separate duals into binding lower & upper bounds

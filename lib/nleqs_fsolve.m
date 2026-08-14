@@ -129,7 +129,12 @@ fsolve_opt.Jacobian = 'on';
 fsolve_opt.JacobMult = [];
 
 %% call the solver
-[x, f, eflag, varargout{1:nargout-3}] = fsolve(fcn, x0, fsolve_opt);
+no_logger = ~mp.logger.manager('active');
+if no_logger
+    [x, f, eflag, varargout{1:nargout-3}] = fsolve(fcn, x0, fsolve_opt);
+else
+    mp_printf(evalc('[x, f, eflag, varargout{1:nargout-3}] = fsolve(fcn, x0, fsolve_opt);'));
+end
 
 if nargout > 3
     varargout{1}.alg = 'FSOLVE';

@@ -38,6 +38,10 @@ function [x, f, eflag, output, lambda] = miqps_gurobi(H, c, A, l, u, xmin, xmax,
 %               1 = some progress output
 %               2 = verbose progress output
 %               3 = even more verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -45,8 +49,9 @@ function [x, f, eflag, output, lambda] = miqps_gurobi(H, c, A, l, u, xmin, xmax,
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           grb_opt - options struct for GUROBI, value in verbose
-%                   overrides these options
+%           grb_opt - options struct for GUROBI, values in verbose, mip_gap,
+%               and mip_gap_abs override these options, unless
+%               ``grb_opt.OutputFlag`` is false, in the case of verbose
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -108,7 +113,7 @@ function [x, f, eflag, output, lambda] = miqps_gurobi(H, c, A, l, u, xmin, xmax,
 % See also miqps_master, gurobi.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -183,9 +188,6 @@ end
 if isempty(xmax)
     xmax = Inf(nx, 1);          %% ... unbounded above.
 end
-if isempty(x0)
-    x0 = zeros(nx, 1);
-end
 
 %% default options
 if ~isempty(opt) && isfield(opt, 'verbose') && ~isempty(opt.verbose)
@@ -195,22 +197,54 @@ else
 end
 
 %% set up options struct for Gurobi
+output_flag_override = false;
 if ~isempty(opt) && isfield(opt, 'grb_opt') && ~isempty(opt.grb_opt)
     g_opt = gurobi_options(opt.grb_opt);
+    if isfield(opt.grb_opt, 'OutputFlag')
+        output_flag_override = true;
+    end
 else
     g_opt = gurobi_options;
 end
-if verbose > 1
-    g_opt.LogToConsole = 1;
-    g_opt.OutputFlag = 1;
-    if verbose > 2
-        g_opt.DisplayInterval = 1;
+if ~output_flag_override
+    if verbose > 1
+        g_opt.OutputFlag = 1;
+        g_opt.LogToConsole = 1;
     else
-        g_opt.DisplayInterval = 100;
+        g_opt.OutputFlag = 0;
+        g_opt.LogToConsole = 0;
     end
+end
+if (isfield(g_opt, 'OutputFlag') && ~g_opt.OutputFlag)
+   g_opt.LogToConsole = 0;
+end
+if verbose > 2
+    g_opt.DisplayInterval = 1;
 else
-    g_opt.LogToConsole = 0;
-    g_opt.OutputFlag = 0;
+    g_opt.DisplayInterval = 100;
+end
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    g_opt.MIPGap = opt.mip_gap;
+end
+if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+    g_opt.MIPGapAbs = opt.mip_gap_abs;
+end
+
+%% handle redirection of console output
+if (~isfield(g_opt, 'OutputFlag') || g_opt.OutputFlag) && ...
+        (~isfield(g_opt, 'LogToConsole') || g_opt.LogToConsole)
+    %% Gurobi is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        g_opt.LogToConsole = 0;     %% disable Gurobi console output
+    end
+    if (~isfield(g_opt, 'LogFile') || strlength(g_opt.LogFile) == 0)
+        %% Gurobi is not writing to a log file ...
+        log_file_path = mp.logger.manager('path');
+        if ~isempty(log_file_path)  %% but active logger IS
+            %% redirect Gurobi output to log file too
+            g_opt.LogFile = log_file_path;
+        end
+    end
 end
 
 if ~issparse(A)
@@ -234,6 +268,9 @@ m.sense = char([ double('=')*ones(1,neq) double('<')*ones(1,niq) ]);
 m.lb = xmin;
 m.ub = xmax;
 m.obj = c';
+if ~isempty(x0)
+    m.start = x0;
+end
 if ~isempty(vtype)
     m.vtype = vtype;
 end
@@ -268,7 +305,7 @@ if verbose
         'deterministic concurrent simplex'
     };
     vn = gurobiver;
-    fprintf('Gurobi Version %s -- %s %s solver\n', ...
+    mp_printf('Gurobi Version %s -- %s %s solver\n', ...
         vn, alg_names{g_opt.Method+2}, lpqp);
 end
 results = gurobi(m, g_opt);
@@ -349,6 +386,9 @@ lambda = struct( ...
     'upper', lam.upper ...
 );
 
+if mi && eflag == 1
+    output.mip_gap = output.mipgap;
+end
 if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
     if length(vtype) == 1
         if vtype == 'I' || vtype == 'B' || vtype == 'N'
@@ -362,7 +402,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
     end
     if length(k) < nx   %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
             tol = opt.price_stage_warn_tol;
@@ -374,20 +414,20 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
         x0(k) = round(x0(k));
         xmin(k) = x0(k);
         xmax(k) = x0(k);
-    %     opt.grb_opt.Method = 0;     %% primal simplex
+        opt.grb_opt.Method = 1;     %% dual simplex
 
         [x_, f_, eflag_, output_, lambda] = qps_gurobi(H, c, A, l, u, xmin, xmax, x0, opt);
         if eflag ~= eflag_
             error('miqps_gurobi: EXITFLAG from price computation stage = %d', eflag_);
         end
         if abs(f - f_)/max(abs(f), 1) > tol
-            warning('miqps_gurobi: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
+            mp_warning('miqps_gurobi: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
         end
         xn = abs(x);
         xn(xn<1) = 1;
         [mx, k] = max(abs(x - x_) ./ xn);
         if mx > tol
-            warning('miqps_gurobi: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
+            mp_warning('miqps_gurobi: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
         end
         output.price_stage = output_;
     end

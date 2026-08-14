@@ -37,6 +37,10 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -44,8 +48,8 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           mosek_opt - options struct for MOSEK, value in verbose
-%                   overrides these options
+%           mosek_opt - options struct for MOSEK, values in verbose, mip_gap,
+%               and mip_gap_abs override these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -109,7 +113,7 @@ function [x, f, eflag, output, lambda] = miqps_mosek(H, c, A, l, u, xmin, xmax, 
 % See also miqps_master, mosekopt.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -188,6 +192,21 @@ if ~isempty(p.opt) && isfield(p.opt, 'mosek_opt') && ~isempty(p.opt.mosek_opt)
     mosek_opt = mosek_options(p.opt.mosek_opt);
 else
     mosek_opt = mosek_options;
+end
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    mosek_opt.MSK_DPAR_MIO_TOL_REL_GAP = opt.mip_gap;
+end
+if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+    mosek_opt.MSK_DPAR_MIO_TOL_ABS_GAP = opt.mip_gap_abs;
+end
+
+%% handle redirection of console output
+if verbose
+    log_to_console = mp.logger.manager('write_to_console');
+    log_file_path = mp.logger.manager('path');
+else
+    log_to_console = true;  %% no MOSEK console output
+    log_file_path = '';
 end
 
 %% set up problem struct for MOSEK
@@ -315,11 +334,25 @@ if verbose
     if isempty(vn)
         vn = '<unknown>';
     end
-    fprintf('MOSEK Version %s -- %s %s solver\n', ...
+    mp_printf('MOSEK Version %s -- %s %s solver\n', ...
             vn, alg_names{mosek_opt.MSK_IPAR_OPTIMIZER+1}, lpqp);
 end
-cmd = sprintf('minimize echo(%d)', verbose);
-[r, res] = mosekopt(cmd, prob, mosek_opt);
+if log_to_console
+    cmd = sprintf('minimize echo(%d)', verbose);
+else
+    cmd = 'minimize';
+end
+if isempty(log_file_path)
+    [r, res] = mosekopt(cmd, prob, mosek_opt);
+else
+    log_callback = struct( ...
+        'loghandle', [], ...
+        'log', 'mosek_log_callback' ...
+    );
+    mosek_opt.MSK_IPAR_LOG = verbose;   %% not sure this has any effect
+    outstr = evalc('[r, res] = mosekopt(cmd, prob, mosek_opt, log_callback);');
+    mp_printf(outstr);
+end
 
 %%-----  repackage results  -----
 if isfield(res, 'sol')
@@ -386,7 +419,7 @@ if (verbose || r == sc.MSK_RES_ERR_LICENSE || ...
         r == sc.MSK_RES_ERR_LICENSE_SERVER_VERSION || ...
         r == sc.MSK_RES_ERR_MISSING_LICENSE_FILE) ...
         && ~isempty(msg)  %% always alert user of license problems
-    fprintf('%s\n', msg);
+    mp_printf('%s\n', msg);
 end
 
 %%-----  repackage results  -----
@@ -441,7 +474,7 @@ end
 if mi && eflag == 1 && (~isfield(p.opt, 'skip_prices') || ~p.opt.skip_prices)
     if length(prob.ints.sub) < nx   %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(p.opt, 'price_stage_warn_tol') && ~isempty(p.opt.price_stage_warn_tol)
             tol = p.opt.price_stage_warn_tol;
@@ -456,20 +489,20 @@ if mi && eflag == 1 && (~isfield(p.opt, 'skip_prices') || ~p.opt.skip_prices)
         if qp
             pp.opt.mosek_opt.MSK_IPAR_OPTIMIZER = sc.MSK_OPTIMIZER_FREE;
         else
-            pp.opt.mosek_opt.MSK_IPAR_OPTIMIZER = sc.MSK_OPTIMIZER_PRIMAL_SIMPLEX;
+            pp.opt.mosek_opt.MSK_IPAR_OPTIMIZER = sc.MSK_OPTIMIZER_DUAL_SIMPLEX;
         end
         [x_, f_, eflag_, output_, lambda] = qps_mosek(pp);
         if eflag ~= eflag_
             error('miqps_mosek: EXITFLAG from price computation stage = %d', eflag_);
         end
         if abs(f - f_)/max(abs(f), 1) > tol
-            warning('miqps_mosek: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
+            mp_warning('miqps_mosek: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
         end
         xn = abs(x);
         xn(xn<1) = 1;
         [mx, k] = max(abs(x - x_) ./ xn);
         if mx > tol
-            warning('miqps_mosek: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
+            mp_warning('miqps_mosek: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
         end
         output.price_stage = output_;
     end

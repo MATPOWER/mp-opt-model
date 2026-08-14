@@ -103,7 +103,7 @@ function [x, f, eflag, output, lambda] = qcqps_gurobi(H, c, Q, B, lq, uq, A, l, 
 % See also qcqps_master, gurobi_options, gurobi.
 
 %   MP-Opt-Model
-%   Copyright (c) 2019-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2019-2026, Power Systems Engineering Research Center (PSERC)
 %   by Wilson Gonzalez Vanegas, Universidad Nacional de Colombia Sede Manizales
 %   and Ray Zimmerman, PSERC Cornell
 %
@@ -380,7 +380,7 @@ if verbose
         'deterministic concurrent simplex'
         };
     vn = gurobiver;
-    fprintf('Gurobi Version %s -- %s %s solver\n', ...
+    mp_printf('Gurobi Version %s -- %s %s solver\n', ...
         vn, alg_names{g_opt.Method+2}, lpqcqp);
 end
 

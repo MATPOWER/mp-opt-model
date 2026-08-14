@@ -23,7 +23,7 @@ classdef set_manager_opt_model < mp.set_manager
 % objects.
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -170,12 +170,12 @@ classdef set_manager_opt_model < mp.set_manager
                 none = '- ';
                 for k = 1:length(idxs)
                     obj.display_soln_print_row(fid, idxs(k));
-                    fprintf(fid, '\n');
+                    mp_printf(fid, '\n');
                 end
 
                 %% print footer rows
-                fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
-                fprintf(fid, '\n');
+                mp_printf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                mp_printf(fid, '\n');
             end
         end
 
@@ -389,9 +389,9 @@ classdef set_manager_opt_model < mp.set_manager
             %
             % See also display_soln.
 
-            fprintf(fid, '=====  %s  =====\n', obj.label);
+            mp_printf(fid, '=====  %s  =====\n', obj.label);
             for h = 1:length(hdr1)
-                fprintf(fid, '%s\n', [hdr1{h} hdr2{h}]);
+                mp_printf(fid, '%s\n', [hdr1{h} hdr2{h}]);
             end
         end
 
@@ -410,7 +410,7 @@ classdef set_manager_opt_model < mp.set_manager
 
             ii = sprintf('%d', i);
             fmt = sprintf('%%-%ds', length(ii)+ceil((7-length(ii))/2));
-            fprintf(fid, '%7s %-28s', sprintf(fmt, ii), obj.describe_idx(i));
+            mp_printf(fid, '%7s %-28s', sprintf(fmt, ii), obj.describe_idx(i));
         end
 
         function default_tags = get_soln_default_tags(obj)

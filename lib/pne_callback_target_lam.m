@@ -17,7 +17,7 @@ function [nx, cx, s] = pne_callback_target_lam(k, nx, cx, px, s, opt)
 % See pne_callback_default for details of the input and output arguments.
 
 %   MP-Opt-Model
-%   Copyright (c) 2016-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2016-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %   and Shrirang Abhyankar, Argonne National Laboratory
 %
@@ -80,7 +80,7 @@ if isempty(ev) && ~s.rollback
             nx.this_step = nx.x(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             if opt.verbose > 3
-                fprintf('  step %d prediction to overshoot full trace, set next step to natural param w/reduced size\n', k+1);
+                mp_printf('  step %d prediction to overshoot full trace, set next step to natural param w/reduced size\n', k+1);
             end
         end
     elseif target > 0       %% target lambda value
@@ -88,7 +88,7 @@ if isempty(ev) && ~s.rollback
             nx.this_step = target - nx.x(end);
             nx.this_parm = @pne_pfcn_natural;   %% change to natural parameterization
             if opt.verbose > 3
-                fprintf('  step %d prediction to overshoot target lambda, set next step to natural param w/reduced size\n', k+1);
+                mp_printf('  step %d prediction to overshoot target lambda, set next step to natural param w/reduced size\n', k+1);
             end
         end
     end

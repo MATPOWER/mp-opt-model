@@ -37,6 +37,10 @@ function [x, f, eflag, output, lambda] = miqps_cplex(H, c, A, l, u, xmin, xmax, 
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -44,8 +48,8 @@ function [x, f, eflag, output, lambda] = miqps_cplex(H, c, A, l, u, xmin, xmax, 
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           cplex_opt - options struct for CPLEX, value in verbose
-%                   overrides these options
+%           cplex_opt - options struct for CPLEX, values in verbose, mip_gap,
+%               and mip_gap_abs override these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -105,7 +109,7 @@ function [x, f, eflag, output, lambda] = miqps_cplex(H, c, A, l, u, xmin, xmax, 
 % See also miqps_master, cplexmiqp, cplexmilp, cplexqp, cplexlp, cplex_options.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -219,6 +223,12 @@ elseif verbose > 1
 elseif verbose > 0
     cplex_opt.display = 'off';
 end
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    cplex_opt.mip.tolerances.mipgap = opt.mip_gap;
+end
+if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+    cplex_opt.mip.tolerances.absmipgap = opt.mip_gap_abs;
+end
 
 if isempty(Ai) && isempty(Ae)
     unconstrained = 1;
@@ -254,7 +264,7 @@ end
 if mi
     if ~nnz(H)
         if verbose
-            fprintf('CPLEX Version %s -- %s MILP solver\n', ...
+            mp_printf('CPLEX Version %s -- %s MILP solver\n', ...
                 vstr, alg_names{cplex_opt.lpmethod+1});
         end
         [x, f, eflag, output] = ...
@@ -262,7 +272,7 @@ if mi
         lam = [];
     else
         if verbose
-            fprintf('CPLEX Version %s --  %s MIQP solver\n', ...
+            mp_printf('CPLEX Version %s --  %s MIQP solver\n', ...
                 vstr, alg_names{cplex_opt.qpmethod+1});
         end
         %% ensure H is numerically symmetric
@@ -276,14 +286,14 @@ if mi
 else
     if ~nnz(H)
         if verbose
-            fprintf('CPLEX Version %s -- %s LP solver\n', ...
+            mp_printf('CPLEX Version %s -- %s LP solver\n', ...
                 vstr, alg_names{cplex_opt.lpmethod+1});
         end
         [x, f, eflag, output, lam] = ...
             cplexlp(c, Ai, bi, Ae, be, xmin, xmax, x0, cplex_opt);
     else
         if verbose
-            fprintf('CPLEX Version %s --  %s QP solver\n', ...
+            mp_printf('CPLEX Version %s --  %s QP solver\n', ...
                 vstr, alg_names{cplex_opt.qpmethod+1});
         end
         %% ensure H is numerically symmetric
@@ -300,7 +310,7 @@ end
 %%    cplexstatusstring: 'non-optimal'
 %%              message: 'Solution with numerical issues'
 if eflag > 1
-    warning('qps_cplex: Undocumented ''exitflag'' value (%d)\n          cplexstatus: %d\n    cplexstatusstring: ''%s''\n              message: ''%s''', eflag, output.cplexstatus, output.cplexstatusstring, output.message);
+    mp_warning('qps_cplex: Undocumented ''exitflag'' value (%d)\n          cplexstatus: %d\n    cplexstatusstring: ''%s''\n              message: ''%s''', eflag, output.cplexstatus, output.cplexstatusstring, output.message);
     if eflag == 5 && mi
         eflag = 1;      %% give it a try for the MI phase
     else
@@ -350,7 +360,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
             (vtype == 'S' & x' == 0));
     if length(k) < nx   %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
             tol = opt.price_stage_warn_tol;
@@ -369,13 +379,13 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
             error('miqps_cplex: EXITFLAG from price computation stage = %d', eflag_);
         end
         if abs(f - f_)/max(abs(f), 1) > tol
-            warning('miqps_cplex: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
+            mp_warning('miqps_cplex: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
         end
         xn = abs(x);
         xn(xn<1) = 1;
         [mx, k] = max(abs(x - x_) ./ xn);
         if mx > tol
-            warning('miqps_cplex: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
+            mp_warning('miqps_cplex: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
         end
         output.price_stage = output_;
     end

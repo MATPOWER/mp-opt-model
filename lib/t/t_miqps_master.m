@@ -2,7 +2,7 @@ function t_miqps_master(quiet)
 % t_miqps_master - Tests of MILP/MIQP solvers via miqps_master.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -29,7 +29,7 @@ end
 n = 83;
 nqp = 28;
 nmiqp = 11;
-t_begin(n*length(algs), quiet);
+t_begin(2*n*length(algs), quiet);
 
 diff_alg_warn_id = 'optim:linprog:WillRunDiffAlg';
 if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
@@ -38,12 +38,14 @@ if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
 end
 
 for k = 1:length(algs)
+for j = 1:2
     if ~isempty(check{k}) && ...
             (ischar(check{k}) && ~have_feature(check{k}) || ...
              isa(check{k}, 'function_handle') && ~check{k}())
         t_skip(n, sprintf('%s not installed', names{k}));
     else
         opt = struct('verbose', 0, 'alg', algs{k});
+        opt.price_stage_warn_tol = 0.01;
         mpopt = struct( ...
             'verbose', 0, ...
             'opf', struct( ...
@@ -60,13 +62,16 @@ for k = 1:length(algs)
                 'num_threads', 0, ...
                 'opt', 0 ) ...
         );
-%         if have_feature('highs')
+        if have_feature('highs')
 %             opt.highs_opt.primal_feasibility_tolerance = 1e-10;
 %             opt.highs_opt.dual_feasibility_tolerance = 1e-10;
 %             opt.highs_opt.ipm_optimality_tolerance = 1e-12;
 %             opt.highs_opt.primal_residual_tolerance = 1e-10;
 %             opt.highs_opt.dual_residual_tolerance = 1e-10;
-%         end
+            if have_feature('highs', 'vnum') == 1.014
+                opt.highs_opt.presolve = "off";
+            end
+        end
         if have_feature('cplex')
             % alg = 0;        %% default uses barrier method with NaN bug in lower lim multipliers
             alg = 2;        %% use dual simplex
@@ -94,12 +99,18 @@ for k = 1:length(algs)
             end
             opt.mosek_opt = mosek_options([], mpopt);
         end
+        name = names{k};
+        if j == 2
+            name = [name ' (lazy)'];
+            opt.lazy = 'all';
+            opt.lazy_mip_gap = [0.1 0.03 0];
+        end
         opt_r = opt;
         opt_r.relax_integer = 1;
         opt_f = opt;
         opt_f.fix_integer = 1;
 
-        t = sprintf('%s - 3-d LP : ', names{k});
+        t = sprintf('%s - 3-d LP : ', name);
         %% based on example from 'doc linprog'
         c = [-5; -4; -6];
         A = [1 -1  1;
@@ -119,7 +130,7 @@ for k = 1:length(algs)
         t_is(lam.upper, zeros(size(x)), 9, [t 'lam.upper']);
 
         if does_qp(k)
-            t = sprintf('%s - unconstrained 3-d quadratic : ', names{k});
+            t = sprintf('%s - unconstrained 3-d quadratic : ', name);
             %% from http://www.akiti.ca/QuadProgEx0Constr.html
             H = [5 -2 -1; -2 4 3; -1 3 5];
             c = [2; -35; -47];
@@ -133,7 +144,7 @@ for k = 1:length(algs)
             t_is(lam.lower, zeros(size(x)), 13, [t 'lam.lower']);
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
 
-            t = sprintf('%s - constrained 2-d QP : ', names{k});
+            t = sprintf('%s - constrained 2-d QP : ', name);
             %% example from 'doc quadprog'
             H = [   1   -1;
                     -1  2   ];
@@ -154,7 +165,7 @@ for k = 1:length(algs)
             t_is(lam.lower, zeros(size(x)), 7, [t 'lam.lower']);
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
 
-            t = sprintf('%s - constrained 4-d QP : ', names{k});
+            t = sprintf('%s - constrained 4-d QP : ', name);
             %% from https://v8doc.sas.com/sashtml/iml/chap8/sect12.htm
             H = [   1003.1  4.3     6.3     5.9;
                     4.3     2.2     2.1     3.9;
@@ -176,7 +187,7 @@ for k = 1:length(algs)
             t_is(lam.lower, [2.24;0;0;1.7667], 4, [t 'lam.lower']);
             t_is(lam.upper, zeros(size(x)), 13, [t 'lam.upper']);
 
-            t = sprintf('%s - (struct) constrained 4-d QP : ', names{k});
+            t = sprintf('%s - (struct) constrained 4-d QP : ', name);
             p = struct('H', H, 'A', A, 'l', l, 'u', u, 'xmin', xmin, 'x0', x0, 'opt', opt);
             [x, f, s, out, lam] = miqps_master(p);
             t_is(s, 1, 12, [t 'success']);
@@ -190,13 +201,13 @@ for k = 1:length(algs)
             t_skip(nqp, sprintf('%s does not handle QP problems', names{k}));
         end
 
-        t = sprintf('%s - infeasible LP : ', names{k});
+        t = sprintf('%s - infeasible LP : ', name);
         p = struct('A', sparse([1 1]), 'c', [1;1], 'u', -1, 'xmin', [0;0], 'opt', opt);
         [x, f, s, out, lam] = miqps_master(p);
         t_ok(s <= 0, [t 'no success']);
 
 % opt.verbose = 3;
-        t = sprintf('%s - 2-d ILP : ', names{k});
+        t = sprintf('%s - 2-d ILP : ', name);
         %% from MOSEK 6.0 Guided Tour, section  7.13.1, https://docs.mosek.com/6.0/toolbox/node009.html
         c = [-2; -3];
         A = sparse([195 273; 4 40]);
@@ -209,14 +220,14 @@ for k = 1:length(algs)
         t_is(x, [4; 2], 12, [t 'x']);
         t_is(f, -14, 12, [t 'f']);
 
-        t = sprintf('%s - 2-d ILP (integer relaxed) : ', names{k});
+        t = sprintf('%s - 2-d ILP (integer relaxed) : ', name);
         p.opt = opt_r;
         [x, f, s, out, lam] = miqps_master(p);
         t_is(s, 1, 12, [t 'success']);
         t_is(x, [2.441860465; 3.255813953], 8, [t 'x']);
         t_is(f, -14.651162791, 8, [t 'f']);
 
-        t = sprintf('%s - 6-d ILP : ', names{k});
+        t = sprintf('%s - 6-d ILP : ', name);
         %% from https://doi.org/10.1109/TASE.2020.2998048
         c = [1; 2; 3; 1; 2; 3];
         A = [1 3 5 1 3 5;
@@ -230,6 +241,7 @@ for k = 1:length(algs)
         t_is(s, 1, 12, [t 'success']);
         t_ok(norm(x - [1; 0; 3; 0; 0; 2], Inf) < 1e-12 || ...
              norm(x - [0; 0; 3; 1; 0; 2], Inf) < 1e-12 || ...
+             norm(x - [0; 2; 3; 0; 0; 1], Inf) < 1e-12 || ...
              norm(x - [0; 0; 3; 0; 2; 1], Inf) < 1e-12, [t 'x']);
         t_is(f, 16, 12, [t 'f']);
 
@@ -288,7 +300,7 @@ for k = 1:length(algs)
                     1 1 10 15 5 0 0 0 0 0 0 8 12 6;
                     0.5 1.3/3 10 15 5 0 0 0 0 0 0 8 12 6]';
             for Scenario = 1:3
-                t = sprintf('%s - 14-d MILP Scenario %d: ', names{k}, Scenario);
+                t = sprintf('%s - 14-d MILP Scenario %d: ', name, Scenario);
                 mm.qdc.set_params(mm.var, 'fixed', 'c', PlantFixedCost(:, Scenario));
                 [x0, xl, xu, vt] = mm.var.params();
                 [A, l, u] = mm.lin.params(mm.var);
@@ -299,13 +311,13 @@ for k = 1:length(algs)
                 t_is(x, ex(:, Scenario), 12, [t 'x']);
                 t_is(f, ef(Scenario, 1), 12, [t 'f']);
 
-                t = sprintf('%s - 14-d MILP Scenario %d (integer relaxed) : ', names{k}, Scenario);
+                t = sprintf('%s - 14-d MILP Scenario %d (integer relaxed) : ', name, Scenario);
                 [x, f, s, out, lam] = miqps_master(HH, cc, A, l, u, xl, xu, x0, vt, opt_r);
                 t_is(s, 1, 12, [t 'exitflag']);
                 t_is(x, ex(:, 4), 12, [t 'x']);
                 t_is(f, ef(Scenario, 2), 12, [t 'f']);
 
-                t = sprintf('%s - 14-d MILP Scenario %d (integer fixed) : ', names{k}, Scenario);
+                t = sprintf('%s - 14-d MILP Scenario %d (integer fixed) : ', name, Scenario);
                 x0 = ones(size(x));
                 [x, f, s, out, lam] = miqps_master(HH, cc, A, l, u, xl, xu, x0, vt, opt_f);
                 t_is(s, 1, 12, [t 'exitflag']);
@@ -318,7 +330,7 @@ for k = 1:length(algs)
 
 
         if does_miqp(k)
-            t = sprintf('%s - 4-d MIQP : ', names{k});
+            t = sprintf('%s - 4-d MIQP : ', name);
             %% from cplexmiqpex.m, CPLEX_Studio_Academic124/cplex/examples/src/matlab/cplexmiqpex.m
             %% Note: This is a lame example; the integer relaxed problem already
             %%       has an integer feasible solution, so this is actually just
@@ -350,7 +362,7 @@ for k = 1:length(algs)
             t_is(lam.lower, [0; 0; 349.5; 4350], 5, [t 'lam.lower']);
             t_is(lam.upper, [0; 0; 0; 0], 7, [t 'lam.upper']);
 
-            t = sprintf('%s - 6-d IQP : ', names{k});
+            t = sprintf('%s - 6-d IQP : ', name);
             %% from Bragin, et. al. https://doi.org/10.1007/s10957-014-0561-3
             %% with sign of A(2,[2;4;6]) corrected
             H = sparse(1:6, 1:6, [1 0.2 1 0.2 1 0.2], 6, 6);
@@ -373,7 +385,8 @@ for k = 1:length(algs)
         end
 % opt.verbose = 0;
     end
-end
+end     %% j = 1:2
+end     %% k = 1:length(algs)
 
 if have_feature('quadprog') && have_feature('quadprog', 'vnum') == 7.005
     warning(s1.state, diff_alg_warn_id);

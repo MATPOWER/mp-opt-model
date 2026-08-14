@@ -8,7 +8,7 @@ function [TorF, vstr, rdate] = have_feature_osqp()
 % See also have_feature, qps_master, osqp.
 
 %   MP-Opt-Model
-%   Copyright (c) 2004-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2004-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -24,6 +24,6 @@ if TorF
         vstr = o.version();
     catch
         TorF = 0;
-        fprintf('OSQP Error!\n');
+        mp_printf('OSQP Error!\n');
     end
 end

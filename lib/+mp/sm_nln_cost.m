@@ -24,7 +24,7 @@ classdef sm_nln_cost < mp.set_manager_opt_model
 % See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -543,17 +543,17 @@ classdef sm_nln_cost < mp.set_manager_opt_model
                 for k = 1:length(idxs)
                     obj.display_soln_print_row(fid, idxs(k));
 
-                    fprintf(fid, '%9s\n', obj.sprintf_num(8, c(idxs(k))));
+                    mp_printf(fid, '%9s\n', obj.sprintf_num(8, c(idxs(k))));
                 end
 
                 %% print footer rows
                 if length(c) > 1
-                    fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
-                    fprintf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', ...
+                    mp_printf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                    mp_printf(fid, '%7s %-28s%9s%9s%9s%9s%9s\n', '', ...
                         'Sum of Displayed Costs', ...
                         obj.sprintf_num(8, sum(c(idxs))));
                 end
-                fprintf(fid, '\n');
+                mp_printf(fid, '\n');
             end
         end
 

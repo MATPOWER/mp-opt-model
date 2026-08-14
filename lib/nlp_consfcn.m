@@ -33,7 +33,7 @@ function [h, g, dh, dg] = nlp_consfcn(mm, x, dhs, dgs)
 % See also nlp_costfcn, nlp_hessfcn.
 
 %   MP-Opt-Model
-%   Copyright (c) 1996-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 1996-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -58,21 +58,21 @@ else                %% constraints and derivatives
 
 %         %% check sparsity structure against that supplied
 %         if nnz(dg) ~= nnz(dgs)
-%             fprintf('=====> nnz(dg) is %d, expected %d <=====\n', nnz(dg), nnz(dgs));
+%             mp_printf('=====> nnz(dg) is %d, expected %d <=====\n', nnz(dg), nnz(dgs));
 %         else
 %             [idgs, jdgs] = find(dgs);
 %             [idg, jdg] = find(dg);
 %             if any(idg ~= idgs) || any(jdg ~= jdgs)
-%                 fprintf('=====> structure of dg is not as expected <=====\n');
+%                 mp_printf('=====> structure of dg is not as expected <=====\n');
 %             end
 %         end
 %         if nnz(dh) ~= nnz(dhs)
-%             fprintf('=====> nnz(dh) is %d, expected %d <=====\n', nnz(dh), nnz(dhs));
+%             mp_printf('=====> nnz(dh) is %d, expected %d <=====\n', nnz(dh), nnz(dhs));
 %         else
 %             [idhs, jdhs] = find(dhs);
 %             [idh, jdh] = find(dh);
 %             if any(idh ~= idhs) || any(jdh ~= jdhs)
-%                 fprintf('=====> structure of dh is not as expected <=====\n');
+%                 mp_printf('=====> structure of dh is not as expected <=====\n');
 %             end
 %         end
     end

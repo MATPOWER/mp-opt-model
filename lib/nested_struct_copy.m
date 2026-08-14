@@ -65,7 +65,7 @@ function d = nested_struct_copy(d, s, opt, parent)
 %     an invalid field so that mpoption can refer to it as option foo.*
 
 %   MP-Opt-Model
-%   Copyright (c) 2013-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2013-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -105,7 +105,7 @@ else
 end
 
 %% form parent string
-if DEBUG, fprintf('nested_struct_copy() : parent = %s\n', strjoin(parent, '.')); end
+if DEBUG, mp_printf('nested_struct_copy() : parent = %s\n', strjoin(parent, '.')); end
 if nargin > 3 && ~isempty(parent)
     pl = length(parent);
     tmp = cell(2, pl);

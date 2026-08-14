@@ -38,6 +38,10 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
+%           mip_gap_abs ([]) - absolute MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -45,8 +49,8 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           intlinprog_opt - options struct for INTLINPROG, value in verbose
-%                   overrides these options
+%           intlinprog_opt - options struct for INTLINPROG, values in verbose,
+%               mip_gap, and mip_gap_abs override these options
 %           linprog_opt - options struct for LINPROG, value in verbose
 %                   overrides these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
@@ -108,7 +112,7 @@ function [x, f, eflag, output, lambda] = miqps_ot(H, c, A, l, u, xmin, xmax, x0,
 % See also miqps_master, intlinprog, quadprog, linprog.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -240,6 +244,12 @@ if isLP
         if ~isempty(opt) && isfield(opt, 'intlinprog_opt') && ~isempty(opt.intlinprog_opt)
             ot_opt = nested_struct_copy(ot_opt, opt.intlinprog_opt);
         end
+        if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+            ot_opt.TolGapRel = opt.mip_gap;
+        end
+        if isfield(opt, 'mip_gap_abs') && ~isempty(opt.mip_gap_abs)
+            ot_opt.TolGapAbs = opt.mip_gap_abs;
+        end
     else
         ot_opt = optimoptions('linprog');
         if ~isempty(opt) && isfield(opt, 'linprog_opt') && ~isempty(opt.linprog_opt)
@@ -263,23 +273,40 @@ end
 ot_opt = optimoptions(ot_opt, 'Display', vrb);
 
 %% call the solver
+no_logger = ~mp.logger.manager('active');
 if isLP
     if mi
-        [x, f, eflag, output] = ...
-            intlinprog(c, intcon, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+        if no_logger
+            [x, f, eflag, output] = ...
+                intlinprog(c, intcon, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+        else
+            mp_printf(evalc('[x, f, eflag, output] = intlinprog(c, intcon, Ai, bi, Ae, be, xmin, xmax, ot_opt);'));
+        end
         lam = [];
     else
         if have_feature('matlab', 'vnum') > 9.013
-            [x, f, eflag, output, lam] = ...
-                linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+            if no_logger
+                [x, f, eflag, output, lam] = ...
+                    linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+            else
+                mp_printf(evalc('[x, f, eflag, output, lam] = linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);'));
+            end
         else
-            [x, f, eflag, output, lam] = ...
-                linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+            if no_logger
+                [x, f, eflag, output, lam] = ...
+                    linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+            else
+                mp_printf(evalc('[x, f, eflag, output, lam] = linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);'));
+            end
         end
     end
 else
-    [x, f, eflag, output, lam] = ...
-        quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+    if no_logger
+        [x, f, eflag, output, lam] = ...
+            quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+    else
+        mp_printf(evalc('[x, f, eflag, output, lam] = quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);'));
+    end
 end
 
 %% repackage lambdas
@@ -305,10 +332,13 @@ else
     );
 end
 
+if mi && eflag == 1
+    output.mip_gap = output.relativegap;
+end
 if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
     if length(intcon) < nx  %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
             tol = opt.price_stage_warn_tol;
@@ -320,7 +350,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
         x0(k) = round(x0(k));
         xmin(k) = x0(k);
         xmax(k) = x0(k);
-    %     opt.linprog_opt.Algorithm = 'dual-simplex';     %% dual-simplex
+        opt.linprog_opt.Algorithm = 'dual-simplex'; %% dual-simplex
 
         [x_, f_, eflag_, output_, lambda] = qps_ot(H, c, A, l, u, xmin, xmax, x0, opt);
     %     output
@@ -329,13 +359,13 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
             error('miqps_ot: EXITFLAG from price computation stage = %d', eflag_);
         end
         if abs(f - f_)/max(abs(f), 1) > tol
-            warning('miqps_ot: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
+            mp_warning('miqps_ot: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
         end
         xn = abs(x);
         xn(xn<1) = 1;
         [mx, k] = max(abs(x - x_) ./ xn);
         if mx > tol
-            warning('miqps_ot: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
+            mp_warning('miqps_ot: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
         end
         output.price_stage = output_;
     %     output_

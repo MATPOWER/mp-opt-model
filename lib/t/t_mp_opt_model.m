@@ -2,7 +2,7 @@ function t_mp_opt_model(quiet)
 % t_mp_opt_model - Tests for mp.opt_model.
 
 %   MP-Opt-Model
-%   Copyright (c) 2012-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2012-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -104,7 +104,7 @@ for i = 1:2
                 vt = char(vt0{j} * ones(1, n));
                 vt(j+1) = vt0{1+rem(j,3)};
             end
-%             fprintf('%d %d %d : %s\n', i, j, k, vt);
+%             mp_printf('%d %d %d : %s\n', i, j, k, vt);
             t = sprintf('mm.var.add(''y'', {%d,%d,%d}, y0, ymin, ymax, vt)', i,j,k);
             mm.var.add('y', {i,j,k}, n, 10*(n:-1:1)', -1*(n:-1:1)', 100+(n:-1:1)', vt);
             vNS = vNS + 1; vN = vN + n;

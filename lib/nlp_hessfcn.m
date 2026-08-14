@@ -28,7 +28,7 @@ function Lxx = nlp_hessfcn(mm, x, lambda, cost_mult, Hs)
 % See also nlp_costfcn, nlp_consfcn.
 
 %   MP-Opt-Model
-%   Copyright (c) 1996-2025, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 1996-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -71,13 +71,13 @@ if 0
     d2G_err = full(max(max(abs(d2G - num_d2G))));
     d2H_err = full(max(max(abs(d2H - num_d2H))));
     if d2f_err > 1e-6
-        fprintf('Max difference in d2f: %g\n', d2f_err);
+        mp_printf('Max difference in d2f: %g\n', d2f_err);
     end
     if d2G_err > 1e-5
-        fprintf('Max difference in d2G: %g\n', d2G_err);
+        mp_printf('Max difference in d2G: %g\n', d2G_err);
     end
     if d2H_err > 1e-6
-        fprintf('Max difference in d2H: %g\n', d2H_err);
+        mp_printf('Max difference in d2H: %g\n', d2H_err);
     end
 end
 
@@ -91,12 +91,12 @@ if nargin > 4
 
 %     %% check sparsity structure against that supplied
 %     if nnz(Lxx) ~= nnz(Hs)
-%         fprintf('=====> nnz(Lxx) is %d, expected %d <=====\n', nnz(Lxx), nnz(Hs));
+%         mp_printf('=====> nnz(Lxx) is %d, expected %d <=====\n', nnz(Lxx), nnz(Hs));
 %     else
 %         [iHs, jHs] = find(Hs);
 %         [iH, jH] = find(Lxx);
 %         if any(iH ~= iHs) || any(jH ~= jHs)
-%             fprintf('=====> structure of Lxx is not as expected <=====\n');
+%             mp_printf('=====> structure of Lxx is not as expected <=====\n');
 %         end
 %     end
 end

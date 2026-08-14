@@ -5,23 +5,82 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
+#### 8/12/26
+  - Add mechanism for limiting number of lazy constraint iterations, controlled
+    by new options `lazy_it_lim`, `lazy_mode`, and `lazy_thresh_multiplier`.
+
+#### 8/4/26
+  - Add support for redirecting console output via `mp.logger` by replacing
+    `fprintf()` and `warning()` everywhere with `mp_printf()` and
+    `mp_warning()`, respectively. Requires [MP-Test](8) 8.2 or later.
+  - Add `mp.logger` support for solver output.
+    - DONE
+      - `miqps_glpk()`, `qps_glpk()`
+      - `miqps_gurobi()`, `qps_gurobi()`
+      - `miqps_highs()`, `qps_highs()`
+      - `nlps_ipopt()`, `qps_ipopt()`
+      - `miqps_mosek()`, `qps_mosek()`
+    - DONE, but using `evalc()` (no output during solve)
+      - `miqps_ot()`, `qps_ot()` (`intlinprog()`, `linprog()`, `quadprog()`)
+      - `nleqs_fsolve()`
+      - `nlps_fmincon()`
+    - TO DO
+      - `miqps_cplex()`, `qps_cplex()`
+      - `nlps_knitro()`
+
+#### 5/19/26
+  - Add support for `mp.opt_model.solve()` to solve LP, QP, MILP, and MIQP
+    problems with only a subset of constraints included, specified as a
+    constraint index vector (logical or numeric) in a new `active_constraints`
+    field of the options struct.
+  - Add new `active_constraints` field, a logical vector matching the
+    constraint dimension, to `output` return value for LP, QP, MILP, and MIQP
+    problems when `lazy` and/or `active_constraints` input options are provided.
+    For the lazy constraint case, an element is true if the corresponding
+    constraint was included in the final solve.
+
+#### 5/14/26
+  - Add options `mip_gap` and `mip_gap_abs` to the `miqps_<solver>()`
+    functions, including `miqps_master()` to provide a common interface for
+    setting the MIP gap tolerance parameters for the various solvers.
+  - Add `mip_gap` field to `output` return value for `miqps_gurobi()` and
+    `miqps_ot()` (`miqps_highs()` already includes it) to provide a common
+    method to access the relative MIP gap for the solution of `miqps_master()`
+    for solvers that provide it.
+  - Add option `lazy_mip_gap` to `miqps_master()` to allow use of different
+    relative MIP gap tolerances for the early iterations of lazy constraint
+    handling.
+
+#### 5/7/26
+  - Add basic lazy constraint support to `qps_master()` and `miqps_master()`
+    via `lazy`, `lazy_thresh`, and `lazy_violation_cost` option fields, where
+    where the problem is solved iteratively beginning without lazy constraints,
+    adding at each iteration only those that are violated or within a
+    threshold, until all constraints are satisfied.
+  - Force dual-simplex method for price computation stage of `miqps_<solver>()`
+    functions.
+
+#### 4/30/26
+  - Modify `eflag` output of `qps_highs()` and `miqps_highs()` to reflect
+    the `model_status_string` returned by the HiGHS solver.
+
 #### 4/20/26
-   - Move `mp.opt_model.is_mixed_integer()` logic into new
-     `are_all_continuous()` method of `mp.sm_variable`, and make the former
-     a simple wrapper.
-   - Fix bug with parameter caching in `mp.sm_variable`, where calling
-     `params()` without requesting the variable type would not cache it,
-     so subsequent requests for the variable time incorrectly returned an
-     empty string. Now the variable type is assembled and cached any time
-     there is a non-continuous variable present.
+  - Move `mp.opt_model.is_mixed_integer()` logic into new
+    `are_all_continuous()` method of `mp.sm_variable`, and make the former
+    a simple wrapper.
+  - Fix bug with parameter caching in `mp.sm_variable`, where calling
+    `params()` without requesting the variable type would not cache it,
+    so subsequent requests for the variable time incorrectly returned an
+    empty string. Now the variable type is assembled and cached any time
+    there is a non-continuous variable present.
 
 #### 12/11/25
-   - Add `clear_cached_params()` method to `mp.set_manager_opt_model` and
-     `mp.opt_model`, to clear aggregated parameters cached by the `params()`
-     method.
+  - Add `clear_cached_params()` method to `mp.set_manager_opt_model` and
+    `mp.opt_model`, to clear aggregated parameters cached by the `params()`
+    method.
 
 #### 12/10/25
-   - Add support for the Gurobi's new PDHG LP solver in `qps_gurobi()`.
+  - Add support for the Gurobi's new PDHG LP solver in `qps_gurobi()`.
 
 #### 11/14/25
   - Add support for the new HiPO interior point LP solver in HiGHS, including

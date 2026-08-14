@@ -320,8 +320,13 @@ end
 % fmoptions = optimset(fmoptions, 'Diagnostics', 'on');
 
 %%-----  run solver  -----
-[x, f, eflag, output, Lambda] = ...
-  fmincon(f_fcn, x0, Af, bf, Afeq, bfeq, xmin, xmax, gh_fcn, fmoptions);
+no_logger = ~mp.logger.manager('active');
+if no_logger
+    [x, f, eflag, output, Lambda] = ...
+      fmincon(f_fcn, x0, Af, bf, Afeq, bfeq, xmin, xmax, gh_fcn, fmoptions);
+else
+    mp_printf(evalc('[x, f, eflag, output, Lambda] = fmincon(f_fcn, x0, Af, bf, Afeq, bfeq, xmin, xmax, gh_fcn, fmoptions);'));
+end
 success = (eflag > 0);
 
 %% fix Lambdas

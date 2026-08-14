@@ -20,7 +20,7 @@ function varargout = nleqs_master(fcn, x0, opt)
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use
+%           alg ('DEFAULT') - determines which solver to use
 %               'DEFAULT' : automatic, current default is NEWTON
 %               'NEWTON'  : standard, full-Jacobian Newton's method
 %               'CORE'    : core algorithm, with arbitrary update function
@@ -91,7 +91,7 @@ function varargout = nleqs_master(fcn, x0, opt)
 % nleqs_gauss_seidel, fsolve.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.

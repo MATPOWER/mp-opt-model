@@ -25,7 +25,7 @@ function varargout = pnes_master(fcn, x0, opt)
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use
+%           alg ('DEFAULT') - determines which solver to use
 %               'DEFAULT' : automatic, currently there is only one
 %               solver implementation, a predictor/corrector method
 %           verbose (0) - controls level of progress output displayed
@@ -182,7 +182,7 @@ function varargout = pnes_master(fcn, x0, opt)
 % See also pne_callback_default, pne_register_callbacks, pne_register_events.
 
 %   MP-Opt-Model
-%   Copyright (c) 2013-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2013-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell,
 %   Shrirang Abhyankar, Argonne National Laboratory,
 %   and Alexander Flueck, IIT
@@ -296,14 +296,14 @@ ncb = length(reg_cb);   %% number of registered callback functions
 if warmstarted
     cont_steps = opt.warmstart.cont_steps + 1;
     if opt.verbose
-        fprintf('... CONTINUATION RESUMED\n');
+        mp_printf('... CONTINUATION RESUMED\n');
     end
 else
     cont_steps = 0;
     if opt.verbose
         v = mpomver('all');
-        fprintf('\nMP-Opt-Model Version %s, %s', v.Version, v.Date);
-        fprintf(' -- Predictor/Corrector Continuation Method\n');
+        mp_printf('\nMP-Opt-Model Version %s, %s', v.Version, v.Date);
+        mp_printf(' -- Predictor/Corrector Continuation Method\n');
     end
 end
 
@@ -313,13 +313,13 @@ if opt.solve_base && ~warmstarted
     [x, f, exitflag, out] = nleqs_master(cfcn, x0, opt.nleqs_opt);
     if exitflag
         if opt.verbose > 1
-            fprintf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', cont_steps, x0(end), out.iterations);
+            mp_printf('step %3d  :                          lambda = %6.3f, %2d corrector steps\n', cont_steps, x0(end), out.iterations);
         end
     else
         s.done = 1;
         s.done_msg = sprintf('base solution did not converge in %d iterations', out.iterations);
         if opt.verbose
-            fprintf('%s\n', s.done_msg);
+            mp_printf('%s\n', s.done_msg);
         end
     end
 else
@@ -461,7 +461,7 @@ while ~s.done
         s.done = 1;
         s.done_msg = sprintf('Corrector did not converge in %d iterations.', out.iterations);
         if opt.verbose
-            fprintf('step %3d  : %s stepsize = %-9.3g lambda = %6.3f  corrector did not converge in %d iterations\n', cont_steps, pne_ptag(cx.parm), cx.step, nx.x(end), out.iterations);
+            mp_printf('step %3d  : %s stepsize = %-9.3g lambda = %6.3f  corrector did not converge in %d iterations\n', cont_steps, pne_ptag(cx.parm), cx.step, nx.x(end), out.iterations);
         end
         cont_steps = max(cont_steps - 1, 1);    %% go back to last step, but not to 0
         break;
@@ -553,17 +553,17 @@ while ~s.done
             sub_step = ' ';
         end
 
-        fprintf('step %3d%s : %s stepsize = %-9.3g lambda = %6.3f', cont_steps, sub_step, pne_ptag(cx.parm), cx.step, nx.x(end));
+        mp_printf('step %3d%s : %s stepsize = %-9.3g lambda = %6.3f', cont_steps, sub_step, pne_ptag(cx.parm), cx.step, nx.x(end));
         if opt.verbose < 5
-            fprintf('  %2d corrector steps', out.iterations);
+            mp_printf('  %2d corrector steps', out.iterations);
         end
         if s.rollback
-            fprintf(' ^ ROLLBACK\n');
+            mp_printf(' ^ ROLLBACK\n');
         else
-            fprintf('\n');
+            mp_printf('\n');
         end
         if opt.verbose > 3 && ~isempty(loc_msg)
-            fprintf('    LOCATING -- %s\n', loc_msg);
+            mp_printf('    LOCATING -- %s\n', loc_msg);
         end
     end
 
@@ -582,7 +582,7 @@ while ~s.done
         end
         if (opt.verbose > 2 && s.events(k).log) || ...
                 (opt.verbose > 3 && s.events(k).eidx)
-            fprintf('    %s\n', s.events(k).msg);
+            mp_printf('    %s\n', s.events(k).msg);
         end
     end
 
@@ -649,7 +649,7 @@ output.corrector = out;     %% output from last corrector run
 %% prepare to exit
 if isempty(s.warmstart)
     if opt.verbose
-        fprintf('CONTINUATION TERMINATION: %s\n', s.done_msg);
+        mp_printf('CONTINUATION TERMINATION: %s\n', s.done_msg);
     end
 else
     %% save warmstart values
@@ -673,7 +673,7 @@ else
     output.warmstart = ws;
 
     if opt.verbose
-        fprintf('%s : CONTINUATION SUSPENDED ...\n', s.done_msg);
+        mp_printf('%s : CONTINUATION SUSPENDED ...\n', s.done_msg);
     end
 end
 

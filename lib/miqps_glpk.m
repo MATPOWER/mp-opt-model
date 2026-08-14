@@ -38,6 +38,8 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 %               0 = no progress output
 %               1 = some progress output
 %               2 = verbose progress output
+%           mip_gap ([]) - relative MIP gap tolerance, defaults to solver
+%               options or solver default
 %           skip_prices (0) - flag that specifies whether or not to
 %               skip the price computation stage, in which the problem
 %               is re-solved for only the continuous variables, with all
@@ -45,8 +47,8 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 %           price_stage_warn_tol (1e-7) - tolerance on the objective fcn
 %               value and primal variable relative match required to avoid
 %               mis-match warning message
-%           glpk_opt - options struct for GLPK, value in verbose
-%                   overrides these options
+%           glpk_opt - options struct for GLPK, values in verbose and mip_gap
+%               override these options
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, A, l, u, xmin, xmax, x0, vtype, opt
@@ -103,7 +105,7 @@ function [x, f, eflag, output, lambda] = miqps_glpk(H, c, A, l, u, xmin, xmax, x
 % See also miqps_master, glpk.
 
 %   MP-Opt-Model
-%   Copyright (c) 2010-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2010-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -228,10 +230,65 @@ else
     glpk_opt = glpk_options;
 end
 glpk_opt.msglev = verbose;
+if isfield(opt, 'mip_gap') && ~isempty(opt.mip_gap)
+    glpk_opt.tolobj = max(opt.mip_gap, eps);
+end
+
+%% handle redirection of console output
+if glpk_opt.msglev
+    %% GLPK is writing to console ...
+    if ~mp.logger.manager('write_to_console') ...   %% and active logger is NOT
+        glpk_opt.msglev = 0;    %% disable GLPK console output
+    end
+    %% GLPK doesn't support logging to a file
+end
 
 %% call the solver
+if isempty(AA)
+    AA = sparse(1, nx);
+    bb = 0;
+    emptyA = true;
+else
+    emptyA = false;
+end
+if verbose
+    if mi
+        lpqp = 'MILP';
+    else
+        lpqp = 'LP';
+    end
+    alg_names = {
+        'primal simplex',
+        'dual simplex',
+        'interior',
+    };
+    if isfield(glpk_opt, 'lpsolver') && glpk_opt.lpsolver == 2
+        alg = 3;
+    else
+        alg = 1;
+        if isfield(glpk_opt, 'dual') && glpk_opt.dual
+            dual = glpk_opt.dual;
+            if have_feature('octave', 'vnum') >= 3.007
+                dual = dual -1;
+            end
+            if dual
+                alg = 2;
+            end
+        end
+    end
+    vn = have_feature('glpk', 'vstr');
+    if isempty(vn)
+        vn = '<unknown>';
+    end
+    mp_printf('GLPK Version %s -- %s %s solver\n', ...
+        vn, alg_names{alg}, lpqp);
+end
 [x, f, errnum, extra] = ...
     glpk(c, AA, bb, xmin, xmax, ctype, vtype, 1, glpk_opt);
+if emptyA
+    AA = sparse(0, nx);
+    bb = [];
+end
 
 %% set exit flag
 if isfield(extra, 'status')             %% status found in extra.status
@@ -288,7 +345,7 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
     k = find(vtype == 'I' | vtype == 'B');
     if length(k) < nx   %% still have some free variables
         if verbose
-            fprintf('--- Integer stage complete, starting price computation stage ---\n');
+            mp_printf('--- Integer stage complete, starting price computation stage ---\n');
         end
         if isfield(opt, 'price_stage_warn_tol') && ~isempty(opt.price_stage_warn_tol)
             tol = opt.price_stage_warn_tol;
@@ -300,9 +357,9 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
         xmin(k) = x0(k);
         xmax(k) = x0(k);
         opt.glpk_opt.lpsolver = 1;      %% simplex
-        opt.glpk_opt.dual = 0;          %% primal simplex
-        if have_feature('octave') && have_feature('octave', 'vnum') >= 3.007
-            % opt.glpk_opt.dual = 1;      %% primal simplex
+        if have_feature('octave') && have_feature('octave', 'vnum') < 3.007
+            opt.glpk_opt.dual = 1;      %% dual simplex
+        else
             opt.glpk_opt.dual = 2;      %% dual simplex
         end
 
@@ -311,13 +368,13 @@ if mi && eflag == 1 && (~isfield(opt, 'skip_prices') || ~opt.skip_prices)
             error('miqps_glpk: EXITFLAG from price computation stage = %d', eflag_);
         end
         if abs(f - f_)/max(abs(f), 1) > tol
-            warning('miqps_glpk: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
+            mp_warning('miqps_glpk: relative mismatch in objective function value from price computation stage = %g', abs(f - f_)/max(abs(f), 1));
         end
         xn = abs(x);
         xn(xn<1) = 1;
         [mx, k] = max(abs(x - x_) ./ xn);
         if mx > tol
-            warning('miqps_glpk: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
+            mp_warning('miqps_glpk: max relative mismatch in x from price computation stage = %g (%g)', mx, x(k));
         end
         output.price_stage = output_;
     end

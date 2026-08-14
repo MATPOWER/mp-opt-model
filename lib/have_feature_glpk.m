@@ -8,7 +8,7 @@ function [TorF, vstr, rdate] = have_feature_glpk()
 % See also have_feature, qps_master, miqps_master, glpk.
 
 %   MP-Opt-Model
-%   Copyright (c) 2004-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2004-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -40,6 +40,21 @@ elseif exist('glpk','file') == 2    %% others have glpk.m and ...
             [s,e,tE,m,t] = regexp(str, pat);
             if ~isempty(t)
                 vstr = t{1}{1};
+            end
+        end
+        if isempty(vstr)
+            ov = have_feature('octave', 'vnum');    %% Octave version
+            %% based official Windows builds and Linux Docker builds
+            if ov >= 4 && ov < 4.003
+                vstr = '4.55/4.57?';
+            elseif ov < 4.004
+                vstr = '4.57?';
+            elseif ov < 5
+                vstr = '4.60/4.65?';
+            elseif ov < 7
+                vstr = '4.65/5.0?';
+            else
+                vstr = '5.0?';
             end
         end
     elseif exist('glpkcc','file') == 3  %% MATLAB glpkcc MEX

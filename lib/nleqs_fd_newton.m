@@ -89,7 +89,7 @@ function [x, f, eflag, output, J] = nleqs_fd_newton(fcn, x0, opt)
 % See also nleqs_master.
 
 %   MP-Opt-Model
-%   Copyright (c) 1996-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 1996-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -185,26 +185,26 @@ for j = 1:nj
     normf(j) = norm(f(i1(j):iN(j)), Inf);
 end
 if verbose > 1
-    fprintf('\n iteration ');
-    for j = 1:nj, fprintf('   max residual ');          end
-    fprintf('\nblock    # ');
+    mp_printf('\n iteration ');
+    for j = 1:nj, mp_printf('   max residual ');          end
+    mp_printf('\nblock    # ');
     for j = 1:nj
         n1 = length(labels{j});
         n2 = fix((14 - 3 - n1) / 2)+2;
         n3 = 13-n1-n2;
         lb = sprintf('%sf[%s]%s', repmat(' ', 1, n2), labels{j}, repmat(' ', 1, n3));
-        fprintf('%16s', lb);
+        mp_printf('%16s', lb);
     end
-    fprintf('\n------ ----');
-    for j = 1:nj, fprintf('  --------------');          end
-    fprintf('\n  -    %3d', i);
-    for j = 1:nj, fprintf('      %10.3e', normf(j));    end
+    mp_printf('\n------ ----');
+    for j = 1:nj, mp_printf('  --------------');          end
+    mp_printf('\n  -    %3d', i);
+    for j = 1:nj, mp_printf('      %10.3e', normf(j));    end
 end
 if max(normf) < tol
     eflag = 1;
     msg = sprintf('Fast-decoupled Newton''s method converged in %d iterations.', i);
     if verbose > 1
-        fprintf('\nConverged!\n');
+        mp_printf('\nConverged!\n');
     end
 end
 
@@ -258,9 +258,9 @@ while (~eflag && i < max_it)
             n2 = fix((6 - n1)/2);
             n3 = 6-n1-n2;
             lb = sprintf('%s%s%s', repmat(' ', 1, n2), labels{j}, repmat(' ', 1, n3));
-            fprintf('\n%s %3d', lb, i);
+            mp_printf('\n%s %3d', lb, i);
             for jj = 1:nj
-                fprintf('      %10.3e', normf(jj));
+                mp_printf('      %10.3e', normf(jj));
             end
         end
         if max(normf) < tol
@@ -284,7 +284,7 @@ if eflag ~= 1
     msg = sprintf('Fast-decoupled Newton''s method did not converge in %d iterations.', i);
 end
 if verbose
-    fprintf('\n%s\n', msg);
+    mp_printf('\n%s\n', msg);
 end
 if nargout > 3
     output = struct('alg', 'FD', ...

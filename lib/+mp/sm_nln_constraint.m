@@ -32,7 +32,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
 % See also mp.set_manager, mp.set_manager_opt_model.
 
 %   MP-Opt-Model
-%   Copyright (c) 2008-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2008-2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -788,7 +788,7 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
                         else
                             mu_ub = obj.sprintf_num(8, lam(idxs(k)));
                         end
-                        fprintf(fid, '%9s%9s\n', obj.sprintf_num(8, v(idxs(k))), ...
+                        mp_printf(fid, '%9s%9s\n', obj.sprintf_num(8, v(idxs(k))), ...
                             mu_ub);
                     else
                         if abs(mu_u(idxs(k))) < obj.mu_thresh()
@@ -796,26 +796,26 @@ classdef sm_nln_constraint < mp.set_manager_opt_model
                         else
                             mu_ub = obj.sprintf_num(8, mu_u(idxs(k)));
                         end
-                        fprintf(fid, '%9s%9s%9s\n', obj.sprintf_num(8, v(idxs(k))), ...
+                        mp_printf(fid, '%9s%9s%9s\n', obj.sprintf_num(8, v(idxs(k))), ...
                             '0', mu_ub);
                     end
                 end
 
                 %% print footer rows
-                fprintf(fid, '%s\n', [hdr1{2} hdr2{2}]);
+                mp_printf(fid, '%s\n', [hdr1{2} hdr2{2}]);
                 if iseq
-                    fprintf(fid, '%7s %-28s%9s%9s\n', '', 'Min', ...
+                    mp_printf(fid, '%7s %-28s%9s%9s\n', '', 'Min', ...
                         obj.sprintf_num(8, min(v)), ...
                         obj.sprintf_num(8, min(lam)));
-                    fprintf(fid, '%7s %-28s%9s%9s\n', '', 'Max', ...
+                    mp_printf(fid, '%7s %-28s%9s%9s\n', '', 'Max', ...
                         obj.sprintf_num(8, max(v)), ...
                         obj.sprintf_num(8, max(lam)));
                 else
-                    fprintf(fid, '%7s %-28s%9s%9s%9s\n', '', 'Max', ...
+                    mp_printf(fid, '%7s %-28s%9s%9s%9s\n', '', 'Max', ...
                         obj.sprintf_num(8, max(v)), '0', ...
                         obj.sprintf_num(8, max(mu_u)));
                 end
-                fprintf(fid, '\n');
+                mp_printf(fid, '\n');
             end
         end
 

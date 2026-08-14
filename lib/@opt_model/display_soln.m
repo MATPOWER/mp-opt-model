@@ -43,7 +43,7 @@ function om = display_soln(om, varargin)
 % See also get_soln, parse_soln.
 
 %   MP-Opt-Model
-%   Copyright (c) 2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2026, Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.
@@ -99,5 +99,5 @@ if om.is_solved()
         end
     end             %% loop over set types
 else
-    fprintf(fid, 'Not a solved model.\n');
+    mp_printf(fid, 'Not a solved model.\n');
 end

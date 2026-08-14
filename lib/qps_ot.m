@@ -249,14 +249,23 @@ else                            %% need to use optimset()
 end
 
 %% call the solver
+no_logger = ~mp.logger.manager('active');
 if isLP
     if matlab
         if mlver > 9.013
-            [x, f, eflag, output, lam] = ...
-                linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+            if no_logger
+                [x, f, eflag, output, lam] = ...
+                    linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);
+            else
+                mp_printf(evalc('[x, f, eflag, output, lam] = linprog(c, Ai, bi, Ae, be, xmin, xmax, ot_opt);'));
+            end
         else
-            [x, f, eflag, output, lam] = ...
-                linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+            if no_logger
+                [x, f, eflag, output, lam] = ...
+                    linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+            else
+                mp_printf(evalc('[x, f, eflag, output, lam] = linprog(c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);'));
+            end
         end
     else
 % don't use linprog under Octave (using GLPK directly is recommended)
@@ -264,12 +273,20 @@ if isLP
 %         eflag = [];
 %         output = [];
 %         lam = [];
-        [x, f, eflag, output, lam] = ...
-            quadprog(sparse(nx,nx), c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+        if no_logger
+            [x, f, eflag, output, lam] = ...
+                quadprog(sparse(nx,nx), c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+        else
+            mp_printf(evalc('[x, f, eflag, output, lam] = quadprog(sparse(nx,nx), c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);'));
+        end
     end
 else
-    [x, f, eflag, output, lam] = ...
-        quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+    if no_logger
+        [x, f, eflag, output, lam] = ...
+            quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);
+    else
+        mp_printf(evalc('[x, f, eflag, output, lam] = quadprog(H, c, Ai, bi, Ae, be, xmin, xmax, x0, ot_opt);'));
+    end
 end
 
 %% repackage lambdas
