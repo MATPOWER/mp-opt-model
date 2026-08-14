@@ -17,12 +17,14 @@ end
 %           1         2         3        4
 algs  = {'DEFAULT', 'CPLEX', 'GUROBI', 'MOSEK'};
 names = {'DEFAULT', 'CPLEX', 'Gurobi', 'MOSEK'};
-check = {    [],    'cplex', 'gurobi', 'mosek'};
+check = {@have_miqp_solver, 'cplex', 'gurobi', 'mosek'};
 
-%               1 2 3 4
-does_miqp =    [1 1 1 1];
-does_miqcqp =  [1 1 0 0];
-does_nonconv = [1 1 0 0];
+%               1                     2 3 4
+does_miqp =    [have_miqp_solver()    1 1 1];
+does_miqcqp =  [have_miqp_solver()    0 1 0];
+% replace w/next line once CPLEX & MOSEK interfaces for MIQCQP are implemented
+% does_miqcqp =  [have_miqp_solver()    1 1 1];
+does_nonconv = [have_feature('cplex') 1 0 0];
 
 nmiqp_convex = 3;
 nmiqp_nonconvex = 6; 
@@ -34,7 +36,9 @@ n = nmiqp_convex+nmiqp_nonconvex+nmiqcqp_convex+nmiqcqp_nonconvex;
 t_begin(n * length(algs), quiet);
 
 for k = 1:length(algs)
-    if ~isempty(check{k}) && ~have_feature(check{k})
+    if ~isempty(check{k}) && ...
+            (ischar(check{k}) && ~have_feature(check{k}) || ...
+             isa(check{k}, 'function_handle') && ~check{k}())
         t_skip(n, sprintf('%s not installed', names{k}));
     else
         opt = struct('verbose', 0, 'alg', algs{k});
@@ -196,3 +200,6 @@ for k = 1:length(algs)
 end
 
 t_end;
+
+function TorF = have_miqp_solver()
+TorF = have_feature('cplex') || have_feature('gurobi') || have_feature('mosek');
