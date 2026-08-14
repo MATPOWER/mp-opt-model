@@ -451,15 +451,18 @@ classdef opt_model < handle
             %     prob_type (char array) : problem type, one of the following
             %       strings:
             %
-            %       - ``'LEQ'``   - linear equations
-            %       - ``'NLEQ'``  - nonlinear equations
-            %       - ``'PNE'``   - parameterized nonlinear equations
-            %       - ``'LP'``    - linear program
-            %       - ``'QP'``    - quadratic program
-            %       - ``'NLP'``   - nonlinear program
-            %       - ``'MILP'``  - mixed-integer linear program
-            %       - ``'MIQP'``  - mixed-integer quadratic program
-            %       - ``'MINLP'`` - mixed-integer nonlinear program
+            %       - ``'LEQ'``    - linear equations
+            %       - ``'NLEQ'``   - nonlinear equations
+            %       - ``'PNE'``    - parameterized nonlinear equations
+            %       - ``'LP'``     - linear program
+            %       - ``'QP'``     - quadratic program
+            %       - ``'QCQP'``   - quadratically-constrained quadratic program
+            %       - ``'NLP'``    - nonlinear program
+            %       - ``'MILP'``   - mixed-integer linear program
+            %       - ``'MIQP'``   - mixed-integer quadratic program
+            %       - ``'MIQCQP'`` - mixed-integer quadratically-constrained
+            %                        quadratic program
+            %       - ``'MINLP'``  - mixed-integer nonlinear program
 
             if isempty(mm.prob_type) || nargin > 1 && recheck
                 nleN = mm.nle.get_N();      %% nonlinear equalities

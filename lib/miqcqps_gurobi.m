@@ -69,6 +69,9 @@ function [x, f, eflag, output, lambda] = miqcqps_gurobi(H, c, Q, B, lq, uq, A, l
 %           lower - lower bound on optimization variables
 %           upper - upper bound on optimization variables
 %
+%   Note: Currently, LAMBDA is computed only for problems with all continuous
+%   variables.
+%
 %   Calling syntax options:
 %       [x, f, exitflag, output, lambda] = ...
 %           miqcqps_gurobi(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, vtype, opt)
@@ -92,20 +95,24 @@ function [x, f, eflag, output, lambda] = miqcqps_gurobi(H, c, Q, B, lq, uq, A, l
 %   Example: (problem from OPTI Toolbox, see:
 %             https://jonathancurrie.github.io/OPTI/examples/problem-types/miqcqp/)
 %
-%       H = [1  -1; -1  2];
-%       c = [-2 -6]';
-%       Q = {}; B  = []; lq = []; uq = [];
-%       A = [1  1; -1  2; 2 1];
-%       u = [2 2 3]';
+%       H = [1  0; 0  1];
+%       c = [-2 -2]';
+%       Q = {2*speye(2)};
+%       B  = [0 -2];
+%       lq = [];
+%       uq = 1;
+%       A = [-1 1; 1 3];
+%       u = [2 5]';
 %       l = [];
 %       xmin = zeros(2,1);
 %       xmax = Inf(2,1);
 %       x0 = [];
-%       opt = struct('verbose', 2);
 %       vtype = 'IC';
-%       [x, f, s, out, lam] = miqcqps_gurobi(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, vtype, opt);
+%       opt = struct('verbose', 2);
+%       [x, f, s, out, lam] = ...
+%           miqcqps_gurobi(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, vtype, opt);
 %
-% See also qcqps_master, gurobi_options, gurobi.
+% See also miqcqps_master, gurobi_options, gurobi.
 
 %   MP-Opt-Model
 %   Copyright (c) 2019-2026, Power Systems Engineering Research Center (PSERC)
@@ -340,15 +347,16 @@ niq_lin = length(ilt_lin) + length(igt_lin);       %% number of linear inequalit
 
 %% set up model
 if ~isempty(Q_quad)
-    m.quadcon   = cell2struct([ cellfun(@(x)(0.5*x), Q_quad, 'UniformOutput', false),                               ...
-                                mat2cell(reshape(B_quad', prod(size(B_quad)) ,[]), nx*ones(neq_quad+niq_quad,1)),   ...
-                                num2cell(d_quad,2),                                                                 ...
-                                cellstr(char([double('=')*ones(neq_quad,1); double('<')*ones(niq_quad,1)]))], ...
-                              {  'Qc'  , ...
-                                 'q'   , ...
-                                 'rhs' , ...
-                                 'sense'  },                                                                  ...
-                              2);
+    m.quadcon   = cell2struct( ...
+          [ cellfun(@(x)(0.5*x), Q_quad, 'UniformOutput', false), ...
+            mat2cell(reshape(B_quad', prod(size(B_quad)) ,[]), nx*ones(neq_quad+niq_quad,1)), ...
+            num2cell(d_quad,2), ...
+            cellstr(char([double('=')*ones(neq_quad,1); double('<')*ones(niq_quad,1)]))], ...
+          {  'Qc'  , ...
+             'q'   , ...
+             'rhs' , ...
+             'sense'  }, ...
+          2);
 end
 m.A         = A_lin;
 m.rhs       = b_lin;

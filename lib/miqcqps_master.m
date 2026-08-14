@@ -37,12 +37,13 @@ function [x, f, eflag, output, lambda] = miqcqps_master(H, c, Q, B, lq, uq, A, l
 %               or 1 (value applies to all variables in x),
 %               allowed values are 'C' (continuous), 'B' (binary), or
 %               'I' (integer), 'S' (semi-continuous), or 'N' (semi-integer).
+%               (MOSEK allows only 'C', 'B', or 'I')
 %       OPT : optional options structure with the following fields,
 %           all of which are also optional (default values shown in
 %           parentheses)
-%           alg ('DEFAULT') : determines which solver to use, can be either
-%                   a string (new-style) or a numerical alg code (old-style)
-%               'DEFAULT' :  equals 'GUROBI' in current implementation
+%           alg ('DEFAULT') - determines which solver to use
+%               'DEFAULT' : automatic, first available of Gurobi, ...
+%                           (Gurobi is only option currently implemented)
 %               'GUROBI'  : Gurobi, requires Gurobi solver
 %                           https://www.gurobi.com
 %           verbose (0) - controls level of progress output displayed
@@ -51,7 +52,7 @@ function [x, f, eflag, output, lambda] = miqcqps_master(H, c, Q, B, lq, uq, A, l
 %               2 = verbose progress output
 %           fix_integer (0) - fix integer variables at value in x0, if true
 %           relax_integer (0) - relax integer constraints, if true
-%           grb_opt     - options struct for GUROBI
+%           grb_opt - options struct for GUROBI
 %       PROBLEM : The inputs can alternatively be supplied in a single
 %           PROBLEM struct with fields corresponding to the input arguments
 %           described above: H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, vtype, opt
@@ -73,6 +74,9 @@ function [x, f, eflag, output, lambda] = miqcqps_master(H, c, Q, B, lq, uq, A, l
 %           mu_uq - upper (right-hand) limit on quadratic constraints
 %           lower - lower bound on optimization variables
 %           upper - upper bound on optimization variables
+%
+%   Note: Currently, LAMBDA is computed only for problems with all continuous
+%   variables.
 %
 %   Calling syntax options:
 %       [x, f, exitflag, output, lambda] = ...
@@ -97,18 +101,22 @@ function [x, f, eflag, output, lambda] = miqcqps_master(H, c, Q, B, lq, uq, A, l
 %   Example: (problem from OPTI Toolbox, see:
 %             https://jonathancurrie.github.io/OPTI/examples/problem-types/miqcqp/)
 %
-%       H = [1  -1; -1  2];
-%       c = [-2 -6]';
-%       Q = {}; B  = []; lq = []; uq = [];
-%       A = [1  1; -1  2; 2 1];
-%       u = [2 2 3]';
+%       H = [1  0; 0  1];
+%       c = [-2 -2]';
+%       Q = {2*speye(2)};
+%       B  = [0 -2];
+%       lq = [];
+%       uq = 1;
+%       A = [-1 1; 1 3];
+%       u = [2 5]';
 %       l = [];
 %       xmin = zeros(2,1);
 %       xmax = Inf(2,1);
 %       x0 = [];
 %       vtype = 'IC';
 %       opt = struct('verbose', 2);
-%       [x, f, s, out, lam] = miqcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, vtype, opt);
+%       [x, f, s, out, lam] = ...
+%           miqcqps_master(H, c, Q, B, lq, uq, A, l, u, xmin, xmax, x0, vtype, opt);
 
 %   MP-Opt-Model
 %   Copyright (c) 2019-2026, Power Systems Engineering Research Center (PSERC)
