@@ -17,14 +17,15 @@ end
 %           1         2         3        4
 algs  = {'DEFAULT', 'CPLEX', 'GUROBI', 'MOSEK'};
 names = {'DEFAULT', 'CPLEX', 'Gurobi', 'MOSEK'};
-check = {    [],    'cplex', 'gurobi', 'mosek'};
+check = {@have_miqp_solver, 'cplex', 'gurobi', 'mosek'};
 
 %               1                     2 3 4
 does_miqp =    [have_miqp_solver()    1 1 1];
 does_miqcqp =  [have_miqp_solver()    0 1 0];
-% replace w/next line once CPLEX & MOSEK interfaces for MIQCQP are implemented
+does_nonconv = [have_feature('cplex') 0 0 0];
+% replace w/lines below once CPLEX & MOSEK interfaces for MIQCQP are implemented
 % does_miqcqp =  [have_miqp_solver()    1 1 1];
-does_nonconv = [have_feature('cplex') 1 0 0];
+% does_nonconv = [have_feature('cplex') 1 0 0];
 
 nmiqp_convex = 3;
 nmiqp_nonconvex = 6; 
