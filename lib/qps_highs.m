@@ -139,6 +139,9 @@ end
 %% define nx, set default values for missing optional inputs
 if ~nnz(H)
     lpqp = 'LP';
+    if ~isempty(H)
+        H = [];
+    end
     if isempty(A) && isempty(xmin) && isempty(xmax)
         error('qps_highs: LP problem must include constraints or variable bounds');
     else
