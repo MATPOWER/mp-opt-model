@@ -241,6 +241,10 @@ if ~isempty(x0)
     if mi
         x0(vtype ~= 'C') = round(x0(vtype ~= 'C'));
     end
+    if nnz(x0) == 0
+        %% HiGHSMEX converts to sparse & HiGHS complains about all zeros
+        x0 = [];
+    end
 end
 
 %% set up options struct for HiGHS

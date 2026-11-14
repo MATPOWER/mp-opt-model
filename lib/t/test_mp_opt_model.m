@@ -15,7 +15,7 @@ function success = test_mp_opt_model(verbose, exit_on_fail)
 % See also t_run_tests.
 
 %   MP-Opt-Model
-%   Copyright (c) 2004-2024, Power Systems Engineering Research Center (PSERC)
+%   Copyright (c) 2004-2026 Power Systems Engineering Research Center (PSERC)
 %   by Ray Zimmerman, PSERC Cornell
 %
 %   This file is part of MP-Opt-Model.

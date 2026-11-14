@@ -188,6 +188,10 @@ end
 %% ensure feasibility of x0
 if ~isempty(x0)
     x0 = max(xmin, min(xmax, x0));
+    if nnz(x0) == 0
+        %% HiGHSMEX converts to sparse & HiGHS complains about all zeros
+        x0 = [];
+    end
 end
 
 %% set up options struct for HiGHS

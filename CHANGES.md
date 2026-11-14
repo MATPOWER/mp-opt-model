@@ -5,8 +5,9 @@ Change history for MP-Opt-Model
 since version 5.0
 -----------------
 
-#### 11/12/26
-  - Minor tweaks to avoid warnings and test failures with HiGHS 1.16.1.
+#### 11/13/26
+  - Minor tweaks to avoid warnings and test failures with HiGHS 1.16.1 and
+    Gurobi 14.x.
 
 #### 8/14/26
   - Add support for mixed-integer quadratically-constrained quadratic
